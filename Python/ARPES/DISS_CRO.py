@@ -41,18 +41,12 @@ year = 2016
 sample = 'T10'
 
 D = DLS(file, mat, year, sample)
+D.norm(gold)
+D.ang2k(D.ang, Ekin=65-4.5, a=3.89, b=3.89, c=11, V0=0, thdg=0, tidg=0, phidg=0)
 
 #%%
 ut.gold(gold, mat, year, sample, Ef_ini=60.4, BL='DLS')
 
-#%%
-D.norm(gold)
-
-#%%
-D.ang2k(D.ang, Ekin=65-4.5, a=3.89, b=3.89, c=11, V0=0, thdg=0, tidg=0, phidg=0)
-
-#%%
-D.plt_FS(coord = True)
 
 #%%
 D.plt_spec(norm = True)
