@@ -5,9 +5,11 @@ Created on Tue Jun 19 15:14:29 2018
 
 @author: denyssutter
 """
-
+import os
+os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 import utils_plt_DISS as up
 import matplotlib.pyplot as plt
+
 
 """
 fig1: DFT plot Ca2RuO4: figure 3 of Nature Comm.
@@ -18,9 +20,8 @@ fig4: DFT plot uniform gap scnenario
 #[7974,8048,7993,8028]
 
 
-import os
-os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
-up.fig1()
+
+up.fig3()
 
 
 
