@@ -7,7 +7,7 @@ Created on Sun Jun 10 13:20:31 2018
 """
 
 import os
-os.chdir('/Users/denyssutter/Documents/Python/ARPES')
+os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 
 import numpy as np
 from ARPES import DLS
@@ -40,7 +40,7 @@ D.plt_spec(norm = True)
 
 #%%
 import os
-os.chdir('/Users/denyssutter/Documents/Python/ARPES')
+os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 
 import models as mdl
 

@@ -17,7 +17,7 @@ def rainbow_light():
     # ------------------------------------------------------------------------------
     
     # Load the colormap data from file
-    filepath = '/Users/denyssutter/Documents/Python/ARPES/cmap/rainbow_light.dat'
+    filepath = '/Users/denyssutter/Documents/library/Python/ARPES/cmap/rainbow_light.dat'
     data = np.loadtxt(filepath)
     colors = np.array([(i[0], i[1], i[2]) for i in data])
     

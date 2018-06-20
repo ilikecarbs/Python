@@ -109,7 +109,7 @@ def fig1():
     XG = np.fliplr(GX)
     XS = pd.read_csv('DFT_CRO_YS_final.dat').values
     SX = np.fliplr(XS)
-    os.chdir('/Users/denyssutter/Documents/Python/ARPES')
+    os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
     
     ###k-points
     G = (0, 0)
@@ -133,7 +133,7 @@ def fig2():
     xz_data = np.loadtxt('DMFT_CRO_xz.dat')
     yz_data = np.loadtxt('DMFT_CRO_yz.dat')
     xy_data = np.loadtxt('DMFT_CRO_xy.dat')
-    os.chdir('/Users/denyssutter/Documents/Python/ARPES')
+    os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
     
     m, n = 8000, 351 #dimensions energy, full k-path
     bot, top = 2500, 5000 #restrict energy window
@@ -178,7 +178,7 @@ def fig3():
     XG = np.fliplr(GX)
     XS = pd.read_csv('DFT_CRO_YS_OSMT.dat').values
     SX = np.fliplr(XS)
-    os.chdir('/Users/denyssutter/Documents/Python/ARPES')
+    os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
     
     ###k-points
     G = (0, 0)
@@ -204,7 +204,7 @@ def fig4():
     XG = np.fliplr(GX)
     XS = pd.read_csv('DFT_CRO_YS_uni.dat').values
     SX = np.fliplr(XS)
-    os.chdir('/Users/denyssutter/Documents/Python/ARPES')
+    os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
     
     ###k-points
     G = (0, 0)

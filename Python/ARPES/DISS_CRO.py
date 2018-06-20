@@ -15,11 +15,12 @@ fig2: DMFT pot Ca2RuO4: figure 3 of Nature Comm.
 fig3: DFT plot orbitally selective Mott scenario
 fig4: DFT plot uniform gap scnenario
 """
-[7974,8048,7993,8028]
+#[7974,8048,7993,8028]
 
 
-
-up.fig4()
+import os
+os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+up.fig1()
 
 
 
@@ -30,7 +31,7 @@ dpi = 300,bbox_inches="tight")
 
 #%%
 import os
-os.chdir('/Users/denyssutter/Documents/Python/ARPES')
+os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 
 from ARPES import DLS
 import utils as ut

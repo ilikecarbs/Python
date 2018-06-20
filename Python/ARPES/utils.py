@@ -26,7 +26,7 @@ def norm(self, gold): #Normalize Data file with gold
         os.chdir(self.folder)
         Ef = np.loadtxt(''.join(['Ef_',str(gold),'.dat']))
         norm = np.loadtxt(''.join(['norm_',str(gold),'.dat']))
-        os.chdir('/Users/denyssutter/Documents/Python')
+        os.chdir('/Users/denyssutter/Documents/library/Python')
             
         en_norm = np.ones(self.ens.shape)
         int_norm = np.ones(self.int.shape)
@@ -39,7 +39,7 @@ def norm(self, gold): #Normalize Data file with gold
                 en_norm[:, i, :] = self.en - Ef[i]
                 int_norm[:, i, :] = np.divide(self.int[:, i, :], norm[i])
     except OSError:
-        os.chdir('/Users/denyssutter/Documents/Python')
+        os.chdir('/Users/denyssutter/Documents/library/Python')
         print('- No gold files: {}'.format(self.gold),'\n')
     
     return en_norm, int_norm
@@ -160,7 +160,7 @@ def gold(file, mat, year, sample, Ef_ini, BL):
     os.chdir(D.folder)
     np.savetxt(''.join(['Ef_',str(file),'.dat']),Ef_fit)
     np.savetxt(''.join(['norm_',str(file),'.dat']),norm)
-    os.chdir('/Users/denyssutter/Documents/Python')
+    os.chdir('/Users/denyssutter/Documents/library/Python')
     
     plt.subplot(212)
     plt.plot(D.ang, Ef, 'bo')

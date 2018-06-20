@@ -6,7 +6,7 @@ Created on Sun Jun 10 13:20:31 2018
 @author: denyssutter
 """
 import os
-os.chdir('/Users/denyssutter/Documents/Python/ARPES')
+os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 
 import h5py
 import numpy as np
