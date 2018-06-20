@@ -15,12 +15,16 @@ from utils_ext import rainbow_light
 rainbow_light = rainbow_light()
 cm.register_cmap(name='rainbow_light', cmap=rainbow_light)
 
-def plt_spec(self, norm):
+def plt_spec(self, norm=False):
 
     if norm == True:
         k = self.angs
         en = self.en_norm
         dat = self.int_norm
+    elif norm == 'shift':
+        k = self.ang
+        en = self.en_shift
+        dat = self.int_shift
     elif norm == False:
         k = self.ang
         en = self.en

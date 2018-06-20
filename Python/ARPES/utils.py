@@ -46,6 +46,31 @@ def norm(self, gold): #Normalize Data file with gold
 
 
 
+def shift(self, gold): #Normalize energy file with gold
+    self.gold = gold
+    try:
+        os.chdir(self.folder)
+        Ef = np.loadtxt(''.join(['Ef_',str(gold),'.dat']))
+        os.chdir('/Users/denyssutter/Documents/library/Python')
+            
+        en_shift = np.ones(self.ens.shape)
+        int_shift = np.ones(self.int.shape)
+        if np.size(self.int.shape) == 2:
+            for i in range(self.angs.shape[0]):
+                en_shift[i, :] = self.en - Ef[i]
+                int_shift[i, :] = self.int[i, :]
+        elif np.size(self.int.shape) == 3:
+            for i in range(self.angs.shape[1]):
+                en_shift[:, i, :] = self.en - Ef[i]
+                int_shift[:, i, :] = self.int[:, i, :]
+    except OSError:
+        os.chdir('/Users/denyssutter/Documents/library/Python')
+        print('- No gold files: {}'.format(self.gold),'\n')
+    
+    return en_shift, int_shift
+
+
+
 def ang2k(self, angdg, Ekin, a, b, c, V0, thdg, tidg, phidg):      
     hbar = 6.58212*10**-16; #eV * s
     me = 5.68563*10**-32; #eV * s^2 / Angstrom^2

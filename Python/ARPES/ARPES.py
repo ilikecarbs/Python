@@ -74,6 +74,13 @@ class DLS:
         self.int_norm = int_norm
         print('\n ~ Data normalized'.format(len(np.shape(self.int))),
               '\n', '==========================================')    
+    
+    def shift(self, gold): #Normalize Data file with gold
+        en_shift, int_shift = u.shift(self, gold)
+        self.en_shift = en_shift
+        self.int_shift = int_shift
+        print('\n ~ Only energy normalized'.format(len(np.shape(self.int))),
+              '\n', '==========================================')   
         
     def ang2k(self, angdg, Ekin, a, b, c=11, V0=0, thdg=0, tidg=0, phidg=0):      
         k, k_V0 = u.ang2k(self, angdg, Ekin, a, b, c, V0, thdg, tidg, phidg)
