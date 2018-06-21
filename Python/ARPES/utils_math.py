@@ -8,7 +8,7 @@ Created on Fri Jun 15 13:53:54 2018
 
 import numpy as np
 from numpy import linalg as la
-import utils_plt as up 
+import utils_plt as uplt 
 
 def paramSRO():
     """
@@ -135,10 +135,26 @@ class TB:
         self.bndstr = bndstr
   
     def plt_cont_TB_SRO(self, e0=0):
-        up.plt_cont_TB_SRO(self, e0)
+        uplt.plt_cont_TB_SRO(self, e0)
         
     def plt_cont_TB_CSRO20(self, e0=0): 
-        up.plt_cont_TB_CSRO20(self, e0)
+        uplt.plt_cont_TB_CSRO20(self, e0)
         
     def plt_cont_TB_simple(self, e0=0):
-        up.plt_cont_TB_simple(self, e0)
+        uplt.plt_cont_TB_simple(self, e0)
+        
+        
+
+def FDsl(x, p0, p1, p2, p3, p4):
+    """
+    Fermi Dirac Function sloped
+    p3 + (p2 + p4 * x) * (np.exp((x - p1) / p0) + 1) ** -1
+    """
+    return p3 + (p2 + p4 * x) * (np.exp((x - p1) / p0) + 1) ** -1
+
+def poly2(x, p0, p1, p2, p3):
+    """
+    Polynomial second order
+    p1 + p2 * (x - p0) + p3 * (x - p0)**2 
+    """
+    return p1 + p2 * (x - p0) + p3 * (x - p0)**2 

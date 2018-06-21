@@ -11,7 +11,7 @@ os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 import h5py
 import numpy as np
 import utils as u
-import utils_plt_ARPES as up
+import utils_plt as uplt
 
 
 class DLS:
@@ -105,8 +105,8 @@ class DLS:
               '\n', '==========================================')  
         
     def plt_spec(self, norm=False):
-        up.plt_spec(self, norm)
+        uplt.plt_spec(self, norm)
             
     def plt_FS(self, coord=False):
-        up.plt_FS(self, coord)
+        uplt.plt_FS(self, coord)
 

@@ -7,8 +7,8 @@ Created on Mon Jun 11 09:57:01 2018
 """
 import os
 import numpy as np
-import functions as fn
-import ARPES as pes
+import utils_math as umath
+from ARPES import DLS
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
@@ -151,7 +151,7 @@ def gold(file, mat, year, sample, Ef_ini, BL):
     Generates Files for Normalization
     """
     if BL == 'DLS':
-        D = pes.DLS(file, mat, year, sample)
+        D = DLS(file, mat, year, sample)
     
     bnd = 150
     ch = 300
@@ -168,19 +168,19 @@ def gold(file, mat, year, sample, Ef_ini, BL):
     
     for i in range(0,len(D.ang)):
         try:
-            popt, pcov = curve_fit(fn.FDsl, D.en[inden:], D.int[i,inden:], p1_ini)
+            popt, pcov = curve_fit(umath.FDsl, D.en[inden:], D.int[i,inden:], p1_ini)
         except RuntimeError:
             print("Error - convergence not reached")
         if i==ch:
-            plt.plot(D.en[inden:], fn.FDsl(D.en[inden:], 
+            plt.plot(D.en[inden:], umath.FDsl(D.en[inden:], 
                      popt[0], popt[1], popt[2], popt[3], popt[4]),'r-')
         Ef[i]   = popt[1]
         norm[i] = sum(D.int[i,:])
         
     pini_poly2 = [Ef[ch], 0, 0, 0]
     #bounds_poly2 = ([-1, Ef[300]-1, -np.inf, -1], [1, Ef[300]+1, np.inf, 1])
-    popt, pcov = curve_fit(fn.poly2, D.ang[bnd:-bnd], Ef[bnd:-bnd], pini_poly2)
-    Ef_fit = fn.poly2(D.ang, popt[0], popt[1], popt[2], popt[3])
+    popt, pcov = curve_fit(umath.poly2, D.ang[bnd:-bnd], Ef[bnd:-bnd], pini_poly2)
+    Ef_fit = umath.poly2(D.ang, popt[0], popt[1], popt[2], popt[3])
       
     os.chdir(D.folder)
     np.savetxt(''.join(['Ef_',str(file),'.dat']),Ef_fit)
