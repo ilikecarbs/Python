@@ -70,6 +70,41 @@ def shift(self, gold): #Normalize energy file with gold
     return en_shift, int_shift
 
 
+def flatten(self, norm): #Flatten spectra
+    int_flat = self.int
+    if norm == True:
+        int_flat = self.int_norm
+    elif norm == False:
+        int_flat = self.int  
+    elif norm == 'shift':
+        int_flat = self.int_shift
+     
+    for i in range(int_flat.shape[0]):
+        int_flat[i, :] = np.divide(int_flat[i, :], np.sum(int_flat[i, :]))
+                
+    return int_flat
+      
+  
+def restrict(self, bot, top, left, right):
+    m, n = self.int.shape
+    
+    val, _bot = find(range(n), bot * n)
+    val, _top = find(range(n), top * n)
+    val, _left = find(range(m), left * m)
+    val, _right = find(range(m), right * m)
+    
+    _bot = bot * n; _top = top; _left = left; _right = right;
+    en_restr = self.en[_bot:_top]
+    ens_restr = self.ens[_left:_right, _bot:_top]
+    ang_restr = self.ang[_left:_right]
+    angs_restr = self.angs[_left:_right, _bot:_top]
+    en_norm_restr = self.en_norm[_left:_right, _bot:_top]
+    int_restr = self.int[_left:_right, _bot:_top]
+    int_norm_restr = self.int_norm[_left:_right, _bot:_top]
+    
+    return (en_restr, ens_restr, en_norm_restr, ang_restr, 
+            angs_restr, int_restr, int_norm_restr)
+
 
 def ang2k(self, angdg, Ekin, a, b, c, V0, thdg, tidg, phidg):      
     hbar = 6.58212*10**-16; #eV * s
