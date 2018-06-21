@@ -1,6 +1,6 @@
 ANGLE RESOLVED PHOTOEMISSION SPECTROSCOPY TOOLS
 
-- ARPES.py:       Data handling tools for the i05 beamline at Diamond Light Source, Oxford UK
+- ARPES.py:       Data handling tools for i05 (Diamond Light Source), SLS (PSI), ALS (LBNL)
 
 - GUI.py:         Building GUI for data analysis (under development)
 
