@@ -1,8 +1,8 @@
-Basic data analysis tools for angle resolved photoemission spectroscopy (under development)
+#ANGLE RESOLVED PHOTOEMISSION SPECTROSCOPY TOOLS
 
 - ARPES.py:       Data handling tools for the i05 beamline at Diamond Light Source, Oxford UK
 
-- GUI.py:         Building GUI for data analysis (in progress)
+- GUI.py:         Building GUI for data analysis (under development)
 
 - main.py:        Main file for testing stuff
 
