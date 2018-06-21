@@ -66,14 +66,14 @@ for file in files:
     n += 1
     
     D = DLS(file, mat, year, sample)
-    D.ang2k(D.ang, Ekin=65-4.5, a=3.89, b=3.89, c=11, V0=0, thdg=0, tidg=0, phidg=0)
+    
     D.shift(gold)
     D.norm(gold)
     D.restrict(bot = .6, top = 1, left = 0, right = 1)
     D.flatten(norm = 'spec')
-    
+    D.ang2k(D.ang, Ekin=65-4.5, a=3.89, b=3.89, c=11, V0=0, thdg=0, tidg=0, phidg=0)
     plt.subplot(2,2,n)
-    plt.pcolormesh(D.angs, D.en_norm, D.int_flat, 
+    plt.pcolormesh(D.ks, D.en_norm, D.int_flat, 
                    cmap = cm.bone_r, vmin=0, vmax=0.5*np.max(D.int_flat))
     
 #        plt.plot([np.min(k), np.max(k)], [0, 0], 'k:')

@@ -105,6 +105,12 @@ class DLS:
         k, k_V0 = u.ang2k(self, angdg, Ekin, a, b, c, V0, thdg, tidg, phidg)
         self.k = k
         self.k_V0 = k_V0
+        
+        self.ks = np.transpose(np.broadcast_to(k[0], 
+                                               (self.en.size, self.ang.size)))
+        self.k_V0s = np.transpose(np.broadcast_to(k_V0[0], 
+                                               (self.en.size, self.ang.size)))
+            
         print('\n ~ Angles converted into k-space for Fermi surface',
               '\n', '==========================================')  
         
