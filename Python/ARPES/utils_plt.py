@@ -73,6 +73,24 @@ def plt_spec(self, norm=False):
         plt.plot([np.min(k), np.max(k)], [0, 0], 'k:')
     plt.xlabel('$k_x$')   
     plt.show()
+    
+    
+def plt_FS(self, coord=False):
+    if coord == True:
+        kx = self.kx
+        ky = self.ky
+        dat = self.map
+    elif coord == False:
+        kx = self.ang
+        ky = self.pol
+        dat = self.map
+       
+    plt.figure(2000)
+    plt.clf()
+    plt.pcolormesh(kx, ky, dat, cmap = rainbow_light)
+    plt.colorbar()
+    plt.show()
+
 
 def plt_cont_TB_simple(self, e0):
     bndstr = self.bndstr

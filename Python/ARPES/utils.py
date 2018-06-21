@@ -93,7 +93,6 @@ def restrict(self, bot, top, left, right):
     val, _left = find(range(m), left * m)
     val, _right = find(range(m), right * m)
     
-    _bot = bot * n; _top = top; _left = left; _right = right;
     en_restr = self.en[_bot:_top]
     ens_restr = self.ens[_left:_right, _bot:_top]
     ang_restr = self.ang[_left:_right]
