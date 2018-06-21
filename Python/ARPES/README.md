@@ -1,4 +1,4 @@
-#ANGLE RESOLVED PHOTOEMISSION SPECTROSCOPY TOOLS
+ANGLE RESOLVED PHOTOEMISSION SPECTROSCOPY TOOLS
 
 - ARPES.py:       Data handling tools for the i05 beamline at Diamond Light Source, Oxford UK
 
