@@ -26,14 +26,12 @@ font = {'family': 'serif',
         'weight': 'ultralight',
         'size': 12,
         }
+
 # +----------+ #
 # | Colormap | # ===============================================================
 # +----------+ #
+
 def rainbow_light():
-    # Rainbox ligth colormap from ALS
-    # ------------------------------------------------------------------------------
-    
-    # Load the colormap data from file
     filepath = '/Users/denyssutter/Documents/library/Python/ARPES/cmap/rainbow_light.dat'
     data = np.loadtxt(filepath)
     colors = np.array([(i[0], i[1], i[2]) for i in data])
@@ -46,9 +44,25 @@ def rainbow_light():
                                                       N=len(colors))
     return rainbow_light
 
+def rainbow_light_2():
+    filepath = '/Users/denyssutter/Documents/library/Python/ARPES/cmap/rainbow_light_2.dat'
+    data = np.loadtxt(filepath)
+    colors = np.array([(i[0], i[1], i[2]) for i in data])
+    
+    # Normalize the colors
+    colors /= colors.max()
+    
+    # Build the colormap
+    rainbow_light_2 = LinearSegmentedColormap.from_list('rainbow_light', colors, 
+                                                      N=len(colors))
+    return rainbow_light_2
+
 rainbow_light = rainbow_light()
 cm.register_cmap(name='rainbow_light', cmap=rainbow_light)
  
+rainbow_light_2 = rainbow_light_2()
+cm.register_cmap(name='rainbow_light_2', cmap=rainbow_light_2)
+
 def plt_spec(self, norm=False):
     if norm == True:
         k = self.angs
@@ -182,7 +196,6 @@ def CRO_theory_plot(k_pts, data_en, data, colmap, v_max):
                     pos.y0, 0.01, pos.height])
     cbar = plt.colorbar(cax = cax, ticks = None)
     cbar.set_ticks([])
-#    cbar.set_ticklabels(['', 'max'])
     ax.set_position([pos.x0, pos.y0, k_prev * scale, pos.height])
 
 def fig1(colmap = cm.bone_r, print_fig = False):
@@ -316,7 +329,7 @@ def fig4(colmap = cm.bone_r, print_fig = False):
                 '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/fig4.png', 
                 dpi = 300,bbox_inches="tight")
     
-def fig5(colmap = rainbow_light, print_fig = False):
+def fig5(colmap = rainbow_light_2, print_fig = False):
     """
     Plot experimental Data Ca2RuO4
     """
@@ -336,7 +349,7 @@ def fig5(colmap = rainbow_light, print_fig = False):
     plt.rcParams['xtick.labelbottom'] = True
     plt.rcParams['xtick.labeltop'] = False
     scale = .02
-    v_scale = 1.2
+    v_scale = 1.3
     k_seg_1 = np.array([0, 4.442882938158366, 8.885765876316732])
     k_seg_2 = np.array([0, 3.141592653589793, 6.283185307179586])
     k_seg_3 = np.array([0, 4.442882938158366])
@@ -361,7 +374,8 @@ def fig5(colmap = rainbow_light, print_fig = False):
                     V0=0, thdg=-4, tidg=0, phidg=0)
             plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
             plt.pcolormesh(D.ks, D.en_norm, D.int_flat, 
-                       cmap=colmap, vmin=0, 
+                       cmap=colmap, 
+                       vmin=v_scale * 0.01 * np.max(D.int_flat), 
                        vmax=v_scale * 0.5 * np.max(D.int_flat))
             plt.xlim(xmax = 1, xmin = -1)
             plt.ylabel('$\omega$ (meV)', fontdict = font)
@@ -376,7 +390,8 @@ def fig5(colmap = rainbow_light, print_fig = False):
                     V0=0, thdg=-7.5, tidg=8.5, phidg=45)
             plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
             plt.pcolormesh(D.ks, D.en_norm, D.int_flat, 
-                       cmap=colmap, vmin=0, 
+                       cmap=colmap,
+                       vmin=v_scale * 0.01 * np.max(D.int_flat), 
                        vmax=v_scale * 0.55 * np.max(D.int_flat))
             plt.xlim(xmax = 0, xmin = -1)
             plt.xticks([-1, -.5, 0], ('', 'X', 'S'))
@@ -390,7 +405,8 @@ def fig5(colmap = rainbow_light, print_fig = False):
                     V0=0, thdg=5, tidg=12.5, phidg=0)
             plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
             plt.pcolormesh(D.ks, D.en_norm, np.flipud(D.int_flat), 
-                       cmap=colmap, vmin=0, 
+                       cmap=colmap, 
+                       vmin=v_scale * 0.01 * np.max(D.int_flat), 
                        vmax=v_scale * 0.65 * np.max(D.int_flat))
             plt.xlim(xmax = 1, xmin = 0)
             plt.xticks([0, 1], ('', '$\Gamma$'))
@@ -404,7 +420,8 @@ def fig5(colmap = rainbow_light, print_fig = False):
                     V0=0, thdg=-9.5, tidg=0, phidg=45)
             plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
             plt.pcolormesh(D.ks, D.en_norm, np.flipud(D.int_flat), 
-                       cmap=colmap, vmin=0, 
+                       cmap=colmap, 
+                       vmin=v_scale * 0.01 * np.max(D.int_flat), 
                        vmax=v_scale * 0.53 * np.max(D.int_flat))
             plt.xlim(xmax = 1.5, xmin = 0)
             plt.xticks([0, 0.5, 1, 1.5], ('', 'X', '$\Gamma$', 'X'))

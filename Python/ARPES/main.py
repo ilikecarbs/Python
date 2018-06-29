@@ -13,7 +13,7 @@ import utils_plt as uplt
 import utils_math as umath
 import utils as u
 import matplotlib.pyplot as plt
-from ARPES import DLS
+import ARPES
 import numpy as np
 import time
 import matplotlib.cm as cm
@@ -44,7 +44,7 @@ fig5: Experimental Data of Nature Comm.
 
 
 uplt.fig5(
-        print_fig = False
+        print_fig = True
         )
 
 
@@ -60,6 +60,46 @@ uplt.fig5(
 
 #u.gold(gold, mat, year, sample, Ef_ini=60.4, BL='DLS')
 
+#%%
+from astropy.io import fits
+import os
+os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+import numpy as np
+
+file = '0619_00161'
+mat = 'Ca2RuO4'
+year = 2016
+sample = 'data'
+
+folder = ''.join(['/Users/denyssutter/Documents/Denys/',str(mat),
+                  '/ALS',str(year),'/',str(sample),'/'])
+filename = ''.join([str(year),file,'.fits'])
+path = folder + filename
+
+f = fits.open(path)
+hdr = f[0].header
+mode = hdr['NM_0_0']
+data = f[1].data
+
+npol = data.size
+(nen, nang) = data[0][-1].shape
+
+intensity = np.zeros((npol, nang, nen))
+ens = np.zeros((npol, nang, nen))
+angs = np.zeros((npol, nang, nen))
+pols = np.zeros((npol, nang, nen))
+
+en = np.zeros((nen))
+ang = np.zeros((nang))
+pol = np.zeros((npol))
+
+for i in range(npol):
+    pol[i] = data[i][1]
+    intensity[i, :, :] = np.transpose(data[i][-1])
+    
+pols  = np.transpose(np.broadcast_to(pol, (ang.size, en.size, pol.size)),
+                                (2, 0, 1))
+
 
 #%%
 
@@ -73,7 +113,7 @@ mat = 'CSRO20'
 year = 2017
 sample = 'S6'
 
-D = DLS(file, mat, year, sample)
+D = ARPES.DLS(file, mat, year, sample)
 #u.gold(gold, mat, year, sample, Ef_ini=17.63, BL='DLS')
 D.norm(gold)
 
