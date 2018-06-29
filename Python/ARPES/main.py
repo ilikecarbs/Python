@@ -13,7 +13,7 @@ import utils_plt as uplt
 import utils_math as umath
 import utils as u
 import matplotlib.pyplot as plt
-from ARPES import DLS
+import ARPES
 import numpy as np
 import time
 import matplotlib.cm as cm
@@ -39,71 +39,90 @@ fig1: DFT plot Ca2RuO4: figure 3 of Nature Comm.
 fig2: DMFT pot Ca2RuO4: figure 3 of Nature Comm.
 fig3: DFT plot orbitally selective Mott scenario
 fig4: DFT plot uniform gap scnenario
+fig5: Experimental Data of Nature Comm.
 """
 
-uplt.fig4()
+
+uplt.fig5(
+        print_fig = True
+        )
 
 
 #%%
-plt.savefig(
-'/Users/denyssutter/Documents/PhD/PhD_Denys/Chapter_Ca214/Figs/Raster/fig3.png', 
-dpi = 300,bbox_inches="tight")
-
-#%%
-os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
-
-file = 47974
-gold = 48000
-mat = 'Ca2RuO4'
-year = 2016
-sample = 'T10'
-plt.figure(1000, clear = True)
-plt.figure(100, clear = True)
-files = np.array([47974, 48048, 47993, 48028])
-n = 0
-for file in files:
-    plt.figure(1000)
-    n += 1
-    D = DLS(file, mat, year, sample)
-    D.shift(gold)
-    D.norm(gold)
-    D.restrict(bot=.6, top=1, left=0, right=1)
-    D.flatten(norm='spec')
-    plt.subplot(2,2,n)
-    if n == 1:
-        D.ang2k(D.ang, Ekin=65-4.5, lat_unit=True, a=3.89, b=3.89, c=11, 
-                V0=0, thdg=-4, tidg=0, phidg=0)
-        plt.pcolormesh(D.ks, D.en_norm, D.int_flat, 
-                   cmap = cm.bone_r, vmin=0, vmax=0.5*np.max(D.int_flat))
-        plt.xlim(xmax = 1, xmin = -1)
-    elif n == 2:
-        D.ang2k(D.ang, Ekin=65-4.5, lat_unit=True, a=3.89, b=3.89, c=11, 
-                V0=0, thdg=-7.5, tidg=8.5, phidg=45)
-        plt.pcolormesh(D.ks, D.en_norm, D.int_flat, 
-                   cmap = cm.bone_r, vmin=0, vmax=0.6*np.max(D.int_flat))
-        plt.xlim(xmax = 0, xmin = -1)
-    elif n == 3:
-        D.ang2k(D.ang, Ekin=65-4.5, lat_unit=True, a=3.89, b=3.89, c=11, 
-                V0=0, thdg=-2, tidg=12.5, phidg=0)
-        plt.pcolormesh(D.ks, D.en_norm, D.int_flat, 
-                   cmap = cm.bone_r, vmin=0, vmax=0.6*np.max(D.int_flat))
-    elif n == 4:
-        D.ang2k(D.ang, Ekin=65-4.5, lat_unit=True, a=3.89, b=3.89, c=11, 
-                V0=0, thdg=-20, tidg=0, phidg=45)
-        plt.pcolormesh(D.ks, D.en_norm, D.int_flat, 
-                   cmap = cm.bone_r, vmin=0, vmax=0.6*np.max(D.int_flat))
-#        plt.plot([np.min(k), np.max(k)], [0, 0], 'k:')
-    plt.xlabel('$k_x$') 
-    plt.ylim(ymax = 0, ymin = -2.5)
-    plt.figure(100, figsize = (5,5))
-    plt.plot([-1, -1], [-1, 1], 'k--')
-    plt.plot([1, 1], [-1, 1], 'k--')
-    plt.plot([-1, 1], [1, 1], 'k--')
-    plt.plot([-1, 1], [-1, -1], 'k--')
-    plt.plot(D.k[0], D.k[1])
-    plt.show()
+    
+#    plt.figure(100, figsize = (5,5))
+#    plt.plot([-1, -1], [-1, 1], 'k--')
+#    plt.plot([1, 1], [-1, 1], 'k--')
+#    plt.plot([-1, 1], [1, 1], 'k--')
+#    plt.plot([-1, 1], [-1, -1], 'k--')
+#    plt.plot(D.k[0], D.k[1])
+#    plt.show()
 
 #u.gold(gold, mat, year, sample, Ef_ini=60.4, BL='DLS')
+
+#%%
+from astropy.io import fits
+import os
+os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+import numpy as np
+
+file = '0619_00161'
+mat = 'Ca2RuO4'
+year = 2016
+sample = 'data'
+
+
+D = ARPES.ALS(file, mat, year, sample)
+#%%
+D.FS(e = -4, ew = .05, norm = False)
+D.ang2kFS(D.ang, Ekin=D.hv-4.5, lat_unit=False, a=5.33, b=5.33, c=11, 
+                V0=0, thdg=20.5, tidg=0, phidg=0)
+D.plt_FS(coord = True)
+#%%
+
+
+
+folder = ''.join(['/Users/denyssutter/Documents/Denys/',str(mat),
+                  '/ALS',str(year),'/',str(sample),'/'])
+filename = ''.join([str(year),file,'.fits'])
+path = folder + filename
+
+f = fits.open(path)
+hdr = f[0].header
+mode = hdr['NM_0_0']
+data = f[1].data
+
+px_per_en = hdr['SSPEV_0']
+e_i = hdr['SSX0_0']
+e_f = hdr['SSX1_0']
+a_i = hdr['SSY0_0']
+a_f = hdr['SSY1_0']
+Ef = hdr['SSKE0_0']
+ang_per_px = 0.193
+binning = 2
+
+npol = data.size
+(nen, nang) = data[0][-1].shape
+
+intensity = np.zeros((npol, nang, nen))
+ens = np.zeros((npol, nang, nen))
+angs = np.zeros((npol, nang, nen))
+pols = np.zeros((npol, nang, nen))
+
+en = (np.arange(e_i, e_f, 1) - Ef) / px_per_en
+ang = np.arange(a_i, a_f, 1) * ang_per_px / binning
+ang = np.arange(0, nang, 1)
+pol = np.arange(0, npol, 1)
+
+for i in range(npol):
+    pol[i] = data[i][1]
+    intensity[i, :, :] = np.transpose(data[i][-1])
+    
+pols  = np.transpose(np.broadcast_to(pol, (ang.size, en.size, pol.size)),
+                                (2, 0, 1))
+
+angs  = np.transpose(np.broadcast_to(
+                            ang, (pol.size, en.size, ang.size)), (0, 2, 1))
 
 
 #%%
@@ -118,7 +137,7 @@ mat = 'CSRO20'
 year = 2017
 sample = 'S6'
 
-D = DLS(file, mat, year, sample)
+D = ARPES.DLS(file, mat, year, sample)
 #u.gold(gold, mat, year, sample, Ef_ini=17.63, BL='DLS')
 D.norm(gold)
 
