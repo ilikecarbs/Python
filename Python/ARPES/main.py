@@ -41,7 +41,10 @@ fig3: DFT plot orbitally selective Mott scenario
 fig4: DFT plot uniform gap scnenario
 """
 
-uplt.fig4()
+
+uplt.fig1(
+        colmap = cm.bone_r, print_fig = False
+        )
 
 
 #%%

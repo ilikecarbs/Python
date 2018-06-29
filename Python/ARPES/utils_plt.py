@@ -121,7 +121,7 @@ def plt_cont_TB_CSRO20(self, e0):
     plt.subplot(236)
     plt.contour(X, Y, Bxy, levels = e0)
         
-def CRO_theory_plot(k_pts, data_en, data):
+def CRO_theory_plot(k_pts, data_en, data, colmap):
     c = len(data)
     scale = .02
     plt.figure(1001, figsize = (10, 10), clear = True)
@@ -173,7 +173,7 @@ def CRO_theory_plot(k_pts, data_en, data):
         elif k == 3:
             plt.xticks(k_seg, ('', 'X', '$\Gamma$', 'X'))
         plt.tick_params(direction='in', length=1.5, width=.5, colors='k')    
-        plt.pcolormesh(data_kpath, data_en, data_spec, cmap = cm.bone_r)
+        plt.pcolormesh(data_kpath, data_en, data_spec, cmap = colmap)
         plt.ylim(ymax = 0, ymin = -2.5)
     cax = plt.axes([pos.x0 + k_prev * scale + 0.01,
                     pos.y0, 0.01, pos.height])
@@ -182,7 +182,7 @@ def CRO_theory_plot(k_pts, data_en, data):
     cbar.set_ticklabels(['', 'max'])
     ax.set_position([pos.x0, pos.y0, k_prev * scale, pos.height])
 
-def fig1():
+def fig1(colmap = cm.bone_r, print_fig = False):
     """
     Prepare and plot DFT data of Ca2RuO4 (final)
     """
@@ -204,9 +204,12 @@ def fig1():
     k_pts = np.array([[S, G, S], [S, X, S], [S, G], [G, X, G, X]])
     DFT = np.array([[SG, GS], [SX, XS], [SG], [GX, XG, GX]])
     DFT_en = np.linspace(-2.5,0,500)
-    CRO_theory_plot(k_pts, DFT_en, DFT) #Plot data
+    CRO_theory_plot(k_pts, DFT_en, DFT, colmap) #Plot data
+    plt.savefig(
+            '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/fig1.png', 
+            dpi = 300,bbox_inches="tight")
     
-def fig2():
+def fig2(colmap = cm.bone_r, print_fig = False):
     """
     Prepare and plot DMFT data of Ca2RuO4 
     """
@@ -243,9 +246,12 @@ def fig2():
     k_pts = np.array([[S, G, S], [S, X, S], [S, G], [G, X, G, X]])
     DMFT = np.array([[SG, GS], [SX, XS], [SG], [GX, XG, GX]])
     
-    CRO_theory_plot(k_pts, DMFT_en, DMFT) #Plot data
+    CRO_theory_plot(k_pts, DMFT_en, DMFT, colmap) #Plot data
+    plt.savefig(
+            '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/fig2.png', 
+            dpi = 300,bbox_inches="tight")
 
-def fig3():
+def fig3(colmap = cm.bone_r, print_fig = False):
     """
     Prepare and plot DFT data of Ca2RuO4 (OSMT)
     """
@@ -269,9 +275,12 @@ def fig3():
     DFT = np.array([[SG, GS], [SX, XS], [SG], [GX, XG, GX]])
     DFT_en = np.linspace(-2.5,0,500)
     
-    CRO_theory_plot(k_pts, DFT_en, DFT) #Plot data
+    CRO_theory_plot(k_pts, DFT_en, DFT, colmap) #Plot data
+    plt.savefig(
+            '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/fig3.png', 
+            dpi = 300,bbox_inches="tight")
 
-def fig4():
+def fig4(colmap = cm.bone_r, print_fig = False):
     """
     Prepare and plot DFT data of Ca2RuO4 (OSMT)
     """
@@ -295,7 +304,10 @@ def fig4():
     DFT = np.array([[SG, GS], [SX, XS], [SG], [GX, XG, GX]])
     DFT_en = np.linspace(-2.5,0,500)
     
-    CRO_theory_plot(k_pts, DFT_en, DFT) #Plot data
+    CRO_theory_plot(k_pts, DFT_en, DFT, colmap) #Plot data
+    plt.savefig(
+            '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/fig4.png', 
+            dpi = 300,bbox_inches="tight")
     
 if __name__ == "__main__":
     fig3() 
