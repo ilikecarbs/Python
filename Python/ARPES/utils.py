@@ -98,13 +98,18 @@ def restrict(self, bot, top, left, right):
     return (en_restr, ens_restr, en_norm_restr, ang_restr, 
             angs_restr, int_restr, int_norm_restr)
 
-def ang2k(self, angdg, Ekin, lat_unit, a, b, c, V0, thdg, tidg, phidg):      
+def ang2k(self, angdg, Ekin, lat_unit, a, b, c, V0, thdg, tidg, phidg):     
+    """
+    Transformation from angles to k-space
+    """
     hbar = 6.58212*10**-16; #eV * s
     me = 5.68563*10**-32; #eV * s^2 / Angstrom^2
     ang = np.pi * angdg / 180
     th = np.pi * thdg / 180
     ti = np.pi * tidg / 180
     phi = np.pi * phidg / 180
+    
+    #Rotation matrices
     Ti = np.array([
             [1, 0, 0],
             [0, np.cos(ti), np.sin(ti)],
@@ -120,21 +125,25 @@ def ang2k(self, angdg, Ekin, lat_unit, a, b, c, V0, thdg, tidg, phidg):
             [0, 1, 0],
             [np.sin(th), 0, np.cos(th)]
             ])
-    k_norm = np.sqrt(2 * me * Ekin) / hbar
-    k_norm_V0 = np.sqrt(2 * me * (Ekin + V0)) / hbar
-    kv = np.ones((3, len(ang)))
-    kv_V0 = np.ones((3, len(ang)))
-
+    
+    #Build k-vector
+    k_norm = np.sqrt(2 * me * Ekin) / hbar  #norm of k-vector
+    k_norm_V0 = np.sqrt(2 * me * (Ekin + V0)) / hbar  #norm of k-vector 
+    kv = np.ones((3, len(ang)))  #Placeholder
+    kv_V0 = np.ones((3, len(ang)))  #Placeholder
     kv = np.array([k_norm * np.sin(ang), 0*ang, k_norm * np.cos(ang)])
     kv_V0 = np.array([k_norm * np.sin(ang), 0*ang, 
                       np.sqrt(k_norm_V0**2 - (k_norm * np.sin(ang)**2))])
     k_vec = np.matmul(Phi, np.matmul(Ti, np.matmul(Th, kv)))
     k_vec_V0 = np.matmul(Phi, np.matmul(Ti, np.matmul(Th, kv_V0)))
-    if lat_unit == True:
+    if lat_unit == True: #lattice units
         k_vec *= np.array([[a / np.pi], [b / np.pi], [c / np.pi]])    
     return k_vec, k_vec_V0
 
 def ang2kFS(self, angdg, Ekin, lat_unit, a, b, c, V0, thdg, tidg, phidg):
+    """
+    Transformation angles to k-space for Fermi surfaces
+    """
     kx = np.ones((self.pol.size, self.ang.size))
     ky = np.ones((self.pol.size, self.ang.size))
     kx_V0 = np.ones((self.pol.size, self.ang.size))

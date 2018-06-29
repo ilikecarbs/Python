@@ -163,14 +163,14 @@ def CRO_theory_plot(k_pts, data_en, data):
         pos = ax.get_position()
         
         #Labels
-        if k==0:
+        if k == 0:
             plt.ylabel('$\omega$ (meV)', fontdict = font)
             plt.xticks(k_seg, ('S', '$\Gamma$', 'S'))
-        elif k==1:
+        elif k == 1:
             plt.xticks(k_seg, ('', 'X', 'S'))
-        elif k==2:
+        elif k == 2:
             plt.xticks(k_seg, ('', '$\Gamma$'))
-        elif k==3:
+        elif k == 3:
             plt.xticks(k_seg, ('', 'X', '$\Gamma$', 'X'))
         plt.tick_params(direction='in', length=1.5, width=.5, colors='k')    
         plt.pcolormesh(data_kpath, data_en, data_spec, cmap = cm.bone_r)

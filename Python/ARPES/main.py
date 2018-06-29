@@ -40,11 +40,9 @@ fig2: DMFT pot Ca2RuO4: figure 3 of Nature Comm.
 fig3: DFT plot orbitally selective Mott scenario
 fig4: DFT plot uniform gap scnenario
 """
-#[7974,8048,7993,8028]
 
-uplt.fig3()
+uplt.fig4()
 
-#hi
 
 #%%
 plt.savefig(
@@ -59,36 +57,53 @@ gold = 48000
 mat = 'Ca2RuO4'
 year = 2016
 sample = 'T10'
-
+plt.figure(1000, clear = True)
+plt.figure(100, clear = True)
 files = np.array([47974, 48048, 47993, 48028])
-plt.figure(1000)
-plt.clf()
 n = 0
 for file in files:
+    plt.figure(1000)
     n += 1
-    D = pes.DLS(file, mat, year, sample)
+    D = DLS(file, mat, year, sample)
     D.shift(gold)
     D.norm(gold)
     D.restrict(bot=.6, top=1, left=0, right=1)
     D.flatten(norm='spec')
-    if file == 47974:
-        D.ang2k(D.ang, Ekin=65-4.5, a=5, b=3.89, c=11, 
-                V0=0, thdg=-4, tidg=0, phidg=0)
-    else:
-        D.ang2k(D.ang, Ekin=65-4.5, a=3.89, b=3.89, c=11, 
-                V0=0, thdg=0, tidg=0, phidg=0)
     plt.subplot(2,2,n)
-    plt.pcolormesh(D.ks, D.en_norm, D.int_flat, 
+    if n == 1:
+        D.ang2k(D.ang, Ekin=65-4.5, lat_unit=True, a=3.89, b=3.89, c=11, 
+                V0=0, thdg=-4, tidg=0, phidg=0)
+        plt.pcolormesh(D.ks, D.en_norm, D.int_flat, 
                    cmap = cm.bone_r, vmin=0, vmax=0.5*np.max(D.int_flat))
+        plt.xlim(xmax = 1, xmin = -1)
+    elif n == 2:
+        D.ang2k(D.ang, Ekin=65-4.5, lat_unit=True, a=3.89, b=3.89, c=11, 
+                V0=0, thdg=-7.5, tidg=8.5, phidg=45)
+        plt.pcolormesh(D.ks, D.en_norm, D.int_flat, 
+                   cmap = cm.bone_r, vmin=0, vmax=0.6*np.max(D.int_flat))
+        plt.xlim(xmax = 0, xmin = -1)
+    elif n == 3:
+        D.ang2k(D.ang, Ekin=65-4.5, lat_unit=True, a=3.89, b=3.89, c=11, 
+                V0=0, thdg=-2, tidg=12.5, phidg=0)
+        plt.pcolormesh(D.ks, D.en_norm, D.int_flat, 
+                   cmap = cm.bone_r, vmin=0, vmax=0.6*np.max(D.int_flat))
+    elif n == 4:
+        D.ang2k(D.ang, Ekin=65-4.5, lat_unit=True, a=3.89, b=3.89, c=11, 
+                V0=0, thdg=-20, tidg=0, phidg=45)
+        plt.pcolormesh(D.ks, D.en_norm, D.int_flat, 
+                   cmap = cm.bone_r, vmin=0, vmax=0.6*np.max(D.int_flat))
 #        plt.plot([np.min(k), np.max(k)], [0, 0], 'k:')
     plt.xlabel('$k_x$') 
-#    plt.ylim(ymax = 0, ymin = -2.5)
+    plt.ylim(ymax = 0, ymin = -2.5)
+    plt.figure(100, figsize = (5,5))
+    plt.plot([-1, -1], [-1, 1], 'k--')
+    plt.plot([1, 1], [-1, 1], 'k--')
+    plt.plot([-1, 1], [1, 1], 'k--')
+    plt.plot([-1, 1], [-1, -1], 'k--')
+    plt.plot(D.k[0], D.k[1])
     plt.show()
 
 #u.gold(gold, mat, year, sample, Ef_ini=60.4, BL='DLS')
-
-D.norm(gold)
-#D.plt_spec(norm = 'shift')
 
 
 #%%
