@@ -6,11 +6,11 @@ Created on Sun Jun 10 13:20:31 2018
 @author: denyssutter
 """
 import os
+os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 import h5py
 import numpy as np
 import utils as u
 import utils_plt as uplt
-# os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 
 
 class DLS:  

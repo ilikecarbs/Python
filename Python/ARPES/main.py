@@ -39,11 +39,12 @@ fig1: DFT plot Ca2RuO4: figure 3 of Nature Comm.
 fig2: DMFT pot Ca2RuO4: figure 3 of Nature Comm.
 fig3: DFT plot orbitally selective Mott scenario
 fig4: DFT plot uniform gap scnenario
+fig5: Experimental Data of Nature Comm.
 """
 
 
-uplt.fig1(
-        colmap = cm.bone_r, print_fig = False
+uplt.fig5(
+        print_fig = False
         )
 
 

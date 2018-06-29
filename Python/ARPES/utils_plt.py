@@ -7,6 +7,8 @@ Created on Wed Jun 20 11:30:51 2018
 """    
     
 import os
+os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+import ARPES
 import numpy as np
 from matplotlib.colors import LinearSegmentedColormap
 import pandas as pd
@@ -121,7 +123,7 @@ def plt_cont_TB_CSRO20(self, e0):
     plt.subplot(236)
     plt.contour(X, Y, Bxy, levels = e0)
         
-def CRO_theory_plot(k_pts, data_en, data, colmap):
+def CRO_theory_plot(k_pts, data_en, data, colmap, v_max):
     c = len(data)
     scale = .02
     plt.figure(1001, figsize = (10, 10), clear = True)
@@ -173,13 +175,14 @@ def CRO_theory_plot(k_pts, data_en, data, colmap):
         elif k == 3:
             plt.xticks(k_seg, ('', 'X', '$\Gamma$', 'X'))
         plt.tick_params(direction='in', length=1.5, width=.5, colors='k')    
-        plt.pcolormesh(data_kpath, data_en, data_spec, cmap = colmap)
+        plt.pcolormesh(data_kpath, data_en, data_spec, cmap = colmap,
+                       vmin=0, vmax=v_max*np.max(data_spec))
         plt.ylim(ymax = 0, ymin = -2.5)
     cax = plt.axes([pos.x0 + k_prev * scale + 0.01,
                     pos.y0, 0.01, pos.height])
     cbar = plt.colorbar(cax = cax, ticks = None)
-    cbar.set_ticks([np.min(data_spec), np.max(data_spec)])
-    cbar.set_ticklabels(['', 'max'])
+    cbar.set_ticks([])
+#    cbar.set_ticklabels(['', 'max'])
     ax.set_position([pos.x0, pos.y0, k_prev * scale, pos.height])
 
 def fig1(colmap = cm.bone_r, print_fig = False):
@@ -204,10 +207,11 @@ def fig1(colmap = cm.bone_r, print_fig = False):
     k_pts = np.array([[S, G, S], [S, X, S], [S, G], [G, X, G, X]])
     DFT = np.array([[SG, GS], [SX, XS], [SG], [GX, XG, GX]])
     DFT_en = np.linspace(-2.5,0,500)
-    CRO_theory_plot(k_pts, DFT_en, DFT, colmap) #Plot data
-    plt.savefig(
-            '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/fig1.png', 
-            dpi = 300,bbox_inches="tight")
+    CRO_theory_plot(k_pts, DFT_en, DFT, colmap, v_max = 1) #Plot data
+    if print_fig == True:
+        plt.savefig(
+                '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/fig1.png', 
+                dpi = 300,bbox_inches="tight")
     
 def fig2(colmap = cm.bone_r, print_fig = False):
     """
@@ -246,10 +250,11 @@ def fig2(colmap = cm.bone_r, print_fig = False):
     k_pts = np.array([[S, G, S], [S, X, S], [S, G], [G, X, G, X]])
     DMFT = np.array([[SG, GS], [SX, XS], [SG], [GX, XG, GX]])
     
-    CRO_theory_plot(k_pts, DMFT_en, DMFT, colmap) #Plot data
-    plt.savefig(
-            '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/fig2.png', 
-            dpi = 300,bbox_inches="tight")
+    CRO_theory_plot(k_pts, DMFT_en, DMFT, colmap, v_max = .5) #Plot data
+    if print_fig == True:
+        plt.savefig(
+                '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/fig2.png', 
+                dpi = 300,bbox_inches="tight")
 
 def fig3(colmap = cm.bone_r, print_fig = False):
     """
@@ -275,10 +280,11 @@ def fig3(colmap = cm.bone_r, print_fig = False):
     DFT = np.array([[SG, GS], [SX, XS], [SG], [GX, XG, GX]])
     DFT_en = np.linspace(-2.5,0,500)
     
-    CRO_theory_plot(k_pts, DFT_en, DFT, colmap) #Plot data
-    plt.savefig(
-            '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/fig3.png', 
-            dpi = 300,bbox_inches="tight")
+    CRO_theory_plot(k_pts, DFT_en, DFT, colmap, v_max = 1) #Plot data
+    if print_fig == True:
+        plt.savefig(
+                '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/fig3.png', 
+                dpi = 300,bbox_inches="tight")
 
 def fig4(colmap = cm.bone_r, print_fig = False):
     """
@@ -304,12 +310,13 @@ def fig4(colmap = cm.bone_r, print_fig = False):
     DFT = np.array([[SG, GS], [SX, XS], [SG], [GX, XG, GX]])
     DFT_en = np.linspace(-2.5,0,500)
     
-    CRO_theory_plot(k_pts, DFT_en, DFT, colmap) #Plot data
-    plt.savefig(
-            '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/fig4.png', 
-            dpi = 300,bbox_inches="tight")
+    CRO_theory_plot(k_pts, DFT_en, DFT, colmap, v_max = 1) #Plot data
+    if print_fig == True:
+        plt.savefig(
+                '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/fig4.png', 
+                dpi = 300,bbox_inches="tight")
     
-def fig5(colmap = cm.bone_r, print_fig = False):
+def fig5(colmap = rainbow_light, print_fig = False):
     """
     Plot experimental Data Ca2RuO4
     """
@@ -329,6 +336,7 @@ def fig5(colmap = cm.bone_r, print_fig = False):
     plt.rcParams['xtick.labelbottom'] = True
     plt.rcParams['xtick.labeltop'] = False
     scale = .02
+    v_scale = 1.2
     k_seg_1 = np.array([0, 4.442882938158366, 8.885765876316732])
     k_seg_2 = np.array([0, 3.141592653589793, 6.283185307179586])
     k_seg_3 = np.array([0, 4.442882938158366])
@@ -337,7 +345,7 @@ def fig5(colmap = cm.bone_r, print_fig = False):
     n = 0
     for file in files:
         n += 1
-        D = DLS(file, mat, year, sample)
+        D = ARPES.DLS(file, mat, year, sample)
         D.shift(gold)
         D.norm(gold)
         D.restrict(bot=.6, top=1, left=0, right=1)
@@ -353,7 +361,8 @@ def fig5(colmap = cm.bone_r, print_fig = False):
                     V0=0, thdg=-4, tidg=0, phidg=0)
             plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
             plt.pcolormesh(D.ks, D.en_norm, D.int_flat, 
-                       cmap = cm.bone_r, vmin=0, vmax=0.5*np.max(D.int_flat))
+                       cmap=colmap, vmin=0, 
+                       vmax=v_scale * 0.5 * np.max(D.int_flat))
             plt.xlim(xmax = 1, xmin = -1)
             plt.ylabel('$\omega$ (meV)', fontdict = font)
             plt.xticks([-1, 0, 1], ('S', '$\Gamma$', 'S'))
@@ -367,7 +376,8 @@ def fig5(colmap = cm.bone_r, print_fig = False):
                     V0=0, thdg=-7.5, tidg=8.5, phidg=45)
             plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
             plt.pcolormesh(D.ks, D.en_norm, D.int_flat, 
-                       cmap = cm.bone_r, vmin=0, vmax=0.55*np.max(D.int_flat))
+                       cmap=colmap, vmin=0, 
+                       vmax=v_scale * 0.55 * np.max(D.int_flat))
             plt.xlim(xmax = 0, xmin = -1)
             plt.xticks([-1, -.5, 0], ('', 'X', 'S'))
         elif n == 3:
@@ -380,7 +390,8 @@ def fig5(colmap = cm.bone_r, print_fig = False):
                     V0=0, thdg=5, tidg=12.5, phidg=0)
             plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
             plt.pcolormesh(D.ks, D.en_norm, np.flipud(D.int_flat), 
-                       cmap = cm.bone_r, vmin=0, vmax=0.65*np.max(D.int_flat))
+                       cmap=colmap, vmin=0, 
+                       vmax=v_scale * 0.65 * np.max(D.int_flat))
             plt.xlim(xmax = 1, xmin = 0)
             plt.xticks([0, 1], ('', '$\Gamma$'))
         elif n == 4:
@@ -393,20 +404,22 @@ def fig5(colmap = cm.bone_r, print_fig = False):
                     V0=0, thdg=-9.5, tidg=0, phidg=45)
             plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
             plt.pcolormesh(D.ks, D.en_norm, np.flipud(D.int_flat), 
-                       cmap = cm.bone_r, vmin=0, vmax=0.53*np.max(D.int_flat))
+                       cmap=colmap, vmin=0, 
+                       vmax=v_scale * 0.53 * np.max(D.int_flat))
             plt.xlim(xmax = 1.5, xmin = 0)
             plt.xticks([0, 0.5, 1, 1.5], ('', 'X', '$\Gamma$', 'X'))
         
         pos = ax.get_position()
         plt.ylim(ymax = 0, ymin = -2.5)
+        plt.show()
     cax = plt.axes([pos.x0 + k_seg_4[-1] * scale + 0.01,
                     pos.y0, 0.01, pos.height])
     cbar = plt.colorbar(cax = cax, ticks = None)
-    cbar.set_ticks([1.001*np.min(D.int_flat), .53*np.max(D.int_flat)])
-    cbar.set_ticklabels(['min', 'max'])
-    plt.savefig(
-            '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/fig4.png', 
-            dpi = 300,bbox_inches="tight")
+    cbar.set_ticks([])
+    if print_fig == True:
+        plt.savefig(
+                '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/fig5.png', 
+                dpi = 300,bbox_inches="tight")
     
     
 if __name__ == "__main__":

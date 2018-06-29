@@ -6,9 +6,10 @@ Created on Mon Jun 11 09:57:01 2018
 @author: denyssutter
 """
 import os
+os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 import numpy as np
 import utils_math as umath
-from ARPES import DLS
+import ARPES
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
    
@@ -176,7 +177,7 @@ def gold(file, mat, year, sample, Ef_ini, BL):
     Generates Files for Normalization
     """
     if BL == 'DLS':
-        D = DLS(file, mat, year, sample)
+        D = ARPES.DLS(file, mat, year, sample)
     bnd = 150
     ch = 300
     plt.figure(5001)
