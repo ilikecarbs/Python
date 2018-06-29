@@ -144,50 +144,41 @@ class ALS:
               '\n', '==========================================')
         f = fits.open(path)
         hdr = f[0].header
-        mode = hdr['NM_0_0']
         data = f[1].data
+        mode = hdr['NM_0_0']
+        px_per_en = hdr['SSPEV_0']
+        e_i = hdr['SSX0_0']
+        e_f = hdr['SSX1_0']
+        a_i = hdr['SSY0_0']
+        a_f = hdr['SSY1_0']
+        Ef = hdr['SSKE0_0']
+        ang_per_px = 0.193
+        binning = 4
         
         npol = data.size
         (nen, nang) = data[0][-1].shape
         
         intensity = np.zeros((npol, nang, nen))
-        ens = np.zeros((npol, nang, nen))
-        angs = np.zeros((npol, nang, nen))
-        pols = np.zeros((npol, nang, nen))
-        en = np.zeros((nen))
-        ang = np.zeros((nang))
-        pol = np.zeros((npol))
+        en = (np.arange(e_i, e_f, 1) - Ef) / px_per_en
+        ang = np.arange(a_i, a_f, 1) * ang_per_px / binning
+        pol = np.arange(0, npol, 1)
+        
         if mode == 'Beta':
             for i in range(npol):
                 pol[i] = data[i][1]
                 intensity[i, :, :] = np.transpose(data[i][-1])
+                self.ens = np.broadcast_to(en, (pol.size, ang.size, en.size))
                 self.angs  = np.transpose(np.broadcast_to(
                                 ang, (pol.size, en.size, ang.size)), (0, 2, 1))
                 self.pols  = np.transpose(np.broadcast_to(
                                 pol, (ang.size, en.size, pol.size)), (2, 0, 1))
             
 
-
+            self.int = intensity
+        self.pol = pol
         self.ang = ang
         self.en = en
-        try: 
-            pol = np.array(list(f['/entry1/analyser/sapolar']))
-            self.pol = pol
-            self.int  = np.array(intensity)[:,:,:]
-            self.ens   = np.broadcast_to(en, (pol.size, ang.size, en.size))
-            self.angs  = np.transpose(
-                            np.broadcast_to(ang, (pol.size, en.size, ang.size)),
-                                (0, 2, 1))
-            self.pols  = np.transpose(
-                            np.broadcast_to(pol, (ang.size, en.size, pol.size)),
-                                (2, 0, 1))
-        except KeyError:
-            print('- No polar angles available \n')
-            self.int = np.asarray(intensity)[0, :, :]
-            self.ens = np.broadcast_to(en, (ang.size, en.size))
-            self.angs = np.transpose(np.broadcast_to(ang, (en.size, ang.size)))
-        photon = list(f['/entry1/instrument/monochromator/energy'])
-        self.hv = np.array(photon)
+        self.hv = data[0][-4]
         print('\n ~ Initialization complete. Data has {} dimensions'.format(
                 len(np.shape(self.int))),
               '\n', '==========================================')  

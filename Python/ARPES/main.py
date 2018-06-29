@@ -71,6 +71,17 @@ mat = 'Ca2RuO4'
 year = 2016
 sample = 'data'
 
+
+D = ARPES.ALS(file, mat, year, sample)
+#%%
+D.FS(e = -4, ew = .05, norm = False)
+D.ang2kFS(D.ang, Ekin=D.hv-4.5, lat_unit=False, a=5.33, b=5.33, c=11, 
+                V0=0, thdg=20.5, tidg=0, phidg=0)
+D.plt_FS(coord = True)
+#%%
+
+
+
 folder = ''.join(['/Users/denyssutter/Documents/Denys/',str(mat),
                   '/ALS',str(year),'/',str(sample),'/'])
 filename = ''.join([str(year),file,'.fits'])
@@ -81,6 +92,15 @@ hdr = f[0].header
 mode = hdr['NM_0_0']
 data = f[1].data
 
+px_per_en = hdr['SSPEV_0']
+e_i = hdr['SSX0_0']
+e_f = hdr['SSX1_0']
+a_i = hdr['SSY0_0']
+a_f = hdr['SSY1_0']
+Ef = hdr['SSKE0_0']
+ang_per_px = 0.193
+binning = 2
+
 npol = data.size
 (nen, nang) = data[0][-1].shape
 
@@ -89,9 +109,10 @@ ens = np.zeros((npol, nang, nen))
 angs = np.zeros((npol, nang, nen))
 pols = np.zeros((npol, nang, nen))
 
-en = np.zeros((nen))
-ang = np.zeros((nang))
-pol = np.zeros((npol))
+en = (np.arange(e_i, e_f, 1) - Ef) / px_per_en
+ang = np.arange(a_i, a_f, 1) * ang_per_px / binning
+ang = np.arange(0, nang, 1)
+pol = np.arange(0, npol, 1)
 
 for i in range(npol):
     pol[i] = data[i][1]
@@ -99,6 +120,9 @@ for i in range(npol):
     
 pols  = np.transpose(np.broadcast_to(pol, (ang.size, en.size, pol.size)),
                                 (2, 0, 1))
+
+angs  = np.transpose(np.broadcast_to(
+                            ang, (pol.size, en.size, ang.size)), (0, 2, 1))
 
 
 #%%

@@ -95,7 +95,7 @@ def plt_FS(self, coord=False):
         dat = self.map
     plt.figure(2000)
     plt.clf()
-    plt.pcolormesh(kx, ky, dat, cmap = rainbow_light)
+    plt.pcolormesh(kx, ky, dat, cmap = rainbow_light_2)
     plt.colorbar()
     plt.show()
 
