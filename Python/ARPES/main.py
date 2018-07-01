@@ -67,6 +67,8 @@ os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 import numpy as np
 import matplotlib.cm as cm
 
+rainbow_light = uplt.rainbow_light
+cm.register_cmap(name='rainbow_light', cmap=rainbow_light)
 rainbow_light_2 = uplt.rainbow_light_2
 cm.register_cmap(name='rainbow_light_2', cmap=rainbow_light_2)
 
@@ -86,28 +88,53 @@ D1.ang2kFS(D1.ang, Ekin=D1.hv-4.5-4.7, lat_unit=True, a=a, b=a, c=11,
                 V0=0, thdg=th, tidg=ti, phidg=phi)
 D2.ang2kFS(D2.ang, Ekin=D2.hv-4.5-4.7, lat_unit=True, a=a, b=a, c=11, 
                 V0=0, thdg=th, tidg=ti, phidg=phi)
-#%%
+
 data = np.concatenate((D1.int, D2.int), axis=0)
 pol = np.concatenate((D1.pol, D2.pol), axis=0)
 kx = np.concatenate((D1.kx, D2.kx), axis=0)
 ky = np.concatenate((D1.ky, D2.ky), axis=0)
 en = D1.en-2.3
 
-e = -4.7; ew = 0.4
+e = -2.1; ew = 0.4
 e_val, e_ind = u.find(en, e)
 ew_val, ew_ind = u.find(en, e-ew)
 FSmap = np.sum(data[:, :, ew_ind:e_ind], axis=2)
         
 plt.figure(1006, figsize=(4, 6), clear=True)
 plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
-plt.contourf(kx, ky, FSmap, 100, cmap = cm.ocean_r)
-#               vmin = .5 * np.max(FSmap), vmax = 1 * np.max(FSmap))
+plt.contourf(kx, ky, FSmap, 100, cmap = cm.ocean_r,
+               vmin = .5 * np.max(FSmap), vmax = .93 * np.max(FSmap))
+plt.xlabel('$k_x$ ($\pi/a$)', fontdict = font)
+plt.ylabel('$k_y$ ($\pi/b$)', fontdict = font)
+#plt.xlim((-1.1, 1.1))
+#plt.ylim((-1.1, 3.1))
+plt.axis('equal')
+plt.grid(alpha=0.2)
+plt.xticks(np.arange(-10,10,1))
+plt.yticks(np.arange(-10,10,1))
 plt.plot([-1, -1], [-1, 1], 'k-')
 plt.plot([1, 1], [-1, 1], 'k-')
 plt.plot([-1, 1], [1, 1], 'k-')
 plt.plot([-1, 1], [-1, -1], 'k-')
+plt.plot([-1, 1], [-1, 1], 'g:')
+plt.plot([-1, 1], [1, 1], 'g:')
+plt.plot([-1, 0], [1, 2], 'g:')
+plt.plot([0, 0], [2, -1], 'g:')
+ax = plt.axes()
+ax.arrow(-1, -1, .3, .3, head_width=0.2, head_length=0.2, fc='g', ec='k')
+ax.arrow(0, -.4, 0, -.3, head_width=0.2, head_length=0.2, fc='g', ec='k')
 
-cbar = plt.colorbar(ticks = None)
+#plt.plot(0, 0, 'ko', markersize=3)
+plt.text(-0.15, -0.15, r'$\Gamma$',
+         fontsize=12, color='r')
+plt.text(.85, .85, r'S',
+         fontsize=12, color='r')
+plt.text(-0.15, .85, r'X',
+         fontsize=12, color='r')
+pos = ax.get_position()
+cax = plt.axes([pos.x0+pos.width+0.03 ,
+                    pos.y0, 0.03, pos.height])
+cbar = plt.colorbar(cax = cax, ticks = None)
 cbar.set_ticks([])
 plt.show()
 
