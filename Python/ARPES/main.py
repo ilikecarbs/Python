@@ -43,8 +43,8 @@ fig5: Experimental Data of Nature Comm.
 """
 
 
-uplt.fig5(
-        print_fig = True
+uplt.fig1(
+        colmap = cm.bone_r, print_fig = False
         )
 
 
@@ -65,19 +65,42 @@ from astropy.io import fits
 import os
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 import numpy as np
+import matplotlib.cm as cm
 
-file = '0619_00161'
+rainbow_light_2 = uplt.rainbow_light_2
+cm.register_cmap(name='rainbow_light_2', cmap=rainbow_light_2)
+
+file1 = '0619_00161'
+file2 = '0619_00162'
 mat = 'Ca2RuO4'
 year = 2016
 sample = 'data'
 
+D1 = ARPES.ALS(file1, mat, year, sample)
+D2 = ARPES.ALS(file2, mat, year, sample)
+data = np.concatenate((D1.int, D2.int), axis=0)
+pol = np.concatenate((D1.pol, D2.pol), axis=0)
 
-D = ARPES.ALS(file, mat, year, sample)
+ang = D1.ang
+en = D1.en-2.3
+
+e = -4.7; ew = 0.4
+e_val, e_ind = u.find(en, e)
+ew_val, ew_ind = u.find(en, e-ew)
+FSmap = np.sum(data[:, :, ew_ind:e_ind], axis=2)
+        
+plt.figure(1006, figsize=(4, 6), clear=True)
+plt.contourf(ang, pol, FSmap, 100, cmap = cm.ocean_r, shading = 'gouraud')
+#               vmin = .5 * np.max(FSmap), vmax = 1 * np.max(FSmap))
+plt.colorbar()
+plt.show()
+
+
 #%%
-D.FS(e = -4, ew = .05, norm = False)
-D.ang2kFS(D.ang, Ekin=D.hv-4.5, lat_unit=False, a=5.33, b=5.33, c=11, 
+D1.FS(e = 2.3-4.7, ew = .4, norm = False)
+D1.ang2kFS(D.ang, Ekin=D.hv-4.5, lat_unit=False, a=5.33, b=5.33, c=11, 
                 V0=0, thdg=20.5, tidg=0, phidg=0)
-D.plt_FS(coord = True)
+D1.plt_FS(coord = False)
 #%%
 
 

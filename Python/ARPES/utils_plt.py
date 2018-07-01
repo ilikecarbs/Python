@@ -9,6 +9,7 @@ Created on Wed Jun 20 11:30:51 2018
 import os
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 import ARPES
+import utils
 import numpy as np
 from matplotlib.colors import LinearSegmentedColormap
 import pandas as pd
@@ -63,7 +64,7 @@ cm.register_cmap(name='rainbow_light', cmap=rainbow_light)
 rainbow_light_2 = rainbow_light_2()
 cm.register_cmap(name='rainbow_light_2', cmap=rainbow_light_2)
 
-def plt_spec(self, norm=False):
+def plt_spec(self, norm):
     if norm == True:
         k = self.angs
         en = self.en_norm
@@ -76,15 +77,42 @@ def plt_spec(self, norm=False):
         k = self.ang
         en = self.en
         dat = np.transpose(self.int)
-    plt.figure(1000)
+    plt.figure(10000)
     plt.clf()
     plt.pcolormesh(k, en, dat, cmap = cm.Greys)
     if norm == True:
         plt.plot([np.min(k), np.max(k)], [0, 0], 'k:')
     plt.xlabel('$k_x$')   
+    plt.ylabel('\omega')
+    plt.show()
+
+def plt_FS_polcut(self, norm, p, pw):
+    if norm == True:
+        k = self.angs
+        en = self.en_norm
+        dat = self.int_norm
+    elif norm == 'shift':
+        k = self.angs
+        en = self.en_shift
+        dat = self.int_shift
+    elif norm == False:
+        k = self.ang
+        en = self.en
+        dat = np.transpose(self.int)
+    p_val, p_ind = utils.find(self.pol, p)
+    pw_val, pw_ind = utils.find(self.pol, p - pw)
+    spec = np.sum(dat[:, : ,p_ind:-1:pw_ind], axis=2)
+    plt.figure(10000)
+    plt.clf()
+    plt.pcolormesh(k, en, spec, cmap = cm.Greys)
+    plt.plot([np.min(k), np.max(k)], [-2.8, -2.8], 'k:')
+    if norm == True:
+        plt.plot([np.min(k), np.max(k)], [0, 0], 'k:')
+#    plt.xlabel('$k$')   
+#    plt.ylabel('$\omega$')
     plt.show()
     
-def plt_FS(self, coord=False):
+def plt_FS(self, coord):
     if coord == True:
         kx = self.kx
         ky = self.ky
@@ -373,7 +401,7 @@ def fig5(colmap = rainbow_light_2, print_fig = False):
             D.ang2k(D.ang, Ekin=65-4.5, lat_unit=True, a=3.89, b=3.89, c=11, 
                     V0=0, thdg=-4, tidg=0, phidg=0)
             plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
-            plt.pcolormesh(D.ks, D.en_norm, D.int_flat, 
+            plt.pcolormesh(D.ks, D.en_norm+.1, D.int_flat, 
                        cmap=colmap, 
                        vmin=v_scale * 0.01 * np.max(D.int_flat), 
                        vmax=v_scale * 0.5 * np.max(D.int_flat))
@@ -389,10 +417,10 @@ def fig5(colmap = rainbow_light_2, print_fig = False):
             D.ang2k(D.ang, Ekin=65-4.5, lat_unit=True, a=3.89, b=3.89, c=11, 
                     V0=0, thdg=-7.5, tidg=8.5, phidg=45)
             plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
-            plt.pcolormesh(D.ks, D.en_norm, D.int_flat, 
+            plt.pcolormesh(D.ks, D.en_norm+.1, D.int_flat, 
                        cmap=colmap,
-                       vmin=v_scale * 0.01 * np.max(D.int_flat), 
-                       vmax=v_scale * 0.55 * np.max(D.int_flat))
+                       vmin=v_scale * 0.0 * np.max(D.int_flat), 
+                       vmax=v_scale * 0.54 * np.max(D.int_flat))
             plt.xlim(xmax = 0, xmin = -1)
             plt.xticks([-1, -.5, 0], ('', 'X', 'S'))
         elif n == 3:
@@ -404,10 +432,10 @@ def fig5(colmap = rainbow_light_2, print_fig = False):
             D.ang2k(D.ang, Ekin=65-4.5, lat_unit=True, a=3.89, b=3.89, c=11, 
                     V0=0, thdg=5, tidg=12.5, phidg=0)
             plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
-            plt.pcolormesh(D.ks, D.en_norm, np.flipud(D.int_flat), 
+            plt.pcolormesh(D.ks, D.en_norm+.1, np.flipud(D.int_flat), 
                        cmap=colmap, 
                        vmin=v_scale * 0.01 * np.max(D.int_flat), 
-                       vmax=v_scale * 0.65 * np.max(D.int_flat))
+                       vmax=v_scale * 0.7 * np.max(D.int_flat))
             plt.xlim(xmax = 1, xmin = 0)
             plt.xticks([0, 1], ('', '$\Gamma$'))
         elif n == 4:
@@ -419,7 +447,7 @@ def fig5(colmap = rainbow_light_2, print_fig = False):
             D.ang2k(D.ang, Ekin=65-4.5, lat_unit=True, a=3.89, b=3.89, c=11, 
                     V0=0, thdg=-9.5, tidg=0, phidg=45)
             plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
-            plt.pcolormesh(D.ks, D.en_norm, np.flipud(D.int_flat), 
+            plt.pcolormesh(D.ks, D.en_norm+.1, np.flipud(D.int_flat), 
                        cmap=colmap, 
                        vmin=v_scale * 0.01 * np.max(D.int_flat), 
                        vmax=v_scale * 0.53 * np.max(D.int_flat))

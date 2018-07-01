@@ -13,7 +13,7 @@ import utils as u
 import utils_plt as uplt
 from astropy.io import fits
 
-class DLS:  
+class DLS:
     """
     Data from Diamond Light Source
     Beamline: i05
@@ -154,15 +154,14 @@ class ALS:
         Ef = hdr['SSKE0_0']
         ang_per_px = 0.193
         binning = 4
-        
+        ###Creating Placeholders
         npol = data.size
         (nen, nang) = data[0][-1].shape
-        
         intensity = np.zeros((npol, nang, nen))
-        en = (np.arange(e_i, e_f, 1) - Ef) / px_per_en
-        ang = np.arange(a_i, a_f, 1) * ang_per_px / binning
-        pol = np.arange(0, npol, 1)
-        
+        en = (np.arange(e_i, e_f, 1.) - Ef) / px_per_en
+        ang = np.arange(a_i, a_f, 1.) * ang_per_px / binning
+        pol = np.arange(0, npol, 1.)
+        ###Build up data
         if mode == 'Beta':
             for i in range(npol):
                 pol[i] = data[i][1]
@@ -172,8 +171,6 @@ class ALS:
                                 ang, (pol.size, en.size, ang.size)), (0, 2, 1))
                 self.pols  = np.transpose(np.broadcast_to(
                                 pol, (ang.size, en.size, pol.size)), (2, 0, 1))
-            
-
             self.int = intensity
         self.pol = pol
         self.ang = ang
@@ -249,5 +246,9 @@ class ALS:
         
     def plt_spec(self, norm=False):
         uplt.plt_spec(self, norm)
+    
+    def plt_FS_polcut(self, norm=False, p=0, pw=0):
+        uplt.plt_FS_polcut(self, norm, p, pw)
+        
     def plt_FS(self, coord=False):
         uplt.plt_FS(self, coord)
