@@ -76,12 +76,21 @@ mat = 'Ca2RuO4'
 year = 2016
 sample = 'data'
 
+th = 20
+ti = -2
+phi = 21
+a = 5.5
 D1 = ARPES.ALS(file1, mat, year, sample)
 D2 = ARPES.ALS(file2, mat, year, sample)
+D1.ang2kFS(D1.ang, Ekin=D1.hv-4.5-4.7, lat_unit=True, a=a, b=a, c=11, 
+                V0=0, thdg=th, tidg=ti, phidg=phi)
+D2.ang2kFS(D2.ang, Ekin=D2.hv-4.5-4.7, lat_unit=True, a=a, b=a, c=11, 
+                V0=0, thdg=th, tidg=ti, phidg=phi)
+#%%
 data = np.concatenate((D1.int, D2.int), axis=0)
 pol = np.concatenate((D1.pol, D2.pol), axis=0)
-
-ang = D1.ang
+kx = np.concatenate((D1.kx, D2.kx), axis=0)
+ky = np.concatenate((D1.ky, D2.ky), axis=0)
 en = D1.en-2.3
 
 e = -4.7; ew = 0.4
@@ -90,9 +99,16 @@ ew_val, ew_ind = u.find(en, e-ew)
 FSmap = np.sum(data[:, :, ew_ind:e_ind], axis=2)
         
 plt.figure(1006, figsize=(4, 6), clear=True)
-plt.contourf(ang, pol, FSmap, 100, cmap = cm.ocean_r, shading = 'gouraud')
+plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+plt.contourf(kx, ky, FSmap, 100, cmap = cm.ocean_r)
 #               vmin = .5 * np.max(FSmap), vmax = 1 * np.max(FSmap))
-plt.colorbar()
+plt.plot([-1, -1], [-1, 1], 'k-')
+plt.plot([1, 1], [-1, 1], 'k-')
+plt.plot([-1, 1], [1, 1], 'k-')
+plt.plot([-1, 1], [-1, -1], 'k-')
+
+cbar = plt.colorbar(ticks = None)
+cbar.set_ticks([])
 plt.show()
 
 

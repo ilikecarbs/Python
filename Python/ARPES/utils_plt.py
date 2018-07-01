@@ -121,8 +121,8 @@ def plt_FS(self, coord):
         kx = self.ang
         ky = self.pol
         dat = self.map
-    plt.figure(2000)
-    plt.clf()
+    plt.figure(2000, figsize=(10,10), clear=True)
+    plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
     plt.pcolormesh(kx, ky, dat, cmap = rainbow_light_2)
     plt.colorbar()
     plt.show()
