@@ -78,17 +78,20 @@ class DLS:
               '\n', '==========================================')   
         
     def restrict(self, bot = 0, top = 1, left = 0, right = 1): #restrict spectrum
-        (en_restr, ens_restr, en_norm_restr, ang_restr, angs_restr,
-         int_restr, int_norm_restr) = u.restrict(self, bot, top, left, right)
+        (en_restr, ens_restr, en_norm_restr, ang_restr, angs_restr, pol_restr, 
+         pols_restr, int_restr, int_norm_restr) = u.restrict(
+                 self, bot, top, left, right)
         self.en = en_restr
         self.ens = ens_restr
         self.ang = ang_restr
         self.angs = angs_restr
+        self.pol = pol_restr
+        self.pols = pols_restr
         self.en_norm = en_norm_restr
         self.int = int_restr
         self.int_norm = int_norm_restr
         print('\n ~ Spectra restricted',
-              '\n', '==========================================')   
+              '\n', '==========================================')  
         
     def ang2k(self, angdg, Ekin, lat_unit=False, a=5.33, b=5.33, c=11, 
               V0=0, thdg=0, tidg=0, phidg=0):      
@@ -115,7 +118,7 @@ class DLS:
         print('\n ~ Angles converted into k-space',
               '\n', '==========================================')  
         
-    def FS(self, e, ew=0, norm=False): #Extract Constant Energy Map
+    def FS(self, e=0, ew=0, norm=False): #Extract Constant Energy Map
         FSmap = u.FS(self, e, ew, norm)
         self.map = FSmap
         print('\n ~ Constant energy map extracted',
@@ -130,6 +133,9 @@ class DLS:
     def plt_FS(self, coord=False):
         uplt.plt_FS(self, coord)
 
+    def plt_hv(self, a=0, aw=0):
+        uplt.plt_hv(self, a, aw)
+        
 class ALS:  
     """
     Data from Advanced Light Source
@@ -205,12 +211,15 @@ class ALS:
               '\n', '==========================================')   
         
     def restrict(self, bot = 0, top = 1, left = 0, right = 1): #restrict spectrum
-        (en_restr, ens_restr, en_norm_restr, ang_restr, angs_restr,
-         int_restr, int_norm_restr) = u.restrict(self, bot, top, left, right)
+        (en_restr, ens_restr, en_norm_restr, ang_restr, angs_restr, pol_restr, 
+         pols_restr, int_restr, int_norm_restr) = u.restrict(
+                 self, bot, top, left, right)
         self.en = en_restr
         self.ens = ens_restr
         self.ang = ang_restr
         self.angs = angs_restr
+        self.pol = pol_restr
+        self.pols = pols_restr
         self.en_norm = en_norm_restr
         self.int = int_restr
         self.int_norm = int_norm_restr
@@ -242,7 +251,7 @@ class ALS:
         print('\n ~ Angles converted into k-space',
               '\n', '==========================================')  
         
-    def FS(self, e, ew=0, norm=False): #Extract Constant Energy Map
+    def FS(self, e=0, ew=0, norm=False): #Extract Constant Energy Map
         FSmap = u.FS(self, e, ew, norm)
         self.map = FSmap
         print('\n ~ Constant energy map extracted',
@@ -250,12 +259,15 @@ class ALS:
         
     def plt_spec(self, norm=False):
         uplt.plt_spec(self, norm)
-    
+        
     def plt_FS_polcut(self, norm=False, p=0, pw=0):
         uplt.plt_FS_polcut(self, norm, p, pw)
         
     def plt_FS(self, coord=False):
         uplt.plt_FS(self, coord)
+        
+    def plt_hv(self, a=0, aw=0):
+        uplt.plt_hv(self, a, aw)
         
 class SIS:  
     """
@@ -340,17 +352,20 @@ class SIS:
               '\n', '==========================================')   
         
     def restrict(self, bot = 0, top = 1, left = 0, right = 1): #restrict spectrum
-        (en_restr, ens_restr, en_norm_restr, ang_restr, angs_restr,
-         int_restr, int_norm_restr) = u.restrict(self, bot, top, left, right)
+        (en_restr, ens_restr, en_norm_restr, ang_restr, angs_restr, pol_restr, 
+         pols_restr, int_restr, int_norm_restr) = u.restrict(
+                 self, bot, top, left, right)
         self.en = en_restr
         self.ens = ens_restr
         self.ang = ang_restr
         self.angs = angs_restr
+        self.pol = pol_restr
+        self.pols = pols_restr
         self.en_norm = en_norm_restr
         self.int = int_restr
         self.int_norm = int_norm_restr
         print('\n ~ Spectra restricted',
-              '\n', '==========================================')   
+              '\n', '==========================================')  
         
     def ang2k(self, angdg, Ekin, lat_unit=False, a=5.33, b=5.33, c=11, 
               V0=0, thdg=0, tidg=0, phidg=0):      
@@ -377,7 +392,7 @@ class SIS:
         print('\n ~ Angles converted into k-space',
               '\n', '==========================================')  
         
-    def FS(self, e, ew=0, norm=False): #Extract Constant Energy Map
+    def FS(self, e=0, ew=0, norm=False): #Extract Constant Energy Map
         FSmap = u.FS(self, e, ew, norm)
         self.map = FSmap
         print('\n ~ Constant energy map extracted',
@@ -391,3 +406,9 @@ class SIS:
         
     def plt_FS(self, coord=False):
         uplt.plt_FS(self, coord)
+        
+    def plt_hv(self, a=0, aw=0):
+        uplt.plt_hv(self, a, aw)
+        
+        
+        

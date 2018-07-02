@@ -84,20 +84,38 @@ def flatten(self, norm):
     return int_flat
   
 def restrict(self, bot, top, left, right):
-    m, n = self.int.shape
-    val, _bot = find(range(n), bot * n)
-    val, _top = find(range(n), top * n)
-    val, _left = find(range(m), left * m)
-    val, _right = find(range(m), right * m)
-    en_restr = self.en[_bot:_top]
-    ens_restr = self.ens[_left:_right, _bot:_top]
-    ang_restr = self.ang[_left:_right]
-    angs_restr = self.angs[_left:_right, _bot:_top]
-    en_norm_restr = self.en_norm[_left:_right, _bot:_top]
-    int_restr = self.int[_left:_right, _bot:_top]
-    int_norm_restr = self.int_norm[_left:_right, _bot:_top]
+    if self.int.ndim == 2:
+        d1, d2 = self.int.shape
+        val, _bot = find(range(d2), bot * d2)
+        val, _top = find(range(d2), top * d2)
+        val, _left = find(range(d1), left * d1)
+        val, _right = find(range(d1), right * d1)
+        en_restr = self.en[_bot:_top]
+        ens_restr = self.ens[_left:_right, _bot:_top]
+        ang_restr = self.ang[_left:_right]
+        angs_restr = self.angs[_left:_right, _bot:_top]
+        en_norm_restr = self.en_norm[_left:_right, _bot:_top]
+        int_restr = self.int[_left:_right, _bot:_top]
+        int_norm_restr = self.int_norm[_left:_right, _bot:_top]
+        pol_restr = 0
+        pols_restr = 0
+    elif self.int.ndim == 3:
+        d1, d2 = self.int.shape[1], self.int.shape[0]
+        val, _bot = find(range(d2), bot * d2)
+        val, _top = find(range(d2), top * d2)
+        val, _left = find(range(d1), left * d1)
+        val, _right = find(range(d1), right * d1)
+        pol_restr = self.pol[_bot:_top]
+        pols_restr = self.pols[_bot:_top, _left:_right, :]
+        en_restr = self.en
+        ens_restr = self.ens[_bot:_top, _left:_right]
+        ang_restr = self.ang[_left:_right]
+        angs_restr = self.angs[_bot:_top, _left:_right, :]
+        en_norm_restr = self.en_norm[_bot:_top, _left:_right, :]
+        int_restr = self.int[_bot:_top, _left:_right, :]
+        int_norm_restr = self.int[_bot:_top, _left:_right, :]
     return (en_restr, ens_restr, en_norm_restr, ang_restr, 
-            angs_restr, int_restr, int_norm_restr)
+            angs_restr, pol_restr, pols_restr, int_restr, int_norm_restr)
 
 def ang2k(self, angdg, Ekin, lat_unit, a, b, c, V0, thdg, tidg, phidg):     
     """
@@ -165,11 +183,11 @@ def FS(self, e, ew, norm): #Extract Constant Energy Map
     if norm == True:
         e_val, e_ind = find(self.en_norm[0, 0, :], e)
         ew_val, ew_ind = find(self.en_norm[0, 0, :], e-ew)
-        FSmap = np.sum(self.int_norm[:, :, e_ind:-1:ew_ind], axis=2)
+        FSmap = np.sum(self.int_norm[:, :, ew_ind:e_ind], axis=2)
     elif norm == False:
         e_val, e_ind = find(self.en, e)
         ew_val, ew_ind = find(self.en, e-ew)
-        FSmap = np.sum(self.int[:, :, e_ind:-1:ew_ind], axis=2)
+        FSmap = np.sum(self.int[:, :, ew_ind:e_ind], axis=2)
     return FSmap
 
 def gold(file, mat, year, sample, Ef_ini, BL):

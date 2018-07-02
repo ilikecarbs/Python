@@ -44,22 +44,10 @@ fig6: Constant energy map CaRuO4 of alpha branch
 """
 
 
-uplt.fig5(
-        colmap=cm.ocean_r, print_fig = True
+uplt.fig6(
+        colmap=cm.ocean_r, print_fig = False
         )
 
-
-#%%
-    
-#    plt.figure(100, figsize = (5,5))
-#    plt.plot([-1, -1], [-1, 1], 'k--')
-#    plt.plot([1, 1], [-1, 1], 'k--')
-#    plt.plot([-1, 1], [1, 1], 'k--')
-#    plt.plot([-1, 1], [-1, -1], 'k--')
-#    plt.plot(D.k[0], D.k[1])
-#    plt.show()
-
-#u.gold(gold, mat, year, sample, Ef_ini=60.4, BL='DLS')
 
 #%%
 import os
@@ -104,21 +92,8 @@ year = 2015
 sample = 'data'
 
 D = ARPES.SIS(file, mat, year, sample)
-#%%
+D.plt_hv()
 
-import os
-os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
-import matplotlib.cm as cm
-import ARPES
-
-#7991 7992
-
-file = 'CSRO_P1_0032'
-mat = 'CSRO20'
-year = 2017
-sample = 'data'
-
-D = ARPES.SIS(file, mat, year, sample)
 #%%
 
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
@@ -134,25 +109,35 @@ sample = 'S6'
 D = ARPES.DLS(file, mat, year, sample)
 #u.gold(gold, mat, year, sample, Ef_ini=17.63, BL='DLS')
 D.norm(gold)
+D.restrict(bot=0, top=1, left=.1, right=.9)
 
-#%%
 D.FS(e = -0.0, ew = .02, norm = True)
-D.ang2kFS(D.ang, Ekin=22-4.5, a=5.33, b=5.33, c=11, V0=0, thdg=0, tidg=0, phidg=0)
+D.ang2kFS(D.ang, Ekin=22-4.5, lat_unit=True, a=5.33, b=5.33, c=11, 
+          V0=0, thdg=8.7, tidg=-4, phidg=0)
 D.plt_FS(coord = True)
 
 #%%
+
+"""
+Test Script for Tight binding models
+"""
+
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 
 start = time.time()
-tb = umath.TB(a = np.pi, kpoints = 200)
+tb = umath.TB(a = np.pi, kpoints = 200)  #Initialize tight binding model
 
-#param = mdl.paramSRO()
-param = umath.paramCSRO20()
+####SRO TB hopping parameters###
+#param = umath.paramSRO()  
+param = umath.paramCSRO20()  
 
-#tb.simple(param)
+###Calculate and Plot FS###
+#tb.simple(param) 
+#tb.SRO(param) 
 tb.CSRO(param)
-#tb.SRO(param)
 
+
+#tb.plt_cont_TB_SRO()
 tb.plt_cont_TB_CSRO20()
 
 print(time.time()-start)

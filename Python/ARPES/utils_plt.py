@@ -77,9 +77,9 @@ def plt_spec(self, norm):
         k = self.ang
         en = self.en
         dat = np.transpose(self.int)
-    plt.figure(10000)
-    plt.clf()
-    plt.pcolormesh(k, en, dat, cmap = cm.Greys)
+    plt.figure(2006, figsize=(10, 10), clear=True)
+    plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+    plt.contourf(k, en, dat, 100, cmap = cm.ocean_r)
     if norm == True:
         plt.plot([np.min(k), np.max(k)], [0, 0], 'k:')
     plt.xlabel('$k_x$')   
@@ -101,17 +101,37 @@ def plt_FS_polcut(self, norm, p, pw):
         dat = np.transpose(self.int)
     p_val, p_ind = utils.find(self.pol, p)
     pw_val, pw_ind = utils.find(self.pol, p - pw)
-    spec = np.sum(dat[:, : ,p_ind:-1:pw_ind], axis=2)
-    plt.figure(10000)
-    plt.clf()
-    plt.pcolormesh(k, en, spec, cmap = cm.Greys)
+    spec = np.sum(dat[:, : , pw_ind:p_ind], axis=2)
+    plt.figure(2005, figsize=(10, 10), clear=True)
+    plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+    plt.contourf(k, en, spec, 100, cmap = cm.ocean_r)
     plt.plot([np.min(k), np.max(k)], [-2.8, -2.8], 'k:')
     if norm == True:
         plt.plot([np.min(k), np.max(k)], [0, 0], 'k:')
-#    plt.xlabel('$k$')   
-#    plt.ylabel('$\omega$')
+    plt.xlabel('$k$')   
+    plt.ylabel('\omega')
     plt.show()
-    
+
+def plt_hv(self, a, aw):
+    k = self.ang
+    hv = self.hv
+    en = self.en
+    dat = self.int
+    a_val, a_ind = utils.find(self.ang, a)
+    aw_val, aw_ind = utils.find(self.ang, a - aw)
+    spec = np.sum(dat[:, aw_ind:a_ind+1, :], axis=1)
+    ###Plotting###
+    n = np.ceil(np.sqrt(self.hv.size))
+    plt.figure(2004, figsize=(10, 10), clear=True)
+    plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+    for i in range(self.hv.size):
+        plt.subplot(n, n, i+1)
+        plt.contourf(k, en, np.transpose(dat[i, :, :]), 100, cmap = cm.ocean_r)
+        plt.title(str(np.round(hv[i], 0))+" eV")
+    plt.figure(2007, figsize=(10, 10), clear=True)
+    plt.contourf(hv, en, np.transpose(spec), 100, cmap = cm.ocean_r)
+    plt.show()
+        
 def plt_FS(self, coord):
     if coord == True:
         kx = self.kx
@@ -123,7 +143,8 @@ def plt_FS(self, coord):
         dat = self.map
     plt.figure(2000, figsize=(10,10), clear=True)
     plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
-    plt.pcolormesh(kx, ky, dat, cmap = rainbow_light_2)
+    plt.contourf(kx, ky, dat, 100, cmap = cm.ocean_r)
+    plt.axis('equal')
     plt.colorbar()
     plt.show()
 
@@ -132,6 +153,7 @@ def plt_cont_TB_simple(self, e0):
     coord = self.coord   
     X = coord['X']; Y = coord['Y']   
     en = bndstr['en']
+    plt.figure(2003, figsize=(10, 10), clear=True)
     plt.contour(X, Y, en, levels = e0)
   
 def plt_cont_TB_SRO(self, e0):
@@ -139,12 +161,14 @@ def plt_cont_TB_SRO(self, e0):
     coord = self.coord   
     X = coord['X']; Y = coord['Y']   
     xz = bndstr['xz']; yz = bndstr['yz']; xy = bndstr['xy']
-    plt.subplot(231)
-    plt.contour(X, Y, xz, colors = 'black', linestyles = ':', levels = e0)
-    plt.subplot(232)
-    plt.contour(X, Y, yz, colors = 'black', linestyles = ':', levels = e0)
-    plt.subplot(233)
-    plt.contour(X, Y, xy, colors = 'black', linestyles = ':', levels = e0)
+    en = (xz, yz, xy)
+    plt.figure(2002, figsize=(10, 3), clear=True)
+    n = 0
+    for i in en:
+        n = n + 1
+        plt.subplot(1, 3, n)
+        plt.contour(X, Y, i, colors = 'black', linestyles = ':', levels = e0)
+        plt.axis('equal')
   
 def plt_cont_TB_CSRO20(self, e0):   
     bndstr = self.bndstr
@@ -152,23 +176,19 @@ def plt_cont_TB_CSRO20(self, e0):
     X = coord['X']; Y = coord['Y']   
     Axz = bndstr['Axz']; Ayz = bndstr['Ayz']; Axy = bndstr['Axy']
     Bxz = bndstr['Bxz']; Byz = bndstr['Byz']; Bxy = bndstr['Bxy']
-    plt.subplot(231)
-    plt.contour(X, Y, Axz, levels = e0)
-    plt.subplot(232)
-    plt.contour(X, Y, Ayz, levels = e0)
-    plt.subplot(233)
-    plt.contour(X, Y, Axy, levels = e0)
-    plt.subplot(234)
-    plt.contour(X, Y, Bxz, levels = e0)
-    plt.subplot(235)
-    plt.contour(X, Y, Byz, levels = e0)
-    plt.subplot(236)
-    plt.contour(X, Y, Bxy, levels = e0)
+    en = (Axz, Ayz, Axy, Bxz, Byz, Bxy)
+    plt.figure(2001, figsize=(6, 4), clear=True)
+    n = 0
+    for i in en:
+        n = n + 1
+        plt.subplot(2, 3, n)
+        plt.contour(X, Y, i, levels = e0)
+        plt.axis('equal')
         
 def CRO_theory_plot(k_pts, data_en, data, colmap, v_max):
     c = len(data)
     scale = .02
-    plt.figure(1001, figsize = (10, 10), clear = True)
+    plt.figure(1001, figsize=(10, 10), clear = True)
     for k in range(len(data)): #looping over segments of k-path
         c = len(data[k])
         m, n = data[k][0].shape

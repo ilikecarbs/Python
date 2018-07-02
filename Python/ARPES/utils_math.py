@@ -28,7 +28,9 @@ def paramCSRO20():
 
         
 class TB:
-    
+    """
+    Tight binding models
+    """
     def __init__(self, a = np.pi, kbnd = 1, kpoints = 100):
         self.a = a
         x = np.linspace(-kbnd, kbnd, kpoints)
