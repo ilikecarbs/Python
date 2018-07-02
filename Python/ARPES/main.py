@@ -44,158 +44,85 @@ fig6: Constant energy map CaRuO4 of alpha branch
 """
 
 
-uplt.fig5(
-        colmap=cm.ocean_r, print_fig = True
+uplt.fig6(
+        colmap=cm.ocean_r, print_fig = False
         )
 
-
 #%%
-    
-#    plt.figure(100, figsize = (5,5))
-#    plt.plot([-1, -1], [-1, 1], 'k--')
-#    plt.plot([1, 1], [-1, 1], 'k--')
-#    plt.plot([-1, 1], [1, 1], 'k--')
-#    plt.plot([-1, 1], [-1, -1], 'k--')
-#    plt.plot(D.k[0], D.k[1])
-#    plt.show()
 
-#u.gold(gold, mat, year, sample, Ef_ini=60.4, BL='DLS')
-
-#%%
-from astropy.io import fits
 import os
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
-import numpy as np
 import matplotlib.cm as cm
+import ARPES
 
-rainbow_light = uplt.rainbow_light
-cm.register_cmap(name='rainbow_light', cmap=rainbow_light)
-rainbow_light_2 = uplt.rainbow_light_2
-cm.register_cmap(name='rainbow_light_2', cmap=rainbow_light_2)
+#7991 7992
 
-file1 = '0619_00161'
-file2 = '0619_00162'
+file = 'CRO_SIS_0048'
 mat = 'Ca2RuO4'
-year = 2016
+year = 2015
 sample = 'data'
 
-th = 20
-ti = -2
-phi = 21
-a = 5.5
-D1 = ARPES.ALS(file1, mat, year, sample)
-D2 = ARPES.ALS(file2, mat, year, sample)
-D1.ang2kFS(D1.ang, Ekin=D1.hv-4.5-4.7, lat_unit=True, a=a, b=a, c=11, 
-                V0=0, thdg=th, tidg=ti, phidg=phi)
-D2.ang2kFS(D2.ang, Ekin=D2.hv-4.5-4.7, lat_unit=True, a=a, b=a, c=11, 
-                V0=0, thdg=th, tidg=ti, phidg=phi)
+D = ARPES.SIS(file, mat, year, sample)
 
-data = np.concatenate((D1.int, D2.int), axis=0)
-pol = np.concatenate((D1.pol, D2.pol), axis=0)
-kx = np.concatenate((D1.kx, D2.kx), axis=0)
-ky = np.concatenate((D1.ky, D2.ky), axis=0)
-en = D1.en-2.3
+D.ang2k(D.ang, Ekin=65-4.5, lat_unit=True, a=3.89, b=3.89, c=11, 
+        V0=0, thdg=-4, tidg=0, phidg=0)
+#D.plt_hv()
+int1 = D.int[11, :, :]
+int2 = D.int[16, :, :] * 3.9
+val, _edc = u.find(D.k[0], 1)
+edc1 = int1[_edc, :]
+edc2 = int2[_edc, :]
 
-e = -2.2; ew = 0.2
-e_val, e_ind = u.find(en, e)
-ew_val, ew_ind = u.find(en, e-ew)
-FSmap = np.sum(data[:, :, ew_ind:e_ind], axis=2)
-        
-plt.figure(1006, figsize=(3.5, 5), clear=True)
-plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
-plt.contourf(kx, ky, FSmap, 100, cmap = cm.ocean_r,
-               vmin = .5 * np.max(FSmap), vmax = .95 * np.max(FSmap))
-plt.xlabel('$k_x$ ($\pi/a$)', fontdict = font)
-plt.ylabel('$k_y$ ($\pi/b$)', fontdict = font)
+plt.rcParams['ytick.right'] = True
+plt.rcParams['xtick.top'] = True
+plt.rcParams['ytick.labelleft'] = True
+plt.rcParams['xtick.labelbottom'] = True
+plt.figure(1007, figsize=(8, 6), clear=True)
 
-plt.axis('equal')
-plt.grid(alpha=0.3)
-plt.xticks(np.arange(-10,10,1))
-plt.yticks(np.arange(-10,10,1))
-plt.plot([-1, -1], [-1, 1], 'k-')
-plt.plot([1, 1], [-1, 1], 'k-')
-plt.plot([-1, 1], [1, 1], 'k-')
-plt.plot([-1, 1], [-1, -1], 'k-')
-plt.plot([-1, 1], [-1, 1], 'g:', linewidth=3)
-plt.plot([-1, 1], [1, 1], 'g:', linewidth=3)
-plt.plot([-1, 0], [1, 2], 'g:', linewidth=3)
-plt.plot([0, 0], [2, -1], 'g:', linewidth=3)
-ax = plt.axes()
-ax.arrow(-1, -1, .3, .3, head_width=0.2, head_length=0.2, fc='g', ec='k')
-ax.arrow(0, -.5, 0, -.3, head_width=0.2, head_length=0.2, fc='g', ec='k')
+ax = plt.subplot(1, 3, 1) 
+ax.set_position([.1, .3, .2 , .6])
+plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
+plt.contourf(D.k[0], D.en, np.transpose(int1), 100, cmap=cm.ocean_r,
+             vmin = 0, vmax = 1.4e4)
+plt.plot([-1, 1.66], [0, 0], 'k:')
+plt.plot([1, 1], [-2.5, .5], 'g--', linewidth=1)
+plt.xlim(xmax = 1.66, xmin = -1)
+plt.ylim(ymax = 0.5, ymin = -2.5)
+plt.ylabel('$\omega$ (meV)', fontdict = font)
+plt.xticks([-1, 0, 1], ('S', '$\Gamma$', 'S'))
+plt.text(-.9, 0.3, r'(a)', fontsize=15)
 
-#plt.plot(0, 0, 'ko', markersize=3)
-plt.text(-0.1, -0.1, r'$\Gamma$',
-         fontsize=20, color='r')
-plt.text(-0.1, 1.9, r'$\Gamma$',
-         fontsize=20, color='r')
-plt.text(.9, .9, r'S',
-         fontsize=20, color='r')
-plt.text(-0.1, .9, r'X',
-         fontsize=20, color='r')
-plt.xlim(xmin=-1.1, xmax=1.1)
-plt.ylim(ymin=-1.1, ymax=3.1)
+plt.rcParams['ytick.labelleft'] = False
+ax = plt.subplot(1, 3, 2) 
+ax.set_position([.32, .3, .2 , .6])
+plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
+plt.contourf(D.k[0], D.en+.07, np.transpose(int2), 100, cmap=cm.ocean_r,
+             vmin = 0, vmax = 1.4e4)
+plt.plot([-1, 1.66], [0, 0], 'k:')
+plt.plot([1, 1], [-2.5, .5], 'g--', linewidth=1)
+plt.xlim(xmax = 1.66, xmin = -1)
+plt.ylim(ymax = 0.5, ymin = -2.5)
+plt.xticks([-1, 0, 1], ('S', '$\Gamma$', 'S'))
+plt.text(-.9, 0.3, r'(b)', fontsize=15)
 pos = ax.get_position()
-cax = plt.axes([pos.x0+pos.width+0.03 ,
-                    pos.y0, 0.03, pos.height])
+cax = plt.axes([pos.x0+pos.width+0.01 ,
+                    pos.y0, 0.01, pos.height])
 cbar = plt.colorbar(cax = cax, ticks = None)
 cbar.set_ticks([])
-plt.show()
-plt.savefig(
-                '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/fig6.png', 
-                dpi = 300,bbox_inches="tight")
-
-#%%
-D1.FS(e = 2.3-4.7, ew = .4, norm = False)
-D1.ang2kFS(D.ang, Ekin=D.hv-4.5, lat_unit=False, a=5.33, b=5.33, c=11, 
-                V0=0, thdg=20.5, tidg=0, phidg=0)
-D1.plt_FS(coord = False)
-#%%
-
-
-
-folder = ''.join(['/Users/denyssutter/Documents/Denys/',str(mat),
-                  '/ALS',str(year),'/',str(sample),'/'])
-filename = ''.join([str(year),file,'.fits'])
-path = folder + filename
-
-f = fits.open(path)
-hdr = f[0].header
-mode = hdr['NM_0_0']
-data = f[1].data
-
-px_per_en = hdr['SSPEV_0']
-e_i = hdr['SSX0_0']
-e_f = hdr['SSX1_0']
-a_i = hdr['SSY0_0']
-a_f = hdr['SSY1_0']
-Ef = hdr['SSKE0_0']
-ang_per_px = 0.193
-binning = 2
-
-npol = data.size
-(nen, nang) = data[0][-1].shape
-
-intensity = np.zeros((npol, nang, nen))
-ens = np.zeros((npol, nang, nen))
-angs = np.zeros((npol, nang, nen))
-pols = np.zeros((npol, nang, nen))
-
-en = (np.arange(e_i, e_f, 1) - Ef) / px_per_en
-ang = np.arange(a_i, a_f, 1) * ang_per_px / binning
-ang = np.arange(0, nang, 1)
-pol = np.arange(0, npol, 1)
-
-for i in range(npol):
-    pol[i] = data[i][1]
-    intensity[i, :, :] = np.transpose(data[i][-1])
     
-pols  = np.transpose(np.broadcast_to(pol, (ang.size, en.size, pol.size)),
-                                (2, 0, 1))
-
-angs  = np.transpose(np.broadcast_to(
-                            ang, (pol.size, en.size, ang.size)), (0, 2, 1))
-
+plt.rcParams['xtick.labelbottom'] = False
+ax = plt.subplot(1, 3, 3) 
+ax.set_position([.57, .3, .2 , .6])
+plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
+plt.plot(edc1, D.en, 'bo', markersize=3)
+plt.plot(edc2, D.en, 'gd', markersize=3)
+plt.plot([0, 1.5e4], [0, 0], 'k:')
+plt.plot([0, 1.5e4], [-.2, -.2], 'k:', linewidth=.2)
+plt.text(1e3, -0.15, r'$\Delta$', fontsize=12)
+plt.text(7e2, 0.3, r'(c)', fontsize=15)
+plt.xlim(xmax = 1.2e4, xmin = 0)
+plt.ylim(ymax = 0.5, ymin = -2.5)
+plt.xlabel('Intensity (a.u)', fontdict = font)
 
 #%%
 
@@ -212,25 +139,35 @@ sample = 'S6'
 D = ARPES.DLS(file, mat, year, sample)
 #u.gold(gold, mat, year, sample, Ef_ini=17.63, BL='DLS')
 D.norm(gold)
+D.restrict(bot=0, top=1, left=.1, right=.9)
 
-#%%
 D.FS(e = -0.0, ew = .02, norm = True)
-D.ang2kFS(D.ang, Ekin=22-4.5, a=5.33, b=5.33, c=11, V0=0, thdg=0, tidg=0, phidg=0)
+D.ang2kFS(D.ang, Ekin=22-4.5, lat_unit=True, a=5.33, b=5.33, c=11, 
+          V0=0, thdg=8.7, tidg=-4, phidg=0)
 D.plt_FS(coord = True)
 
 #%%
+
+"""
+Test Script for Tight binding models
+"""
+
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 
 start = time.time()
-tb = umath.TB(a = np.pi, kpoints = 200)
+tb = umath.TB(a = np.pi, kpoints = 200)  #Initialize tight binding model
 
-#param = mdl.paramSRO()
-param = umath.paramCSRO20()
+####SRO TB hopping parameters###
+#param = umath.paramSRO()  
+param = umath.paramCSRO20()  
 
-#tb.simple(param)
+###Calculate and Plot FS###
+#tb.simple(param) 
+#tb.SRO(param) 
 tb.CSRO(param)
-#tb.SRO(param)
 
+
+#tb.plt_cont_TB_SRO()
 tb.plt_cont_TB_CSRO20()
 
 print(time.time()-start)
