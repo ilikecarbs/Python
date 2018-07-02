@@ -151,7 +151,7 @@ def ang2kFS(self, angdg, Ekin, lat_unit, a, b, c, V0, thdg, tidg, phidg):
     ky_V0 = np.ones((self.pol.size, self.ang.size))
     for i in range(self.pol.size):
         k, k_V0 = ang2k(self, angdg, Ekin, lat_unit, a, b, c, V0, thdg, 
-                        self.pol[i], phidg)
+                        self.pol[i]-tidg, phidg)
         kx[i, :] = k[0, :]
         ky[i, :] = k[1, :]
         kx_V0[i, :] = k_V0[0, :]
