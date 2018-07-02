@@ -127,6 +127,7 @@ def plt_hv(self, a, aw):
     for i in range(self.hv.size):
         plt.subplot(n, n, i+1)
         plt.contourf(k, en, np.transpose(dat[i, :, :]), 100, cmap = cm.ocean_r)
+        plt.xticks((0, 0), ('', ''))
         plt.title(str(np.round(hv[i], 0))+" eV")
     plt.figure(2007, figsize=(10, 10), clear=True)
     plt.contourf(hv, en, np.transpose(spec), 100, cmap = cm.ocean_r)

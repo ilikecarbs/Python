@@ -48,35 +48,6 @@ uplt.fig6(
         colmap=cm.ocean_r, print_fig = False
         )
 
-
-#%%
-import os
-os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
-import matplotlib.cm as cm
-import h5py
-import numpy as np
-
-#7991 7992
-
-file = 'CRO_SIS_0048'
-mat = 'Ca2RuO4'
-year = 2015
-sample = 'data'
-folder = ''.join(['/Users/denyssutter/Documents/Denys/',str(mat),
-                  '/SIS',str(year),'/',str(sample),'/'])
-filename = ''.join([str(file),'.h5'])
-path = folder + filename
-f = h5py.File(path,'r')
-data  = (f['Electron Analyzer/Image Data'])
-intensity = np.array(data)
-hv  = np.array(f['Other Instruments/hv'])
-pol  = np.array(f['Other Instruments/Tilt'])
-d1, d2, d3 = data.shape
-e_i, de = data.attrs['Axis0.Scale']
-a_i, da = data.attrs['Axis1.Scale']
-en = np.arange(e_i, e_i + d1 * de, de)
-ang = np.arange(a_i, a_i + d2 * da, da)
-
 #%%
 
 import os
@@ -92,7 +63,66 @@ year = 2015
 sample = 'data'
 
 D = ARPES.SIS(file, mat, year, sample)
-D.plt_hv()
+
+D.ang2k(D.ang, Ekin=65-4.5, lat_unit=True, a=3.89, b=3.89, c=11, 
+        V0=0, thdg=-4, tidg=0, phidg=0)
+#D.plt_hv()
+int1 = D.int[11, :, :]
+int2 = D.int[16, :, :] * 3.9
+val, _edc = u.find(D.k[0], 1)
+edc1 = int1[_edc, :]
+edc2 = int2[_edc, :]
+
+plt.rcParams['ytick.right'] = True
+plt.rcParams['xtick.top'] = True
+plt.rcParams['ytick.labelleft'] = True
+plt.rcParams['xtick.labelbottom'] = True
+plt.figure(1007, figsize=(8, 6), clear=True)
+
+ax = plt.subplot(1, 3, 1) 
+ax.set_position([.1, .3, .2 , .6])
+plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
+plt.contourf(D.k[0], D.en, np.transpose(int1), 100, cmap=cm.ocean_r,
+             vmin = 0, vmax = 1.4e4)
+plt.plot([-1, 1.66], [0, 0], 'k:')
+plt.plot([1, 1], [-2.5, .5], 'g--', linewidth=1)
+plt.xlim(xmax = 1.66, xmin = -1)
+plt.ylim(ymax = 0.5, ymin = -2.5)
+plt.ylabel('$\omega$ (meV)', fontdict = font)
+plt.xticks([-1, 0, 1], ('S', '$\Gamma$', 'S'))
+plt.text(-.9, 0.3, r'(a)', fontsize=15)
+
+plt.rcParams['ytick.labelleft'] = False
+ax = plt.subplot(1, 3, 2) 
+ax.set_position([.32, .3, .2 , .6])
+plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
+plt.contourf(D.k[0], D.en+.07, np.transpose(int2), 100, cmap=cm.ocean_r,
+             vmin = 0, vmax = 1.4e4)
+plt.plot([-1, 1.66], [0, 0], 'k:')
+plt.plot([1, 1], [-2.5, .5], 'g--', linewidth=1)
+plt.xlim(xmax = 1.66, xmin = -1)
+plt.ylim(ymax = 0.5, ymin = -2.5)
+plt.xticks([-1, 0, 1], ('S', '$\Gamma$', 'S'))
+plt.text(-.9, 0.3, r'(b)', fontsize=15)
+pos = ax.get_position()
+cax = plt.axes([pos.x0+pos.width+0.01 ,
+                    pos.y0, 0.01, pos.height])
+cbar = plt.colorbar(cax = cax, ticks = None)
+cbar.set_ticks([])
+    
+plt.rcParams['xtick.labelbottom'] = False
+ax = plt.subplot(1, 3, 3) 
+ax.set_position([.57, .3, .2 , .6])
+plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
+plt.plot(edc1, D.en, 'bo', markersize=3)
+plt.plot(edc2, D.en, 'gd', markersize=3)
+plt.plot([0, 1.5e4], [0, 0], 'k:')
+plt.plot([0, 1.5e4], [-.2, -.2], 'k:', linewidth=.2)
+plt.text(1e3, -0.15, r'$\Delta$', fontsize=12)
+plt.text(7e2, 0.3, r'(c)', fontsize=15)
+plt.xlim(xmax = 1.2e4, xmin = 0)
+plt.ylim(ymax = 0.5, ymin = -2.5)
+plt.xlabel('Intensity (a.u)', fontdict = font)
 
 #%%
 
