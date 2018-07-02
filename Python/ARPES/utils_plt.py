@@ -361,7 +361,6 @@ def fig5(colmap = cm.ocean_r, print_fig = False):
     """
     Plot experimental Data Ca2RuO4
     """
-    
     os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
     mat = 'Ca2RuO4'
     year = 2016
@@ -475,7 +474,6 @@ def fig6(colmap = cm.ocean_r, print_fig = False):
     mat = 'Ca2RuO4'
     year = 2016
     sample = 'data'
-    
     th = 20
     ti = -2
     phi = 21
@@ -493,7 +491,9 @@ def fig6(colmap = cm.ocean_r, print_fig = False):
     e = -2.2; ew = 0.2
     e_val, e_ind = utils.find(en, e)
     ew_val, ew_ind = utils.find(en, e-ew)
-    FSmap = np.sum(data[:, :, ew_ind:e_ind], axis=2)
+    FSmap = np.sum(data[:, :, ew_ind:e_ind], axis=2) #creating FS map
+    
+    ###Plotting###
     plt.figure(1006, figsize=(3.5, 5), clear=True)
     plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
     plt.contourf(kx, ky, FSmap, 100, cmap = cm.ocean_r,
