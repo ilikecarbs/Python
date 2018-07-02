@@ -357,7 +357,7 @@ def fig4(colmap = cm.bone_r, print_fig = False):
                 '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/fig4.png', 
                 dpi = 300,bbox_inches="tight")
     
-def fig5(colmap = rainbow_light_2, print_fig = False):
+def fig5(colmap = cm.ocean_r, print_fig = False):
     """
     Plot experimental Data Ca2RuO4
     """
@@ -466,7 +466,76 @@ def fig5(colmap = rainbow_light_2, print_fig = False):
                 '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/fig5.png', 
                 dpi = 300,bbox_inches="tight")
     
+def fig6(colmap = cm.ocean_r, print_fig = False):
+    """
+    Constant energy map of Ca2RuO4 of alpha branch over two BZ's
+    """
+    file1 = '0619_00161'
+    file2 = '0619_00162'
+    mat = 'Ca2RuO4'
+    year = 2016
+    sample = 'data'
     
+    th = 20
+    ti = -2
+    phi = 21
+    a = 5.5
+    D1 = ARPES.ALS(file1, mat, year, sample) #frist scan
+    D2 = ARPES.ALS(file2, mat, year, sample) #second scan
+    D1.ang2kFS(D1.ang, Ekin=D1.hv-4.5-4.7, lat_unit=True, a=a, b=a, c=11, 
+                    V0=0, thdg=th, tidg=ti, phidg=phi)
+    D2.ang2kFS(D2.ang, Ekin=D2.hv-4.5-4.7, lat_unit=True, a=a, b=a, c=11, 
+                    V0=0, thdg=th, tidg=ti, phidg=phi)    
+    data = np.concatenate((D1.int, D2.int), axis=0) #combining two scans
+    kx = np.concatenate((D1.kx, D2.kx), axis=0)
+    ky = np.concatenate((D1.ky, D2.ky), axis=0)
+    en = D1.en-2.3 #energy off set (Fermi level not specified)
+    e = -2.2; ew = 0.2
+    e_val, e_ind = utils.find(en, e)
+    ew_val, ew_ind = utils.find(en, e-ew)
+    FSmap = np.sum(data[:, :, ew_ind:e_ind], axis=2)
+    plt.figure(1006, figsize=(3.5, 5), clear=True)
+    plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+    plt.contourf(kx, ky, FSmap, 100, cmap = cm.ocean_r,
+                   vmin = .5 * np.max(FSmap), vmax = .95 * np.max(FSmap))
+    plt.xlabel('$k_x$ ($\pi/a$)', fontdict = font)
+    plt.ylabel('$k_y$ ($\pi/b$)', fontdict = font)
+    plt.axis('equal')
+    plt.grid(alpha=0.3)
+    plt.xticks(np.arange(-10,10,1))
+    plt.yticks(np.arange(-10,10,1))
+    plt.plot([-1, -1], [-1, 1], 'k-')
+    plt.plot([1, 1], [-1, 1], 'k-')
+    plt.plot([-1, 1], [1, 1], 'k-')
+    plt.plot([-1, 1], [-1, -1], 'k-')
+    plt.plot([-1, 1], [-1, 1], 'g:', linewidth=3)
+    plt.plot([-1, 1], [1, 1], 'g:', linewidth=3)
+    plt.plot([-1, 0], [1, 2], 'g:', linewidth=3)
+    plt.plot([0, 0], [2, -1], 'g:', linewidth=3)
+    ax = plt.axes()
+    ax.arrow(-1, -1, .3, .3, head_width=0.2, head_length=0.2, fc='g', ec='k')
+    ax.arrow(0, -.5, 0, -.3, head_width=0.2, head_length=0.2, fc='g', ec='k')
+    plt.text(-0.1, -0.1, r'$\Gamma$',
+             fontsize=20, color='r')
+    plt.text(-0.1, 1.9, r'$\Gamma$',
+             fontsize=20, color='r')
+    plt.text(.9, .9, r'S',
+             fontsize=20, color='r')
+    plt.text(-0.1, .9, r'X',
+             fontsize=20, color='r')
+    plt.xlim(xmin=-1.1, xmax=1.1)
+    plt.ylim(ymin=-1.1, ymax=3.1)
+    pos = ax.get_position()
+    cax = plt.axes([pos.x0+pos.width+0.03 ,
+                        pos.y0, 0.03, pos.height])
+    cbar = plt.colorbar(cax = cax, ticks = None)
+    cbar.set_ticks([])
+    plt.show()
+    if print_fig == True:
+        plt.savefig(
+                    '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/fig6.png', 
+                    dpi = 300,bbox_inches="tight")
+        
 if __name__ == "__main__":
     fig3() 
         

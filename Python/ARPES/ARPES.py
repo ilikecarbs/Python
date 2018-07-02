@@ -123,6 +123,10 @@ class DLS:
         
     def plt_spec(self, norm=False):
         uplt.plt_spec(self, norm)
+    
+    def plt_FS_polcut(self, norm=False, p=0, pw=0):
+        uplt.plt_FS_polcut(self, norm, p, pw)
+        
     def plt_FS(self, coord=False):
         uplt.plt_FS(self, coord)
 
