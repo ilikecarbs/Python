@@ -67,7 +67,7 @@ class DLS:
     def shift(self, gold): #Flatten spectra
         en_shift, int_shift = u.shift(self, gold)
         self.en_norm = en_shift
-        self.int_norm = int_shift
+        self.int_shift = int_shift
         print('\n ~ Only energy normalized',
               '\n', '==========================================')   
         

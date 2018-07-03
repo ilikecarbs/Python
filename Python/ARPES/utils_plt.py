@@ -206,8 +206,6 @@ def CRO_theory_plot(k_pts, data_en, data, colmap, v_max):
         
         ###Plotting###
         #Setting which axes should be ticked and labelled
-        plt.rcParams['xtick.top'] = plt.rcParams['xtick.bottom'] = True
-        plt.rcParams['ytick.right'] = plt.rcParams['ytick.left'] = True
         plt.rcParams['xtick.labelbottom'] = True
         plt.rcParams['xtick.labeltop'] = False
         
@@ -240,7 +238,7 @@ def CRO_theory_plot(k_pts, data_en, data, colmap, v_max):
         elif k == 3:
             plt.xticks(k_seg, ('', 'X', '$\Gamma$', 'X'))
         plt.tick_params(direction='in', length=1.5, width=.5, colors='k')    
-        plt.pcolormesh(data_kpath, data_en, data_spec, cmap = colmap,
+        plt.contourf(data_kpath, data_en, data_spec, 300, cmap = colmap,
                        vmin=0, vmax=v_max*np.max(data_spec))
         plt.ylim(ymax = 0, ymin = -2.5)
     cax = plt.axes([pos.x0 + k_prev * scale + 0.01,
@@ -394,8 +392,6 @@ def fig5(colmap = cm.ocean_r, print_fig = False):
     
     ###Plotting###
     #Setting which axes should be ticked and labelled
-    plt.rcParams['xtick.top'] = plt.rcParams['xtick.bottom'] = True
-    plt.rcParams['ytick.right'] = plt.rcParams['ytick.left'] = True
     plt.rcParams['xtick.labelbottom'] = True
     plt.rcParams['xtick.labeltop'] = False
     scale = .02
@@ -412,21 +408,20 @@ def fig5(colmap = cm.ocean_r, print_fig = False):
         D.shift(gold)
         D.norm(gold)
         D.restrict(bot=.6, top=1, left=0, right=1)
-        D.flatten(norm='shift')
+        D.flatten(norm=True)
         if n == 1:
             plt.rcParams['ytick.labelright'] = False
             plt.rcParams['ytick.labelleft'] = True
             ax = plt.subplot(1, 4, n) 
             ax.set_position([.1, .3, k_seg_1[-1] * scale, .3])
             pos = ax.get_position()
-            
             D.ang2k(D.ang, Ekin=65-4.5, lat_unit=True, a=3.89, b=3.89, c=11, 
                     V0=0, thdg=-4, tidg=0, phidg=0)
             plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
-            plt.pcolormesh(D.ks, D.en_norm+.1, D.int_flat, 
+            plt.contourf(D.ks, D.en_norm+.1, D.int_norm, 300,
                        cmap=colmap, 
-                       vmin=v_scale * 0.01 * np.max(D.int_flat), 
-                       vmax=v_scale * 0.5 * np.max(D.int_flat))
+                       vmin=v_scale * 0.01 * np.max(D.int_norm), 
+                       vmax=v_scale * 0.5 * np.max(D.int_norm))
             plt.xlim(xmax = 1, xmin = -1)
             plt.ylabel('$\omega$ (meV)', fontdict = font)
             plt.xticks([-1, 0, 1], ('S', '$\Gamma$', 'S'))
@@ -439,10 +434,10 @@ def fig5(colmap = cm.ocean_r, print_fig = False):
             D.ang2k(D.ang, Ekin=65-4.5, lat_unit=True, a=3.89, b=3.89, c=11, 
                     V0=0, thdg=-7.5, tidg=8.5, phidg=45)
             plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
-            plt.pcolormesh(D.ks, D.en_norm+.1, D.int_flat, 
+            plt.contourf(D.ks, D.en_norm+.1, D.int_norm, 300,
                        cmap=colmap,
-                       vmin=v_scale * 0.0 * np.max(D.int_flat), 
-                       vmax=v_scale * 0.54 * np.max(D.int_flat))
+                       vmin=v_scale * 0.0 * np.max(D.int_norm), 
+                       vmax=v_scale * 0.54 * np.max(D.int_norm))
             plt.xlim(xmax = 0, xmin = -1)
             plt.xticks([-1, -.5, 0], ('', 'X', 'S'))
         elif n == 3:
@@ -454,10 +449,10 @@ def fig5(colmap = cm.ocean_r, print_fig = False):
             D.ang2k(D.ang, Ekin=65-4.5, lat_unit=True, a=3.89, b=3.89, c=11, 
                     V0=0, thdg=5, tidg=12.5, phidg=0)
             plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
-            plt.pcolormesh(D.ks, D.en_norm+.1, np.flipud(D.int_flat), 
+            plt.contourf(D.ks, D.en_norm+.1, np.flipud(D.int_norm), 300,
                        cmap=colmap, 
-                       vmin=v_scale * 0.01 * np.max(D.int_flat), 
-                       vmax=v_scale * 0.7 * np.max(D.int_flat))
+                       vmin=v_scale * 0.01 * np.max(D.int_norm), 
+                       vmax=v_scale * 0.7 * np.max(D.int_norm))
             plt.xlim(xmax = 1, xmin = 0)
             plt.xticks([0, 1], ('', '$\Gamma$'))
         elif n == 4:
@@ -469,10 +464,10 @@ def fig5(colmap = cm.ocean_r, print_fig = False):
             D.ang2k(D.ang, Ekin=65-4.5, lat_unit=True, a=3.89, b=3.89, c=11, 
                     V0=0, thdg=-9.5, tidg=0, phidg=45)
             plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
-            plt.pcolormesh(D.ks, D.en_norm+.1, np.flipud(D.int_flat), 
+            plt.contourf(D.ks, D.en_norm+.1, np.flipud(D.int_norm), 300,
                        cmap=colmap, 
-                       vmin=v_scale * 0.01 * np.max(D.int_flat), 
-                       vmax=v_scale * 0.53 * np.max(D.int_flat))
+                       vmin=v_scale * 0.01 * np.max(D.int_norm), 
+                       vmax=v_scale * 0.53 * np.max(D.int_norm))
             plt.xlim(xmax = 1.5, xmin = 0)
             plt.xticks([0, 0.5, 1, 1.5], ('', 'X', '$\Gamma$', 'X'))
         
@@ -519,7 +514,7 @@ def fig6(colmap = cm.ocean_r, print_fig = False):
     ###Plotting###
     plt.figure(1006, figsize=(3.5, 5), clear=True)
     plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
-    plt.contourf(kx, ky, FSmap, 100, cmap = colmap,
+    plt.contourf(kx, ky, FSmap, 300, cmap = colmap,
                    vmin = .5 * np.max(FSmap), vmax = .95 * np.max(FSmap))
     plt.xlabel('$k_x$ ($\pi/a$)', fontdict = font)
     plt.ylabel('$k_y$ ($\pi/b$)', fontdict = font)
@@ -610,7 +605,7 @@ def fig7(colmap = cm.ocean_r, print_fig = False):
         ax = plt.subplot(1, 3, 1) 
         ax.set_position([.1, .3, .2 , .6])
         plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
-        plt.contourf(D.k[0], D.en, np.transpose(int1), 100, cmap=colmap,
+        plt.contourf(D.k[0], D.en, np.transpose(int1), 300, cmap=colmap,
                      vmin = 0, vmax = 1.4e4)
         plt.plot([-1, 1.66], [0, 0], 'k:')
         plt.plot([-1, 1.66], [mdc_val - mdcw_val / 2, mdc_val - mdcw_val / 2],
@@ -631,7 +626,7 @@ def fig7(colmap = cm.ocean_r, print_fig = False):
         ax = plt.subplot(1, 3, 2) 
         ax.set_position([.32, .3, .2 , .6])
         plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
-        plt.contourf(D.k[0], D.en+.07, np.transpose(int2), 100, cmap=colmap,
+        plt.contourf(D.k[0], D.en+.07, np.transpose(int2), 300, cmap=colmap,
                      vmin = 0, vmax = 1.4e4)
         plt.plot([-1, 1.66], [0, 0], 'k:')
         plt.plot([edc_val, edc_val], [-2.5, .5], 'g--', linewidth=1)
@@ -682,6 +677,9 @@ def fig7(colmap = cm.ocean_r, print_fig = False):
                     dpi = 300,bbox_inches="tight")
 
 def fig8(colmap = cm.ocean_r, print_fig = False):
+    """
+    Polarization dependence Ca2RuO4
+    """
     file1 = 47991
     file2 = 47992
     mat = 'Ca2RuO4'
@@ -708,7 +706,7 @@ def fig8(colmap = cm.ocean_r, print_fig = False):
         ax = plt.subplot(1, 3, 1) 
         ax.set_position([.1, .3, .2 , .6])
         plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
-        plt.contourf(D1.ks, D1.en_norm+.1, np.flipud(D1.int_norm), 100, 
+        plt.contourf(D1.ks, D1.en_norm+.1, np.flipud(D1.int_norm), 300, 
                      cmap=colmap, vmin = 0, vmax = .008)
         plt.plot([-1, 1.66], [0, 0], 'k:')
         plt.plot([edc_val, edc_val], [-2.5, .5], 'g--', linewidth=1)
@@ -724,7 +722,7 @@ def fig8(colmap = cm.ocean_r, print_fig = False):
         ax = plt.subplot(1, 3, 2) 
         ax.set_position([.32, .3, .2 , .6])
         plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
-        plt.contourf(D2.ks, D2.en_norm+.1, np.flipud(D2.int_norm), 100, 
+        plt.contourf(D2.ks, D2.en_norm+.1, np.flipud(D2.int_norm), 300, 
                      cmap=colmap, vmin = 0, vmax = .008)
         plt.plot([-1, 1.66], [0, 0], 'k:')
         plt.plot([edc_val, edc_val], [-2.5, .5], 'g--', linewidth=1)
@@ -772,6 +770,55 @@ def fig8(colmap = cm.ocean_r, print_fig = False):
     if print_fig == True:
         plt.savefig(
                     '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/fig8.png', 
+                    dpi = 300,bbox_inches="tight")
+        
+def fig9(colmap = cm.bone_r, print_fig = False):
+    """
+    DMFT plot dxz/yz, dxy Ca2RuO4
+    """
+    os.chdir('/Users/denyssutter/Documents/PhD/data')
+    xz_data = np.loadtxt('DMFT_CRO_xz.dat')
+    yz_data = np.loadtxt('DMFT_CRO_yz.dat')
+    xy_data = np.loadtxt('DMFT_CRO_xy.dat')
+    os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+    m, n = 8000, 351 #dimensions energy, full k-path
+    bot, top = 2500, 5000 #restrict energy window
+    DMFT_data = np.array([xz_data, yz_data, xy_data]) #combine data
+    DMFT_spec = np.reshape(DMFT_data[:, :, 2], (3, n, m)) #reshape into n,m
+    DMFT_spec = DMFT_spec[:, :, bot:top] #restrict data to bot, top
+    DMFT_en   = np.linspace(-8, 8, m) #define energy data
+    DMFT_en   = DMFT_en[bot:top] #restrict energy data
+    #[0, 56, 110, 187, 241, 266, 325, 350]  = [G,X,S,G,Y,T,G,Z]
+    DMFT_spec = np.transpose(DMFT_spec, (0,2,1)) #transpose
+    DMFT_k = np.arange(0, 351, 1)
+    plt.figure(1009, figsize=(8, 8), clear=True)
+    for i in range(2):
+        ax = plt.subplot(1, 2, i + 1)
+        ax.set_position([.1 + (i * .38), .3, .35 , .35])
+        plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
+        plt.contourf(DMFT_k, DMFT_en, DMFT_spec[i + 1, :, :], 300, cmap=colmap,
+                     vmin = 0, vmax = .3)
+        plt.plot([0, 350], [0, 0], 'k:')
+        plt.xlim(xmax=350, xmin=0)
+        plt.ylim(ymax=2, ymin=-3)
+        plt.xticks([0, 56, 110, 187, 241, 266, 325, 350], 
+                   ('$\Gamma$', 'X', 'S', '$\Gamma$', 'Y', 'T', '$\Gamma$', 'Z'));
+        if i == 0:
+            plt.text(10, 1.6, r'(a) $d_{xz/yz}$', fontsize=12)
+            plt.text(198, -.65, r'$U+J_\mathrm{H}$', fontsize=12)
+            plt.arrow(188, 0, 0, .7, head_width=8, head_length=0.2, fc='g', ec='g')
+            plt.arrow(188, 0, 0, -1.7, head_width=8, head_length=0.2, fc='g', ec='g')
+            plt.yticks(np.arange(-3, 2, 1.))
+            plt.ylabel('$\omega$ (eV)', fontdict = font)
+        elif i == 1:
+            plt.text(10, 1.6, r'(b) $d_{xy}$', fontsize=12)
+            plt.text(263, -1, r'$3J_\mathrm{H}$', fontsize=12)
+            plt.arrow(253, -.8, 0, .22, head_width=8, head_length=0.2, fc='g', ec='g')
+            plt.arrow(253, -.8, 0, -.5, head_width=8, head_length=0.2, fc='g', ec='g')
+            plt.yticks(np.arange(-3, 2, 1.), [])
+    if print_fig == True:
+        plt.savefig(
+                    '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/fig9.png', 
                     dpi = 300,bbox_inches="tight")
         
 if __name__ == "__main__":
