@@ -49,109 +49,19 @@ fig9: DMFT plot Ca2RuO4 dxy/dxz,yz: figure 4 of Nature Comm.
 """
 
 
-uplt.fig5(
-        colmap=cm.bone_r, print_fig = True
+uplt.fig9(
+        print_fig = True
         )
 
 #%%
+import pandas as pd
+os.chdir('/Users/denyssutter/Documents/PhD/data')
+DFT_data = pd.read_csv('DFT_CRO.dat', sep='\t')
+DFT_data = DFT_data.replace({'{': '(', '}': ')'}, regex=True)
+DFT_data = DFT_data.values()
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
-mat = 'Ca2RuO4'
-year = 2016
-sample = 'T10'
-plt.figure(1005, figsize = (10, 10), clear = True)
-files = np.array([47974, 48048, 47993, 48028])
-gold = 48000
 
-###Plotting###
-#Setting which axes should be ticked and labelled
-plt.rcParams['xtick.labelbottom'] = True
-plt.rcParams['xtick.labeltop'] = False
-scale = .02
-v_scale = 1.3
-k_seg_1 = np.array([0, 4.442882938158366, 8.885765876316732])
-k_seg_2 = np.array([0, 3.141592653589793, 6.283185307179586])
-k_seg_3 = np.array([0, 4.442882938158366])
-k_seg_4 = np.array([0, 3.141592653589793, 6.283185307179586, 9.42477796076938])
-
-n = 0
-for file in files:
-    n += 1
-    D = ARPES.DLS(file, mat, year, sample)
-    D.shift(gold)
-    D.norm(gold)
-    D.restrict(bot=.6, top=1, left=0, right=1)
-    D.flatten(norm=True)
-    if n == 1:
-        plt.rcParams['ytick.labelright'] = False
-        plt.rcParams['ytick.labelleft'] = True
-        ax = plt.subplot(1, 4, n) 
-        ax.set_position([.1, .3, k_seg_1[-1] * scale, .3])
-        pos = ax.get_position()
-        D.ang2k(D.ang, Ekin=65-4.5, lat_unit=True, a=3.89, b=3.89, c=11, 
-                V0=0, thdg=-4, tidg=0, phidg=0)
-        plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
-        plt.contourf(D.ks, D.en_norm+.1, D.int_norm, 300,
-                   cmap=cm.bone_r, 
-                   vmin=v_scale * 0.01 * np.max(D.int_norm), 
-                   vmax=v_scale * 0.5 * np.max(D.int_norm))
-        plt.xlim(xmax = 1, xmin = -1)
-        plt.ylabel('$\omega$ (meV)', fontdict = font)
-        plt.xticks([-1, 0, 1], ('S', '$\Gamma$', 'S'))
-    elif n == 2:
-        plt.rcParams['ytick.labelright'] = False
-        plt.rcParams['ytick.labelleft'] = False
-        ax = plt.subplot(1, 4, n)
-        ax.set_position([pos.x0 + k_seg_1[-1] * scale, pos.y0, 
-                         k_seg_2[-1] * scale, pos.height])
-        D.ang2k(D.ang, Ekin=65-4.5, lat_unit=True, a=3.89, b=3.89, c=11, 
-                V0=0, thdg=-7.5, tidg=8.5, phidg=45)
-        plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
-        plt.contourf(D.ks, D.en_norm+.1, D.int_norm, 300,
-                   cmap=cm.bone_r,
-                   vmin=v_scale * 0.0 * np.max(D.int_norm), 
-                   vmax=v_scale * 0.54 * np.max(D.int_norm))
-        plt.xlim(xmax = 0, xmin = -1)
-        plt.xticks([-1, -.5, 0], ('', 'X', 'S'))
-    elif n == 3:
-        plt.rcParams['ytick.labelright'] = False
-        plt.rcParams['ytick.labelleft'] = False
-        ax = plt.subplot(1, 4, n)
-        ax.set_position([pos.x0 + k_seg_2[-1] * scale, pos.y0, 
-                         k_seg_3[-1] * scale, pos.height])
-        D.ang2k(D.ang, Ekin=65-4.5, lat_unit=True, a=3.89, b=3.89, c=11, 
-                V0=0, thdg=5, tidg=12.5, phidg=0)
-        plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
-        plt.contourf(D.ks, D.en_norm+.1, np.flipud(D.int_norm), 300,
-                   cmap=cm.bone_r, 
-                   vmin=v_scale * 0.01 * np.max(D.int_norm), 
-                   vmax=v_scale * 0.7 * np.max(D.int_norm))
-        plt.xlim(xmax = 1, xmin = 0)
-        plt.xticks([0, 1], ('', '$\Gamma$'))
-    elif n == 4:
-        plt.rcParams['ytick.labelright'] = False
-        plt.rcParams['ytick.labelleft'] = False
-        ax = plt.subplot(1, 4, n)
-        ax.set_position([pos.x0 + k_seg_3[-1] * scale, pos.y0, 
-                         k_seg_4[-1] * scale, pos.height])
-        D.ang2k(D.ang, Ekin=65-4.5, lat_unit=True, a=3.89, b=3.89, c=11, 
-                V0=0, thdg=-9.5, tidg=0, phidg=45)
-        plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
-        plt.contourf(D.ks, D.en_norm+.1, np.flipud(D.int_norm), 300,
-                   cmap=cm.bone_r, 
-                   vmin=v_scale * 0.01 * np.max(D.int_norm), 
-                   vmax=v_scale * 0.53 * np.max(D.int_norm))
-        plt.xlim(xmax = 1.5, xmin = 0)
-        plt.xticks([0, 0.5, 1, 1.5], ('', 'X', '$\Gamma$', 'X'))
-    
-    pos = ax.get_position()
-    plt.ylim(ymax = 0, ymin = -2.5)
-    plt.show()
-cax = plt.axes([pos.x0 + k_seg_4[-1] * scale + 0.01,
-                pos.y0, 0.01, pos.height])
-cbar = plt.colorbar(cax = cax, ticks = None)
-cbar.set_ticks([])
-
-
+#plt.imshow(DFT_data)
 #%%
 
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
