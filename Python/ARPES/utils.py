@@ -72,7 +72,6 @@ def flatten(self, norm):
     """
     Flatten spectra
     """
-    int_flat = self.int
     if norm == True:
         int_flat = self.int_norm
     elif norm == False:

@@ -165,9 +165,15 @@ def lor2(x, p0, p1, p2, p3, p4, p5, p6, p7, p8):
     """
     Two lorentzians on a quadratic background
     """
-    return (p2 / (1 + ((x - p0) / p4) ** 2) + 
-            p3 / (1 + ((x - p1) / p5) ** 2) +
+    return (p4 / (1 + ((x - p0) / p2) ** 2) + 
+            p5 / (1 + ((x - p1) / p3) ** 2) +
             p6 + p7 * x + p8 * x ** 2)
     
-    
+def gauss2(x, p0, p1, p2, p3, p4, p5, p6, p7, p8):
+    """
+    Two gaussians on a quadratic background
+    """
+    return (p4 * np.exp(-(x - p0) ** 2 / (2 * p2 ** 2)) + 
+            p5 * np.exp(-(x - p1) ** 2 / (2 * p3 ** 2)) +
+            p6 + p7 * x + p8 * x ** 2)    
     

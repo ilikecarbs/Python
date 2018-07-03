@@ -10,13 +10,15 @@ import os
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 import ARPES
 import utils
+import utils_math
 import numpy as np
 from matplotlib.colors import LinearSegmentedColormap
 import pandas as pd
 import matplotlib.pyplot as plt
 from numpy import linalg as la
 import matplotlib.cm as cm
-
+from scipy.stats import exponnorm
+from scipy.optimize import curve_fit
 
 plt.rcParams['mathtext.fontset'] = 'cm'
 plt.rcParams['font.serif']=['Computer Modern Roman']
@@ -86,7 +88,7 @@ def plt_spec(self, norm):
     plt.ylabel('\omega')
     plt.show()
 
-def plt_FS_polcut(self, norm, p, pw):
+def plt_FS_poliut(self, norm, p, pw):
     if norm == True:
         k = self.angs
         en = self.en_norm
@@ -410,7 +412,7 @@ def fig5(colmap = cm.ocean_r, print_fig = False):
         D.shift(gold)
         D.norm(gold)
         D.restrict(bot=.6, top=1, left=0, right=1)
-        D.flatten(norm='spec')
+        D.flatten(norm='shift')
         if n == 1:
             plt.rcParams['ytick.labelright'] = False
             plt.rcParams['ytick.labelleft'] = True
@@ -517,7 +519,7 @@ def fig6(colmap = cm.ocean_r, print_fig = False):
     ###Plotting###
     plt.figure(1006, figsize=(3.5, 5), clear=True)
     plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
-    plt.contourf(kx, ky, FSmap, 100, cmap = cm.ocean_r,
+    plt.contourf(kx, ky, FSmap, 100, cmap = colmap,
                    vmin = .5 * np.max(FSmap), vmax = .95 * np.max(FSmap))
     plt.xlabel('$k_x$ ($\pi/a$)', fontdict = font)
     plt.ylabel('$k_y$ ($\pi/b$)', fontdict = font)
@@ -555,6 +557,221 @@ def fig6(colmap = cm.ocean_r, print_fig = False):
     if print_fig == True:
         plt.savefig(
                     '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/fig6.png', 
+                    dpi = 300,bbox_inches="tight")
+
+def fig7(colmap = cm.ocean_r, print_fig = False):
+    """
+    Photon energy dependence Ca2RuO4 
+    """
+    file = 'CRO_SIS_0048'
+    mat = 'Ca2RuO4'
+    year = 2015
+    sample = 'data'
+    D = ARPES.SIS(file, mat, year, sample)
+    D.ang2k(D.ang, Ekin=65-4.5, lat_unit=True, a=3.89, b=3.89, c=11, 
+            V0=0, thdg=-4, tidg=0, phidg=0)
+    int1 = D.int[11, :, :]
+    int2 = D.int[16, :, :] * 3.9
+    edc_val = 1
+    mdc_val = -2.2
+    mdcw_val = .1
+    val, _edc = utils.find(D.k[0], edc_val)
+    val, _mdc = utils.find(D.en, mdc_val)
+    val, _mdcw = utils.find(D.en, mdc_val - mdcw_val)
+    edc1 = int1[_edc, :]
+    edc2 = int2[_edc, :]
+    mdc = np.sum(int1[:, _mdcw:_mdc], axis=1)
+    mdc = mdc / np.max(mdc)
+    
+    plt.figure(2007, figsize=(4, 4), clear=True)
+    ###Fit MDC###
+    delta = 1e-5
+    p_mdc_i = [-.3, .35, 
+               .1, .1, 
+               1, 1, 
+               .695, 0.02, -.02]
+    p_mdc_bounds = ([-.3, .2,
+                     0, 0,
+                     0, 0,
+                     p_mdc_i[-3]-delta, p_mdc_i[-2]-delta, p_mdc_i[-1]-delta],
+                    [-.2, .5,
+                     .12, .12,
+                     np.inf, np.inf,
+                     p_mdc_i[-3]+delta, p_mdc_i[-2]+delta, p_mdc_i[-1]+delta])
+    p_mdc, cov_mdc = curve_fit(
+            utils_math.gauss2, D.k[0], mdc, p_mdc_i, bounds=p_mdc_bounds)
+    b_mdc = utils_math.poly2(D.k[0], 0, p_mdc[-3], p_mdc[-2], p_mdc[-1])
+    f_mdc = utils_math.gauss2(D.k[0], *p_mdc)
+    plt.plot(D.k[0], mdc, 'bo')
+    plt.plot(D.k[0], f_mdc)
+    plt.plot(D.k[0], b_mdc, 'k--')
+    ###Plot Panels###
+    def fig7a():
+        ax = plt.subplot(1, 3, 1) 
+        ax.set_position([.1, .3, .2 , .6])
+        plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
+        plt.contourf(D.k[0], D.en, np.transpose(int1), 100, cmap=colmap,
+                     vmin = 0, vmax = 1.4e4)
+        plt.plot([-1, 1.66], [0, 0], 'k:')
+        plt.plot([-1, 1.66], [mdc_val - mdcw_val / 2, mdc_val - mdcw_val / 2],
+                 'g--', linewidth=1)
+        plt.plot([edc_val, edc_val], [-2.5, .5], 'g--', linewidth=1)
+        plt.xlim(xmax = 1.66, xmin = -1)
+        plt.ylim(ymax = 0.5, ymin = -2.5)
+        plt.ylabel('$\omega$ (meV)', fontdict = font)
+        plt.xticks([-1, 0, 1], ('S', '$\Gamma$', 'S'))
+        plt.yticks(np.arange(-2.5, .5, .5))
+        plt.text(-.9, 0.3, r'(a)', fontsize=15)
+        plt.text(.22, .1, r'$\mathcal{C}$', fontsize=15)
+        plt.arrow(-1, -1, 0, -.3, head_width=0.2, head_length=0.2, fc='g', ec='k')
+        plt.plot(D.k[0], (mdc - b_mdc) * 1.5, 'o', markersize=1, color='C9')
+        plt.fill(D.k[0], (f_mdc - b_mdc) * 1.5, alpha=.2, color='C9')
+    
+    def fig7b():
+        ax = plt.subplot(1, 3, 2) 
+        ax.set_position([.32, .3, .2 , .6])
+        plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
+        plt.contourf(D.k[0], D.en+.07, np.transpose(int2), 100, cmap=colmap,
+                     vmin = 0, vmax = 1.4e4)
+        plt.plot([-1, 1.66], [0, 0], 'k:')
+        plt.plot([edc_val, edc_val], [-2.5, .5], 'g--', linewidth=1)
+        plt.xlim(xmax = 1.66, xmin = -1)
+        plt.ylim(ymax = 0.5, ymin = -2.5)
+        plt.xticks([-1, 0, 1], ('S', '$\Gamma$', 'S'))
+        plt.yticks(np.arange(-2.5, .5, .5), ())
+        plt.text(-.9, 0.3, r'(b)', fontsize=15)
+        
+        pos = ax.get_position()
+        cax = plt.axes([pos.x0+pos.width+0.01 ,
+                            pos.y0, 0.01, pos.height])
+        cbar = plt.colorbar(cax = cax, ticks = None)
+        cbar.set_ticks([])
+        cbar.set_clim(np.min(D.int), np.max(D.int))
+        
+    def fig7c():
+        xx = np.linspace(1, -5, 200)
+        ax = plt.subplot(1, 3, 3) 
+        ax.set_position([.57, .3, .2 , .6])
+        plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
+        plt.plot(edc1, D.en, 'o', markersize=3, color=(0, 0, .8))
+        plt.plot(edc2, D.en, 'd', markersize=3, color='C0')
+        plt.fill_between([0, 1.5e4], 0, -.2, color='C3', alpha=0.2)
+        plt.fill(7.4e3 * exponnorm.pdf(-xx, K=2, loc=.63, scale = .2), xx, 
+                 alpha = .2, fc=(0, 0, .8))
+        plt.fill(1.3e4 * exponnorm.pdf(-xx, K=2, loc=1.34, scale = .28), xx, 
+                 alpha = .2, fc='C0')
+        plt.plot([0, 1.5e4], [0, 0], 'k:')
+        plt.plot([0, 1.5e4], [-.2, -.2], 'k:', linewidth=.2)
+        plt.text(1e3, -0.15, r'$\Delta$', fontsize=12)
+        plt.text(7e2, 0.3, r'(c)', fontsize=15)
+        plt.text(6e3, -.9, r'$\mathcal{A}$', fontsize=15)
+        plt.text(6e3, -1.75, r'$\mathcal{B}$', fontsize=15)
+        plt.xlim(xmax = 1.2e4, xmin = 0)
+        plt.ylim(ymax = 0.5, ymin = -2.5)
+        plt.xticks([])
+        plt.yticks(np.arange(-2.5, .5, .5), ())
+        plt.legend(('63$\,$eV', '78$\,$eV'), frameon=False)
+        plt.xlabel('Intensity (a.u)', fontdict = font)
+    plt.figure(1007, figsize=(8, 6), clear=True)
+    fig7a()
+    fig7b()
+    fig7c()
+    if print_fig == True:
+        plt.savefig(
+                    '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/fig7.png', 
+                    dpi = 300,bbox_inches="tight")
+
+def fig8(colmap = cm.ocean_r, print_fig = False):
+    file1 = 47991
+    file2 = 47992
+    mat = 'Ca2RuO4'
+    year = 2016
+    sample = 'T10'
+    D1 = ARPES.DLS(file1, mat, year, sample)
+    D2 = ARPES.DLS(file2, mat, year, sample)
+    D1.norm(48000)
+    D2.norm(48000)
+    D1.restrict(bot=.6, top=1, left=0, right=1)
+    D2.restrict(bot=.6, top=1, left=0, right=1)
+    D1.flatten(norm=True)
+    D2.flatten(norm=True)
+    D1.ang2k(D1.ang, Ekin=65-4.5, lat_unit=True, a=3.89, b=3.89, c=11, 
+                        V0=0, thdg=5, tidg=12.5, phidg=0)
+    D2.ang2k(D2.ang, Ekin=65-4.5, lat_unit=True, a=3.89, b=3.89, c=11, 
+                        V0=0, thdg=5, tidg=12.5, phidg=0)
+    edc_val = .35
+    val, _edc = utils.find(np.flipud(D1.k[0]), edc_val)
+    edc1 = D1.int_norm[_edc, :]
+    edc2 = D2.int_norm[_edc, :]
+    ###Plot Panels###
+    def fig8a():
+        ax = plt.subplot(1, 3, 1) 
+        ax.set_position([.1, .3, .2 , .6])
+        plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
+        plt.contourf(D1.ks, D1.en_norm+.1, np.flipud(D1.int_norm), 100, 
+                     cmap=colmap, vmin = 0, vmax = .008)
+        plt.plot([-1, 1.66], [0, 0], 'k:')
+        plt.plot([edc_val, edc_val], [-2.5, .5], 'g--', linewidth=1)
+        plt.xlim(xmax = 1, xmin = 0)
+        plt.ylim(ymax = 0.5, ymin = -2.5)
+        plt.ylabel('$\omega$ (meV)', fontdict = font)
+        plt.xticks([0, 1], ('S', '$\Gamma$'))
+        plt.yticks(np.arange(-2.5, .5, .5))
+        plt.text(.05, 0.3, r'(a)', fontsize=15)
+        plt.arrow(-1, -1, 0, -.3, head_width=0.2, head_length=0.2, fc='g', ec='k')
+    
+    def fig8b():
+        ax = plt.subplot(1, 3, 2) 
+        ax.set_position([.32, .3, .2 , .6])
+        plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
+        plt.contourf(D2.ks, D2.en_norm+.1, np.flipud(D2.int_norm), 100, 
+                     cmap=colmap, vmin = 0, vmax = .008)
+        plt.plot([-1, 1.66], [0, 0], 'k:')
+        plt.plot([edc_val, edc_val], [-2.5, .5], 'g--', linewidth=1)
+        plt.xlim(xmax = 1, xmin = 0)
+        plt.ylim(ymax = 0.5, ymin = -2.5)
+        plt.xticks([0, 1], ('S', '$\Gamma$'))
+        plt.yticks(np.arange(-2.5, .5, .5), ())
+        plt.text(.05, 0.3, r'(b)', fontsize=15)
+        
+        pos = ax.get_position()
+        cax = plt.axes([pos.x0+pos.width+0.01 ,
+                            pos.y0, 0.01, pos.height])
+        cbar = plt.colorbar(cax = cax, ticks = None)
+        cbar.set_ticks([])
+        cbar.set_clim(np.min(D2.int_norm), np.max(D2.int_norm))
+        
+    def fig8c():
+        xx = np.linspace(1, -5, 200)
+        ax = plt.subplot(1, 3, 3) 
+        ax.set_position([.57, .3, .2 , .6])
+        plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
+        plt.plot(edc1, D1.en_norm[_edc, :]+.1, 'o', markersize=3, color=(0, 0, .8))
+        plt.plot(edc2 * .8, D2.en_norm[_edc, :]+.1, 'd', markersize=3, color='C0')
+        plt.fill_between([0, 1e-2], 0, -.2, color='C3', alpha=0.2)
+        plt.fill(5.5e-3 * exponnorm.pdf(-xx, K=2, loc=.6, scale = .2), xx, 
+                 alpha = .2, fc=(0, 0, .8))
+        plt.fill(5.5e-3 * exponnorm.pdf(-xx, K=2, loc=1.45, scale = .25), xx, 
+                 alpha = .2, fc='C0')
+        plt.plot([0, 1e-2], [0, 0], 'k:')
+        plt.plot([0, 1e-2], [-.2, -.2], 'k:', linewidth=.2)
+        plt.text(7e-4, -0.15, r'$\Delta$', fontsize=12)
+        plt.text(5e-4, 0.3, r'(c)', fontsize=15)
+        plt.text(3.3e-3, -.9, r'$\mathcal{A}$', fontsize=15)
+        plt.text(3.3e-3, -1.75, r'$\mathcal{B}$', fontsize=15)
+        plt.xlim(xmax = .007, xmin = 0)
+        plt.ylim(ymax = 0.5, ymin = -2.5)
+        plt.xticks([])
+        plt.yticks(np.arange(-2.5, .5, .5), ())
+        plt.legend(('$\sigma$-pol.', '$\pi$-pol.'), frameon=False)
+        plt.xlabel('Intensity (a.u)', fontdict = font)
+    plt.figure(1008, figsize=(8, 6), clear=True)
+    fig8a()
+    fig8b()
+    fig8c()
+    if print_fig == True:
+        plt.savefig(
+                    '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/fig8.png', 
                     dpi = 300,bbox_inches="tight")
         
 if __name__ == "__main__":
