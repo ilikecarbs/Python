@@ -78,8 +78,13 @@ def flatten(self, norm):
         int_flat = self.int  
     elif norm == 'shift':
         int_flat = self.int_shift
-    for i in range(int_flat.shape[0]):
-        int_flat[i, :] = np.divide(int_flat[i, :], np.sum(int_flat[i, :]))           
+    if int_flat.ndim == 2:
+        for i in range(int_flat.shape[0]):
+            int_flat[i, :] = np.divide(int_flat[i, :], np.sum(int_flat[i, :]))           
+    if int_flat.ndim == 3:
+        for i in range(int_flat.shape[1]):
+            int_flat[:, i, :] = np.divide(int_flat[:, i, :], 
+                                    np.sum(int_flat[:, i, :]))   
     return int_flat
   
 def restrict(self, bot, top, left, right):
@@ -179,10 +184,12 @@ def FS(self, e, ew, norm): #Extract Constant Energy Map
     """
     Extracts Constant Energy Map, Integrated from e to e-ew
     """
+    FSmap = np.zeros((self.pol.size, self.ang.size))
     if norm == True:
-        e_val, e_ind = find(self.en_norm[0, 0, :], e)
-        ew_val, ew_ind = find(self.en_norm[0, 0, :], e-ew)
-        FSmap = np.sum(self.int_norm[:, :, ew_ind:e_ind], axis=2)
+        for i in range(self.ang.size):
+            e_val, e_ind = find(self.en_norm[0, i, :], e)
+            ew_val, ew_ind = find(self.en_norm[0, i, :], e-ew)
+            FSmap[:, i] = np.sum(self.int_norm[:, i, ew_ind:e_ind], axis=1)
     elif norm == False:
         e_val, e_ind = find(self.en, e)
         ew_val, ew_ind = find(self.en, e-ew)

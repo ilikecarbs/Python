@@ -21,13 +21,11 @@ import matplotlib.cm as cm
 
 rainbow_light = uplt.rainbow_light
 cm.register_cmap(name='rainbow_light', cmap=rainbow_light)
- 
 plt.rcParams['mathtext.fontset'] = 'cm'
 plt.rcParams['font.serif']=['Computer Modern Roman']
 plt.rc('font', **{'family': 'serif', 'serif': ['STIXGeneral']})
 plt.rcParams['xtick.top'] = plt.rcParams['xtick.bottom'] = True
-plt.rcParams['ytick.right'] = plt.rcParams['ytick.left'] = True
-    
+plt.rcParams['ytick.right'] = plt.rcParams['ytick.left'] = True  
 font = {'family': 'serif',
         'style': 'normal',
         'color':  [0,0,0],
@@ -37,102 +35,108 @@ font = {'family': 'serif',
 
 #%%
 """
-(L):   long loading time!!!
-fig1:  DFT plot Ca2RuO4: figure 3 of Nature Comm.
-fig2:  (L): DMFT pot Ca2RuO4: figure 3 of Nature Comm.
-fig3:  DFT plot orbitally selective Mott scenario
-fig4:  DFT plot uniform gap scnenario
-fig5:  Experimental Data of Nature Comm.
-fig6:  Constant energy map CaRuO4 of alpha branch
-fig7:  Photon energy dependence Ca2RuO4: figure 2 of Nature Comm.
-fig8:  Polarization dependence Ca2RuO4: figure 2 of Nature Comm.
-fig9:  (L): DMFT plot Ca2RuO4 dxy/dxz,yz: figure 4 of Nature Comm.
-fig10: (L): DFT plot Ca2RuO4: spaghetti and spectral representation
+CROfig1:  DFT plot Ca2RuO4: figure 3 of Nature Comm.
+CROfig2:  (L): DMFT pot Ca2RuO4: figure 3 of Nature Comm.
+CROfig3:  DFT plot orbitally selective Mott scenario
+CROfig4:  DFT plot uniform gap scnenario
+CROfig5:  Experimental Data of Nature Comm.
+CROfig6:  Constant energy map CaRuO4 of alpha branch
+CROfig7:  Photon energy dependence Ca2RuO4: figure 2 of Nature Comm.
+CROfig8:  Polarization dependence Ca2RuO4: figure 2 of Nature Comm.
+CROfig9:  (L): DMFT plot Ca2RuO4 dxy/dxz,yz: figure 4 of Nature Comm.
+CROfig10: (L): DFT plot Ca2RuO4: spaghetti and spectral representation
+CROfig11:  Multiplet analysis Ca2RuO4
 """
 
-
-uplt.fig10(
-        print_fig = True
-        )
+uplt.fig5(print_fig=True)
 
 #%%
-import pandas as pd
-from numpy import linalg as la
-
-###Load DFT spaghetti Plot###
-os.chdir('/Users/denyssutter/Documents/PhD/data')
-DFT_data = pd.read_table('DFT_CRO.dat', sep='\t')
-DFT_data = DFT_data.replace({'{': '', '}': ''}, regex=True)
-DFT_data = DFT_data.values
+tb = umath.TB(a = np.pi, kbnd = 2, kpoints = 200)  #Initialize tight binding model
+param = umath.paramCSRO20()  
+tb.CSRO(param)
+bndstr = tb.bndstr
+coord = tb.coord   
+X = coord['X']; Y = coord['Y']   
+Axz = bndstr['Axz']; Ayz = bndstr['Ayz']; Axy = bndstr['Axy']
+Bxz = bndstr['Bxz']; Byz = bndstr['Byz']; Bxy = bndstr['Bxy']
+en = (Axy, Bxz, Byz)
+plt.figure(10005, figsize=(5, 5), clear=True)
+n = 0
+for i in en:
+    n += 1
+    C = plt.contour(X, Y, i, colors = 'black', linestyles = ':', levels = 0)
+    p = C.collections[0].get_paths()
+    p = np.asarray(p)
+    axy = np.arange(0, 4, 1)
+    bxz = np.arange(16, 24, 1)
+    byz1 = np.array([16, 17, 20, 21])
+    byz2 = np.array([18])
+    byz3 = np.array([19])
+    if n == 1:
+        ind = axy; col = 'r'
+    elif n == 2:
+        ind = bxz; col = 'b'
+    elif n == 3:
+        ind = byz1; col = 'k'
+    for j in ind:
+        v = p[j].vertices
+        plt.plot(v[:, 0], v[:, 1], marker = '.', color = col)
+        
+#%%
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
-###Build k-axis segments###
-G = (0, 0, 0); X = (np.pi, 0, 0); Y = (0, np.pi, 0)
-Z = (0, 0, np.pi); T = (0, np.pi, np.pi); S = (np.pi, np.pi, 0)    
-###Data along path in k-space###
-k_pts = np.array([G, X, S, G, Y, T, G, Z])
-k_seg = [0]
-for k in range(len(k_pts)-1):
-    diff = abs(np.subtract(k_pts[k], k_pts[k + 1]))
-    k_seg.append(k_seg[k] + la.norm(diff)) #extending list cummulative
-###Spaceholders DFT spaghetti plot###
-(M, N) = DFT_data.shape
-data = np.zeros((M, N, 3))
-en = np.zeros((M, N)) 
-xz = np.zeros((M, N))
-k = np.linspace(0, 350, M)
-###Load Data spectral representation###
-os.chdir('/Users/denyssutter/Documents/PhD/data')
-DFT_spec = pd.read_csv('DFT_CRO_all.dat').values
-os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
-(m, n) = DFT_spec.shape
-DFT_en = np.linspace(-3, 1.5, m)
-DFT_k = np.linspace(0, 350, n)
 
-def fig10a():
-    ax = plt.subplot(121)
-    ax.set_position([.1, .3, .35 , .35])
-    plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
-    plt.plot(0, 3, 'bo')
-    plt.plot(50, 3, 'ro')
-    for m in range(M):
-        for n in range(N):
-            data[m][n][:] = np.asfarray(DFT_data[m][n].split(','))
-            en[m][n] = data[m][n][1]
-            xz[m][n] = data[m][n][2]
-            plt.plot(k[m], en[m, n], 'o', markersize=3, 
-                     color=(xz[m, n], 0, (1-xz[m, n])))
-    plt.plot([0, 350], [0, 0], 'k:')
-    plt.text(10, 1.15, r'(a)', fontsize=12)
-    plt.xlim(xmax=350, xmin=0)
-    plt.ylim(ymax=1.5, ymin=-3)
-    plt.xticks(k_seg / k_seg[-1] * 350, 
-               ('$\Gamma$', 'X', 'S', '$\Gamma$', 'Y', 'T', '$\Gamma$', 'Z'));
-    plt.yticks(np.arange(-3, 2, 1.))
-    plt.ylabel('$\omega$ (eV)', fontdict = font)
-    plt.legend(('$d_{xy}$', '$d_{xz/yz}$'), frameon=False)
+file = 62087
+gold = 62081
+mat = 'CSRO20'
+year = 2017
+sample = 'S6'
 
-def fig10b():
-    ax = plt.subplot(122)
-    ax.set_position([.1 + .38, .3, .35 , .35])
-    plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
-    plt.contourf(DFT_k, DFT_en, DFT_spec, 300, cmap=cm.bone_r,
-                 vmin = 0, vmax = 25)
-    plt.plot([0, 350], [0, 0], 'k:')
-    plt.text(10, 1.15, r'(b)', fontsize=12)
-    plt.xlim(xmax=350, xmin=0)
-    plt.ylim(ymax=1.5, ymin=-3)
-    plt.xticks(k_seg / k_seg[-1] * 350, 
-               ('$\Gamma$', 'X', 'S', '$\Gamma$', 'Y', 'T', '$\Gamma$', 'Z'));
-    plt.yticks(np.arange(-3, 2, 1.), [])
-    pos = ax.get_position()
-    cax = plt.axes([pos.x0+pos.width+0.01 ,
-                    pos.y0, 0.01, pos.height])
-    cbar = plt.colorbar(cax = cax, ticks = None)
-    cbar.set_ticks([])
+D = ARPES.DLS(file, mat, year, sample)
+D.norm(gold)
+D.restrict(bot=0, top=1, left=.12, right=.9)
 
-plt.figure(1010, figsize=(8,8), clear=True)
-fig10a()
-fig10b()
+#%%
+D.FS(e = 0.02, ew = .03, norm = True)
+
+D.ang2kFS(D.ang, Ekin=22-4.5, lat_unit=True, a=5.5, b=5.5, c=11, 
+          V0=0, thdg=8.7, tidg=-4, phidg=92)
+
+plt.figure(1005, figsize = (8, 8), clear = True)
+plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+
+FS = D.map
+for i in range(FS.shape[1]):
+    FS[:, i] = np.divide(FS[:, i], np.sum(FS[:, i]))  
+    
+ax = plt.subplot(1, 3, 2) 
+ax.set_position([.35, .3, .3, .37])
+pos = ax.get_position()
+plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
+plt.contourf(D.kx, D.ky, FS, 300,
+           cmap=cm.ocean_r)
+plt.xlim(xmax=np.max(D.kx), xmin=np.min(D.kx))
+plt.ylim(ymax=np.max(D.ky), ymin=np.min(D.ky))
+plt.ylabel('$k_x$', fontdict = font)
+plt.axis('equal')
+#%%
+
+    
+#%%
+p = C.collections[0].get_paths()
+p = np.asarray(p)
+#v = p.vertices
+#x = v[:, 0]
+#y = v[:, 1]
+
+plt.figure(20000, clear=True)
+for i in ind:
+    v = p[i].vertices
+    plt.plot(v[:, 0], v[:, 1], color = col)
+#    if i == 19:
+#        plt.plot(v[:, 0], v[:, 1], 'ko')
+
+    plt.text(v[-10, 0], v[-10, 1], str(i))
+
 #%%
 
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
@@ -164,7 +168,7 @@ Test Script for Tight binding models
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 
 start = time.time()
-tb = umath.TB(a = np.pi, kpoints = 200)  #Initialize tight binding model
+tb = umath.TB(a = np.pi, kbnd = 2, kpoints = 200)  #Initialize tight binding model
 
 ####SRO TB hopping parameters###
 #param = umath.paramSRO()  
