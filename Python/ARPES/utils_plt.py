@@ -60,11 +60,27 @@ def rainbow_light_2():
                                                       N=len(colors))
     return rainbow_light_2
 
+def orbitals():
+    colors = np.zeros((100,3))
+    for i in range(100):
+        colors[i,:] = [i/100, 0, 1 - i/100]
+        
+    # Normalize the colors
+    colors /= colors.max()
+    
+    # Build the colormap
+    orbitals = LinearSegmentedColormap.from_list('orbitals', colors, 
+                                                      N=len(colors))
+    return orbitals
+    
 rainbow_light = rainbow_light()
 cm.register_cmap(name='rainbow_light', cmap=rainbow_light)
  
 rainbow_light_2 = rainbow_light_2()
 cm.register_cmap(name='rainbow_light_2', cmap=rainbow_light_2)
+
+orbitals = orbitals()
+cm.register_cmap(name='orbitals', cmap=orbitals)
 
 def plt_spec(self, norm):
     if norm == True:
@@ -79,7 +95,7 @@ def plt_spec(self, norm):
         k = self.ang
         en = self.en
         dat = np.transpose(self.int)
-    plt.figure(2006, figsize=(10, 10), clear=True)
+    plt.figure(20006, figsize=(10, 10), clear=True)
     plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
     plt.contourf(k, en, dat, 100, cmap = cm.ocean_r)
     if norm == True:
@@ -104,7 +120,7 @@ def plt_FS_poliut(self, norm, p, pw):
     p_val, p_ind = utils.find(self.pol, p)
     pw_val, pw_ind = utils.find(self.pol, p - pw)
     spec = np.sum(dat[:, : , pw_ind:p_ind], axis=2)
-    plt.figure(2005, figsize=(10, 10), clear=True)
+    plt.figure(20005, figsize=(10, 10), clear=True)
     plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
     plt.contourf(k, en, spec, 100, cmap = cm.ocean_r)
     plt.plot([np.min(k), np.max(k)], [-2.8, -2.8], 'k:')
@@ -131,7 +147,7 @@ def plt_hv(self, a, aw):
         plt.contourf(k, en, np.transpose(dat[i, :, :]), 100, cmap = cm.ocean_r)
         plt.xticks((0, 0), ('', ''))
         plt.title(str(np.round(hv[i], 0))+" eV")
-    plt.figure(2007, figsize=(10, 10), clear=True)
+    plt.figure(20007, figsize=(10, 10), clear=True)
     plt.contourf(hv, en, np.transpose(spec), 100, cmap = cm.ocean_r)
     plt.show()
         
@@ -144,7 +160,7 @@ def plt_FS(self, coord):
         kx = self.ang
         ky = self.pol
         dat = self.map
-    plt.figure(2000, figsize=(10,10), clear=True)
+    plt.figure(20000, figsize=(10,10), clear=True)
     plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
     plt.contourf(kx, ky, dat, 100, cmap = cm.ocean_r)
     plt.axis('equal')
@@ -156,7 +172,7 @@ def plt_cont_TB_simple(self, e0):
     coord = self.coord   
     X = coord['X']; Y = coord['Y']   
     en = bndstr['en']
-    plt.figure(2003, figsize=(10, 10), clear=True)
+    plt.figure(20003, figsize=(10, 10), clear=True)
     plt.contour(X, Y, en, levels = e0)
   
 def plt_cont_TB_SRO(self, e0):
@@ -165,7 +181,7 @@ def plt_cont_TB_SRO(self, e0):
     X = coord['X']; Y = coord['Y']   
     xz = bndstr['xz']; yz = bndstr['yz']; xy = bndstr['xy']
     en = (xz, yz, xy)
-    plt.figure(2002, figsize=(10, 3), clear=True)
+    plt.figure(20002, figsize=(10, 3), clear=True)
     n = 0
     for i in en:
         n = n + 1
@@ -180,12 +196,12 @@ def plt_cont_TB_CSRO20(self, e0):
     Axz = bndstr['Axz']; Ayz = bndstr['Ayz']; Axy = bndstr['Axy']
     Bxz = bndstr['Bxz']; Byz = bndstr['Byz']; Bxy = bndstr['Bxy']
     en = (Axz, Ayz, Axy, Bxz, Byz, Bxy)
-    plt.figure(2001, figsize=(6, 4), clear=True)
+    plt.figure(20001, figsize=(6, 4), clear=True)
     n = 0
     for i in en:
         n = n + 1
         plt.subplot(2, 3, n)
-        plt.contour(X, Y, i, levels = e0)
+        plt.contour(X, Y, i, colors = 'black', linestyles = ':', levels = e0)
         plt.axis('equal')
         
 def CRO_theory_plot(k_pts, data_en, data, colmap, v_max):
@@ -247,7 +263,11 @@ def CRO_theory_plot(k_pts, data_en, data, colmap, v_max):
     cbar.set_ticks([])
     ax.set_position([pos.x0, pos.y0, k_prev * scale, pos.height])
 
-def fig1(colmap = cm.bone_r, print_fig = False):
+"""
+Figures Dissertation Ca2RuO4 (CRO)
+"""
+
+def CROfig1(colmap = cm.bone_r, print_fig = False):
     """
     Prepare and plot DFT data of Ca2RuO4 (final)
     """
@@ -272,10 +292,10 @@ def fig1(colmap = cm.bone_r, print_fig = False):
     CRO_theory_plot(k_pts, DFT_en, DFT, colmap, v_max = 1) #Plot data
     if print_fig == True:
         plt.savefig(
-                '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/fig1.png', 
+                '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CROfig1.png', 
                 dpi = 300,bbox_inches="tight")
     
-def fig2(colmap = cm.bone_r, print_fig = False):
+def CROfig2(colmap = cm.bone_r, print_fig = False):
     """
     Prepare and plot DMFT data of Ca2RuO4 
     """
@@ -315,10 +335,10 @@ def fig2(colmap = cm.bone_r, print_fig = False):
     CRO_theory_plot(k_pts, DMFT_en, DMFT, colmap, v_max = .5) #Plot data
     if print_fig == True:
         plt.savefig(
-                '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/fig2.png', 
+                '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CROfig2.png', 
                 dpi = 300,bbox_inches="tight")
 
-def fig3(colmap = cm.bone_r, print_fig = False):
+def CROfig3(colmap = cm.bone_r, print_fig = False):
     """
     Prepare and plot DFT data of Ca2RuO4 (OSMT)
     """
@@ -345,10 +365,10 @@ def fig3(colmap = cm.bone_r, print_fig = False):
     CRO_theory_plot(k_pts, DFT_en, DFT, colmap, v_max = 1) #Plot data
     if print_fig == True:
         plt.savefig(
-                '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/fig3.png', 
+                '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CROfig3.png', 
                 dpi = 300,bbox_inches="tight")
 
-def fig4(colmap = cm.bone_r, print_fig = False):
+def CROfig4(colmap = cm.bone_r, print_fig = False):
     """
     Prepare and plot DFT data of Ca2RuO4 (OSMT)
     """
@@ -375,10 +395,10 @@ def fig4(colmap = cm.bone_r, print_fig = False):
     CRO_theory_plot(k_pts, DFT_en, DFT, colmap, v_max = 1) #Plot data
     if print_fig == True:
         plt.savefig(
-                '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/fig4.png', 
+                '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CROfig4.png', 
                 dpi = 300,bbox_inches="tight")
     
-def fig5(colmap = cm.ocean_r, print_fig = False):
+def CROfig5(colmap = cm.ocean_r, print_fig = False):
     """
     Plot experimental Data Ca2RuO4
     """
@@ -480,10 +500,10 @@ def fig5(colmap = cm.ocean_r, print_fig = False):
     cbar.set_ticks([])
     if print_fig == True:
         plt.savefig(
-                '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/fig5.png', 
+                '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CROfig5.png', 
                 dpi = 300,bbox_inches="tight")
     
-def fig6(colmap = cm.ocean_r, print_fig = False):
+def CROfig6(colmap = cm.ocean_r, print_fig = False):
     """
     Constant energy map of Ca2RuO4 of alpha branch over two BZ's
     """
@@ -551,10 +571,10 @@ def fig6(colmap = cm.ocean_r, print_fig = False):
     plt.show()
     if print_fig == True:
         plt.savefig(
-                    '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/fig6.png', 
+                    '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CROfig6.png', 
                     dpi = 300,bbox_inches="tight")
 
-def fig7(colmap = cm.ocean_r, print_fig = False):
+def CROfig7(colmap = cm.ocean_r, print_fig = False):
     """
     Photon energy dependence Ca2RuO4 
     """
@@ -618,7 +638,6 @@ def fig7(colmap = cm.ocean_r, print_fig = False):
         plt.yticks(np.arange(-2.5, .5, .5))
         plt.text(-.9, 0.3, r'(a)', fontsize=15)
         plt.text(.22, .1, r'$\mathcal{C}$', fontsize=15)
-        plt.arrow(-1, -1, 0, -.3, head_width=0.2, head_length=0.2, fc='g', ec='k')
         plt.plot(D.k[0], (mdc - b_mdc) * 1.5, 'o', markersize=1, color='C9')
         plt.fill(D.k[0], (f_mdc - b_mdc) * 1.5, alpha=.2, color='C9')
     
@@ -667,16 +686,17 @@ def fig7(colmap = cm.ocean_r, print_fig = False):
         plt.yticks(np.arange(-2.5, .5, .5), ())
         plt.legend(('63$\,$eV', '78$\,$eV'), frameon=False)
         plt.xlabel('Intensity (a.u)', fontdict = font)
+        
     plt.figure(1007, figsize=(8, 6), clear=True)
     fig7a()
     fig7b()
     fig7c()
     if print_fig == True:
         plt.savefig(
-                    '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/fig7.png', 
+                    '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CROfig7.png', 
                     dpi = 300,bbox_inches="tight")
 
-def fig8(colmap = cm.ocean_r, print_fig = False):
+def CROfig8(colmap = cm.ocean_r, print_fig = False):
     """
     Polarization dependence Ca2RuO4
     """
@@ -707,7 +727,7 @@ def fig8(colmap = cm.ocean_r, print_fig = False):
         ax.set_position([.1, .3, .2 , .6])
         plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
         plt.contourf(D1.ks, D1.en_norm+.1, np.flipud(D1.int_norm), 300, 
-                     cmap=colmap, vmin = 0, vmax = .008)
+                     cmap=colmap, vmin = 0, vmax = .007)
         plt.plot([-1, 1.66], [0, 0], 'k:')
         plt.plot([edc_val, edc_val], [-2.5, .5], 'g--', linewidth=1)
         plt.xlim(xmax = 1, xmin = 0)
@@ -723,7 +743,7 @@ def fig8(colmap = cm.ocean_r, print_fig = False):
         ax.set_position([.32, .3, .2 , .6])
         plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
         plt.contourf(D2.ks, D2.en_norm+.1, np.flipud(D2.int_norm), 300, 
-                     cmap=colmap, vmin = 0, vmax = .008)
+                     cmap=colmap, vmin = 0, vmax = .007)
         plt.plot([-1, 1.66], [0, 0], 'k:')
         plt.plot([edc_val, edc_val], [-2.5, .5], 'g--', linewidth=1)
         plt.xlim(xmax = 1, xmin = 0)
@@ -763,16 +783,17 @@ def fig8(colmap = cm.ocean_r, print_fig = False):
         plt.yticks(np.arange(-2.5, .5, .5), ())
         plt.legend(('$\sigma$-pol.', '$\pi$-pol.'), frameon=False)
         plt.xlabel('Intensity (a.u)', fontdict = font)
+        
     plt.figure(1008, figsize=(8, 6), clear=True)
     fig8a()
     fig8b()
     fig8c()
     if print_fig == True:
         plt.savefig(
-                    '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/fig8.png', 
+                    '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CROfig8.png', 
                     dpi = 300,bbox_inches="tight")
         
-def fig9(colmap = cm.bone_r, print_fig = False):
+def CROfig9(colmap = cm.bone_r, print_fig = False):
     """
     DMFT plot dxz/yz, dxy Ca2RuO4
     """
@@ -800,29 +821,174 @@ def fig9(colmap = cm.bone_r, print_fig = False):
                      vmin = 0, vmax = .3)
         plt.plot([0, 350], [0, 0], 'k:')
         plt.xlim(xmax=350, xmin=0)
-        plt.ylim(ymax=2, ymin=-3)
+        plt.ylim(ymax=1.5, ymin=-3)
         plt.xticks([0, 56, 110, 187, 241, 266, 325, 350], 
                    ('$\Gamma$', 'X', 'S', '$\Gamma$', 'Y', 'T', '$\Gamma$', 'Z'));
         if i == 0:
-            plt.text(10, 1.6, r'(a) $d_{xz/yz}$', fontsize=12)
+            plt.text(10, -2.8, r'(a) $d_{\gamma z}$', fontsize=12)
             plt.text(198, -.65, r'$U+J_\mathrm{H}$', fontsize=12)
             plt.arrow(188, 0, 0, .7, head_width=8, head_length=0.2, fc='g', ec='g')
             plt.arrow(188, 0, 0, -1.7, head_width=8, head_length=0.2, fc='g', ec='g')
             plt.yticks(np.arange(-3, 2, 1.))
             plt.ylabel('$\omega$ (eV)', fontdict = font)
         elif i == 1:
-            plt.text(10, 1.6, r'(b) $d_{xy}$', fontsize=12)
+            plt.text(10, -2.8, r'(b) $d_{xy}$', fontsize=12)
             plt.text(263, -1, r'$3J_\mathrm{H}$', fontsize=12)
             plt.arrow(253, -.8, 0, .22, head_width=8, head_length=0.2, fc='g', ec='g')
             plt.arrow(253, -.8, 0, -.5, head_width=8, head_length=0.2, fc='g', ec='g')
             plt.yticks(np.arange(-3, 2, 1.), [])
+            pos = ax.get_position()
+            cax = plt.axes([pos.x0+pos.width+0.01 ,
+                            pos.y0, 0.01, pos.height])
+            cbar = plt.colorbar(cax = cax, ticks = None)
+            cbar.set_ticks([])
+            cbar.set_clim(np.min(DMFT_spec), 0.4 * np.max(DMFT_spec))
     if print_fig == True:
         plt.savefig(
-                    '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/fig9.png', 
+                    '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CROfig9.png', 
                     dpi = 300,bbox_inches="tight")
         
-if __name__ == "__main__":
-    fig3() 
+def CROfig10(colmap = cm.bone_r, print_fig = False):
+    """
+    DFT plot of Ca2RuO4: spaghetti and spectral representation plot
+    """
+    ###Load DFT spaghetti Plot###
+    os.chdir('/Users/denyssutter/Documents/PhD/data')
+    DFT_data = pd.read_table('DFT_CRO.dat', sep='\t')
+    DFT_data = DFT_data.replace({'{': '', '}': ''}, regex=True)
+    DFT_data = DFT_data.values
+    os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+    ###Build k-axis segments###
+    G = (0, 0, 0); X = (np.pi, 0, 0); Y = (0, np.pi, 0)
+    Z = (0, 0, np.pi); T = (0, np.pi, np.pi); S = (np.pi, np.pi, 0)    
+    ###Data along path in k-space###
+    k_pts = np.array([G, X, S, G, Y, T, G, Z])
+    k_seg = [0]
+    for k in range(len(k_pts)-1):
+        diff = abs(np.subtract(k_pts[k], k_pts[k + 1]))
+        k_seg.append(k_seg[k] + la.norm(diff)) #extending list cummulative
+    ###Spaceholders DFT spaghetti plot###
+    (M, N) = DFT_data.shape
+    data = np.zeros((M, N, 3))
+    en = np.zeros((M, N)) 
+    xz = np.zeros((M, N))
+    k = np.linspace(0, 350, M)
+    ###Load Data spectral representation###
+    os.chdir('/Users/denyssutter/Documents/PhD/data')
+    DFT_spec = pd.read_csv('DFT_CRO_all.dat').values
+    os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+    (m, n) = DFT_spec.shape
+    DFT_en = np.linspace(-3, 1.5, m)
+    DFT_k = np.linspace(0, 350, n)
+    
+    def fig10a():
+        ax = plt.subplot(121)
+        ax.set_position([.1, .3, .35 , .35])
+        plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
+        plt.plot(0, 3, 'bo')
+        plt.plot(50, 3, 'ro')
+        for m in range(M):
+            for n in range(N):
+                data[m][n][:] = np.asfarray(DFT_data[m][n].split(','))
+                en[m][n] = data[m][n][1]
+                xz[m][n] = data[m][n][2]
+                plt.plot(k[m], en[m, n], 'o', markersize=3, 
+                         color=(xz[m, n], 0, (1-xz[m, n])))
+        plt.plot([0, 350], [0, 0], 'k:')
+        plt.text(10, 1.15, r'(a)', fontsize=12)
+        plt.xlim(xmax=350, xmin=0)
+        plt.ylim(ymax=1.5, ymin=-3)
+        plt.xticks(k_seg / k_seg[-1] * 350, 
+                   ('$\Gamma$', 'X', 'S', '$\Gamma$', 'Y', 'T', '$\Gamma$', 'Z'));
+        plt.yticks(np.arange(-3, 2, 1.))
+        plt.ylabel('$\omega$ (eV)', fontdict = font)
+        plt.legend(('$d_{xy}$', '$d_{\gamma z}$'), frameon=False)
+    
+    def fig10b():
+        ax = plt.subplot(122)
+        ax.set_position([.1 + .38, .3, .35 , .35])
+        plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
+        plt.contourf(DFT_k, DFT_en, DFT_spec, 300, cmap=colmap,
+                     vmin = 0, vmax = 25)
+        plt.plot([0, 350], [0, 0], 'k:')
+        plt.text(10, 1.15, r'(b)', fontsize=12)
+        plt.xlim(xmax=350, xmin=0)
+        plt.ylim(ymax=1.5, ymin=-3)
+        plt.xticks(k_seg / k_seg[-1] * 350, 
+                   ('$\Gamma$', 'X', 'S', '$\Gamma$', 'Y', 'T', '$\Gamma$', 'Z'));
+        plt.yticks(np.arange(-3, 2, 1.), [])
+        pos = ax.get_position()
+        cax = plt.axes([pos.x0+pos.width+0.01 ,
+                        pos.y0, 0.01, pos.height])
+        cbar = plt.colorbar(cax = cax, ticks = None)
+        cbar.set_ticks([])
+        cbar.set_clim(np.min(DFT_spec), np.max(DFT_spec))
+
+    plt.figure(1010, figsize=(8,8), clear=True)
+    fig10a()
+    fig10b()
+    if print_fig == True:
+        plt.savefig(
+                    '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CROfig10.png', 
+                    dpi = 300,bbox_inches="tight")
         
+def CROfig11(print_fig = False):
+    """
+    Multiplet analysis Ca2RuO4
+    """
+    plt.figure(1011, figsize=(8, 8), clear=True)
+    ax = plt.subplot(111)
+    ax.set_position([.1, .3, .52 , .15])
+    plt.tick_params(direction='in', length=0, width=.5, colors='k') 
+    off = [0, 3, 5, 8, 9.25, 11.25, 12.5]
+    n = 0
+    for i in off:
+        n += 1
+        plt.plot([0 + i, 1 + i], [0, 0], 'k-')
+        plt.plot([0 + i, 1 + i], [-.5, -.5], 'k-')
+        plt.plot([0 + i, 1 + i], [-2.5, -2.5], 'k-')
+        
+        if any(x==n for x in [1, 2, 3, 4, 6, 7]):
+            ax.arrow(.33 + i, -.5, 0, 1, head_width=0.2, head_length=0.4,
+                     linewidth=1.5, fc='r', ec='r')
+        if any(x==n for x in [6]):
+            ax.arrow(.1 + i, .8, 0, -1, head_width=0.2, head_length=0.4,
+                     linewidth=1.5, fc='r', ec='r')
+        if any(x==n for x in [1, 2, 3, 5, 6, 7]):
+            ax.arrow(.66 + i, -1, 0, 1, head_width=0.2, head_length=0.4,
+                     linewidth=1.5, fc='r', ec='r')
+        if any(x==n for x in [7]):
+            ax.arrow(.9 + i, .3, 0, -1, head_width=0.2, head_length=0.4,
+                     linewidth=1.5, fc='r', ec='r')
+        if any(x==n for x in [1, 2, 4, 5, 6, 7]):
+            ax.arrow(.33 + i, -3, 0, 1, head_width=0.2, head_length=0.4,
+                     linewidth=1.5, fc='r', ec='r')
+        if any(x==n for x in [1, 3, 4, 5, 6, 7]):  
+            ax.arrow(.66 + i, -1.7, 0, -1, head_width=0.2, head_length=0.4,
+                     linewidth=1.5, fc='r', ec='r')
+            
+    plt.fill_between([2, 7], 4, -4, color='C0', alpha=0.2)
+    plt.fill_between([7, 14.3], 4, -4, color=(0, 0, .8), alpha=0.2)
+    plt.text(-1.7, -2.7, r'$d_{xy}$', fontsize=12)
+    plt.text(-1.7, -.3, r'$d_{\gamma z}$', fontsize=12)
+    plt.text(4., 1.5, r'$3J_\mathrm{H}$', fontsize=12)
+    plt.text(9.9, 1.5, r'$U+J_\mathrm{H}$', fontsize=12)
+    plt.text(-1.7, 3, r'$| d_4; S=1,\alpha = xy\rangle$', fontsize=8)
+    plt.text(2.6, 3, r'$| d_3; \frac{3}{2},\gamma z\rangle$', fontsize=8)
+    plt.text(4.6, 3, r'$| d_3; \frac{1}{2},\gamma z\rangle$', fontsize=8)
+    plt.text(8.4, 3, r'$| d_3; \frac{1}{2}, xy\rangle$', fontsize=8)
+    plt.text(11.5, 3, r'$| d_5; \frac{1}{2}, xy\rangle$', fontsize=8)
+    plt.xticks([])
+    plt.yticks([])
+    plt.xlim(xmax=14.3, xmin=-2)
+    plt.ylim(ymax=4, ymin=-4)
+    if print_fig == True:
+        plt.savefig(
+                    '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CROfig11.png', 
+                    dpi = 600,bbox_inches="tight")
+
+"""
+Figures Dissertation Ca1.8Sr0.2RuO4 (CSRO)
+"""        
         
         
