@@ -60,11 +60,27 @@ def rainbow_light_2():
                                                       N=len(colors))
     return rainbow_light_2
 
+def orbitals():
+    colors = np.zeros((100,3))
+    for i in range(100):
+        colors[i,:] = [i/100, 0, 1 - i/100]
+        
+    # Normalize the colors
+    colors /= colors.max()
+    
+    # Build the colormap
+    orbitals = LinearSegmentedColormap.from_list('orbitals', colors, 
+                                                      N=len(colors))
+    return orbitals
+    
 rainbow_light = rainbow_light()
 cm.register_cmap(name='rainbow_light', cmap=rainbow_light)
  
 rainbow_light_2 = rainbow_light_2()
 cm.register_cmap(name='rainbow_light_2', cmap=rainbow_light_2)
+
+orbitals = orbitals()
+cm.register_cmap(name='orbitals', cmap=orbitals)
 
 def plt_spec(self, norm):
     if norm == True:
@@ -618,7 +634,6 @@ def fig7(colmap = cm.ocean_r, print_fig = False):
         plt.yticks(np.arange(-2.5, .5, .5))
         plt.text(-.9, 0.3, r'(a)', fontsize=15)
         plt.text(.22, .1, r'$\mathcal{C}$', fontsize=15)
-        plt.arrow(-1, -1, 0, -.3, head_width=0.2, head_length=0.2, fc='g', ec='k')
         plt.plot(D.k[0], (mdc - b_mdc) * 1.5, 'o', markersize=1, color='C9')
         plt.fill(D.k[0], (f_mdc - b_mdc) * 1.5, alpha=.2, color='C9')
     
@@ -667,6 +682,7 @@ def fig7(colmap = cm.ocean_r, print_fig = False):
         plt.yticks(np.arange(-2.5, .5, .5), ())
         plt.legend(('63$\,$eV', '78$\,$eV'), frameon=False)
         plt.xlabel('Intensity (a.u)', fontdict = font)
+        
     plt.figure(1007, figsize=(8, 6), clear=True)
     fig7a()
     fig7b()
@@ -707,7 +723,7 @@ def fig8(colmap = cm.ocean_r, print_fig = False):
         ax.set_position([.1, .3, .2 , .6])
         plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
         plt.contourf(D1.ks, D1.en_norm+.1, np.flipud(D1.int_norm), 300, 
-                     cmap=colmap, vmin = 0, vmax = .008)
+                     cmap=colmap, vmin = 0, vmax = .007)
         plt.plot([-1, 1.66], [0, 0], 'k:')
         plt.plot([edc_val, edc_val], [-2.5, .5], 'g--', linewidth=1)
         plt.xlim(xmax = 1, xmin = 0)
@@ -723,7 +739,7 @@ def fig8(colmap = cm.ocean_r, print_fig = False):
         ax.set_position([.32, .3, .2 , .6])
         plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
         plt.contourf(D2.ks, D2.en_norm+.1, np.flipud(D2.int_norm), 300, 
-                     cmap=colmap, vmin = 0, vmax = .008)
+                     cmap=colmap, vmin = 0, vmax = .007)
         plt.plot([-1, 1.66], [0, 0], 'k:')
         plt.plot([edc_val, edc_val], [-2.5, .5], 'g--', linewidth=1)
         plt.xlim(xmax = 1, xmin = 0)
@@ -763,6 +779,7 @@ def fig8(colmap = cm.ocean_r, print_fig = False):
         plt.yticks(np.arange(-2.5, .5, .5), ())
         plt.legend(('$\sigma$-pol.', '$\pi$-pol.'), frameon=False)
         plt.xlabel('Intensity (a.u)', fontdict = font)
+        
     plt.figure(1008, figsize=(8, 6), clear=True)
     fig8a()
     fig8b()
@@ -800,25 +817,115 @@ def fig9(colmap = cm.bone_r, print_fig = False):
                      vmin = 0, vmax = .3)
         plt.plot([0, 350], [0, 0], 'k:')
         plt.xlim(xmax=350, xmin=0)
-        plt.ylim(ymax=2, ymin=-3)
+        plt.ylim(ymax=1.5, ymin=-3)
         plt.xticks([0, 56, 110, 187, 241, 266, 325, 350], 
                    ('$\Gamma$', 'X', 'S', '$\Gamma$', 'Y', 'T', '$\Gamma$', 'Z'));
         if i == 0:
-            plt.text(10, 1.6, r'(a) $d_{xz/yz}$', fontsize=12)
+            plt.text(10, -2.8, r'(a) $d_{xz/yz}$', fontsize=12)
             plt.text(198, -.65, r'$U+J_\mathrm{H}$', fontsize=12)
             plt.arrow(188, 0, 0, .7, head_width=8, head_length=0.2, fc='g', ec='g')
             plt.arrow(188, 0, 0, -1.7, head_width=8, head_length=0.2, fc='g', ec='g')
             plt.yticks(np.arange(-3, 2, 1.))
             plt.ylabel('$\omega$ (eV)', fontdict = font)
         elif i == 1:
-            plt.text(10, 1.6, r'(b) $d_{xy}$', fontsize=12)
+            plt.text(10, -2.8, r'(b) $d_{xy}$', fontsize=12)
             plt.text(263, -1, r'$3J_\mathrm{H}$', fontsize=12)
             plt.arrow(253, -.8, 0, .22, head_width=8, head_length=0.2, fc='g', ec='g')
             plt.arrow(253, -.8, 0, -.5, head_width=8, head_length=0.2, fc='g', ec='g')
             plt.yticks(np.arange(-3, 2, 1.), [])
+            pos = ax.get_position()
+            cax = plt.axes([pos.x0+pos.width+0.01 ,
+                            pos.y0, 0.01, pos.height])
+            cbar = plt.colorbar(cax = cax, ticks = None)
+            cbar.set_ticks([])
+            cbar.set_clim(np.min(DMFT_spec), 0.4 * np.max(DMFT_spec))
     if print_fig == True:
         plt.savefig(
                     '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/fig9.png', 
+                    dpi = 300,bbox_inches="tight")
+        
+def fig10(colmap = cm.bone_r, print_fig = False):
+    """
+    DFT plot of Ca2RuO4: spaghetti and spectral representation plot
+    """
+    ###Load DFT spaghetti Plot###
+    os.chdir('/Users/denyssutter/Documents/PhD/data')
+    DFT_data = pd.read_table('DFT_CRO.dat', sep='\t')
+    DFT_data = DFT_data.replace({'{': '', '}': ''}, regex=True)
+    DFT_data = DFT_data.values
+    os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+    ###Build k-axis segments###
+    G = (0, 0, 0); X = (np.pi, 0, 0); Y = (0, np.pi, 0)
+    Z = (0, 0, np.pi); T = (0, np.pi, np.pi); S = (np.pi, np.pi, 0)    
+    ###Data along path in k-space###
+    k_pts = np.array([G, X, S, G, Y, T, G, Z])
+    k_seg = [0]
+    for k in range(len(k_pts)-1):
+        diff = abs(np.subtract(k_pts[k], k_pts[k + 1]))
+        k_seg.append(k_seg[k] + la.norm(diff)) #extending list cummulative
+    ###Spaceholders DFT spaghetti plot###
+    (M, N) = DFT_data.shape
+    data = np.zeros((M, N, 3))
+    en = np.zeros((M, N)) 
+    xz = np.zeros((M, N))
+    k = np.linspace(0, 350, M)
+    ###Load Data spectral representation###
+    os.chdir('/Users/denyssutter/Documents/PhD/data')
+    DFT_spec = pd.read_csv('DFT_CRO_all.dat').values
+    os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+    (m, n) = DFT_spec.shape
+    DFT_en = np.linspace(-3, 1.5, m)
+    DFT_k = np.linspace(0, 350, n)
+    
+    def fig10a():
+        ax = plt.subplot(121)
+        ax.set_position([.1, .3, .35 , .35])
+        plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
+        plt.plot(0, 3, 'bo')
+        plt.plot(50, 3, 'ro')
+        for m in range(M):
+            for n in range(N):
+                data[m][n][:] = np.asfarray(DFT_data[m][n].split(','))
+                en[m][n] = data[m][n][1]
+                xz[m][n] = data[m][n][2]
+                plt.plot(k[m], en[m, n], 'o', markersize=3, 
+                         color=(xz[m, n], 0, (1-xz[m, n])))
+        plt.plot([0, 350], [0, 0], 'k:')
+        plt.text(10, 1.15, r'(a)', fontsize=12)
+        plt.xlim(xmax=350, xmin=0)
+        plt.ylim(ymax=1.5, ymin=-3)
+        plt.xticks(k_seg / k_seg[-1] * 350, 
+                   ('$\Gamma$', 'X', 'S', '$\Gamma$', 'Y', 'T', '$\Gamma$', 'Z'));
+        plt.yticks(np.arange(-3, 2, 1.))
+        plt.ylabel('$\omega$ (eV)', fontdict = font)
+        plt.legend(('$d_{xy}$', '$d_{xz/yz}$'), frameon=False)
+    
+    def fig10b():
+        ax = plt.subplot(122)
+        ax.set_position([.1 + .38, .3, .35 , .35])
+        plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
+        plt.contourf(DFT_k, DFT_en, DFT_spec, 300, cmap=colmap,
+                     vmin = 0, vmax = 25)
+        plt.plot([0, 350], [0, 0], 'k:')
+        plt.text(10, 1.15, r'(b)', fontsize=12)
+        plt.xlim(xmax=350, xmin=0)
+        plt.ylim(ymax=1.5, ymin=-3)
+        plt.xticks(k_seg / k_seg[-1] * 350, 
+                   ('$\Gamma$', 'X', 'S', '$\Gamma$', 'Y', 'T', '$\Gamma$', 'Z'));
+        plt.yticks(np.arange(-3, 2, 1.), [])
+        pos = ax.get_position()
+        cax = plt.axes([pos.x0+pos.width+0.01 ,
+                        pos.y0, 0.01, pos.height])
+        cbar = plt.colorbar(cax = cax, ticks = None)
+        cbar.set_ticks([])
+        cbar.set_clim(np.min(DFT_spec), np.max(DFT_spec))
+
+    plt.figure(1010, figsize=(8,8), clear=True)
+    fig10a()
+    fig10b()
+    if print_fig == True:
+        plt.savefig(
+                    '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/fig10.png', 
                     dpi = 300,bbox_inches="tight")
         
 if __name__ == "__main__":
