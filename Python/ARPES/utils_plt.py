@@ -412,8 +412,6 @@ def CROfig5(colmap = cm.ocean_r, print_fig = False):
     
     ###Plotting###
     #Setting which axes should be ticked and labelled
-    plt.rcParams['xtick.labelbottom'] = True
-    plt.rcParams['xtick.labeltop'] = False
     scale = .02
     v_scale = 1.3
     k_seg_1 = np.array([0, 4.442882938158366, 8.885765876316732])
@@ -430,66 +428,62 @@ def CROfig5(colmap = cm.ocean_r, print_fig = False):
         D.restrict(bot=.6, top=1, left=0, right=1)
         D.flatten(norm=True)
         if n == 1:
-            plt.rcParams['ytick.labelright'] = False
-            plt.rcParams['ytick.labelleft'] = True
             ax = plt.subplot(1, 4, n) 
             ax.set_position([.1, .3, k_seg_1[-1] * scale, .3])
             pos = ax.get_position()
             D.ang2k(D.ang, Ekin=65-4.5, lat_unit=True, a=3.89, b=3.89, c=11, 
                     V0=0, thdg=-4, tidg=0, phidg=0)
             plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
-            plt.contourf(D.ks, D.en_norm+.1, D.int_norm, 300,
+            plt.contourf(D.kxs, D.en_norm+.1, D.int_norm, 300,
                        cmap=colmap, 
                        vmin=v_scale * 0.01 * np.max(D.int_norm), 
                        vmax=v_scale * 0.5 * np.max(D.int_norm))
             plt.xlim(xmax = 1, xmin = -1)
             plt.ylabel('$\omega$ (meV)', fontdict = font)
             plt.xticks([-1, 0, 1], ('S', '$\Gamma$', 'S'))
+            plt.yticks(np.arange(-2.5, 0, .5))
         elif n == 2:
-            plt.rcParams['ytick.labelright'] = False
-            plt.rcParams['ytick.labelleft'] = False
             ax = plt.subplot(1, 4, n)
             ax.set_position([pos.x0 + k_seg_1[-1] * scale, pos.y0, 
                              k_seg_2[-1] * scale, pos.height])
             D.ang2k(D.ang, Ekin=65-4.5, lat_unit=True, a=3.89, b=3.89, c=11, 
                     V0=0, thdg=-7.5, tidg=8.5, phidg=45)
             plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
-            plt.contourf(D.ks, D.en_norm+.1, D.int_norm, 300,
+            plt.contourf(D.kxs, D.en_norm+.1, D.int_norm, 300,
                        cmap=colmap,
                        vmin=v_scale * 0.0 * np.max(D.int_norm), 
                        vmax=v_scale * 0.54 * np.max(D.int_norm))
             plt.xlim(xmax = 0, xmin = -1)
             plt.xticks([-1, -.5, 0], ('', 'X', 'S'))
+            plt.yticks(np.arange(-2.5, 0, .5), [])
         elif n == 3:
-            plt.rcParams['ytick.labelright'] = False
-            plt.rcParams['ytick.labelleft'] = False
             ax = plt.subplot(1, 4, n)
             ax.set_position([pos.x0 + k_seg_2[-1] * scale, pos.y0, 
                              k_seg_3[-1] * scale, pos.height])
             D.ang2k(D.ang, Ekin=65-4.5, lat_unit=True, a=3.89, b=3.89, c=11, 
                     V0=0, thdg=5, tidg=12.5, phidg=0)
             plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
-            plt.contourf(D.ks, D.en_norm+.1, np.flipud(D.int_norm), 300,
+            plt.contourf(D.kxs, D.en_norm+.1, np.flipud(D.int_norm), 300,
                        cmap=colmap, 
                        vmin=v_scale * 0.01 * np.max(D.int_norm), 
                        vmax=v_scale * 0.7 * np.max(D.int_norm))
             plt.xlim(xmax = 1, xmin = 0)
             plt.xticks([0, 1], ('', '$\Gamma$'))
+            plt.yticks(np.arange(-2.5, 0, .5), [])
         elif n == 4:
-            plt.rcParams['ytick.labelright'] = False
-            plt.rcParams['ytick.labelleft'] = False
             ax = plt.subplot(1, 4, n)
             ax.set_position([pos.x0 + k_seg_3[-1] * scale, pos.y0, 
                              k_seg_4[-1] * scale, pos.height])
             D.ang2k(D.ang, Ekin=65-4.5, lat_unit=True, a=3.89, b=3.89, c=11, 
                     V0=0, thdg=-9.5, tidg=0, phidg=45)
             plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
-            plt.contourf(D.ks, D.en_norm+.1, np.flipud(D.int_norm), 300,
+            plt.contourf(D.kxs, D.en_norm+.1, np.flipud(D.int_norm), 300,
                        cmap=colmap, 
                        vmin=v_scale * 0.01 * np.max(D.int_norm), 
                        vmax=v_scale * 0.53 * np.max(D.int_norm))
             plt.xlim(xmax = 1.5, xmin = 0)
             plt.xticks([0, 0.5, 1, 1.5], ('', 'X', '$\Gamma$', 'X'))
+            plt.yticks(np.arange(-2.5, 0, .5), [])
         
         pos = ax.get_position()
         plt.ylim(ymax = 0, ymin = -2.5)
@@ -726,7 +720,7 @@ def CROfig8(colmap = cm.ocean_r, print_fig = False):
         ax = plt.subplot(1, 3, 1) 
         ax.set_position([.1, .3, .2 , .6])
         plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
-        plt.contourf(D1.ks, D1.en_norm+.1, np.flipud(D1.int_norm), 300, 
+        plt.contourf(D1.kxs, D1.en_norm+.1, np.flipud(D1.int_norm), 300, 
                      cmap=colmap, vmin = 0, vmax = .007)
         plt.plot([-1, 1.66], [0, 0], 'k:')
         plt.plot([edc_val, edc_val], [-2.5, .5], 'g--', linewidth=1)
@@ -742,7 +736,7 @@ def CROfig8(colmap = cm.ocean_r, print_fig = False):
         ax = plt.subplot(1, 3, 2) 
         ax.set_position([.32, .3, .2 , .6])
         plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
-        plt.contourf(D2.ks, D2.en_norm+.1, np.flipud(D2.int_norm), 300, 
+        plt.contourf(D2.kxs, D2.en_norm+.1, np.flipud(D2.int_norm), 300, 
                      cmap=colmap, vmin = 0, vmax = .007)
         plt.plot([-1, 1.66], [0, 0], 'k:')
         plt.plot([edc_val, edc_val], [-2.5, .5], 'g--', linewidth=1)
