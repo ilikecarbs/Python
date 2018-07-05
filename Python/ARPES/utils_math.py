@@ -161,6 +161,13 @@ def poly2(x, p0, p1, p2, p3):
     """
     return p1 + p2 * (x - p0) + p3 * (x - p0)**2 
 
+def lor(x, p0, p1, p2, p3, p4, p5):
+    """
+    Single lorentzians on a quadratic background
+    """
+    return (p2 / (1 + ((x - p0) / p1) ** 2) + 
+            p3 + p4 * x + p5 * x ** 2)
+    
 def lor2(x, p0, p1, p2, p3, p4, p5, p6, p7, p8):
     """
     Two lorentzians on a quadratic background
@@ -168,6 +175,23 @@ def lor2(x, p0, p1, p2, p3, p4, p5, p6, p7, p8):
     return (p4 / (1 + ((x - p0) / p2) ** 2) + 
             p5 / (1 + ((x - p1) / p3) ** 2) +
             p6 + p7 * x + p8 * x ** 2)
+    
+def lor8(x, p0, p1, p2, p3, p4, p5, p6, p7, 
+         p8, p9, p10, p11, p12, p13, p14, p15, 
+         p16, p17, p18, p19, p20, p21, p22, p23, 
+         p24, p25, p26):
+    """
+    Eight lorentzians on a quadratic background
+    """
+    return (p16 / (1 + ((x - p0) / p8)  ** 2) + 
+            p17 / (1 + ((x - p1) / p9)  ** 2) +
+            p18 / (1 + ((x - p2) / p10) ** 2) +
+            p19 / (1 + ((x - p3) / p11) ** 2) +
+            p20 / (1 + ((x - p4) / p12) ** 2) +
+            p21 / (1 + ((x - p5) / p13) ** 2) +
+            p22 / (1 + ((x - p6) / p14) ** 2) +
+            p23 / (1 + ((x - p7) / p15) ** 2) +
+            p24 + p25 * x + p26 * x ** 2)
     
 def gauss2(x, p0, p1, p2, p3, p4, p5, p6, p7, p8):
     """

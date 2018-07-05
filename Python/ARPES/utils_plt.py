@@ -540,13 +540,14 @@ def CROfig6(colmap = cm.ocean_r, print_fig = False):
     plt.plot([1, 1], [-1, 1], 'k-')
     plt.plot([-1, 1], [1, 1], 'k-')
     plt.plot([-1, 1], [-1, -1], 'k-')
-    plt.plot([-1, 1], [-1, 1], 'g:', linewidth=3)
-    plt.plot([-1, 1], [1, 1], 'g:', linewidth=3)
-    plt.plot([-1, 0], [1, 2], 'g:', linewidth=3)
-    plt.plot([0, 0], [2, -1], 'g:', linewidth=3)
+    c = (0, 238 / 256, 118 / 256)
+    plt.plot([-1, 1], [-1, 1], linestyle=':', color=c, linewidth=3)
+    plt.plot([-1, 1], [1, 1], linestyle=':', color=c, linewidth=3)
+    plt.plot([-1, 0], [1, 2], linestyle=':', color=c, linewidth=3)
+    plt.plot([0, 0], [2, -1], linestyle=':', color=c, linewidth=3)
     ax = plt.axes()
-    ax.arrow(-1, -1, .3, .3, head_width=0.2, head_length=0.2, fc='g', ec='k')
-    ax.arrow(0, -.5, 0, -.3, head_width=0.2, head_length=0.2, fc='g', ec='k')
+    ax.arrow(-1, -1, .3, .3, head_width=0.2, head_length=0.2, fc=c, ec='k')
+    ax.arrow(0, -.5, 0, -.3, head_width=0.2, head_length=0.2, fc=c, ec='k')
     plt.text(-0.1, -0.1, r'$\Gamma$',
              fontsize=20, color='r')
     plt.text(-0.1, 1.9, r'$\Gamma$',
@@ -592,7 +593,7 @@ def CROfig7(colmap = cm.ocean_r, print_fig = False):
     mdc = np.sum(int1[:, _mdcw:_mdc], axis=1)
     mdc = mdc / np.max(mdc)
     
-    plt.figure(2007, figsize=(4, 4), clear=True)
+    plt.figure(10007, figsize=(4, 4), clear=True)
     ###Fit MDC###
     delta = 1e-5
     p_mdc_i = [-.3, .35, 
@@ -615,7 +616,7 @@ def CROfig7(colmap = cm.ocean_r, print_fig = False):
     plt.plot(D.k[0], f_mdc)
     plt.plot(D.k[0], b_mdc, 'k--')
     ###Plot Panels###
-    def fig7a():
+    def CROfig7a():
         ax = plt.subplot(1, 3, 1) 
         ax.set_position([.1, .3, .2 , .6])
         plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
@@ -623,8 +624,9 @@ def CROfig7(colmap = cm.ocean_r, print_fig = False):
                      vmin = 0, vmax = 1.4e4)
         plt.plot([-1, 1.66], [0, 0], 'k:')
         plt.plot([-1, 1.66], [mdc_val - mdcw_val / 2, mdc_val - mdcw_val / 2],
-                 'g--', linewidth=1)
-        plt.plot([edc_val, edc_val], [-2.5, .5], 'g--', linewidth=1)
+                 linestyle='--', color=(0, 238 / 256, 118 / 256), linewidth=1)
+        plt.plot([edc_val, edc_val], [-2.5, .5], linestyle='--', 
+                 color=(0, 238 / 256, 118 / 256), linewidth=1)
         plt.xlim(xmax = 1.66, xmin = -1)
         plt.ylim(ymax = 0.5, ymin = -2.5)
         plt.ylabel('$\omega$ (meV)', fontdict = font)
@@ -635,14 +637,15 @@ def CROfig7(colmap = cm.ocean_r, print_fig = False):
         plt.plot(D.k[0], (mdc - b_mdc) * 1.5, 'o', markersize=1, color='C9')
         plt.fill(D.k[0], (f_mdc - b_mdc) * 1.5, alpha=.2, color='C9')
     
-    def fig7b():
+    def CROfig7b():
         ax = plt.subplot(1, 3, 2) 
         ax.set_position([.32, .3, .2 , .6])
         plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
         plt.contourf(D.k[0], D.en+.07, np.transpose(int2), 300, cmap=colmap,
                      vmin = 0, vmax = 1.4e4)
         plt.plot([-1, 1.66], [0, 0], 'k:')
-        plt.plot([edc_val, edc_val], [-2.5, .5], 'g--', linewidth=1)
+        plt.plot([edc_val, edc_val], [-2.5, .5], linestyle='--', 
+                 color=(0, 238 / 256, 118 / 256), linewidth=1)
         plt.xlim(xmax = 1.66, xmin = -1)
         plt.ylim(ymax = 0.5, ymin = -2.5)
         plt.xticks([-1, 0, 1], ('S', '$\Gamma$', 'S'))
@@ -656,7 +659,7 @@ def CROfig7(colmap = cm.ocean_r, print_fig = False):
         cbar.set_ticks([])
         cbar.set_clim(np.min(D.int), np.max(D.int))
         
-    def fig7c():
+    def CROfig7c():
         xx = np.linspace(1, -5, 200)
         ax = plt.subplot(1, 3, 3) 
         ax.set_position([.57, .3, .2 , .6])
@@ -682,9 +685,9 @@ def CROfig7(colmap = cm.ocean_r, print_fig = False):
         plt.xlabel('Intensity (a.u)', fontdict = font)
         
     plt.figure(1007, figsize=(8, 6), clear=True)
-    fig7a()
-    fig7b()
-    fig7c()
+    CROfig7a()
+    CROfig7b()
+    CROfig7c()
     if print_fig == True:
         plt.savefig(
                     '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CROfig7.png', 
@@ -716,14 +719,15 @@ def CROfig8(colmap = cm.ocean_r, print_fig = False):
     edc1 = D1.int_norm[_edc, :]
     edc2 = D2.int_norm[_edc, :]
     ###Plot Panels###
-    def fig8a():
+    def CROfig8a():
         ax = plt.subplot(1, 3, 1) 
         ax.set_position([.1, .3, .2 , .6])
         plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
         plt.contourf(D1.kxs, D1.en_norm+.1, np.flipud(D1.int_norm), 300, 
                      cmap=colmap, vmin = 0, vmax = .007)
         plt.plot([-1, 1.66], [0, 0], 'k:')
-        plt.plot([edc_val, edc_val], [-2.5, .5], 'g--', linewidth=1)
+        plt.plot([edc_val, edc_val], [-2.5, .5], linestyle='--', 
+                 color=(0, 238 / 256, 118 / 256), linewidth=1)
         plt.xlim(xmax = 1, xmin = 0)
         plt.ylim(ymax = 0.5, ymin = -2.5)
         plt.ylabel('$\omega$ (meV)', fontdict = font)
@@ -732,14 +736,15 @@ def CROfig8(colmap = cm.ocean_r, print_fig = False):
         plt.text(.05, 0.3, r'(a)', fontsize=15)
         plt.arrow(-1, -1, 0, -.3, head_width=0.2, head_length=0.2, fc='g', ec='k')
     
-    def fig8b():
+    def CROfig8b():
         ax = plt.subplot(1, 3, 2) 
         ax.set_position([.32, .3, .2 , .6])
         plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
         plt.contourf(D2.kxs, D2.en_norm+.1, np.flipud(D2.int_norm), 300, 
                      cmap=colmap, vmin = 0, vmax = .007)
         plt.plot([-1, 1.66], [0, 0], 'k:')
-        plt.plot([edc_val, edc_val], [-2.5, .5], 'g--', linewidth=1)
+        plt.plot([edc_val, edc_val], [-2.5, .5], linestyle='--', 
+                 color=(0, 238 / 256, 118 / 256), linewidth=1)
         plt.xlim(xmax = 1, xmin = 0)
         plt.ylim(ymax = 0.5, ymin = -2.5)
         plt.xticks([0, 1], ('S', '$\Gamma$'))
@@ -753,7 +758,7 @@ def CROfig8(colmap = cm.ocean_r, print_fig = False):
         cbar.set_ticks([])
         cbar.set_clim(np.min(D2.int_norm), np.max(D2.int_norm))
         
-    def fig8c():
+    def CROfig8c():
         xx = np.linspace(1, -5, 200)
         ax = plt.subplot(1, 3, 3) 
         ax.set_position([.57, .3, .2 , .6])
@@ -779,9 +784,9 @@ def CROfig8(colmap = cm.ocean_r, print_fig = False):
         plt.xlabel('Intensity (a.u)', fontdict = font)
         
     plt.figure(1008, figsize=(8, 6), clear=True)
-    fig8a()
-    fig8b()
-    fig8c()
+    CROfig8a()
+    CROfig8b()
+    CROfig8c()
     if print_fig == True:
         plt.savefig(
                     '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CROfig8.png', 
@@ -875,7 +880,7 @@ def CROfig10(colmap = cm.bone_r, print_fig = False):
     DFT_en = np.linspace(-3, 1.5, m)
     DFT_k = np.linspace(0, 350, n)
     
-    def fig10a():
+    def CROfig10a():
         ax = plt.subplot(121)
         ax.set_position([.1, .3, .35 , .35])
         plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
@@ -898,7 +903,7 @@ def CROfig10(colmap = cm.bone_r, print_fig = False):
         plt.ylabel('$\omega$ (eV)', fontdict = font)
         plt.legend(('$d_{xy}$', '$d_{\gamma z}$'), frameon=False)
     
-    def fig10b():
+    def CROfig10b():
         ax = plt.subplot(122)
         ax.set_position([.1 + .38, .3, .35 , .35])
         plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
@@ -919,8 +924,8 @@ def CROfig10(colmap = cm.bone_r, print_fig = False):
         cbar.set_clim(np.min(DFT_spec), np.max(DFT_spec))
 
     plt.figure(1010, figsize=(8,8), clear=True)
-    fig10a()
-    fig10b()
+    CROfig10a()
+    CROfig10b()
     if print_fig == True:
         plt.savefig(
                     '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CROfig10.png', 
@@ -983,6 +988,195 @@ def CROfig11(print_fig = False):
 
 """
 Figures Dissertation Ca1.8Sr0.2RuO4 (CSRO)
-"""        
+"""     
+
+def CSROfig1(colmap = cm.ocean_r, print_fig = False):
+    """
+    Experimental data: Figure 1 CSCRO20 paper
+    """
+    ###Load Data###
+    os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+    file = 62087
+    gold = 62081
+    mat = 'CSRO20'
+    year = 2017
+    sample = 'S6'
+    D = ARPES.DLS(file, mat, year, sample)
+    D.norm(gold)
+    D.restrict(bot=0, top=1, left=.12, right=.9)
+    D.FS(e = 0.02, ew = .03, norm = True)
+    D.ang2kFS(D.ang, Ekin=22-4.5, lat_unit=True, a=5.33, b=5.55, c=11, 
+              V0=0, thdg=8.7, tidg=4, phidg=88)
+    FS = np.flipud(D.map)
+    file = 62090
+    gold = 62091
+    A1 = ARPES.DLS(file, mat, year, sample)
+    A1.norm(gold)
+    A1.ang2k(A1.ang, Ekin=22-4.5, lat_unit=True, a=5.33, b=5.55, c=11, 
+              V0=0, thdg=9.3, tidg=0, phidg=90)
+    file = 62097
+    gold = 62091
+    A2 = ARPES.DLS(file, mat, year, sample)
+    A2.norm(gold)
+    A2.ang2k(A1.ang, Ekin=22-4.5, lat_unit=True, a=5.33, b=5.55, c=11, 
+              V0=0, thdg=6.3, tidg=-16, phidg=90)
+    c = (0, 238 / 256, 118 / 256)
+    ###MDC###
+    mdc_val = -.004
+    mdcw_val = .002
+    mdc = np.zeros(A1.ang.shape)
+    for i in range(len(A1.ang)):
+        val, _mdc = utils.find(A1.en_norm[i, :], mdc_val)
+        val, _mdcw = utils.find(A1.en_norm[i, :], mdc_val - mdcw_val)
+        mdc[i] = np.sum(A1.int_norm[i, _mdcw:_mdc])
+    mdc = mdc / np.max(mdc)
+    plt.figure(20001, figsize=(4, 4), clear=True)
+    ###Fit MDC###
+    delta = 1e-5
+    p_mdc_i = np.array(
+                [-1.4, -1.3, -1.1, -.9, -.7, -.6, -.3, .3,
+                 .05, .05, .05, .05, .05, .05, .1, .1, 
+                 .3, .3, .4, .4, .5, .5, .1, .1,
+                 .33, 0.02, .02])
+    bounds_bot = np.concatenate((p_mdc_i[0:-3] - np.inf, p_mdc_i[-3:27] - delta))
+    bounds_top = np.concatenate((p_mdc_i[0:-3] + np.inf, p_mdc_i[-3:27] + delta))
+    p_mdc_bounds = (bounds_bot, bounds_top)
+    p_mdc, cov_mdc = curve_fit(
+            utils_math.lor8, A1.k[1], mdc, p_mdc_i, bounds=p_mdc_bounds)
+    b_mdc = utils_math.poly2(A1.k[1], 0, p_mdc[-3], p_mdc[-2], p_mdc[-1])
+    f_mdc = utils_math.lor8(A1.k[1], *p_mdc) - b_mdc
+    f_mdc[0] = 0
+    f_mdc[-1] = 0
+    plt.plot(A1.k[1], mdc, 'bo')
+    plt.plot(A1.k[1], f_mdc)
+    plt.plot(A1.k[1], b_mdc, 'k--')
+        
+    def CSROfig1a():
+        ax = plt.subplot(1, 3, 1) 
+        ax.set_position([.08, .3, .28, .35])
+        plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+        plt.contourf(A1.en_norm, A1.kys, A1.int_norm, 100, cmap=colmap,
+                     vmin=.1 * np.max(A1.int_norm), vmax=.8 * np.max(A1.int_norm))
+        plt.plot([0, 0], [np.min(A1.kys), np.max(A1.kys)], 'k:')
+        plt.plot([-.005, -.005], [np.min(A1.kys), np.max(A1.kys)], linestyle='--',
+                 color=c, linewidth=.5)
+        plt.xlim(xmax=.03, xmin=-.06)
+        plt.ylim(ymax=np.max(D.ky), ymin=np.min(D.ky))   
+        plt.xticks(np.arange(-.06, .03, .02), ('-60', '-40', '-20', '0', '20'))
+        plt.yticks([-1.5, -1, -.5, 0, .5])
+        plt.xlabel('$\omega\,(\mathrm{meV})$', fontdict = font)
+        plt.ylabel('$k_x \,(\pi/a)$', fontdict = font)
+        plt.plot((mdc - b_mdc) / 30 + .001, A1.k[1], 'o', markersize=1.5, color='C9')
+        plt.fill(f_mdc / 30 + .001, A1.k[1], alpha=.2, color='C9')
+        plt.text(-.058, .56, r'(a)', fontsize=12)
+        plt.text(.024, -.03, r'$\Gamma$', fontsize=12, color='r')
+        plt.text(.024, -1.03, r'Y', fontsize=12, color='r')
+        cols = ['k', 'b', 'b', 'b', 'b', 'm', 'C1', 'C1']
+        lbls = [r'$\beta$', r'$\gamma$', r'$\gamma$', r'$\gamma$', r'$\gamma$',
+                r'$\beta$', r'$\alpha$', r'$\alpha$']
+        corr = np.array([.003, .002, .002, 0, -.001, 0, .002, .003])
+        p_mdc[6 + 16] *= 1.5
+        for i in range(8):
+            plt.plot((utils_math.lor(A1.k[1], p_mdc[i], p_mdc[i + 8], p_mdc[i + 16], 
+                     p_mdc[-3], p_mdc[-2], p_mdc[-1]) - b_mdc) / 30 + .001, 
+                     A1.k[1], linewidth=.5, color=cols[i])
+#            if i == 6:
+#                p_mdc[7 + 16] /= 2
+            plt.text(p_mdc[i + 16] / 20 + corr[i], p_mdc[i]-.03, lbls[i], 
+                     fontdict=font, fontsize=10, color=cols[i])
+        plt.plot(f_mdc / 30 + .001, A1.k[1], color=c, linewidth=.5)
+    
+    def CSROfig1c():
+        ax = plt.subplot(1, 3, 3) 
+        ax.set_position([.66, .3, .217, .35])
+        plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+        plt.contourf(-np.transpose(np.fliplr(A2.en_norm)), np.transpose(A2.kys), 
+                     np.transpose(np.fliplr(A2.int_norm)), 100, cmap=colmap,
+                     vmin=.1 * np.max(A2.int_norm), vmax=.8 * np.max(A2.int_norm))
+        plt.plot([0, 0], [np.min(A2.kys), np.max(A2.kys)], 'k:')
+        plt.xlim(xmin=-.01, xmax=.06)
+        plt.ylim(ymax=np.max(D.ky), ymin=np.min(D.ky))  
+        plt.xticks(np.arange(0, .06, .02), ('0', '-20', '-40', '-60'))
+        plt.yticks([-1.5, -1, -.5, 0, .5], [])
+        plt.xlabel('$\omega\,(\mathrm{meV})$', fontdict = font)
+        plt.text(-.0085, .56, r'(c)', fontsize=12)
+        plt.text(-.008, -.03, r'X', fontsize=12, color='r')
+        plt.text(-.008, -1.03, r'S', fontsize=12, color='r')
+        pos = ax.get_position()
+        cax = plt.axes([pos.x0+pos.width+0.01 ,
+                            pos.y0, 0.01, pos.height])
+        cbar = plt.colorbar(cax = cax, ticks = None)
+        cbar.set_ticks([])
+        cbar.set_clim(np.min(A2.int_norm), np.max(A2.int_norm))
+    
+    def CSROfig1b():
+        for i in range(FS.shape[1]):
+            FS[:, i] = np.divide(FS[:, i], np.sum(FS[:, i]))  #Flatten
+        ax = plt.subplot(1, 3, 2) 
+        ax.set_position([.37, .3, .28, .35])
+        plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
+        plt.contourf(D.kx, D.ky, FS, 300, vmax=.9 * np.max(FS), vmin=.3 * np.max(FS),
+                   cmap=colmap)
+        plt.xlabel('$k_y \,(\pi/a)$', fontdict = font)
+        #plt.axis('equal')
+        plt.text(-.65, .56, r'(b)', fontsize=12, color='w')
+        plt.text(-.05, -.03, r'$\Gamma$', fontsize=12, color='r')
+        plt.text(-.05, -1.03, r'Y', fontsize=12, color='r')
+        plt.text(.95, -.03, r'X', fontsize=12, color='r')
+        plt.text(.95, -1.03, r'S', fontsize=12, color='r')
+        plt.plot(A1.k[0], A1.k[1], linestyle='--', color=c, linewidth=.5)
+        plt.plot(A2.k[0], A2.k[1], linestyle='--', color=c, linewidth=.5)
+        ###Tight Binding Model###
+        tb = utils_math.TB(a = np.pi, kbnd = 2, kpoints = 200)#Initialize 
+        param = utils_math.paramCSRO20()  #Load parameters
+        tb.CSRO(param)  #Calculate bandstructure
+        bndstr = tb.bndstr  #Load bandstructure
+        coord = tb.coord  #Load coordinates
+        X = coord['X']; Y = coord['Y']   
+        Axy = bndstr['Axy']; Bxz = bndstr['Bxz']; Byz = bndstr['Byz']
+        en = (Axy, Bxz, Byz)  #Loop over sheets
+        n = 0
+        for i in en:
+            n += 1
+            C = plt.contour(X, Y, i, colors = 'black', linestyles = ':', 
+                            alpha=0, levels = 0)
+            p = C.collections[0].get_paths()
+            p = np.asarray(p)
+            axy = np.arange(0, 4, 1) #indices of same paths
+            bxz = np.arange(16, 24, 1)
+            byz = np.array([16, 17, 20, 21])
+            if n == 1:
+                ind = axy; col = 'r'
+            elif n == 2:
+                ind = bxz; col = 'b'
+            elif n == 3:
+                ind = byz; col = 'k'
+                v = p[18].vertices
+                plt.plot(v[:, 0], v[:, 1], linestyle = ':', color = 'm', 
+                         linewidth=1)
+                v = p[2].vertices
+                plt.plot(v[:, 0], v[:, 1], linestyle = ':', color = 'm', 
+                         linewidth=1)
+                v = p[19].vertices
+                plt.plot(v[:, 0], v[:, 1], linestyle = ':', color = 'C1', 
+                         linewidth=1)
+            for j in ind:
+                v = p[j].vertices
+                plt.plot(v[:, 0], v[:, 1], linestyle = ':', color = col, 
+                         linewidth=1)
+        plt.xticks([-.5, 0, .5, 1])
+        plt.yticks([-1.5, -1, -.5, 0, .5], [])
+        plt.xlim(xmax=np.max(D.kx), xmin=np.min(D.kx))
+        plt.ylim(ymax=np.max(D.ky), ymin=np.min(D.ky))     
+        
+    plt.figure(2001, figsize=(8, 8), clear=True)
+    CSROfig1a()
+    CSROfig1b()
+    CSROfig1c()
+    if print_fig == True:
+            plt.savefig(
+                        '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig1.png', 
+                        dpi = 600,bbox_inches="tight")
+   
         
         
