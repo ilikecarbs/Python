@@ -104,7 +104,7 @@ def plt_spec(self, norm):
     plt.ylabel('\omega')
     plt.show()
 
-def plt_FS_poliut(self, norm, p, pw):
+def plt_FS_polcut(self, norm, p, pw):
     if norm == True:
         k = self.angs
         en = self.en_norm
@@ -1236,7 +1236,6 @@ def CSROfig1(colmap = cm.ocean_r, print_fig = False):
         plt.contourf(D.kx, D.ky, FS, 300, vmax=.9 * np.max(FS), vmin=.3 * np.max(FS),
                    cmap=colmap)
         plt.xlabel('$k_y \,(\pi/a)$', fontdict = font)
-        #plt.axis('equal')
         plt.text(-.65, .56, r'(b)', fontsize=12, color='w')
         plt.text(-.05, -.03, r'$\Gamma$', fontsize=12, color='r')
         plt.text(-.05, -1.03, r'Y', fontsize=12, color='r')

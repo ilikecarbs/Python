@@ -58,95 +58,99 @@ CSROfig1:  Experimental data: Figure 1 CSRO20 paper
 utils_plt.CROfig8(print_fig=True)
 
 #%%
+from scipy.optimize import curve_fit
 colmap = cm.ocean_r
-p65 = '0618_00113'
-s65 = '0618_00114'
-p120 = '0618_00115'
-s120 = '0618_00116'
-mat = 'Ca2RuO4'
-year = 2016
+os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+file = 'CSRO_P1_0032'
+mat = 'CSRO20'
+year = 2017
 sample = 'data'
-files = [p120, s120, p65, s65]
-lbls1 = ['(a)', '(b)', '(c)', '(d)']
-lbls2 = [r'$120\,\mathrm{eV}$', r'$120\,\mathrm{eV}$', r'$65\,\mathrm{eV}$', r'$65\,\mathrm{eV}$']
-lbls3 = [r'$\bar{\pi}$-pol.', r'$\bar{\sigma}$-pol.', r'$\bar{\pi}$-pol.', r'$\bar{\sigma}$-pol.']
+D = ARPES.SIS(file, mat, year, sample) 
+D.FS(e = 19.3, ew = .01, norm = False)
+D.FS_flatten(ang=False)
+"""
+D.FS_restrict(bot=0, top=1, left=0, right=1)
+"""
+D.ang2kFS(D.ang, Ekin=D.hv-4.5, lat_unit=True, a=5.5, b=5.5, c=11, 
+          V0=0, thdg=-1.2, tidg=1, phidg=0)
+D.plt_FS(coord=True)
 
-th = 25
-ti = -.5
-phi = -25.
+###Diagonal MDC###
+bnd = .75
 c = (0, 238 / 256, 118 / 256)
+mdc_d = np.zeros(D.ang.size)
+for i in range(D.ang.size):
+    val, _mdc_d = utils.find(D.ky[:, i], D.kx[0, i])
+    mdc_d[i] = D.map[_mdc_d, i]
+mdc_d = mdc_d / np.max(mdc_d)
+###Fit MDC###
+plt.figure(20002, figsize=(4, 4), clear=True)
+delta = 1e-5
+p_mdc_i = np.array(
+            [-.6, -.4, -.2, .2, .4, .6,
+             .05, .05, .05, .05, .05, .05,
+             .3, .3, .4, .4, .5, .5, 
+             .33, -0.2, .02])
+bounds_bot = np.concatenate((p_mdc_i[0:-3] - np.inf, p_mdc_i[-3:27] - delta))
+bounds_top = np.concatenate((p_mdc_i[0:-3] + np.inf, p_mdc_i[-3:27] + delta))
+p_mdc_bounds = (bounds_bot, bounds_top)
+p_mdc, cov_mdc = curve_fit(
+        utils_math.lor6, D.kx[0, :], mdc_d, p_mdc_i, bounds=p_mdc_bounds)
+b_mdc = utils_math.poly2(D.kx[0, :], 0, p_mdc[-3], p_mdc[-2], p_mdc[-1])
+f_mdc = utils_math.lor6(D.kx[0, :], *p_mdc) - b_mdc
+f_mdc[0] = 0
+f_mdc[-1] = 0
+plt.plot(D.kx[0, :], mdc_d, 'bo')
+plt.plot(D.kx[0, :], f_mdc + b_mdc)
+plt.plot(D.kx[0, :], b_mdc, 'k--')
+###Plotting
+plt.figure(2002, figsize=(8, 8), clear=True)
+ax = plt.subplot(1, 3, 1) 
+ax.set_position([.08, .2, .4, .4])
+plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+plt.contourf(D.kx, D.ky, D.map_flat, 100, cmap=colmap,
+             vmin=.6 * np.max(D.map_flat), vmax=1.0 * np.max(D.map_flat))
+plt.plot([-bnd, bnd], [-bnd, bnd], linestyle='--', color=c, linewidth=.5)
+###Tight Binding Model###
+tb = utils_math.TB(a = np.pi, kbnd = 2, kpoints = 200)#Initialize 
+param = utils_math.paramCSRO20()  #Load parameters
+tb.CSRO(param)  #Calculate bandstructure
+bndstr = tb.bndstr  #Load bandstructure
+coord = tb.coord  #Load coordinates
+X = coord['X']; Y = coord['Y']   
+Axy = bndstr['Axy']; Bxz = bndstr['Bxz']; Byz = bndstr['Byz']
+en = (Axy, Byz)  #Loop over sheets
 
-###Plotting###
-plt.figure(1012, figsize=(10, 10), clear=True)
+C = plt.contour(X, Y, Byz, colors = 'black', linestyles = ':', 
+                alpha=0, levels = -0.00)
+p = C.collections[0].get_paths()
+p = np.asarray(p)
+axy = np.arange(0, 4, 1) #indices of same paths
+bxz = np.arange(16, 24, 1)
+byz = np.array([16, 17, 20, 21])
 
-for i in range(4):
-    D = ARPES.ALS(files[i], mat, year, sample) #frist scan
-    D.ang2kFS(D.ang, Ekin=D.hv - 4.5 - 5.2, lat_unit=True, a=4.8, b=5.7, c=11, 
-                    V0=0, thdg=th, tidg=ti, phidg=phi)
-    en = D.en - 2.1 #energy off set (Fermi level not specified)
-    e = -5.2; ew = 0.1
-    e_val, e_ind = utils.find(en, e)
-    ew_val, ew_ind = utils.find(en, e-ew)
-    FSmap = np.sum(D.int[:, :, ew_ind:e_ind], axis=2) #creating FS map
-    ax = plt.subplot(1, 5, i + 2) 
-    ax.set_position([.06 + (i * .23), .3, .22, .3])
-    if i == 2:
-        ax.set_position([.06 + (i * .23), .3, .16, .3])
-    elif i == 3:
-        ax.set_position([.06 + (2 * .23) + .17, .3, .16, .3])
-    plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
-    plt.contourf(D.kx, D.ky, FSmap, 300, cmap = colmap,
-                   vmin = .25 * np.max(FSmap), vmax = .95 * np.max(FSmap))
-    plt.grid(alpha=0.5)
-    plt.xticks(np.arange(-10, 10, 2))
-    plt.xlabel('$k_x$ ($\pi/a$)', fontdict = font)
-    plt.plot([-1, -1], [-1, 1], 'k-')
-    plt.plot([1, 1], [-1, 1], 'k-')
-    plt.plot([-1, 1], [1, 1], 'k-')
-    plt.plot([-1, 1], [-1, -1], 'k-')
-    plt.plot([-2, 0], [0, 2], 'k--', linewidth=.5)
-    plt.plot([-2, 0], [0, -2], 'k--', linewidth=.5)
-    plt.plot([2, 0], [0, 2], 'k--', linewidth=.5)
-    plt.plot([2, 0], [0, -2], 'k--', linewidth=.5)
-    if i == 0:
-        plt.ylabel('$k_y$ ($\pi/a$)', fontdict = font)
-        plt.yticks(np.arange(-10, 10, 2))
-        plt.plot([-1, 1], [-1, 1], linestyle=':', color=c, linewidth=1)
-        plt.plot([-1, 1], [1, 1], linestyle=':', color=c, linewidth=1)
-        plt.plot([-1, 0], [1, 2], linestyle=':', color=c, linewidth=1)
-        plt.plot([0, 0], [2, -1], linestyle=':', color=c, linewidth=1)
-        ax.arrow(-1, -1, .3, .3, head_width=0.3, head_length=0.3, fc=c, ec='k')
-        ax.arrow(0, -.4, 0, -.3, head_width=0.3, head_length=0.3, fc=c, ec='k')
-    else:
-        plt.yticks(np.arange(-10, 10, 2), [])
-    if any(x==i for x in [0, 1]):
-        x_pos = -2.7
-    else:
-        x_pos = -1.9
-    plt.text(x_pos, 5.6, lbls1[i], fontsize=12)
-    plt.text(x_pos, 5.0, lbls2[i], fontsize=10)
-    plt.text(x_pos, 4.4, lbls3[i], fontsize=10) 
-    plt.text(-0.15, -0.1, r'$\Gamma$',
-             fontsize=12, color='r')
-    plt.text(-0.15, 1.9, r'$\Gamma$',
-             fontsize=12, color='r')
-    plt.text(.9, .9, r'S',
-             fontsize=12, color='r')
-    plt.text(-0.15, .9, r'X',
-             fontsize=12, color='r')
-    plt.xlim(xmin=-3, xmax=4)
-    if any(x==i for x in [2, 3]):
-        plt.xlim(xmin=-2.2, xmax=2.9)
-    plt.ylim(ymin=-3.3, ymax=6.2)
+ind = byz; col = 'k'
+v = p[18].vertices
+plt.plot(v[:, 0], v[:, 1], linestyle = ':', color = 'm', 
+         linewidth=1)
+v = p[19].vertices
+plt.plot(v[:, 0], v[:, 1], linestyle = ':', color = 'C1', 
+         linewidth=1)
+for j in ind:
+    v = p[j].vertices
+    plt.plot(v[:, 0], v[:, 1], linestyle = ':', color = col, 
+             linewidth=1)
+plt.xticks(np.arange(-10, 10, .5))
+plt.yticks(np.arange(-10, 10, .5))
+plt.axis('equal')
 
-#%%
-
-#pos = ax.get_position()
-#cax = plt.axes([pos.x0+pos.width+0.03 ,
-#                    pos.y0, 0.03, pos.height])
-#cbar = plt.colorbar(cax = cax, ticks = None)
-#cbar.set_ticks([])
-#plt.show()
+plt.xlim(xmax=bnd, xmin=-bnd)
+plt.ylim(ymax=bnd, ymin=-bnd)   
+ax = plt.subplot(1, 4, 3) 
+ax.set_position([.08, .65, .4, .2])
+plt.plot(D.kx[0, :], mdc_d, 'o', markersize=1.5, color='C9')
+plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+plt.xlim(xmax=bnd, xmin=-bnd)
 #%%
 
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
