@@ -986,6 +986,177 @@ def CROfig11(print_fig = False):
                     '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CROfig11.png', 
                     dpi = 600,bbox_inches="tight")
 
+def CROfig12(colmap = cm.ocean_r, print_fig = False):
+    """
+    Constant energy maps Oxygen bands
+    """
+    p65 = '0618_00113'
+    s65 = '0618_00114'
+    p120 = '0618_00115'
+    s120 = '0618_00116'
+    mat = 'Ca2RuO4'
+    year = 2016
+    sample = 'data'
+    files = [p120, s120, p65, s65]
+    lbls1 = ['(a)', '(b)', '(c)', '(d)']
+    lbls2 = [r'$120\,\mathrm{eV}$', r'$120\,\mathrm{eV}$', r'$65\,\mathrm{eV}$', r'$65\,\mathrm{eV}$']
+    lbls3 = [r'$\bar{\pi}$-pol.', r'$\bar{\sigma}$-pol.', r'$\bar{\pi}$-pol.', r'$\bar{\sigma}$-pol.']
+    th = 25
+    ti = -.5
+    phi = -25.
+    c = (0, 238 / 256, 118 / 256)
+    ###Plotting###
+    plt.figure(1012, figsize=(10, 10), clear=True)
+    for i in range(4):
+        D = ARPES.ALS(files[i], mat, year, sample) #frist scan
+        D.ang2kFS(D.ang, Ekin=D.hv - 4.5 - 5.2, lat_unit=True, a=4.8, b=5.7, c=11, 
+                        V0=0, thdg=th, tidg=ti, phidg=phi)
+        en = D.en - 2.1 #energy off set (Fermi level not specified)
+        e = -5.2; ew = 0.1
+        e_val, e_ind = utils.find(en, e)
+        ew_val, ew_ind = utils.find(en, e-ew)
+        FSmap = np.sum(D.int[:, :, ew_ind:e_ind], axis=2) #creating FS map
+        ax = plt.subplot(1, 5, i + 2) 
+        ax.set_position([.06 + (i * .23), .3, .22, .3])
+        if i == 2:
+            ax.set_position([.06 + (i * .23), .3, .16, .3])
+        elif i == 3:
+            ax.set_position([.06 + (2 * .23) + .17, .3, .16, .3])
+        plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+        plt.contourf(D.kx, D.ky, FSmap, 300, cmap = colmap,
+                       vmin = .25 * np.max(FSmap), vmax = .95 * np.max(FSmap))
+        plt.grid(alpha=0.5)
+        plt.xticks(np.arange(-10, 10, 2))
+        plt.xlabel('$k_x$ ($\pi/a$)', fontdict = font)
+        plt.plot([-1, -1], [-1, 1], 'k-')
+        plt.plot([1, 1], [-1, 1], 'k-')
+        plt.plot([-1, 1], [1, 1], 'k-')
+        plt.plot([-1, 1], [-1, -1], 'k-')
+        plt.plot([-2, 0], [0, 2], 'k--', linewidth=.5)
+        plt.plot([-2, 0], [0, -2], 'k--', linewidth=.5)
+        plt.plot([2, 0], [0, 2], 'k--', linewidth=.5)
+        plt.plot([2, 0], [0, -2], 'k--', linewidth=.5)
+        if i == 0:
+            plt.ylabel('$k_y$ ($\pi/a$)', fontdict = font)
+            plt.yticks(np.arange(-10, 10, 2))
+            plt.plot([-1, 1], [-1, 1], linestyle=':', color=c, linewidth=1)
+            plt.plot([-1, 1], [1, 1], linestyle=':', color=c, linewidth=1)
+            plt.plot([-1, 0], [1, 2], linestyle=':', color=c, linewidth=1)
+            plt.plot([0, 0], [2, -1], linestyle=':', color=c, linewidth=1)
+            ax.arrow(-1, -1, .3, .3, head_width=0.3, head_length=0.3, fc=c, ec='k')
+            ax.arrow(0, -.4, 0, -.3, head_width=0.3, head_length=0.3, fc=c, ec='k')
+        else:
+            plt.yticks(np.arange(-10, 10, 2), [])
+        if any(x==i for x in [0, 1]):
+            x_pos = -2.7
+        else:
+            x_pos = -1.9
+        plt.text(x_pos, 5.6, lbls1[i], fontsize=12)
+        plt.text(x_pos, 5.0, lbls2[i], fontsize=10)
+        plt.text(x_pos, 4.4, lbls3[i], fontsize=10) 
+        plt.text(-0.2, -0.15, r'$\Gamma$',
+                 fontsize=12, color='r')
+        plt.text(-0.2, 1.85, r'$\Gamma$',
+                 fontsize=12, color='r')
+        plt.text(.85, .85, r'S',
+                 fontsize=12, color='r')
+        plt.text(-0.2, .9, r'X',
+                 fontsize=12, color='r')
+        plt.xlim(xmin=-3, xmax=4)
+        if any(x==i for x in [2, 3]):
+            plt.xlim(xmin=-2.2, xmax=2.9)
+        plt.ylim(ymin=-3.3, ymax=6.2)
+        
+    if print_fig == True:
+        plt.savefig(
+                    '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CROfig12.png', 
+                    dpi = 300,bbox_inches="tight")
+        
+def CROfig13(colmap = cm.ocean_r, print_fig = False):
+    """
+    Constant energy maps alpha
+    """
+    p65 = '0618_00113'
+    s65 = '0618_00114'
+    p120 = '0618_00115'
+    s120 = '0618_00116'
+    mat = 'Ca2RuO4'
+    year = 2016
+    sample = 'data'
+    files = [p120, s120, p65, s65]
+    lbls1 = ['(a)', '(b)', '(c)', '(d)']
+    lbls2 = [r'$120\,\mathrm{eV}$', r'$120\,\mathrm{eV}$', r'$65\,\mathrm{eV}$', r'$65\,\mathrm{eV}$']
+    lbls3 = [r'$\bar{\pi}$-pol.', r'$\bar{\sigma}$-pol.', r'$\bar{\pi}$-pol.', r'$\bar{\sigma}$-pol.']
+    th = 25
+    ti = -.5
+    phi = -25.
+    c = (0, 238 / 256, 118 / 256)
+    ###Plotting###
+    plt.figure(1012, figsize=(10, 10), clear=True)
+    for i in range(4):
+        D = ARPES.ALS(files[i], mat, year, sample) #frist scan
+        D.ang2kFS(D.ang, Ekin=D.hv - 4.5 - 5.2, lat_unit=True, a=4.8, b=5.7, c=11, 
+                        V0=0, thdg=th, tidg=ti, phidg=phi)
+        en = D.en - 2.1 #energy off set (Fermi level not specified)
+        e = -5.2; ew = 0.1
+        e_val, e_ind = utils.find(en, e)
+        ew_val, ew_ind = utils.find(en, e-ew)
+        FSmap = np.sum(D.int[:, :, ew_ind:e_ind], axis=2) #creating FS map
+        ax = plt.subplot(1, 5, i + 2) 
+        ax.set_position([.06 + (i * .23), .3, .22, .3])
+        if i == 2:
+            ax.set_position([.06 + (i * .23), .3, .16, .3])
+        elif i == 3:
+            ax.set_position([.06 + (2 * .23) + .17, .3, .16, .3])
+        plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+        plt.contourf(D.kx, D.ky, FSmap, 300, cmap = colmap,
+                       vmin = .25 * np.max(FSmap), vmax = .95 * np.max(FSmap))
+        plt.grid(alpha=0.5)
+        plt.xticks(np.arange(-10, 10, 2))
+        plt.xlabel('$k_x$ ($\pi/a$)', fontdict = font)
+        plt.plot([-1, -1], [-1, 1], 'k-')
+        plt.plot([1, 1], [-1, 1], 'k-')
+        plt.plot([-1, 1], [1, 1], 'k-')
+        plt.plot([-1, 1], [-1, -1], 'k-')
+        plt.plot([-2, 0], [0, 2], 'k--', linewidth=.5)
+        plt.plot([-2, 0], [0, -2], 'k--', linewidth=.5)
+        plt.plot([2, 0], [0, 2], 'k--', linewidth=.5)
+        plt.plot([2, 0], [0, -2], 'k--', linewidth=.5)
+        if i == 0:
+            plt.ylabel('$k_y$ ($\pi/a$)', fontdict = font)
+            plt.yticks(np.arange(-10, 10, 2))
+            plt.plot([-1, 1], [-1, 1], linestyle=':', color=c, linewidth=1)
+            plt.plot([-1, 1], [1, 1], linestyle=':', color=c, linewidth=1)
+            plt.plot([-1, 0], [1, 2], linestyle=':', color=c, linewidth=1)
+            plt.plot([0, 0], [2, -1], linestyle=':', color=c, linewidth=1)
+            ax.arrow(-1, -1, .3, .3, head_width=0.3, head_length=0.3, fc=c, ec='k')
+            ax.arrow(0, -.4, 0, -.3, head_width=0.3, head_length=0.3, fc=c, ec='k')
+        else:
+            plt.yticks(np.arange(-10, 10, 2), [])
+        if any(x==i for x in [0, 1]):
+            x_pos = -2.7
+        else:
+            x_pos = -1.9
+        plt.text(x_pos, 5.6, lbls1[i], fontsize=12)
+        plt.text(x_pos, 5.0, lbls2[i], fontsize=10)
+        plt.text(x_pos, 4.4, lbls3[i], fontsize=10) 
+        plt.text(-0.2, -0.15, r'$\Gamma$',
+                 fontsize=12, color='r')
+        plt.text(-0.2, 1.85, r'$\Gamma$',
+                 fontsize=12, color='r')
+        plt.text(.85, .85, r'S',
+                 fontsize=12, color='r')
+        plt.text(-0.2, .9, r'X',
+                 fontsize=12, color='r')
+        plt.xlim(xmin=-3, xmax=4)
+        if any(x==i for x in [2, 3]):
+            plt.xlim(xmin=-2.2, xmax=2.9)
+        plt.ylim(ymin=-3.3, ymax=6.2)
+        
+    if print_fig == True:
+        plt.savefig(
+                    '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CROfig13.png', 
+                    dpi = 300,bbox_inches="tight")
 """
 Figures Dissertation Ca1.8Sr0.2RuO4 (CSRO)
 """     
