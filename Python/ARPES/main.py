@@ -35,6 +35,7 @@ font = {'family': 'serif',
 
 #%%
 """
+--------   Ca2RuO4 Figures   --------
 CROfig1:   DFT plot Ca2RuO4: figure 3 of Nature Comm.
 CROfig2:   (L): DMFT pot Ca2RuO4: figure 3 of Nature Comm.
 CROfig3:   DFT plot orbitally selective Mott scenario
@@ -46,11 +47,15 @@ CROfig8:   Polarization dependence Ca2RuO4: figure 2 of Nature Comm.
 CROfig9:   (L): DMFT plot Ca2RuO4 dxy/dxz,yz: figure 4 of Nature Comm.
 CROfig10:  (L): DFT plot Ca2RuO4: spaghetti and spectral representation
 CROfig11:  Multiplet analysis Ca2RuO4
+CROfig12:  Constant energy maps oxygen band -5.2eV
+CROfig13:  Constant energy maps alpha band -0.5eV
+CROfig14:  Constant energy maps gamma band -2.4eV
 
-CSROfig1:  Experimental data: Figure 1 CSCRO20 paper
+--------   Ca1.8Sr0.2RuO4 Figures --------
+CSROfig1:  Experimental data: Figure 1 CSRO20 paper
 """
 
-utils_plt.CROfig12(print_fig=True)
+utils_plt.CROfig8(print_fig=True)
 
 #%%
 colmap = cm.ocean_r
