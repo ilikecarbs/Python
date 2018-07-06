@@ -87,6 +87,21 @@ def flatten(self, norm):
                                     np.sum(int_flat[:, i, :]))   
     return int_flat
   
+def FS_flatten(self, ang): 
+    """
+    Flatten FS
+    """
+    map_flat = np.zeros(self.map.shape)
+    if ang == True:
+        for i in range(self.ang.size):
+            map_flat[:, i] = np.divide(self.map[:, i],
+                                np.sum(self.map[:, i]))    
+    elif ang == False:
+        for i in range(self.pol.size):
+            map_flat[i, :] = np.divide(self.map[i, :],
+                                np.sum(self.map[i, :]))    
+    return map_flat
+
 def restrict(self, bot, top, left, right):
     if self.int.ndim == 2:
         d1, d2 = self.int.shape
@@ -120,6 +135,22 @@ def restrict(self, bot, top, left, right):
         int_norm_restr = self.int[_bot:_top, _left:_right, :]
     return (en_restr, ens_restr, en_norm_restr, ang_restr, 
             angs_restr, pol_restr, pols_restr, int_restr, int_norm_restr)
+
+def FS_restrict(self, bot, top, left, right):
+    d1, d2 = self.map.shape
+    val, _bot = find(range(d1), bot * d1)
+    val, _top = find(range(d1), top * d1)
+    val, _left = find(range(d2), left * d2)
+    val, _right = find(range(d2), right * d2)
+    pol_restr = self.pol[_bot:_top]
+    pols_restr = self.pols[_bot:_top, _left:_right, :]
+#        en_restr = self.en
+#        ens_restr = self.ens[_bot:_top, _left:_right]
+    ang_restr = self.ang[_left:_right]
+    angs_restr = self.angs[_bot:_top, _left:_right, :]
+#        en_norm_restr = self.en_norm[_bot:_top, _left:_right, :]
+    map_restr = self.int[_bot:_top, _left:_right, :]
+    return (ang_restr, angs_restr, pol_restr, pols_restr, map_restr)
 
 def ang2k(self, angdg, Ekin, lat_unit, a, b, c, V0, thdg, tidg, phidg):     
     """

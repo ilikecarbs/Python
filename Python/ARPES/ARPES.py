@@ -76,6 +76,12 @@ class DLS:
         self.int_flat = int_flat
         print('\n ~ Spectra flattened',
               '\n', '==========================================')   
+    
+    def FS_flatten(self, ang=True): #Flatten FS
+        map_flat = u.FS_flatten(self, ang)
+        self.map_flat = map_flat
+        print('\n ~ FS flattened',
+              '\n', '==========================================') 
         
     def restrict(self, bot = 0, top = 1, left = 0, right = 1): #restrict spectrum
         (en_restr, ens_restr, en_norm_restr, ang_restr, angs_restr, pol_restr, 
@@ -212,6 +218,12 @@ class ALS:
         self.int_flat = int_flat
         print('\n ~ Spectra flattened',
               '\n', '==========================================')   
+    
+    def FS_flatten(self, ang=True): #Flatten FS
+        map_flat = u.FS_flatten(self, ang)
+        self.map_flat = map_flat
+        print('\n ~ FS flattened',
+              '\n', '==========================================') 
         
     def restrict(self, bot = 0, top = 1, left = 0, right = 1): #restrict spectrum
         (en_restr, ens_restr, en_norm_restr, ang_restr, angs_restr, pol_restr, 
@@ -352,9 +364,15 @@ class SIS:
         int_flat = u.flatten(self, norm)
         self.int_flat = int_flat
         print('\n ~ Spectra flattened',
+              '\n', '==========================================')
+        
+    def FS_flatten(self, ang=True): #Flatten FS
+        map_flat = u.FS_flatten(self, ang)
+        self.map_flat = map_flat
+        print('\n ~ FS flattened',
               '\n', '==========================================')   
         
-    def restrict(self, bot = 0, top = 1, left = 0, right = 1): #restrict spectrum
+    def restrict(self, bot=0, top=1, left=0, right=1): #restrict spectrum
         (en_restr, ens_restr, en_norm_restr, ang_restr, angs_restr, pol_restr, 
          pols_restr, int_restr, int_norm_restr) = u.restrict(
                  self, bot, top, left, right)
@@ -368,6 +386,17 @@ class SIS:
         self.int = int_restr
         self.int_norm = int_norm_restr
         print('\n ~ Spectra restricted',
+              '\n', '==========================================')  
+ 
+    def FS_restrict(self, bot=0, top=1, left=0, right=1): #restrict FS
+        (ang_restr, angs_restr, pol_restr, pols_restr, map_restr) = u.FS_restrict(
+                 self, bot, top, left, right)
+        self.ang = ang_restr
+        self.angs = angs_restr
+        self.pol = pol_restr
+        self.pols = pols_restr
+        self.map = map_restr
+        print('\n ~ FS restricted',
               '\n', '==========================================')  
         
     def ang2k(self, angdg, Ekin, lat_unit=False, a=5.33, b=5.33, c=11, 

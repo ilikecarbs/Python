@@ -161,20 +161,52 @@ def poly2(x, p0, p1, p2, p3):
     """
     return p1 + p2 * (x - p0) + p3 * (x - p0)**2 
 
-def lor(x, p0, p1, p2, p3, p4, p5):
+def lor(x, p0, p1, p2, 
+        p3, p4, p5):
     """
     Single lorentzians on a quadratic background
     """
     return (p2 / (1 + ((x - p0) / p1) ** 2) + 
             p3 + p4 * x + p5 * x ** 2)
     
-def lor2(x, p0, p1, p2, p3, p4, p5, p6, p7, p8):
+def lor2(x, p0, p1, 
+         p2, p3, 
+         p4, p5, 
+         p6, p7, p8):
     """
     Two lorentzians on a quadratic background
     """
     return (p4 / (1 + ((x - p0) / p2) ** 2) + 
             p5 / (1 + ((x - p1) / p3) ** 2) +
             p6 + p7 * x + p8 * x ** 2)
+
+def lor4(x, p0, p1, p2, p3, 
+         p4, p5, p6, p7, 
+         p8, p9, p10, p11, 
+         p12, p13, p14):
+    """
+    Four lorentzians on a quadratic background
+    """
+    return (p8 / (1 + ((x - p0) / p4)  ** 2) + 
+            p9 / (1 + ((x - p1) / p5)  ** 2) +
+            p10 / (1 + ((x - p2) / p6)  ** 2) +
+            p11 / (1 + ((x - p3) / p7)  ** 2) +
+            p12 + p13 * x + p14 * x ** 2)
+    
+def lor6(x, p0, p1, p2, p3, p4, p5, 
+         p6, p7, p8, p9, p10, p11, 
+         p12, p13, p14, p15, p16, p17, 
+         p18, p19, p20):
+    """
+    Six lorentzians on a quadratic background
+    """
+    return (p12 / (1 + ((x - p0) / p6)  ** 2) + 
+            p13 / (1 + ((x - p1) / p7)  ** 2) +
+            p14 / (1 + ((x - p2) / p8)  ** 2) +
+            p15 / (1 + ((x - p3) / p9)  ** 2) +
+            p16 / (1 + ((x - p4) / p10) ** 2) +
+            p17 / (1 + ((x - p5) / p11) ** 2) +
+            p18 + p19 * x + p20 * x ** 2)
     
 def lor8(x, p0, p1, p2, p3, p4, p5, p6, p7, 
          p8, p9, p10, p11, p12, p13, p14, p15, 

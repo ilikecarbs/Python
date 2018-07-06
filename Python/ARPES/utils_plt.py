@@ -104,7 +104,7 @@ def plt_spec(self, norm):
     plt.ylabel('\omega')
     plt.show()
 
-def plt_FS_poliut(self, norm, p, pw):
+def plt_FS_polcut(self, norm, p, pw):
     if norm == True:
         k = self.angs
         en = self.en_norm
@@ -204,10 +204,10 @@ def plt_cont_TB_CSRO20(self, e0):
         plt.contour(X, Y, i, colors = 'black', linestyles = ':', levels = e0)
         plt.axis('equal')
         
-def CRO_theory_plot(k_pts, data_en, data, colmap, v_max):
+def CRO_theory_plot(k_pts, data_en, data, colmap, v_max, fignr):
     c = len(data)
     scale = .02
-    plt.figure(1001, figsize=(10, 10), clear = True)
+    plt.figure(fignr, figsize=(10, 10), clear = True)
     for k in range(len(data)): #looping over segments of k-path
         c = len(data[k])
         m, n = data[k][0].shape
@@ -245,7 +245,7 @@ def CRO_theory_plot(k_pts, data_en, data, colmap, v_max):
         
         #Labels
         if k == 0:
-            plt.ylabel('$\omega$ (meV)', fontdict = font)
+            plt.ylabel('$\omega$ (eV)', fontdict = font)
             plt.xticks(k_seg, ('S', '$\Gamma$', 'S'))
         elif k == 1:
             plt.xticks(k_seg, ('', 'X', 'S'))
@@ -261,8 +261,96 @@ def CRO_theory_plot(k_pts, data_en, data, colmap, v_max):
                     pos.y0, 0.01, pos.height])
     cbar = plt.colorbar(cax = cax, ticks = None)
     cbar.set_ticks([])
+    cbar.set_clim(np.min(data_spec), np.max(data_spec))
     ax.set_position([pos.x0, pos.y0, k_prev * scale, pos.height])
-
+    
+def CRO_FS_plot(colmap, e, v_min, fignr):
+    """
+    Constant energy maps Oxygen bands
+    """
+    p65 = '0618_00113'
+    s65 = '0618_00114'
+    p120 = '0618_00115'
+    s120 = '0618_00116'
+    mat = 'Ca2RuO4'
+    year = 2016
+    sample = 'data'
+    files = [p120, s120, p65, s65]
+    lbls1 = ['(a)', '(b)', '(c)', '(d)']
+    lbls2 = [r'$120\,\mathrm{eV}$', r'$120\,\mathrm{eV}$', r'$65\,\mathrm{eV}$', r'$65\,\mathrm{eV}$']
+    lbls3 = [r'$\bar{\pi}$-pol.', r'$\bar{\sigma}$-pol.', r'$\bar{\pi}$-pol.', r'$\bar{\sigma}$-pol.']
+    th = 25
+    ti = -.5
+    phi = -25.
+    c = (0, 238 / 256, 118 / 256)
+    ###Plotting###
+    plt.figure(fignr, figsize=(10, 10), clear=True)
+    for i in range(4):
+        D = ARPES.ALS(files[i], mat, year, sample) #frist scan
+        D.ang2kFS(D.ang, Ekin=D.hv - 4.5 + e, lat_unit=True, a=4.8, b=5.7, c=11, 
+                        V0=0, thdg=th, tidg=ti, phidg=phi)
+        en = D.en - 2.1 #energy off set (Fermi level not specified)
+        ew = 0.1
+        e_val, e_ind = utils.find(en, e)
+        ew_val, ew_ind = utils.find(en, e-ew)
+        FSmap = np.sum(D.int[:, :, ew_ind:e_ind], axis=2) #creating FS map
+        ax = plt.subplot(1, 5, i + 2) 
+        ax.set_position([.06 + (i * .23), .3, .22, .3])
+        if i == 2:
+            ax.set_position([.06 + (i * .23), .3, .16, .3])
+        elif i == 3:
+            ax.set_position([.06 + (2 * .23) + .17, .3, .16, .3])
+        plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+        plt.contourf(D.kx, D.ky, FSmap, 300, cmap = colmap,
+                       vmin = v_min * np.max(FSmap), vmax = .95 * np.max(FSmap))
+        plt.grid(alpha=0.5)
+        plt.xticks(np.arange(-10, 10, 2))
+        plt.xlabel('$k_x$ ($\pi/a$)', fontdict = font)
+        plt.plot([-1, -1], [-1, 1], 'k-')
+        plt.plot([1, 1], [-1, 1], 'k-')
+        plt.plot([-1, 1], [1, 1], 'k-')
+        plt.plot([-1, 1], [-1, -1], 'k-')
+        plt.plot([-2, 0], [0, 2], 'k--', linewidth=.5)
+        plt.plot([-2, 0], [0, -2], 'k--', linewidth=.5)
+        plt.plot([2, 0], [0, 2], 'k--', linewidth=.5)
+        plt.plot([2, 0], [0, -2], 'k--', linewidth=.5)
+        if i == 0:
+            plt.ylabel('$k_y$ ($\pi/a$)', fontdict = font)
+            plt.yticks(np.arange(-10, 10, 2))
+            plt.plot([-1, 1], [-1, 1], linestyle=':', color=c, linewidth=1)
+            plt.plot([-1, 1], [1, 1], linestyle=':', color=c, linewidth=1)
+            plt.plot([-1, 0], [1, 2], linestyle=':', color=c, linewidth=1)
+            plt.plot([0, 0], [2, -1], linestyle=':', color=c, linewidth=1)
+            ax.arrow(-1, -1, .3, .3, head_width=0.3, head_length=0.3, fc=c, ec='k')
+            ax.arrow(0, -.4, 0, -.3, head_width=0.3, head_length=0.3, fc=c, ec='k')
+        else:
+            plt.yticks(np.arange(-10, 10, 2), [])
+        if any(x==i for x in [0, 1]):
+            x_pos = -2.7
+        else:
+            x_pos = -1.9
+        plt.text(x_pos, 5.6, lbls1[i], fontsize=12)
+        plt.text(x_pos, 5.0, lbls2[i], fontsize=10)
+        plt.text(x_pos, 4.4, lbls3[i], fontsize=10) 
+        plt.text(-0.2, -0.15, r'$\Gamma$',
+                 fontsize=12, color='r')
+        plt.text(-0.2, 1.85, r'$\Gamma$',
+                 fontsize=12, color='r')
+        plt.text(.85, .85, r'S',
+                 fontsize=12, color='r')
+        plt.text(-0.2, .9, r'X',
+                 fontsize=12, color='r')
+        plt.xlim(xmin=-3, xmax=4)
+        if any(x==i for x in [2, 3]):
+            plt.xlim(xmin=-2.2, xmax=2.9)
+        plt.ylim(ymin=-3.3, ymax=6.2)
+        
+    pos = ax.get_position()
+    cax = plt.axes([pos.x0+pos.width+0.01 ,
+                        pos.y0, 0.01, pos.height])
+    cbar = plt.colorbar(cax = cax, ticks = None)
+    cbar.set_ticks([])
+    cbar.set_clim(np.min(FSmap), np.max(FSmap))
 """
 Figures Dissertation Ca2RuO4 (CRO)
 """
@@ -289,7 +377,7 @@ def CROfig1(colmap = cm.bone_r, print_fig = False):
     k_pts = np.array([[S, G, S], [S, X, S], [S, G], [G, X, G, X]])
     DFT = np.array([[SG, GS], [SX, XS], [SG], [GX, XG, GX]])
     DFT_en = np.linspace(-2.5,0,500)
-    CRO_theory_plot(k_pts, DFT_en, DFT, colmap, v_max = 1) #Plot data
+    CRO_theory_plot(k_pts, DFT_en, DFT, colmap, v_max = 1, fignr=1001) #Plot data
     if print_fig == True:
         plt.savefig(
                 '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CROfig1.png', 
@@ -332,7 +420,7 @@ def CROfig2(colmap = cm.bone_r, print_fig = False):
     k_pts = np.array([[S, G, S], [S, X, S], [S, G], [G, X, G, X]])
     DMFT = np.array([[SG, GS], [SX, XS], [SG], [GX, XG, GX]])
     
-    CRO_theory_plot(k_pts, DMFT_en, DMFT, colmap, v_max = .5) #Plot data
+    CRO_theory_plot(k_pts, DMFT_en, DMFT, colmap, v_max = .5, fignr=1002) #Plot data
     if print_fig == True:
         plt.savefig(
                 '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CROfig2.png', 
@@ -362,7 +450,7 @@ def CROfig3(colmap = cm.bone_r, print_fig = False):
     DFT = np.array([[SG, GS], [SX, XS], [SG], [GX, XG, GX]])
     DFT_en = np.linspace(-2.5,0,500)
     
-    CRO_theory_plot(k_pts, DFT_en, DFT, colmap, v_max = 1) #Plot data
+    CRO_theory_plot(k_pts, DFT_en, DFT, colmap, v_max = 1, fignr=1003) #Plot data
     if print_fig == True:
         plt.savefig(
                 '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CROfig3.png', 
@@ -392,7 +480,7 @@ def CROfig4(colmap = cm.bone_r, print_fig = False):
     DFT = np.array([[SG, GS], [SX, XS], [SG], [GX, XG, GX]])
     DFT_en = np.linspace(-2.5,0,500)
     
-    CRO_theory_plot(k_pts, DFT_en, DFT, colmap, v_max = 1) #Plot data
+    CRO_theory_plot(k_pts, DFT_en, DFT, colmap, v_max = 1, fignr=1004) #Plot data
     if print_fig == True:
         plt.savefig(
                 '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CROfig4.png', 
@@ -439,9 +527,9 @@ def CROfig5(colmap = cm.ocean_r, print_fig = False):
                        vmin=v_scale * 0.01 * np.max(D.int_norm), 
                        vmax=v_scale * 0.5 * np.max(D.int_norm))
             plt.xlim(xmax = 1, xmin = -1)
-            plt.ylabel('$\omega$ (meV)', fontdict = font)
+            plt.ylabel('$\omega$ (eV)', fontdict = font)
             plt.xticks([-1, 0, 1], ('S', '$\Gamma$', 'S'))
-            plt.yticks(np.arange(-2.5, 0, .5))
+            plt.yticks(np.arange(-2.5, 0.001, .5))
         elif n == 2:
             ax = plt.subplot(1, 4, n)
             ax.set_position([pos.x0 + k_seg_1[-1] * scale, pos.y0, 
@@ -486,12 +574,13 @@ def CROfig5(colmap = cm.ocean_r, print_fig = False):
             plt.yticks(np.arange(-2.5, 0, .5), [])
         
         pos = ax.get_position()
-        plt.ylim(ymax = 0, ymin = -2.5)
+        plt.ylim(ymax = .001, ymin = -2.5)
         plt.show()
     cax = plt.axes([pos.x0 + k_seg_4[-1] * scale + 0.01,
                     pos.y0, 0.01, pos.height])
     cbar = plt.colorbar(cax = cax, ticks = None)
     cbar.set_ticks([])
+    cbar.set_clim(np.min(D.int_norm), np.max(D.int_norm))
     if print_fig == True:
         plt.savefig(
                 '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CROfig5.png', 
@@ -624,12 +713,12 @@ def CROfig7(colmap = cm.ocean_r, print_fig = False):
                      vmin = 0, vmax = 1.4e4)
         plt.plot([-1, 1.66], [0, 0], 'k:')
         plt.plot([-1, 1.66], [mdc_val - mdcw_val / 2, mdc_val - mdcw_val / 2],
-                 linestyle='--', color=(0, 238 / 256, 118 / 256), linewidth=1)
+                 linestyle='--', color=(0, 238 / 256, 118 / 256), linewidth=.5)
         plt.plot([edc_val, edc_val], [-2.5, .5], linestyle='--', 
-                 color=(0, 238 / 256, 118 / 256), linewidth=1)
+                 color=(0, 238 / 256, 118 / 256), linewidth=.5)
         plt.xlim(xmax = 1.66, xmin = -1)
         plt.ylim(ymax = 0.5, ymin = -2.5)
-        plt.ylabel('$\omega$ (meV)', fontdict = font)
+        plt.ylabel('$\omega$ (eV)', fontdict = font)
         plt.xticks([-1, 0, 1], ('S', '$\Gamma$', 'S'))
         plt.yticks(np.arange(-2.5, .5, .5))
         plt.text(-.9, 0.3, r'(a)', fontsize=15)
@@ -645,7 +734,7 @@ def CROfig7(colmap = cm.ocean_r, print_fig = False):
                      vmin = 0, vmax = 1.4e4)
         plt.plot([-1, 1.66], [0, 0], 'k:')
         plt.plot([edc_val, edc_val], [-2.5, .5], linestyle='--', 
-                 color=(0, 238 / 256, 118 / 256), linewidth=1)
+                 color=(0, 238 / 256, 118 / 256), linewidth=.5)
         plt.xlim(xmax = 1.66, xmin = -1)
         plt.ylim(ymax = 0.5, ymin = -2.5)
         plt.xticks([-1, 0, 1], ('S', '$\Gamma$', 'S'))
@@ -727,10 +816,10 @@ def CROfig8(colmap = cm.ocean_r, print_fig = False):
                      cmap=colmap, vmin = 0, vmax = .007)
         plt.plot([-1, 1.66], [0, 0], 'k:')
         plt.plot([edc_val, edc_val], [-2.5, .5], linestyle='--', 
-                 color=(0, 238 / 256, 118 / 256), linewidth=1)
+                 color=(0, 238 / 256, 118 / 256), linewidth=.5)
         plt.xlim(xmax = 1, xmin = 0)
         plt.ylim(ymax = 0.5, ymin = -2.5)
-        plt.ylabel('$\omega$ (meV)', fontdict = font)
+        plt.ylabel('$\omega$ (eV)', fontdict = font)
         plt.xticks([0, 1], ('S', '$\Gamma$'))
         plt.yticks(np.arange(-2.5, .5, .5))
         plt.text(.05, 0.3, r'(a)', fontsize=15)
@@ -744,7 +833,7 @@ def CROfig8(colmap = cm.ocean_r, print_fig = False):
                      cmap=colmap, vmin = 0, vmax = .007)
         plt.plot([-1, 1.66], [0, 0], 'k:')
         plt.plot([edc_val, edc_val], [-2.5, .5], linestyle='--', 
-                 color=(0, 238 / 256, 118 / 256), linewidth=1)
+                 color=(0, 238 / 256, 118 / 256), linewidth=.5)
         plt.xlim(xmax = 1, xmin = 0)
         plt.ylim(ymax = 0.5, ymin = -2.5)
         plt.xticks([0, 1], ('S', '$\Gamma$'))
@@ -985,7 +1074,36 @@ def CROfig11(print_fig = False):
         plt.savefig(
                     '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CROfig11.png', 
                     dpi = 600,bbox_inches="tight")
+        
+def CROfig12(colmap = cm.ocean_r, print_fig = False):
+    """
+    Constant energy maps oxygen band 
+    """
+    CRO_FS_plot(colmap, e=-5.2, v_min=.25, fignr=1012)
+    if print_fig == True:
+        plt.savefig(
+                    '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CROfig12.png', 
+                    dpi = 300,bbox_inches="tight")
 
+def CROfig13(colmap = cm.ocean_r, print_fig = False):
+    """
+    Constant energy maps alpha band
+    """
+    CRO_FS_plot(colmap, e=-.5, v_min=.05, fignr=1013)
+    if print_fig == True:
+        plt.savefig(
+                    '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CROfig13.png', 
+                    dpi = 300,bbox_inches="tight")
+        
+def CROfig14(colmap = cm.ocean_r, print_fig = False):
+    """
+    Constant energy maps gamma band 
+    """
+    CRO_FS_plot(colmap, e=-2.4, v_min=.4, fignr=1014)
+    if print_fig == True:
+        plt.savefig(
+                    '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CROfig14.png', 
+                    dpi = 300,bbox_inches="tight")
 """
 Figures Dissertation Ca1.8Sr0.2RuO4 (CSRO)
 """     
@@ -1118,7 +1236,6 @@ def CSROfig1(colmap = cm.ocean_r, print_fig = False):
         plt.contourf(D.kx, D.ky, FS, 300, vmax=.9 * np.max(FS), vmin=.3 * np.max(FS),
                    cmap=colmap)
         plt.xlabel('$k_y \,(\pi/a)$', fontdict = font)
-        #plt.axis('equal')
         plt.text(-.65, .56, r'(b)', fontsize=12, color='w')
         plt.text(-.05, -.03, r'$\Gamma$', fontsize=12, color='r')
         plt.text(-.05, -1.03, r'Y', fontsize=12, color='r')
