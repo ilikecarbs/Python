@@ -90,38 +90,56 @@ mdc = mdc / np.max(mdc)
 ###Fit MDC's###
 plt.figure(20002, figsize=(4, 4), clear=True)
 delta = 1e-5
-p_mdc_i = np.array(
+p_mdc_d_i = np.array(
             [-.6, -.4, -.2, .2, .4, .6,
              .05, .05, .05, .05, .05, .05,
              .3, .3, .4, .4, .5, .5, 
              .59, -0.2, .04])
-bounds_bot = np.concatenate((p_mdc_i[0:-3] - np.inf, p_mdc_i[-3:27] - delta))
-bounds_top = np.concatenate((p_mdc_i[0:-3] + np.inf, p_mdc_i[-3:27] + delta))
-p_mdc_bounds = (bounds_bot, bounds_top)
-p_mdc, cov_mdc = curve_fit(
-        utils_math.lor6, D.kx[0, :], mdc_d, p_mdc_i, bounds=p_mdc_bounds)
-b_mdc = utils_math.poly2(D.kx[0, :], 0, p_mdc[-3], p_mdc[-2], p_mdc[-1])
-f_mdc = utils_math.lor6(D.kx[0, :], *p_mdc) - b_mdc
-f_mdc[0] = 0
-f_mdc[-1] = 0
+bounds_bot = np.concatenate((p_mdc_d_i[0:-3] - np.inf, p_mdc_d_i[-3:21] - delta))
+bounds_top = np.concatenate((p_mdc_d_i[0:-3] + np.inf, p_mdc_d_i[-3:21] + delta))
+p_mdc_d_bounds = (bounds_bot, bounds_top)
+p_mdc_d, cov_mdc = curve_fit(
+        utils_math.lor6, D.kx[0, :], mdc_d, p_mdc_d_i, bounds=p_mdc_d_bounds)
+b_mdc_d = utils_math.poly2(D.kx[0, :], 0, p_mdc_d[-3], p_mdc_d[-2], p_mdc_d[-1])
+f_mdc_d = utils_math.lor6(D.kx[0, :], *p_mdc_d) - b_mdc_d
+f_mdc_d[0] = 0
+f_mdc_d[-1] = 0
 plt.subplot(211)
 plt.plot(D.kx[0, :], mdc_d, 'bo')
-plt.plot(D.kx[0, :], f_mdc + b_mdc)
-plt.plot(D.kx[0, :], b_mdc, 'k--')
+plt.plot(D.kx[0, :], f_mdc_d + b_mdc_d)
+plt.plot(D.kx[0, :], b_mdc_d, 'k--')
 
+p_mdc_i = np.array(
+            [-.6,  -.2, .2, .6,
+             .05, .05, .05, .05,
+             .3, .3, .4, .4,
+             .59, -0.2, .04])
+bounds_bot = np.concatenate((p_mdc_i[0:-3] - np.inf, p_mdc_i[-3:15] - delta))
+bounds_top = np.concatenate((p_mdc_i[0:-3] + np.inf, p_mdc_i[-3:15] + delta))
+p_mdc_bounds = (bounds_bot, bounds_top)
+p_mdc, cov_mdc = curve_fit(
+        utils_math.lor4, D.ky[:, 0], mdc, p_mdc_i, bounds=p_mdc_bounds)
+b_mdc = utils_math.poly2(D.ky[:, 0], 0, p_mdc[-3], p_mdc[-2], p_mdc[-1])
+f_mdc = utils_math.lor4(D.ky[:, 0], *p_mdc) - b_mdc
+f_mdc[0] = 0
+f_mdc[-1] = 0
+plt.subplot(212)
+plt.plot(D.ky[:, 0], mdc, 'bo')
+plt.plot(D.ky[:, 0], f_mdc + b_mdc)
+plt.plot(D.ky[:, 0], b_mdc, 'k--')
 def CSROfig2a():
     ax = plt.subplot(1, 4, 1) 
     ax.set_position([.08, .605, .4, .15])
-    plt.plot(D.kx[0, :], mdc_d - b_mdc + .01, 'o', markersize=1.5, color='C9')
-    plt.fill(D.kx[0, :], f_mdc + .01, alpha=.2, color='C9')
+    plt.plot(D.kx[0, :], mdc_d - b_mdc_d + .01, 'o', markersize=1.5, color='C9')
+    plt.fill(D.kx[0, :], f_mdc_d + .01, alpha=.2, color='C9')
     corr = np.array([.04, .03, .07, .08, .07, .05])
     cols = ['k', 'm', 'C1', 'C1', 'm', 'k']
     lbls = [r'$\delta$', r'$\beta$', r'$\alpha$', r'$\alpha$', r'$\beta$',
                 r'$\delta$']
     for i in range(6):
-        plt.plot(D.kx[0, :], (utils_math.lor(D.kx[0, :], p_mdc[i], p_mdc[i + 6], p_mdc[i + 12], 
-                 p_mdc[-3], p_mdc[-2], p_mdc[-1]) - b_mdc) + .01, linewidth=.5, color=cols[i])
-        plt.text(p_mdc[i] - .02, p_mdc[i + 12] + corr[i], lbls[i], 
+        plt.plot(D.kx[0, :], (utils_math.lor(D.kx[0, :], p_mdc_d[i], p_mdc_d[i + 6], p_mdc_d[i + 12], 
+                 p_mdc_d[-3], p_mdc_d[-2], p_mdc_d[-1]) - b_mdc_d) + .01, linewidth=.5, color=cols[i])
+        plt.text(p_mdc_d[i] - .02, p_mdc_d[i + 12] + corr[i], lbls[i], 
                      fontdict=font, fontsize=10, color=cols[i])
     plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
     ax.xaxis.tick_top()
@@ -183,7 +201,7 @@ def CSROfig2b():
 def CSROfig2c():
     ax = plt.subplot(1, 4, 4) 
     ax.set_position([.485, .2, .15, .4])
-    plt.plot(mdc, D.ky[:, 0], 'o', markersize=1.5, color='C9')
+    plt.plot(mdc - b_mdc, D.ky[:, 0], 'o', markersize=1.5, color='C9')
 #    plt.fill(D.ky[0, :], f_mdc + .01, alpha=.2, color='C9')
     corr = np.array([.04, .03, .07, .08, .07, .05])
     cols = ['k', 'm', 'C1', 'C1', 'm', 'k']
