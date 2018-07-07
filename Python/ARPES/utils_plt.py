@@ -713,8 +713,8 @@ def CROfig7(colmap = cm.ocean_r, print_fig = False):
                      vmin = 0, vmax = 1.4e4)
         plt.plot([-1, 1.66], [0, 0], 'k:')
         plt.plot([-1, 1.66], [mdc_val - mdcw_val / 2, mdc_val - mdcw_val / 2],
-                 linestyle='--', color=(0, 238 / 256, 118 / 256), linewidth=.5)
-        plt.plot([edc_val, edc_val], [-2.5, .5], linestyle='--', 
+                 linestyle='-.', color=(0, 238 / 256, 118 / 256), linewidth=.5)
+        plt.plot([edc_val, edc_val], [-2.5, .5], linestyle='-.', 
                  color=(0, 238 / 256, 118 / 256), linewidth=.5)
         plt.xlim(xmax = 1.66, xmin = -1)
         plt.ylim(ymax = 0.5, ymin = -2.5)
@@ -733,7 +733,7 @@ def CROfig7(colmap = cm.ocean_r, print_fig = False):
         plt.contourf(D.k[0], D.en+.07, np.transpose(int2), 300, cmap=colmap,
                      vmin = 0, vmax = 1.4e4)
         plt.plot([-1, 1.66], [0, 0], 'k:')
-        plt.plot([edc_val, edc_val], [-2.5, .5], linestyle='--', 
+        plt.plot([edc_val, edc_val], [-2.5, .5], linestyle='-.', 
                  color=(0, 238 / 256, 118 / 256), linewidth=.5)
         plt.xlim(xmax = 1.66, xmin = -1)
         plt.ylim(ymax = 0.5, ymin = -2.5)
@@ -815,7 +815,7 @@ def CROfig8(colmap = cm.ocean_r, print_fig = False):
         plt.contourf(D1.kxs, D1.en_norm+.1, np.flipud(D1.int_norm), 300, 
                      cmap=colmap, vmin = 0, vmax = .007)
         plt.plot([-1, 1.66], [0, 0], 'k:')
-        plt.plot([edc_val, edc_val], [-2.5, .5], linestyle='--', 
+        plt.plot([edc_val, edc_val], [-2.5, .5], linestyle='-.', 
                  color=(0, 238 / 256, 118 / 256), linewidth=.5)
         plt.xlim(xmax = 1, xmin = 0)
         plt.ylim(ymax = 0.5, ymin = -2.5)
@@ -832,7 +832,7 @@ def CROfig8(colmap = cm.ocean_r, print_fig = False):
         plt.contourf(D2.kxs, D2.en_norm+.1, np.flipud(D2.int_norm), 300, 
                      cmap=colmap, vmin = 0, vmax = .007)
         plt.plot([-1, 1.66], [0, 0], 'k:')
-        plt.plot([edc_val, edc_val], [-2.5, .5], linestyle='--', 
+        plt.plot([edc_val, edc_val], [-2.5, .5], linestyle='-.', 
                  color=(0, 238 / 256, 118 / 256), linewidth=.5)
         plt.xlim(xmax = 1, xmin = 0)
         plt.ylim(ymax = 0.5, ymin = -2.5)
@@ -1176,7 +1176,7 @@ def CSROfig1(colmap = cm.ocean_r, print_fig = False):
         plt.contourf(A1.en_norm, A1.kys, A1.int_norm, 100, cmap=colmap,
                      vmin=.1 * np.max(A1.int_norm), vmax=.8 * np.max(A1.int_norm))
         plt.plot([0, 0], [np.min(A1.kys), np.max(A1.kys)], 'k:')
-        plt.plot([-.005, -.005], [np.min(A1.kys), np.max(A1.kys)], linestyle='--',
+        plt.plot([-.005, -.005], [np.min(A1.kys), np.max(A1.kys)], linestyle='-.',
                  color=c, linewidth=.5)
         plt.xlim(xmax=.03, xmin=-.06)
         plt.ylim(ymax=np.max(D.ky), ymin=np.min(D.ky))   
@@ -1241,8 +1241,15 @@ def CSROfig1(colmap = cm.ocean_r, print_fig = False):
         plt.text(-.05, -1.03, r'Y', fontsize=12, color='r')
         plt.text(.95, -.03, r'X', fontsize=12, color='r')
         plt.text(.95, -1.03, r'S', fontsize=12, color='r')
-        plt.plot(A1.k[0], A1.k[1], linestyle='--', color=c, linewidth=.5)
-        plt.plot(A2.k[0], A2.k[1], linestyle='--', color=c, linewidth=.5)
+        lblmap = [r'$\alpha$', r'$\beta$', r'$\gamma$', r'$\delta$', 
+          r'$\epsilon$']
+        lblx = np.array([.25, .43, .66, .68, .8])
+        lbly = np.array([-.25, -.43, -.23, -.68, -.8])
+        lblc = ['C1', 'm', 'b', 'k', 'r']
+        for k in range(5):
+            plt.text(lblx[k], lbly[k], lblmap[k], fontsize=12, color=lblc[k])
+        plt.plot(A1.k[0], A1.k[1], linestyle='-.', color=c, linewidth=.5)
+        plt.plot(A2.k[0], A2.k[1], linestyle='-.', color=c, linewidth=.5)
         ###Tight Binding Model###
         tb = utils_math.TB(a = np.pi, kbnd = 2, kpoints = 200)#Initialize 
         param = utils_math.paramCSRO20()  #Load parameters
@@ -1294,6 +1301,189 @@ def CSROfig1(colmap = cm.ocean_r, print_fig = False):
             plt.savefig(
                         '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig1.png', 
                         dpi = 600,bbox_inches="tight")
-   
+
+def CSROfig2(colmap = cm.ocean_r, print_fig = False):
+    """
+    Experimental PSI data: Figure 2 CSCRO20 paper
+    """
+    os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+    file = 'CSRO_P1_0032'
+    mat = 'CSRO20'
+    year = 2017
+    sample = 'data'
+    D = ARPES.SIS(file, mat, year, sample) 
+    D.FS(e = 19.3, ew = .01, norm = False)
+    D.FS_flatten(ang=False)
+    """
+    D.FS_restrict(bot=0, top=1, left=0, right=1)
+    """
+    D.ang2kFS(D.ang, Ekin=D.hv-4.5, lat_unit=True, a=5.5, b=5.5, c=11, 
+              V0=0, thdg=-1.2, tidg=1, phidg=0)
+    ###Diagonal MDC###
+    bnd = .72
+    c = (0, 238 / 256, 118 / 256)
+    mdc_d = np.zeros(D.ang.size)
+    mdc = np.zeros(D.pol.size)
+    for i in range(D.ang.size):
+        val, _mdc_d = utils.find(D.ky[:, i], D.kx[0, i])
+        mdc_d[i] = D.map[_mdc_d, i]
+    val, _mdc = utils.find(D.kx[0, :], .02)
+    val, _mdcw = utils.find(D.kx[0, :], -.02)
+    mdc = np.sum(D.map[:, _mdcw:_mdc], axis=1)
+    mdc_d = mdc_d / np.max(mdc_d)
+    mdc = mdc / np.max(mdc)
+    ###Fit MDC's###
+    plt.figure(20002, figsize=(4, 4), clear=True)
+    delta = 1e-5
+    p_mdc_d_i = np.array(
+                [-.6, -.4, -.2, .2, .4, .6,
+                 .05, .05, .05, .05, .05, .05,
+                 .3, .3, .4, .4, .5, .5, 
+                 .59, -0.2, .04])
+    bounds_bot = np.concatenate(
+                        (p_mdc_d_i[0:-3] - np.inf, p_mdc_d_i[-3:21] - delta))
+    bounds_top = np.concatenate(
+                        (p_mdc_d_i[0:-3] + np.inf, p_mdc_d_i[-3:21] + delta))
+    p_mdc_d_bounds = (bounds_bot, bounds_top)
+    p_mdc_d, cov_mdc = curve_fit(
+            utils_math.lor6, D.kx[0, :], mdc_d, p_mdc_d_i, bounds=p_mdc_d_bounds)
+    b_mdc_d = utils_math.poly2(D.kx[0, :], 0, p_mdc_d[-3], p_mdc_d[-2], p_mdc_d[-1])
+    f_mdc_d = utils_math.lor6(D.kx[0, :], *p_mdc_d) - b_mdc_d
+    f_mdc_d[0] = 0
+    f_mdc_d[-1] = 0
+    plt.subplot(211)
+    plt.plot(D.kx[0, :], mdc_d, 'bo')
+    plt.plot(D.kx[0, :], f_mdc_d + b_mdc_d)
+    plt.plot(D.kx[0, :], b_mdc_d, 'k--')
+    delta = 5e-2
+    p_mdc_i = np.array(
+                [-.6,  -.2, .2, .6,
+                 .05, .05, .05, .05,
+                 .3, .3, .4, .4,
+                 .6, -0.15, .1])
+    bounds_bot = np.concatenate((p_mdc_i[0:-3] - np.inf, p_mdc_i[-3:15] - delta))
+    bounds_top = np.concatenate((p_mdc_i[0:-3] + np.inf, p_mdc_i[-3:15] + delta))
+    p_mdc_bounds = (bounds_bot, bounds_top)
+    p_mdc, cov_mdc = curve_fit(
+            utils_math.lor4, D.ky[:, 0], mdc, p_mdc_i, bounds=p_mdc_bounds)
+    b_mdc = utils_math.poly2(D.ky[:, 0], 0, p_mdc[-3], p_mdc[-2], p_mdc[-1])
+    f_mdc = utils_math.lor4(D.ky[:, 0], *p_mdc) - b_mdc
+    f_mdc[0] = 0
+    f_mdc[-1] = 0
+    plt.subplot(212)
+    plt.plot(D.ky[:, 0], mdc, 'bo')
+    plt.plot(D.ky[:, 0], f_mdc + b_mdc)
+    plt.plot(D.ky[:, 0], b_mdc, 'k--')
+    def CSROfig2a():
+        ax = plt.subplot(1, 4, 1) 
+        ax.set_position([.08, .605, .4, .15])
+        plt.plot(D.kx[0, :], mdc_d - b_mdc_d + .01, 'o', markersize=1.5, color='C9')
+        plt.fill(D.kx[0, :], f_mdc_d + .01, alpha=.2, color='C9')
+        corr = np.array([.04, .03, .07, .08, .07, .05])
+        cols = ['k', 'm', 'C1', 'C1', 'm', 'k']
+        lbls = [r'$\delta$', r'$\beta$', r'$\alpha$', r'$\alpha$', r'$\beta$',
+                    r'$\delta$']
+        for i in range(6):
+            plt.plot(D.kx[0, :], (utils_math.lor(D.kx[0, :], p_mdc_d[i], 
+                     p_mdc_d[i + 6], p_mdc_d[i + 12], p_mdc_d[-3], p_mdc_d[-2], 
+                     p_mdc_d[-1]) - b_mdc_d) + .01, linewidth=.5, color=cols[i])
+            plt.text(p_mdc_d[i] - .02, p_mdc_d[i + 12] + corr[i], lbls[i], 
+                         fontdict=font, fontsize=10, color=cols[i])
+        plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+        ax.xaxis.tick_top()
+        ax.xaxis.set_label_position('top')
+        plt.xticks(np.arange(-10, 10, .5))
+        plt.yticks([])
+        plt.xlim(xmax=bnd, xmin=-bnd)
+        plt.ylim(ymax=.42, ymin=0)
+        plt.xlabel(r'$k_x = k_y \, (\pi/a)$')
+        plt.ylabel(r'Intensity (a.u.)')
+        plt.text(-.7, .36, r'(a)', fontsize=12)
+    
+    def CSROfig2b():
+        ax = plt.subplot(1, 4, 3) 
+        ax.set_position([.08, .2, .4, .4])
+        plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+        plt.contourf(D.kx, D.ky, D.map_flat, 100, cmap=colmap,
+                     vmin=.6 * np.max(D.map_flat), vmax=1.0 * np.max(D.map_flat))
+        plt.plot([-bnd, bnd], [-bnd, bnd], linestyle='-.', color=c, linewidth=.5)
+        plt.plot([0, 0], [-bnd, bnd], linestyle='-.', color=c, linewidth=.5)
+        ax.arrow(.55, .55, 0, .13, head_width=0.03, head_length=0.03, fc=c, ec=c)
+        plt.xticks(np.arange(-10, 10, .5))
+        plt.yticks(np.arange(-10, 10, .5),[])
         
+        
+        plt.axis('equal')
+        plt.xlabel(r'$k_x \, (\pi/a)$')
+        plt.text(-.7, .63, r'(b)', fontsize=12, color='w')
+        plt.xlim(xmax=bnd, xmin=-bnd)
+        plt.ylim(ymax=bnd, ymin=-bnd)  
+        pos = ax.get_position()
+        cax = plt.axes([pos.x0 - .02 ,
+                        pos.y0, 0.01, pos.height])
+        cbar = plt.colorbar(cax = cax, ticks = None)
+        cbar.set_ticks([])
+        cbar.set_clim(np.min(D.map_flat), np.max(D.map_flat))
+        ###Tight Binding Model###
+        ax = plt.subplot(1, 4, 3) 
+        ax.set_position([.08, .2, .4, .4])
+        tb = utils_math.TB(a = np.pi, kbnd = 2, kpoints = 200)#Initialize 
+        param = utils_math.paramCSRO20()  #Load parameters
+        tb.CSRO(param)  #Calculate bandstructure
+        bndstr = tb.bndstr  #Load bandstructure
+        coord = tb.coord  #Load coordinates
+        X = coord['X']; Y = coord['Y']   
+        Byz = bndstr['Byz']
+        C = plt.contour(X, Y, Byz, colors = 'black', linestyles = ':', 
+                        alpha=0, levels = -0.00)
+        p = C.collections[0].get_paths()
+        p = np.asarray(p)
+        byz = np.array([16, 17, 20, 21])
+        ind = byz; col = 'k'
+        v = p[18].vertices
+        plt.plot(v[:, 0], v[:, 1], linestyle = ':', color = 'm', 
+                 linewidth=1)
+        v = p[19].vertices
+        plt.plot(v[:, 0], v[:, 1], linestyle = ':', color = 'C1', 
+                 linewidth=1)
+        for j in ind:
+            v = p[j].vertices
+            plt.plot(v[:, 0], v[:, 1], linestyle = ':', color = col, 
+                     linewidth=1)
+        
+    def CSROfig2c():
+        ax = plt.subplot(1, 4, 4) 
+        ax.set_position([.485, .2, .15, .4])
+        plt.plot(mdc - b_mdc, D.ky[:, 0], 'o', markersize=1.5, color='C9')
+        plt.fill(f_mdc + .01, D.ky[:, 0], alpha=.2, color='C9')
+        corr = np.array([.03, .06, .04, .04])
+        cols = ['m', 'C1', 'C1', 'm']
+        lbls = [r'$\beta$', r'$\alpha$', r'$\alpha$', r'$\beta$']
+        for i in range(4):
+            plt.plot((utils_math.lor(D.ky[:, 0], p_mdc[i], p_mdc[i + 4], 
+                                     p_mdc[i + 8], p_mdc[-3], p_mdc[-2],
+                                     p_mdc[-1]) - b_mdc) + .01, 
+                     D.ky[:, 0], linewidth=.5, color=cols[i])
+            plt.text(p_mdc[i + 8] + corr[i], p_mdc[i] - .02, lbls[i], 
+                         fontdict=font, fontsize=10, color=cols[i])
+        plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+        plt.yticks(np.arange(-10, 10, .5))
+        ax.yaxis.tick_right()
+        plt.xticks([])
+        plt.ylim(ymax=bnd, ymin=-bnd)
+        plt.xlim(xmax=.42, xmin=0)
+        ax.yaxis.set_label_position('right')
+        plt.ylabel(r'$k_y \, (\pi/b)$')
+        plt.xlabel(r'Intensity (a.u.)')
+        plt.text(.33, .63, r'(c)', fontsize=12)
+        
+    ###Plotting
+    plt.figure(2002, figsize=(8, 8), clear=True)
+    CSROfig2a()
+    CSROfig2b()
+    CSROfig2c()
+    if print_fig == True:
+            plt.savefig(
+                        '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig2.png', 
+                        dpi = 600,bbox_inches="tight")
         
