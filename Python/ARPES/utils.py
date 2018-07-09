@@ -233,6 +233,12 @@ def gold(file, mat, year, sample, Ef_ini, BL):
     """
     if BL == 'DLS':
         D = ARPES.DLS(file, mat, year, sample)
+    elif BL == 'SIS':
+        D = ARPES.SIS(file, mat, year, sample)
+    elif BL == 'ALS':
+        D = ARPES.ALS(file, mat, year, sample)
+    elif BL == 'Bessy':
+        D = ARPES.Bessy(file, mat, year, sample)
     bnd = 150
     ch = 300
     plt.figure(5001)

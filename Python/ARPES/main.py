@@ -56,9 +56,85 @@ CSROfig1:  Experimental data: Figure 1 CSRO20 paper
 CSROfig2:  Experimental PSI data: Figure 2 CSCRO20 paper
 """
 
-utils_plt.CSROfig1(print_fig=True)
+utils_plt.CSROfig2(print_fig=True)
 
 #%%
+from scipy.optimize import curve_fit
+
+
+os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+
+file = 25
+file_LH = 19
+file_LV = 20
+gold = 14
+mat = 'CSRO20'
+year = 2017
+sample = 'S1'
+
+D = ARPES.Bessy(file, mat, year, sample)
+LH = ARPES.Bessy(file_LH, mat, year, sample)
+LV = ARPES.Bessy(file_LV, mat, year, sample)
+
+#utils.gold(gold, mat, year, sample, Ef_ini=35.72, BL='Bessy')
+
+colmap = cm.ocean_r
+D.norm(gold)
+LH.norm(gold)
+LV.norm(gold)
+
+#D.shift(gold)
+#LH.shift(gold)
+#LV.shift(gold)
+D.restrict(bot=.7, top=.9, left=0, right=1)
+LH.restrict(bot=.55, top=.85, left=0, right=1)
+LV.restrict(bot=.55, top=.85, left=0, right=1)
+
+D.ang2k(D.ang, Ekin=35-4.5, lat_unit=True, a=5.5, b=5.5, c=11, 
+          V0=0, thdg=2.4, tidg=0, phidg=-45)
+LH.ang2k(LH.ang, Ekin=35-4.5, lat_unit=True, a=5.5, b=5.5, c=11, 
+          V0=0, thdg=2.4, tidg=0, phidg=-45)
+LV.ang2k(LV.ang, Ekin=35-4.5, lat_unit=True, a=5.5, b=5.5, c=11, 
+          V0=0, thdg=2.4, tidg=0, phidg=-45)
+c = (0, 238 / 256, 118 / 256)
+
+data = (D.int_norm, LH.int_norm, LV.int_norm)
+en = (D.en_norm - .008, LH.en_norm, LV.en_norm)
+ks = (D.ks, LH.ks, LV.ks)
+k = (D.k[0], LH.k[0], LV.k[0])
+#%%
+###MDC###
+
+
+plt.figure(2003, figsize=(8, 8), clear=True)
+for j in [1, 2]:
+    mdc_val = .003
+    mdcw_val = .006
+    mdc = np.zeros(k[j].shape)
+    for i in range(len(k[j])):
+        val, _mdc = utils.find(en[j][i, :], mdc_val)
+        val, _mdcw = utils.find(en[j][i, :], mdc_val - mdcw_val)
+        mdc[i] = np.sum(data[j][i, _mdcw:_mdc])
+    mdc = mdc / np.max(mdc)
+    mdc[0] = 0
+    mdc[-1] = 0
+    
+    ax = plt.subplot(2, 3, j + 1) 
+    ax.set_position([.08 + j * .26, .5, .25, .25])
+    plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+    plt.contourf(ks[j], en[j], data[j], 200, cmap=colmap,
+                 vmin=.05 * np.max(data[j]), vmax=.35 * np.max(data[j]))
+    plt.plot([np.min(ks[j]), np.max(ks[j])], [0, 0], 'k:')
+    plt.yticks(np.arange(-.1, .05, .02), ('-100', '-80', '-60', '-40', '-20', '0',
+               '20', '40'))
+    plt.xticks([-1.5, -1, -.5, 0, .5, 1.0])
+    plt.xlim(xmax=np.max(ks[j]), xmin=np.min(ks[j]))   
+    plt.ylim(ymax=.05, ymin=-.1)
+    plt.ylabel('$\omega\,(\mathrm{meV})$', fontdict = font)
+    plt.xlabel('$k_x \,(\pi/a)$', fontdict = font)
+    plt.plot(k[j], mdc / 30 + .001, 'o', markersize=1.5, color='C9')
+    plt.fill(k[j], mdc / 30 + .001, alpha=.2, color='C9')
+    plt.text(-1, .038, r'(a)', fontsize=12)
 
 #%%
 
@@ -75,7 +151,6 @@ sample = 'S6'
 D = ARPES.DLS(file, mat, year, sample)
 
 #%%
-#u.gold(gold, mat, year, sample, Ef_ini=17.63, BL='DLS')
 D.norm(gold)
 D.restrict(bot=0, top=1, left=.1, right=.9)
 
