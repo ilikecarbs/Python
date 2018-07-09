@@ -452,20 +452,42 @@ class Bessy:
         self.mat = mat
         folder = ''.join(['/Users/denyssutter/Documents/Denys/',str(mat),
                           '/Bessy',str(year),'/',str(sample),'/'])
-        path_int = ''.join(['Ca_',str(file),'int','.dat'])
+        
         path_ang = ''.join(['Ca_',str(file),'ang','.dat'])
+        path_pol = ''.join(['Ca_',str(file),'pol','.dat'])
         path_en = ''.join(['Ca_',str(file),'en','.dat'])
-        intensity = np.loadtxt(folder + path_int)
+        
         ang = np.loadtxt(folder + path_ang)
         en = np.loadtxt(folder + path_en)
+        if file == 8:
+            pol = np.loadtxt(folder + path_pol)
+            self.pol = pol
         self.folder = folder
-        print('\n ~ Initializing Bessy data file: \n {}'.format(folder+path_int), 
+        print('\n ~ Initializing Bessy data file: \n {}'.format(folder+str(file)), 
               '\n', '==========================================')
-        self.int = np.transpose(intensity)
         self.ang = ang
         self.en = en
-        self.ens = np.broadcast_to(en, (ang.size, en.size))
-        self.angs = np.transpose(np.broadcast_to(ang, (en.size, ang.size)))
+        if file == 8:
+            intensity = np.zeros((len(pol), len(ang), len(en)))
+            for k in range(self.pol.size):
+                path_int = ''.join(['Ca_',str(file),'int',str(k + 1),'.dat'])
+                intensity[k, :, :] = np.transpose(np.loadtxt(folder + path_int))
+            print('- Fermi surface map \n')
+            self.ens   = np.broadcast_to(en, (pol.size, ang.size, en.size))
+            self.angs  = np.transpose(
+                            np.broadcast_to(ang, (pol.size, en.size, ang.size)),
+                                (0, 2, 1))
+            self.pols  = np.transpose(
+                            np.broadcast_to(pol, (ang.size, en.size, pol.size)),
+                                (2, 0, 1))
+            self.int = intensity
+        else:
+            path_int = ''.join(['Ca_',str(file),'int','.dat'])
+            intensity = np.loadtxt(folder + path_int)
+            print('- No polar angles available \n')
+            self.ens = np.broadcast_to(en, (ang.size, en.size))
+            self.angs = np.transpose(np.broadcast_to(ang, (en.size, ang.size)))
+            self.int = np.transpose(intensity)
         print('\n ~ Initialization complete. Data has {} dimensions'.format(
                 len(np.shape(self.int))),
               '\n', '==========================================')  

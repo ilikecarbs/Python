@@ -59,6 +59,31 @@ CSROfig2:  Experimental PSI data: Figure 2 CSCRO20 paper
 utils_plt.CSROfig2(print_fig=True)
 
 #%%
+
+os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+file = 8
+gold = 14
+mat = 'CSRO20'
+year = 2017
+sample = 'S1'
+D = ARPES.Bessy(file, mat, year, sample)
+D.norm(gold)
+D.FS(e = 0.07, ew = .02, norm = True)
+D.ang2kFS(D.ang, Ekin=36, lat_unit=True, a=5.5, b=5.5, c=11, 
+          V0=0, thdg=2.7, tidg=-1.5, phidg=42)
+FS = D.map
+for i in range(FS.shape[1]):
+    FS[:, i] = np.divide(FS[:, i], np.sum(FS[:, i]))  #Flatten
+plt.figure(20004, figsize=(8, 8), clear=True)
+ax = plt.subplot(1, 3, 2) 
+ax.set_position([.3, .3, .4, .4])
+plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
+plt.contourf(D.kx, D.ky, FS, 300,
+           cmap=cm.ocean_r)
+plt.grid(alpha=.5)
+#%%
+
+#%%
 from scipy.optimize import curve_fit
 
 
@@ -90,74 +115,112 @@ D.restrict(bot=.7, top=.9, left=0, right=1)
 LH.restrict(bot=.55, top=.85, left=0, right=1)
 LV.restrict(bot=.55, top=.85, left=0, right=1)
 
-D.ang2k(D.ang, Ekin=35-4.5, lat_unit=True, a=5.5, b=5.5, c=11, 
-          V0=0, thdg=2.4, tidg=0, phidg=-45)
-LH.ang2k(LH.ang, Ekin=35-4.5, lat_unit=True, a=5.5, b=5.5, c=11, 
-          V0=0, thdg=2.4, tidg=0, phidg=-45)
-LV.ang2k(LV.ang, Ekin=35-4.5, lat_unit=True, a=5.5, b=5.5, c=11, 
-          V0=0, thdg=2.4, tidg=0, phidg=-45)
+D.ang2k(D.ang, Ekin=40 - 4.5, lat_unit=True, a=5.5, b=5.5, c=11, 
+          V0=0, thdg=2.7, tidg=0, phidg=42)
+LH.ang2k(LH.ang, Ekin=40 - 4.5, lat_unit=True, a=5.5, b=5.5, c=11, 
+          V0=0, thdg=2.7, tidg=0, phidg=42)
+LV.ang2k(LV.ang, Ekin=40 - 4.5, lat_unit=True, a=5.5, b=5.5, c=11, 
+          V0=0, thdg=2.7, tidg=0, phidg=42)
 c = (0, 238 / 256, 118 / 256)
 
 data = (D.int_norm, LH.int_norm, LV.int_norm)
 en = (D.en_norm - .008, LH.en_norm, LV.en_norm)
 ks = (D.ks, LH.ks, LV.ks)
 k = (D.k[0], LH.k[0], LV.k[0])
+b_par = (np.array([0, .0037, .0002, .002]),
+         np.array([0, .0037, .0002, .002]),
+         np.array([0, .0037+.0005, .0002, .002]))
 #%%
 ###MDC###
 
+###Fit MDC###
+#for j in [1, 2]:
+#    mdc_val = -.005
+#    mdcw_val = .015
+#    mdc = np.zeros(k[j].shape)
+#    for i in range(len(k[j])):
+#        val, _mdc = utils.find(en[j][i, :], mdc_val)
+#        val, _mdcw = utils.find(en[j][i, :], mdc_val - mdcw_val)
+#        mdc[i] = np.sum(data[j][i, _mdcw:_mdc])
+#    mdc[0] = 0
+#    mdc[-1] = 0
+#    b_mdc = utils_math.poly2(k[j], 0, 0, 0, 0)
+#    plt.plot(k[j], mdc, 'bo')
+#    plt.plot(k[j], b_mdc, 'k--')
 
 plt.figure(2003, figsize=(8, 8), clear=True)
-for j in [1, 2]:
-    mdc_val = .003
-    mdcw_val = .006
+plt.figure(20003, figsize=(8, 8), clear=True)
+lbls = [r'(a) C$^+$-pol.', r'(b) $\bar{\pi}$-pol.', r'(c) $\bar{\sigma}$-pol.']
+for j in range(3): 
+    plt.figure(20003)
+    ax = plt.subplot(2, 3, j + 1) 
+    ax.set_position([.08 + j * .26, .5, .25, .25])
+    mdc_val = -.005
+    mdcw_val = .015
     mdc = np.zeros(k[j].shape)
     for i in range(len(k[j])):
         val, _mdc = utils.find(en[j][i, :], mdc_val)
         val, _mdcw = utils.find(en[j][i, :], mdc_val - mdcw_val)
         mdc[i] = np.sum(data[j][i, _mdcw:_mdc])
-    mdc = mdc / np.max(mdc)
-    mdc[0] = 0
-    mdc[-1] = 0
     
+    b_mdc = utils_math.poly2(k[j], b_par[j][0], b_par[j][1], b_par[j][2], b_par[j][3])
+#    B_mdc = np.transpose(
+#            np.broadcast_to(b_mdc, (data[j].shape[1], data[j].shape[0])))
+    plt.plot(k[j], mdc, 'bo')
+    plt.plot(k[j], b_mdc, 'k--')
+    plt.figure(2003)
     ax = plt.subplot(2, 3, j + 1) 
     ax.set_position([.08 + j * .26, .5, .25, .25])
     plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
-    plt.contourf(ks[j], en[j], data[j], 200, cmap=colmap,
-                 vmin=.05 * np.max(data[j]), vmax=.35 * np.max(data[j]))
+    if j == 0:
+        plt.contourf(ks[j], en[j], data[j], 200, cmap=colmap,
+                     vmin=.05 * np.max(data[j]), vmax=.35 * np.max(data[j]))
+        mdc = mdc / np.max(mdc)
+        plt.yticks(np.arange(-.1, .05, .02), ('-100', '-80', '-60', '-40', '-20',
+               '0', '20', '40'))
+        plt.ylabel('$\omega\,(\mathrm{meV})$', fontdict = font)
+    else:
+        plt.contourf(ks[j], en[j], data[j], 200, cmap=colmap,
+                     vmin=.3 * np.max(data[1]), vmax=.6 * np.max(data[1]))
+        mdc = (mdc - b_mdc) / .005
+        plt.yticks(np.arange(-.1, .05, .02), [])
+#        mdc = mdc / 4540
+    mdc[0] = 0
+    mdc[-1] = 0
     plt.plot([np.min(ks[j]), np.max(ks[j])], [0, 0], 'k:')
-    plt.yticks(np.arange(-.1, .05, .02), ('-100', '-80', '-60', '-40', '-20', '0',
-               '20', '40'))
+    plt.plot([np.min(ks[j]), np.max(ks[j])], [mdc_val, mdc_val], 
+              linestyle='-.', color=c, linewidth=.5)
     plt.xticks([-1.5, -1, -.5, 0, .5, 1.0])
     plt.xlim(xmax=np.max(ks[j]), xmin=np.min(ks[j]))   
     plt.ylim(ymax=.05, ymin=-.1)
-    plt.ylabel('$\omega\,(\mathrm{meV})$', fontdict = font)
     plt.xlabel('$k_x \,(\pi/a)$', fontdict = font)
     plt.plot(k[j], mdc / 30 + .001, 'o', markersize=1.5, color='C9')
     plt.fill(k[j], mdc / 30 + .001, alpha=.2, color='C9')
-    plt.text(-1, .038, r'(a)', fontsize=12)
+    plt.text(-1, .038, lbls[j], fontsize=12)
 
 #%%
-
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
-
-file = 62087
+file = 62151
 gold = 62081
-#file = 62090
-#gold = 62091
 mat = 'CSRO20'
 year = 2017
 sample = 'S6'
-
 D = ARPES.DLS(file, mat, year, sample)
-
-#%%
 D.norm(gold)
-D.restrict(bot=0, top=1, left=.1, right=.9)
-
-D.FS(e = -0.0, ew = .02, norm = True)
-D.ang2kFS(D.ang, Ekin=22-4.5, lat_unit=True, a=5.33, b=5.33, c=11, 
-          V0=0, thdg=8.7, tidg=-4, phidg=0)
-D.plt_FS(coord = True)
+#D.restrict(bot=0, top=1, left=.12, right=.9)
+D.FS(e = 0.0, ew = .02, norm = True)
+D.ang2kFS(D.ang, Ekin=22-4.5, lat_unit=True, a=5.5, b=5.5, c=11, 
+          V0=0, thdg=12, tidg=-2.5, phidg=45)
+FS = D.map
+for i in range(FS.shape[1]):
+    FS[:, i] = np.divide(FS[:, i], np.sum(FS[:, i]))  #Flatten
+plt.figure(20004, figsize=(8, 8), clear=True)
+ax = plt.subplot(1, 3, 2) 
+ax.set_position([.3, .3, .4, .4])
+plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
+plt.contourf(D.kx, D.ky, FS, 300,
+           cmap=cm.ocean_r)
+plt.grid(alpha=.5)
 
 #%%
 
