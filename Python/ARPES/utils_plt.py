@@ -1190,9 +1190,10 @@ def CSROfig1(colmap = cm.ocean_r, print_fig = False):
         plt.text(.024, -.03, r'$\Gamma$', fontsize=12, color='r')
         plt.text(.024, -1.03, r'Y', fontsize=12, color='r')
         cols = ['k', 'b', 'b', 'b', 'b', 'm', 'C1', 'C1']
-        lbls = [r'$\beta$', r'$\gamma$', r'$\gamma$', r'$\gamma$', r'$\gamma$',
-                r'$\beta$', r'$\alpha$', r'$\alpha$']
-        corr = np.array([.003, .002, .002, 0, -.001, 0, .002, .003])
+        lbls = [r'$\bar{\beta}$', r'$\bar{\gamma}$', r'$\bar{\gamma}$', 
+                r'$\bar{\gamma}$', r'$\bar{\gamma}$',
+                r'$\bar{\beta}$', r'$\bar{\alpha}$', r'$\bar{\alpha}$']
+        corr = np.array([.004, .002, .002, 0, -.001, 0, .003, .003])
         p_mdc[6 + 16] *= 1.5
         for i in range(8):
             plt.plot((utils_math.lor(A1.k[1], p_mdc[i], p_mdc[i + 8], p_mdc[i + 16], 
@@ -1241,8 +1242,8 @@ def CSROfig1(colmap = cm.ocean_r, print_fig = False):
         plt.text(-.05, -1.03, r'Y', fontsize=12, color='r')
         plt.text(.95, -.03, r'X', fontsize=12, color='r')
         plt.text(.95, -1.03, r'S', fontsize=12, color='r')
-        lblmap = [r'$\alpha$', r'$\beta$', r'$\gamma$', r'$\delta$', 
-          r'$\epsilon$']
+        lblmap = [r'$\bar{\alpha}$', r'$\bar{\beta}$', r'$\bar{\gamma}$', 
+                  r'$\bar{\delta}$', r'$\bar{\epsilon}$']
         lblx = np.array([.25, .43, .66, .68, .8])
         lbly = np.array([-.25, -.43, -.23, -.68, -.8])
         lblc = ['C1', 'm', 'b', 'k', 'r']
@@ -1381,8 +1382,8 @@ def CSROfig2(colmap = cm.ocean_r, print_fig = False):
         plt.fill(D.kx[0, :], f_mdc_d + .01, alpha=.2, color='C9')
         corr = np.array([.04, .03, .07, .08, .07, .05])
         cols = ['k', 'm', 'C1', 'C1', 'm', 'k']
-        lbls = [r'$\delta$', r'$\beta$', r'$\alpha$', r'$\alpha$', r'$\beta$',
-                    r'$\delta$']
+        lbls = [r'$\bar{\delta}$', r'$\bar{\beta}$', r'$\bar{\alpha}$', 
+                r'$\bar{\alpha}$', r'$\bar{\beta}$', r'$\bar{\delta}$']
         for i in range(6):
             plt.plot(D.kx[0, :], (utils_math.lor(D.kx[0, :], p_mdc_d[i], 
                      p_mdc_d[i + 6], p_mdc_d[i + 12], p_mdc_d[-3], p_mdc_d[-2], 
@@ -1458,7 +1459,8 @@ def CSROfig2(colmap = cm.ocean_r, print_fig = False):
         plt.fill(f_mdc + .01, D.ky[:, 0], alpha=.2, color='C9')
         corr = np.array([.03, .06, .04, .04])
         cols = ['m', 'C1', 'C1', 'm']
-        lbls = [r'$\beta$', r'$\alpha$', r'$\alpha$', r'$\beta$']
+        lbls = [r'$\bar{\beta}$', r'$\bar{\alpha}$', r'$\bar{\alpha}$', 
+                r'$\bar{\beta}$']
         for i in range(4):
             plt.plot((utils_math.lor(D.ky[:, 0], p_mdc[i], p_mdc[i + 4], 
                                      p_mdc[i + 8], p_mdc[-3], p_mdc[-2],
