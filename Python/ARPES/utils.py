@@ -19,6 +19,22 @@ def find(array, value):
     idx = (np.abs(array - value)).argmin()
     return array[idx], idx
 
+def Shirley(en, edc):
+    N = len(en)
+    A = 1e-5
+    B = np.ones((N))
+    B[-1] = edc[-1]
+    B[-2] = edc[-1]
+    it = 10
+    for k in range(it):
+        for i in range(N - 2):
+            SUM = 0.
+            for j in np.arange(i + 1, N):
+                SUM += (edc[j] - B[j])    
+            B[i] = B[-1] + A * SUM
+        A = A * (1. + (edc[0] - B[0]) / edc[0])
+    return B
+
 def norm(self, gold): 
     """
     Normalize Data
