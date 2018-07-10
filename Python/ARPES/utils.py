@@ -19,6 +19,22 @@ def find(array, value):
     idx = (np.abs(array - value)).argmin()
     return array[idx], idx
 
+def Shirley(en, edc):
+    N = len(en)
+    A = 1e-5
+    B = np.ones((N))
+    B[-1] = edc[-1]
+    B[-2] = edc[-1]
+    it = 10
+    for k in range(it):
+        for i in range(N - 2):
+            SUM = 0.
+            for j in np.arange(i + 1, N):
+                SUM += (edc[j] - B[j])    
+            B[i] = B[-1] + A * SUM
+        A = A * (1. + (edc[0] - B[0]) / edc[0])
+    return B
+
 def norm(self, gold): 
     """
     Normalize Data
@@ -102,6 +118,19 @@ def FS_flatten(self, ang):
                                 np.sum(self.map[i, :]))    
     return map_flat
 
+def bkg(self, norm):
+    """
+    Subtract background
+    """
+    if norm == True:
+        int_bkg = self.int_norm
+    elif norm == False:
+        int_bkg = self.int
+    for i in range(self.en.size):
+        int_bkg[:, i] = int_bkg[:, i] - np.min(int_bkg[:, i])
+    return int_bkg
+    
+    
 def restrict(self, bot, top, left, right):
     if self.int.ndim == 2:
         d1, d2 = self.int.shape
@@ -233,6 +262,12 @@ def gold(file, mat, year, sample, Ef_ini, BL):
     """
     if BL == 'DLS':
         D = ARPES.DLS(file, mat, year, sample)
+    elif BL == 'SIS':
+        D = ARPES.SIS(file, mat, year, sample)
+    elif BL == 'ALS':
+        D = ARPES.ALS(file, mat, year, sample)
+    elif BL == 'Bessy':
+        D = ARPES.Bessy(file, mat, year, sample)
     bnd = 150
     ch = 300
     plt.figure(5001)
