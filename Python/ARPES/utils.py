@@ -102,6 +102,19 @@ def FS_flatten(self, ang):
                                 np.sum(self.map[i, :]))    
     return map_flat
 
+def bkg(self, norm):
+    """
+    Subtract background
+    """
+    if norm == True:
+        int_bkg = self.int_norm
+    elif norm == False:
+        int_bkg = self.int
+    for i in range(self.en.size):
+        int_bkg[:, i] = int_bkg[:, i] - np.min(int_bkg[:, i])
+    return int_bkg
+    
+    
 def restrict(self, bot, top, left, right):
     if self.int.ndim == 2:
         d1, d2 = self.int.shape

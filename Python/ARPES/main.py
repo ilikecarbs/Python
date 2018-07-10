@@ -54,9 +54,10 @@ CROfig14:  Constant energy maps gamma band -2.4eV
 --------   Ca1.8Sr0.2RuO4 Figures --------
 CSROfig1:  Experimental data: Figure 1 CSRO20 paper
 CSROfig2:  Experimental PSI data: Figure 2 CSCRO20 paper
+CSROfig3:  (L): Polarization and orbital characters. Figure 3 in paper
 """
 
-utils_plt.CSROfig2(print_fig=True)
+utils_plt.CSROfig3(print_fig=False)
 
 #%%
 
@@ -84,167 +85,178 @@ plt.grid(alpha=.5)
 #%%
 
 #%%
-os.chdir('/Users/denyssutter/Documents/PhD/data')
-xz_data = np.loadtxt('DMFT_CSRO_xz.dat')
-yz_data = np.loadtxt('DMFT_CSRO_yz.dat')
-xy_data = np.loadtxt('DMFT_CSRO_xy.dat')
-xz_lda = np.loadtxt('LDA_CSRO_xz.dat')
-yz_lda = np.loadtxt('LDA_CSRO_yz.dat')
-xy_lda = np.loadtxt('LDA_CSRO_xy.dat')
+colmap = cm.ocean_r
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
-#%%
-m, n = 8000, 351 #dimensions energy, full k-path
-bot, top = 3000, 6000 #restrict energy window
-DMFT_data = np.array([xz_data, yz_data, xy_data]) #combine data
-DMFT_spec = np.reshape(DMFT_data[:, :, 2], (3, n, m)) #reshape into n,m
-DMFT_spec = DMFT_spec[:, :, bot:top] #restrict data to bot, top
-LDA_data = np.array([xz_lda, yz_lda, xy_lda]) #combine data
-LDA_spec = np.reshape(LDA_data[:, :, 2], (3, n, m)) #reshape into n,m
-LDA_spec = LDA_spec[:, :, bot:top] #restrict data to bot, top
-DMFT_en   = np.linspace(-8, 8, m) #define energy data
-DMFT_en   = DMFT_en[bot:top] #restrict energy data
-#[0, 56, 110, 187, 241, 266, 325, 350]  = [G,X,S,G,Y,T,G,Z]
-DMFT_spec = np.transpose(DMFT_spec, (0,2,1)) #transpose
-LDA_spec = np.transpose(LDA_spec, (0,2,1)) #transpose
-LDA_spec = np.sum(LDA_spec, axis=0) #sum up over orbitals
-kB = 8.617e-5
-T = 39
-bkg = utils_math.FDsl(DMFT_en, p0=kB * T, p1=0, p2=1, p3=0, p4=0)
-bkg = bkg[:, None]
-
-os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
-file = 25
-file_LH = 19
-file_LV = 20
+files = [25, 26, 27, 28]
 gold = 14
 mat = 'CSRO20'
 year = 2017
 sample = 'S1'
-
-D = ARPES.Bessy(file, mat, year, sample)
-LH = ARPES.Bessy(file_LH, mat, year, sample)
-LV = ARPES.Bessy(file_LV, mat, year, sample)
-
-#utils.gold(gold, mat, year, sample, Ef_ini=35.72, BL='Bessy')
-
-colmap = cm.ocean_r
-D.norm(gold)
-LH.norm(gold)
-LV.norm(gold)
-
-#D.shift(gold)
-#LH.shift(gold)
-#LV.shift(gold)
-D.restrict(bot=.7, top=.9, left=0, right=1)
-LH.restrict(bot=.55, top=.85, left=0, right=1)
-LV.restrict(bot=.55, top=.85, left=0, right=1)
-
-D.ang2k(D.ang, Ekin=40, lat_unit=True, a=5.5, b=5.5, c=11, 
-          V0=0, thdg=2.7, tidg=0, phidg=42)
-LH.ang2k(LH.ang, Ekin=40, lat_unit=True, a=5.5, b=5.5, c=11, 
-          V0=0, thdg=2.7, tidg=0, phidg=42)
-LV.ang2k(LV.ang, Ekin=40, lat_unit=True, a=5.5, b=5.5, c=11, 
-          V0=0, thdg=2.7, tidg=0, phidg=42)
+edc_e_val = -.9  #EDC espilon band
+edcw_e_val = .01
+edc_a_val = -.34  #EDC alpha band
+edcw_a_val = .01
 c = (0, 238 / 256, 118 / 256)
+top_e = .005; top_a = .005
+bot_e = -.015; bot_a = -.015
+left_e = -1.1; left_a = -.5
+right_e = -.7; right_a = -.2
 
-data = (D.int_norm, LH.int_norm, LV.int_norm)
-en = (D.en_norm - .008, LH.en_norm, LV.en_norm)
-ks = (D.ks, LH.ks, LV.ks)
-k = (D.k[0], LH.k[0], LV.k[0])
-b_par = (np.array([0, .0037, .0002, .002]),
-         np.array([0, .0037, .0002, .002]),
-         np.array([0, .0037+.0005, .0002, .002]))
+spec = ()
+en = ()
+k = ()
+int_e = np.zeros((4)) 
+int_a = np.zeros((4))
+T = np.array([1.3, 10., 20., 30.])
+EDC_e = () #EDC alpha band
+EDC_a = () #EDC alpha band
+_EDC_e = () #Index EDC epsilon band
+_EDC_a = () #Index EDC alpha band
+_Top_e = (); _Top_a = ()
+_Bot_e = (); _Bot_a = ()
+_Left_e = (); _Left_a = ()
+_Right_e = (); _Right_a = ()
 
-def figCSROfig3abc():
-    lbls = [r'(a) C$^+$-pol.', r'(b) $\bar{\pi}$-pol.', r'(c) $\bar{\sigma}$-pol.']
-    for j in range(3): 
-        plt.figure(20003)
-        ax = plt.subplot(2, 3, j + 1) 
-        ax.set_position([.08 + j * .26, .5, .25, .25])
-        mdc_val = -.005
-        mdcw_val = .015
-        mdc = np.zeros(k[j].shape)
-        for i in range(len(k[j])):
-            val, _mdc = utils.find(en[j][i, :], mdc_val)
-            val, _mdcw = utils.find(en[j][i, :], mdc_val - mdcw_val)
-            mdc[i] = np.sum(data[j][i, _mdcw:_mdc])
+
+for j in range(4): 
+    D = ARPES.Bessy(files[j], mat, year, sample)
+    D.norm(gold)
+#    D.restrict(bot=.7, top=.9, left=.33, right=.5)
+#    D.restrict(bot=.7, top=.9, left=.0, right=1)
+#    D.bkg(norm=True)
+    if j == 0:
+        D.ang2k(D.ang, Ekin=40, lat_unit=True, a=5.5, b=5.5, c=11, 
+                  V0=0, thdg=2.5, tidg=0, phidg=42)
+        int_norm = D.int_norm * 1.5
+    else: 
+        D.ang2k(D.ang, Ekin=40, lat_unit=True, a=5.5, b=5.5, c=11, 
+                  V0=0, thdg=2.9, tidg=0, phidg=42)
+        int_norm = D.int_norm
         
-        b_mdc = utils_math.poly2(k[j], b_par[j][0], b_par[j][1], b_par[j][2], b_par[j][3])
-    #    B_mdc = np.transpose(
-    #            np.broadcast_to(b_mdc, (data[j].shape[1], data[j].shape[0])))
-        plt.plot(k[j], mdc, 'bo')
-        plt.plot(k[j], b_mdc, 'k--')
-        plt.figure(2003)
-        ax = plt.subplot(2, 3, j + 1) 
-        ax.set_position([.08 + j * .26, .5, .25, .25])
+    en_norm = D.en_norm - .008
+    val, _edc_e = utils.find(D.ks[:, 0], edc_e_val)
+    val, _edcw_e = utils.find(D.ks[:, 0], edc_e_val - edcw_e_val)
+    val, _edc_a = utils.find(D.ks[:, 0], edc_a_val)
+    val, _edcw_a = utils.find(D.ks[:, 0], edc_a_val - edcw_a_val)
+    val, _top_e = utils.find(en_norm[0, :], top_e)
+    val, _top_a = utils.find(en_norm[0, :], top_a)
+    val, _bot_e = utils.find(en_norm[0, :], bot_e)
+    val, _bot_a = utils.find(en_norm[0, :], bot_a)
+    val, _left_e = utils.find(D.ks[:, 0], left_e)
+    val, _left_a = utils.find(D.ks[:, 0], left_a)
+    val, _right_e = utils.find(D.ks[:, 0], right_e)
+    val, _right_a = utils.find(D.ks[:, 0], right_a)
+    
+    edc_e = np.sum(int_norm[_edcw_e:_edc_e, :], axis=0)
+    edc_a = np.sum(int_norm[_edcw_a:_edc_a, :], axis=0)
+    int_e[j] = np.sum(int_norm[_left_e:_right_e, _bot_e:_top_e])
+    int_a[j] = np.sum(int_norm[_left_a:_right_a, _bot_a:_top_a])
+    spec = spec + (int_norm,)
+    en = en + (en_norm,)
+    k = k + (D.ks,)
+    EDC_e = EDC_e + (edc_e,)
+    EDC_a = EDC_a + (edc_a,)
+    _EDC_e = _EDC_e + (_edc_e,)
+    _EDC_a = _EDC_a + (_edc_a,)
+    _Top_e = _Top_e + (_top_e,)
+    _Top_a = _Top_a + (_top_a,)
+    _Bot_e = _Bot_e + (_bot_e,)
+    _Bot_a = _Bot_a + (_bot_a,)
+    _Left_e = _Left_e + (_left_e,)
+    _Left_a = _Left_a + (_left_a,)
+    _Right_e = _Right_e + (_right_e,)
+    _Right_a = _Right_a + (_right_a,)
+
+int_e = int_e / int_e[0]
+int_a = int_a / int_a[0]
+lbls = [r'(a) $T=1.3\,$K', r'(b) $T=10\,$K', r'(c) $T=20\,$K', r'(d) $T=30\,$K']
+#%%
+def CSROfig4abcd():
+    for j in range(4): 
+        ax = plt.subplot(2, 4, j + 1) 
+        ax.set_position([.08 + j * .21, .5, .2, .2])
         plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+        plt.contourf(k[j], en[j], spec[j], 100, cmap=colmap,
+                         vmin=.05 * np.max(spec[j]), vmax=.35 * np.max(spec[j]))
         if j == 0:
-            plt.contourf(ks[j], en[j], data[j], 100, cmap=colmap,
-                         vmin=.05 * np.max(data[j]), vmax=.35 * np.max(data[j]))
-            mdc = mdc / np.max(mdc)
-            plt.yticks(np.arange(-.1, .05, .02), ('-100', '-80', '-60', '-40', '-20',
-                   '0', '20', '40'))
+            plt.yticks(np.arange(-.1, .03, .02), ('-100', '-80', '-60', '-40', '-20',
+                   '0', '20'))
             plt.ylabel('$\omega\,(\mathrm{meV})$', fontdict = font)
         else:
-            plt.contourf(ks[j], en[j], data[j], 100, cmap=colmap,
-                         vmin=.3 * np.max(data[1]), vmax=.6 * np.max(data[1]))
-            mdc = (mdc - b_mdc) / .005
             plt.yticks(np.arange(-.1, .05, .02), [])
-        mdc[0] = 0
-        mdc[-1] = 0
-        plt.plot([np.min(ks[j]), np.max(ks[j])], [0, 0], 'k:')
-        plt.plot([np.min(ks[j]), np.max(ks[j])], [mdc_val, mdc_val], 
-                  linestyle='-.', color=c, linewidth=.5)
-        plt.xticks(np.arange(-1, .5, .5), [])
-        plt.xlim(xmax=np.max(ks[j]), xmin=np.min(ks[j]))   
-        plt.ylim(ymax=.05, ymin=-.1)
-        plt.plot(k[j], mdc / 30 + .001, 'o', markersize=1.5, color='C9')
-        plt.fill(k[j], mdc / 30 + .001, alpha=.2, color='C9')
-        plt.text(-1.2, .038, lbls[j], fontsize=12)
+        plt.plot([np.min(k[j]), np.max(k[j])], [0, 0], 'k:')
+        plt.plot([k[j][_EDC_e[j], 0], k[j][_EDC_e[j], 0]], [en[j][0, 0], en[j][0, -1]],
+                 linestyle='-.', color=c, linewidth=.5)
+        plt.plot([k[j][_EDC_a[j], 0], k[j][_EDC_a[j], 0]], [en[j][0, 0], en[j][0, -1]],
+                 linestyle='-.', color=c, linewidth=.5)
+        
+        plt.plot([k[j][_Left_e[j], 0], k[j][_Left_e[j], 0]], 
+                 [en[j][0, _Top_e[j]], en[j][0, _Bot_e[j]]],
+                 linestyle='--', color='r', linewidth=.5)
+        plt.plot([k[j][_Right_e[j], 0], k[j][_Right_e[j], 0]], 
+                 [en[j][0, _Top_e[j]], en[j][0, _Bot_e[j]]],
+                 linestyle='--', color='r', linewidth=.5)
+        plt.plot([k[j][_Left_e[j], 0], k[j][_Right_e[j], 0]], 
+                 [en[j][0, _Top_e[j]], en[j][0, _Top_e[j]]],
+                 linestyle='--', color='r', linewidth=.5)
+        plt.plot([k[j][_Left_e[j], 0], k[j][_Right_e[j], 0]], 
+                 [en[j][0, _Bot_e[j]], en[j][0, _Bot_e[j]]],
+                 linestyle='--', color='r', linewidth=.5)
+        
+        plt.plot([k[j][_Left_a[j], 0], k[j][_Left_a[j], 0]], 
+                 [en[j][0, _Top_a[j]], en[j][0, _Bot_a[j]]],
+                 linestyle='--', color='C1', linewidth=.5)
+        plt.plot([k[j][_Right_a[j], 0], k[j][_Right_a[j], 0]], 
+                 [en[j][0, _Top_a[j]], en[j][0, _Bot_a[j]]],
+                 linestyle='--', color='C1', linewidth=.5)
+        plt.plot([k[j][_Left_a[j], 0], k[j][_Right_a[j], 0]], 
+                 [en[j][0, _Top_a[j]], en[j][0, _Top_a[j]]],
+                 linestyle='--', color='r', linewidth=.5)
+        plt.plot([k[j][_Left_a[j], 0], k[j][_Right_a[j], 0]], 
+                 [en[j][0, _Bot_a[j]], en[j][0, _Bot_a[j]]],
+                 linestyle='--', color='r', linewidth=.5)
+        
+        ax.xaxis.tick_top()
+        plt.xticks(np.arange(-1, .5, 1.), [r'S', r'$\Gamma$'])
+        plt.xlim(xmax=0.05, xmin=np.min(k[j]))   
+        plt.ylim(ymax=.03, ymin=-.1)
+        plt.text(-1.25, .018, lbls[j], fontsize=10)
+        
     pos = ax.get_position()
     cax = plt.axes([pos.x0+pos.width + 0.01 ,
                         pos.y0, 0.01, pos.height])
     cbar = plt.colorbar(cax = cax, ticks = None)
     cbar.set_ticks([])
-    cbar.set_clim(np.min(LV.int_norm), np.max(LV.int_norm))
-plt.figure(2003, figsize=(8, 8), clear=True)
-plt.figure(20003, figsize=(8, 8), clear=True)
-figCSROfig3abc()
+    cbar.set_clim(np.min(D.int_norm), np.max(D.int_norm))
 
-
-#plt.figure(20003, figsize=(10, 10), clear = True)
-###Plotting###
-plt.figure(2003)
-n = 0
-for j in [0, 2]:
-    n += 1
-    SG = DMFT_spec[j, :, 110:187] * bkg
-    GS = np.fliplr(SG)
-    DMFT = np.concatenate((GS, SG, GS), axis=1)
-    DMFT_k = np.linspace(-2, 1, DMFT.shape[1])
-    ax = plt.subplot(2, 3, n + 4) 
-    ax.set_position([.08 + n * .26, .24, .25, .25])
-    plt.tick_params(direction='in', length=1.5, width=.5, colors='k')    
-#    if j == 0:
-#        plt.contourf(DMFT_k, DMFT_en, DMFT, 300, cmap = cm.bone_r,
-#                   vmin=0, vmax=7)
-#        plt.yticks(np.arange(-.1, .05, .02), ('-100', '-80', '-60', '-40', '-20',
-#               '0', '20', '40'))
-#        plt.ylabel('$\omega\,(\mathrm{meV})$', fontdict = font)
-#    else:
-    plt.contourf(DMFT_k, DMFT_en, DMFT, 300, cmap = cm.bone_r,
-               vmin=.5, vmax=6)
-    plt.yticks(np.arange(-.1, .05, .02), [])
-    plt.xticks(np.arange(-1, .5, .5), (r'S', r'', r'$\Gamma$', ''))
-    plt.plot([np.min(DMFT_k), np.max(DMFT_k)], [0, 0], 'k:')
-    plt.xlim(xmax=np.max(ks[0]), xmin=np.min(ks[0]))   
-    plt.ylim(ymax=.05, ymin=-.1)
-pos = ax.get_position()
-cax = plt.axes([pos.x0+pos.width + 0.01 ,
-                    pos.y0, 0.01, pos.height])
-cbar = plt.colorbar(cax = cax, ticks = None)
-cbar.set_ticks([])
-cbar.set_clim(np.min(DMFT), np.max(DMFT))
+def CSROfig4e():
+    plt.figure(20004, figsize=(8, 8), clear=True)
+    ax = plt.subplot(2, 4, 5) 
+    ax.set_position([.08 + 0 * .21, .29, .2, .2])
+    for j in range(4):
+        plt.plot(en[j][_EDC_e[j]], EDC_e[j])
+def CSROfig4h():
+    ax = plt.subplot(2, 4, 8) 
+    ax.set_position([.08 + 3 * .21, .29, .2, .2])
+    plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+    plt.plot(T, int_e, 'ro')
+    plt.plot(T, int_a, 'C1o')
+    plt.plot([1.3, 32], [1, .75], 'r--', linewidth=.5)
+    plt.plot([1.3, 32], [1, 1], 'C1--', linewidth=.5)
+    plt.xticks(T)
+    plt.xlim(xmax=32, xmin=0)
+    plt.grid(True, alpha=.2)
+    plt.yticks([.8, .9, 1.])
+    plt.xlabel(r'$T$ (K)', fontdict = font)
+    ax.yaxis.tick_right()
+    ax.yaxis.set_label_position('right')
+    plt.ylabel(r'$\int_\boxdot \mathcal{A}(k, \omega, T) \, \slash \quad \int_\boxdot \mathcal{A}(k, \omega, 1.3\,\mathrm{K})$', 
+               fontdict = font, fontsize=8)
+    
+#plt.figure(2004, figsize=(8, 8), clear=True)
+#CSROfig4abcd()
+CSROfig4e()
+#CSROfig4h()
 #%%
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 file = 62151

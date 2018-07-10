@@ -1301,7 +1301,7 @@ def CSROfig1(colmap = cm.ocean_r, print_fig = False):
     if print_fig == True:
             plt.savefig(
                         '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig1.png', 
-                        dpi = 600,bbox_inches="tight")
+                        dpi = 300,bbox_inches="tight")
 
 def CSROfig2(colmap = cm.ocean_r, print_fig = False):
     """
@@ -1487,5 +1487,163 @@ def CSROfig2(colmap = cm.ocean_r, print_fig = False):
     if print_fig == True:
             plt.savefig(
                         '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig2.png', 
-                        dpi = 600,bbox_inches="tight")
+                        dpi = 300,bbox_inches="tight")
         
+def CSROfig3(colmap = cm.ocean_r, print_fig = False):
+    """
+    Polarization and orbital characters. Figure 3 in paper
+    """
+    ###Load and prepare calculated data###
+    os.chdir('/Users/denyssutter/Documents/PhD/data')
+    xz_data = np.loadtxt('DMFT_CSRO_xz.dat')
+#    yz_data = np.loadtxt('DMFT_CSRO_yz.dat')
+    xy_data = np.loadtxt('DMFT_CSRO_xy.dat')
+    xz_lda = np.loadtxt('LDA_CSRO_xz.dat')
+    yz_lda = np.loadtxt('LDA_CSRO_yz.dat')
+    xy_lda = np.loadtxt('LDA_CSRO_xy.dat')
+    os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+    m, n = 8000, 351 #dimensions energy, full k-path
+    bot, top = 3000, 6000 #restrict energy window
+    data = np.array([xz_lda + yz_lda + xy_lda, xz_data, xy_data]) #combine data
+    spec = np.reshape(data[:, :, 2], (3, n, m)) #reshape into n,m
+    spec = spec[:, :, bot:top] #restrict data to bot, top
+    spec_en   = np.linspace(-8, 8, m) #define energy data
+    spec_en   = spec_en[bot:top] #restrict energy data
+    #[0, 56, 110, 187, 241, 266, 325, 350]  = [G,X,S,G,Y,T,G,Z]
+    spec = np.transpose(spec, (0,2,1)) #transpose
+    kB = 8.617e-5
+    T = 39
+    bkg = utils_math.FDsl(spec_en, p0=kB * T, p1=0, p2=1, p3=0, p4=0)
+    bkg = bkg[:, None]
+    ###Load and prepare experimental data###
+    os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+    file = 25
+    file_LH = 19
+    file_LV = 20
+    gold = 14
+    mat = 'CSRO20'
+    year = 2017
+    sample = 'S1'
+    
+    D = ARPES.Bessy(file, mat, year, sample)
+    LH = ARPES.Bessy(file_LH, mat, year, sample)
+    LV = ARPES.Bessy(file_LV, mat, year, sample)
+    D.norm(gold)
+    LH.norm(gold)
+    LV.norm(gold)
+#    D.bkg(norm=True)
+#    LH.bkg(norm=True)
+#    LV.bkg(norm=True)
+    D.restrict(bot=.7, top=.9, left=0, right=1)
+    LH.restrict(bot=.55, top=.85, left=0, right=1)
+    LV.restrict(bot=.55, top=.85, left=0, right=1)
+    
+    D.ang2k(D.ang, Ekin=40, lat_unit=True, a=5.5, b=5.5, c=11, 
+              V0=0, thdg=2.7, tidg=0, phidg=42)
+    LH.ang2k(LH.ang, Ekin=40, lat_unit=True, a=5.5, b=5.5, c=11, 
+              V0=0, thdg=2.7, tidg=0, phidg=42)
+    LV.ang2k(LV.ang, Ekin=40, lat_unit=True, a=5.5, b=5.5, c=11, 
+              V0=0, thdg=2.7, tidg=0, phidg=42)
+    c = (0, 238 / 256, 118 / 256)
+    
+    data = (D.int_norm, LH.int_norm, LV.int_norm)
+    en = (D.en_norm - .008, LH.en_norm, LV.en_norm)
+    ks = (D.ks, LH.ks, LV.ks)
+    k = (D.k[0], LH.k[0], LV.k[0])
+    b_par = (np.array([0, .0037, .0002, .002]),
+             np.array([0, .0037, .0002, .002]),
+             np.array([0, .0037+.0005, .0002, .002]))
+    
+    def figCSROfig3abc():
+        lbls = [r'(a) C$^+$-pol.', r'(b) $\bar{\pi}$-pol.', r'(c) $\bar{\sigma}$-pol.']
+        for j in range(3): 
+            plt.figure(20003)
+            ax = plt.subplot(2, 3, j + 1) 
+            ax.set_position([.08 + j * .26, .5, .25, .25])
+            mdc_val = -.005
+            mdcw_val = .015
+            mdc = np.zeros(k[j].shape)
+            for i in range(len(k[j])):
+                val, _mdc = utils.find(en[j][i, :], mdc_val)
+                val, _mdcw = utils.find(en[j][i, :], mdc_val - mdcw_val)
+                mdc[i] = np.sum(data[j][i, _mdcw:_mdc])
+            
+            b_mdc = utils_math.poly2(k[j], b_par[j][0], b_par[j][1], b_par[j][2], b_par[j][3])
+        #    B_mdc = np.transpose(
+        #            np.broadcast_to(b_mdc, (data[j].shape[1], data[j].shape[0])))
+            plt.plot(k[j], mdc, 'bo')
+            plt.plot(k[j], b_mdc, 'k--')
+            plt.figure(2003)
+            ax = plt.subplot(2, 3, j + 1) 
+            ax.set_position([.08 + j * .26, .5, .25, .25])
+            plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+            if j == 0:
+                plt.contourf(ks[j], en[j], data[j], 100, cmap=colmap,
+                             vmin=.05 * np.max(data[j]), vmax=.35 * np.max(data[j]))
+                mdc = mdc / np.max(mdc)
+                plt.yticks(np.arange(-.1, .05, .02), ('-100', '-80', '-60', '-40', '-20',
+                       '0', '20', '40'))
+                plt.ylabel('$\omega\,(\mathrm{meV})$', fontdict = font)
+            else:
+                plt.contourf(ks[j], en[j], data[j], 100, cmap=colmap,
+                             vmin=.3 * np.max(data[1]), vmax=.6 * np.max(data[1]))
+                mdc = (mdc - b_mdc) / .005
+                plt.yticks(np.arange(-.1, .05, .02), [])
+            mdc[0] = 0
+            mdc[-1] = 0
+            plt.plot([np.min(ks[j]), np.max(ks[j])], [0, 0], 'k:')
+            plt.plot([np.min(ks[j]), np.max(ks[j])], [mdc_val, mdc_val], 
+                      linestyle='-.', color=c, linewidth=.5)
+            plt.xticks(np.arange(-1, .5, .5), [])
+            plt.xlim(xmax=np.max(ks[j]), xmin=np.min(ks[j]))   
+            plt.ylim(ymax=.05, ymin=-.1)
+            plt.plot(k[j], mdc / 30 + .001, 'o', markersize=1.5, color='C9')
+            plt.fill(k[j], mdc / 30 + .001, alpha=.2, color='C9')
+            plt.text(-1.2, .038, lbls[j], fontsize=12)
+        pos = ax.get_position()
+        cax = plt.axes([pos.x0+pos.width + 0.01 ,
+                            pos.y0, 0.01, pos.height])
+        cbar = plt.colorbar(cax = cax, ticks = None)
+        cbar.set_ticks([])
+        cbar.set_clim(np.min(LV.int_norm), np.max(LV.int_norm))
+    
+    def figCSROfig3def():
+        plt.figure(2003)
+        lbls = [r'(d) LDA $\Sigma_\mathrm{orb}$', r'(e) DMFT $d_{xz}$', r'(f) DMFT $d_{xy}$']
+        for j in range(3):
+            SG = spec[j, :, 110:187] * bkg
+            GS = np.fliplr(SG)
+            spec_full = np.concatenate((GS, SG, GS), axis=1)
+            spec_k = np.linspace(-2, 1, spec_full.shape[1])
+            ax = plt.subplot(2, 3, j + 4) 
+            ax.set_position([.08 + j * .26, .24, .25, .25])
+            plt.tick_params(direction='in', length=1.5, width=.5, colors='k')    
+            plt.contourf(spec_k, spec_en, spec_full, 300, cmap = cm.bone_r,
+                           vmin=.5, vmax=6)
+            if j == 0:
+                plt.yticks(np.arange(-.1, .05, .02), ('-100', '-80', '-60', '-40', '-20',
+                       '0', '20', '40'))
+                plt.ylabel('$\omega\,(\mathrm{meV})$', fontdict = font)
+            else:
+                plt.yticks(np.arange(-.1, .05, .02), [])
+            plt.xticks(np.arange(-1, .5, .5), (r'S', r'', r'$\Gamma$', ''))
+            plt.plot([np.min(spec_k), np.max(spec_k)], [0, 0], 'k:')
+            plt.xlim(xmax=np.max(ks[0]), xmin=np.min(ks[0]))   
+            plt.ylim(ymax=.05, ymin=-.1)
+            plt.text(-1.2, .038, lbls[j], fontsize=12)
+        pos = ax.get_position()
+        cax = plt.axes([pos.x0+pos.width + 0.01 ,
+                            pos.y0, 0.01, pos.height])
+        cbar = plt.colorbar(cax = cax, ticks = None)
+        cbar.set_ticks([])
+        cbar.set_clim(np.min(spec_full), np.max(spec_full))
+        
+    ###Plotting###
+    plt.figure(2003, figsize=(8, 8), clear=True)
+    plt.figure(20003, figsize=(8, 8), clear=True)
+    figCSROfig3abc()
+    figCSROfig3def()
+    if print_fig == True:
+            plt.savefig(
+                        '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig3.png', 
+                        dpi = 300,bbox_inches="tight")

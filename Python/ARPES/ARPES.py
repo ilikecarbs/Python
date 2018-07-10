@@ -83,6 +83,15 @@ class DLS:
         print('\n ~ FS flattened',
               '\n', '==========================================') 
         
+    def bkg(self, norm=False): #Subtract background
+        int_bkg = u.bkg(self, norm)
+        if norm == True:
+            self.int_norm = int_bkg
+        elif norm == False:
+            self.int = int_bkg
+        print('\n ~ Backgorund subtracted',
+              '\n', '==========================================')    
+        
     def restrict(self, bot = 0, top = 1, left = 0, right = 1): #restrict spectrum
         (en_restr, ens_restr, en_norm_restr, ang_restr, angs_restr, pol_restr, 
          pols_restr, int_restr, int_norm_restr) = u.restrict(
@@ -224,6 +233,15 @@ class ALS:
         self.map_flat = map_flat
         print('\n ~ FS flattened',
               '\n', '==========================================') 
+    
+    def bkg(self, norm=False): #Subtract background
+            int_bkg = u.bkg(self, norm)
+            if norm == True:
+                self.int_norm = int_bkg
+            elif norm == False:
+                self.int = int_bkg
+            print('\n ~ Backgorund subtracted',
+                  '\n', '==========================================')    
         
     def restrict(self, bot = 0, top = 1, left = 0, right = 1): #restrict spectrum
         (en_restr, ens_restr, en_norm_restr, ang_restr, angs_restr, pol_restr, 
@@ -371,6 +389,15 @@ class SIS:
         self.map_flat = map_flat
         print('\n ~ FS flattened',
               '\n', '==========================================')   
+    
+    def bkg(self, norm=False): #Subtract background
+        int_bkg = u.bkg(self, norm)
+        if norm == True:
+            self.int_norm = int_bkg
+        elif norm == False:
+            self.int = int_bkg
+        print('\n ~ Backgorund subtracted',
+              '\n', '==========================================')    
         
     def restrict(self, bot=0, top=1, left=0, right=1): #restrict spectrum
         (en_restr, ens_restr, en_norm_restr, ang_restr, angs_restr, pol_restr, 
@@ -517,6 +544,15 @@ class Bessy:
         self.map_flat = map_flat
         print('\n ~ FS flattened',
               '\n', '==========================================')   
+    
+    def bkg(self, norm=False): #Subtract background
+        int_bkg = u.bkg(self, norm)
+        if norm == True:
+            self.int_norm = int_bkg
+        elif norm == False:
+            self.int = int_bkg
+        print('\n ~ Backgorund subtracted',
+              '\n', '==========================================')    
         
     def restrict(self, bot=0, top=1, left=0, right=1): #restrict spectrum
         (en_restr, ens_restr, en_norm_restr, ang_restr, angs_restr, pol_restr, 
