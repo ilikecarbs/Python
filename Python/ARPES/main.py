@@ -84,6 +84,34 @@ plt.grid(alpha=.5)
 #%%
 
 #%%
+os.chdir('/Users/denyssutter/Documents/PhD/data')
+xz_data = np.loadtxt('DMFT_CSRO_xz.dat')
+yz_data = np.loadtxt('DMFT_CSRO_yz.dat')
+xy_data = np.loadtxt('DMFT_CSRO_xy.dat')
+xz_lda = np.loadtxt('LDA_CSRO_xz.dat')
+yz_lda = np.loadtxt('LDA_CSRO_yz.dat')
+xy_lda = np.loadtxt('LDA_CSRO_xy.dat')
+os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+#%%
+m, n = 8000, 351 #dimensions energy, full k-path
+bot, top = 3000, 6000 #restrict energy window
+DMFT_data = np.array([xz_data, yz_data, xy_data]) #combine data
+DMFT_spec = np.reshape(DMFT_data[:, :, 2], (3, n, m)) #reshape into n,m
+DMFT_spec = DMFT_spec[:, :, bot:top] #restrict data to bot, top
+LDA_data = np.array([xz_lda, yz_lda, xy_lda]) #combine data
+LDA_spec = np.reshape(LDA_data[:, :, 2], (3, n, m)) #reshape into n,m
+LDA_spec = LDA_spec[:, :, bot:top] #restrict data to bot, top
+DMFT_en   = np.linspace(-8, 8, m) #define energy data
+DMFT_en   = DMFT_en[bot:top] #restrict energy data
+#[0, 56, 110, 187, 241, 266, 325, 350]  = [G,X,S,G,Y,T,G,Z]
+DMFT_spec = np.transpose(DMFT_spec, (0,2,1)) #transpose
+LDA_spec = np.transpose(LDA_spec, (0,2,1)) #transpose
+LDA_spec = np.sum(LDA_spec, axis=0) #sum up over orbitals
+kB = 8.617e-5
+T = 39
+bkg = utils_math.FDsl(DMFT_en, p0=kB * T, p1=0, p2=1, p3=0, p4=0)
+bkg = bkg[:, None]
+
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 file = 25
 file_LH = 19
@@ -174,7 +202,7 @@ def figCSROfig3abc():
         plt.fill(k[j], mdc / 30 + .001, alpha=.2, color='C9')
         plt.text(-1.2, .038, lbls[j], fontsize=12)
     pos = ax.get_position()
-    cax = plt.axes([pos.x0+pos.width+0.01 ,
+    cax = plt.axes([pos.x0+pos.width + 0.01 ,
                         pos.y0, 0.01, pos.height])
     cbar = plt.colorbar(cax = cax, ticks = None)
     cbar.set_ticks([])
@@ -182,41 +210,41 @@ def figCSROfig3abc():
 plt.figure(2003, figsize=(8, 8), clear=True)
 plt.figure(20003, figsize=(8, 8), clear=True)
 figCSROfig3abc()
-#%%
-os.chdir('/Users/denyssutter/Documents/PhD/data')
-xz_data = np.loadtxt('DMFT_CSRO_xz.dat')
-yz_data = np.loadtxt('DMFT_CSRO_yz.dat')
-xy_data = np.loadtxt('DMFT_CSRO_xy.dat')
-os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
-#%%
-m, n = 8000, 351 #dimensions energy, full k-path
-bot, top = 2000, 5000 #restrict energy window
-DMFT_data = np.array([xz_data, yz_data, xy_data]) #combine data
-DMFT_spec = np.reshape(DMFT_data[:, :, 2], (3, n, m)) #reshape into n,m
-#DMFT_spec = DMFT_spec[:, :, bot:top] #restrict data to bot, top
-DMFT_en   = np.linspace(-8, 8, m) #define energy data
-#DMFT_en   = DMFT_en[bot:top] #restrict energy data
-#[0, 56, 110, 187, 241, 266, 325, 350]  = [G,X,S,G,Y,T,G,Z]
-DMFT_spec = np.transpose(DMFT_spec, (0,2,1)) #transpose
-#DMFT_spec = np.sum(DMFT_spec, axis=0) #sum up over orbitals
 
-###Data used:
-SG = DMFT_spec[0, :, 110:187]
-GS = np.fliplr(SG)
 
-DMFT = np.concatenate((GS, SG, GS), axis=1)
-#DMFT = GS
-DMFT_k = np.linspace(-2, 1, DMFT.shape[1])
-
-scale = .02
-plt.figure(20003, figsize=(10, 10), clear = True)
+#plt.figure(20003, figsize=(10, 10), clear = True)
 ###Plotting###
-
-plt.tick_params(direction='in', length=1.5, width=.5, colors='k')    
-plt.contourf(DMFT_k, DMFT_en, DMFT, 300, cmap = colmap,
-               vmin=0, vmax=.5*np.max(DMFT))
-plt.xlim(xmax=np.max(ks[0]), xmin=np.min(ks[0]))   
-plt.ylim(ymax=.05, ymin=-.1)
+plt.figure(2003)
+n = 0
+for j in [0, 2]:
+    n += 1
+    SG = DMFT_spec[j, :, 110:187] * bkg
+    GS = np.fliplr(SG)
+    DMFT = np.concatenate((GS, SG, GS), axis=1)
+    DMFT_k = np.linspace(-2, 1, DMFT.shape[1])
+    ax = plt.subplot(2, 3, n + 4) 
+    ax.set_position([.08 + n * .26, .24, .25, .25])
+    plt.tick_params(direction='in', length=1.5, width=.5, colors='k')    
+#    if j == 0:
+#        plt.contourf(DMFT_k, DMFT_en, DMFT, 300, cmap = cm.bone_r,
+#                   vmin=0, vmax=7)
+#        plt.yticks(np.arange(-.1, .05, .02), ('-100', '-80', '-60', '-40', '-20',
+#               '0', '20', '40'))
+#        plt.ylabel('$\omega\,(\mathrm{meV})$', fontdict = font)
+#    else:
+    plt.contourf(DMFT_k, DMFT_en, DMFT, 300, cmap = cm.bone_r,
+               vmin=.5, vmax=6)
+    plt.yticks(np.arange(-.1, .05, .02), [])
+    plt.xticks(np.arange(-1, .5, .5), (r'S', r'', r'$\Gamma$', ''))
+    plt.plot([np.min(DMFT_k), np.max(DMFT_k)], [0, 0], 'k:')
+    plt.xlim(xmax=np.max(ks[0]), xmin=np.min(ks[0]))   
+    plt.ylim(ymax=.05, ymin=-.1)
+pos = ax.get_position()
+cax = plt.axes([pos.x0+pos.width + 0.01 ,
+                    pos.y0, 0.01, pos.height])
+cbar = plt.colorbar(cax = cax, ticks = None)
+cbar.set_ticks([])
+cbar.set_clim(np.min(DMFT), np.max(DMFT))
 #%%
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 file = 62151
