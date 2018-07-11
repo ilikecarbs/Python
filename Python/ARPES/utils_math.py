@@ -9,6 +9,8 @@ Created on Fri Jun 15 13:53:54 2018
 import numpy as np
 from numpy import linalg as la
 import utils_plt as uplt 
+from scipy.stats import exponnorm
+from scipy import special
 
 def paramSRO():
     """
@@ -233,3 +235,35 @@ def gauss2(x, p0, p1, p2, p3, p4, p5, p6, p7, p8):
             p5 * np.exp(-(x - p1) ** 2 / (2 * p3 ** 2)) +
             p6 + p7 * x + p8 * x ** 2)    
     
+def FL_simple(x, p0, p1, p2, p3, p4, p5):
+    """
+    Fermi liquid quasiparticle with simple self energy
+    """
+    ReS = p0 * x
+    ImS = p1 + p2 * x ** 2;
+
+    return (p4 * 1 / np.pi * ImS / ((x - ReS - p3) ** 2 + ImS ** 2) * 
+            (np.exp((x - 0) / p5) + 1) ** -1)
+    
+def gauss_mod(x, p0, p1, p2, p3, p4, p5):
+    """
+    Modified Gaussian
+    """
+    return (p0 * np.exp(-.5 * ((-x + p1) / p2) ** 2) * 
+            (p3 * special.erf((-x + p4) / p5) + 1))
+
+def Full_simple(x, p0, p1, p2, p3, p4, p5, p6, p7, p8, p9):
+    """
+    Spectral function simple FL + incoherent weight as exp. mod. Gaussian
+    """
+    return (FL_simple(x, p0, p1, p2, p3, p4, p5) +
+            p9 * exponnorm.pdf(-x, K=p6, loc=p7, scale = p8) *
+            FDsl(x, p0=1e-3, p1=0, p2=1, p3=0, p4=0))
+    
+def Full_mod(x, p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11):
+    """
+    Spectral function simple FL + incoherent weight as exp. mod. Gaussian
+    """
+    return (FL_simple(x, p0, p1, p2, p3, p4, p5) +
+            gauss_mod(x, p6, p7, p8, p9, p10, p11))
+

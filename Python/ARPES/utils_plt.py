@@ -1660,30 +1660,31 @@ def CSROfig4(colmap = cm.ocean_r, print_fig = False):
     year = 2017
     sample = 'S1'
     edc_e_val = -.9  #EDC espilon band
-    edcw_e_val = .01
-    edc_a_val = -.34  #EDC alpha band
-    edcw_a_val = .01
-    c = (0, 238 / 256, 118 / 256)
-    top_e = .005; top_a = .005
-    bot_e = -.015; bot_a = -.015
-    left_e = -1.1; left_a = -.5
-    right_e = -.7; right_a = -.2
+    edcw_e_val = .05
+    edc_b_val = -.34  #EDC beta band
+    edcw_b_val = .01
+    top_e = .005; top_b = .005
+    bot_e = -.015; bot_b = -.015
+    left_e = -1.1; left_b = -.5
+    right_e = -.7; right_b = -.2
     
     spec = ()
     en = ()
     k = ()
     int_e = np.zeros((4)) 
-    int_a = np.zeros((4))
+    int_b = np.zeros((4))
+    eint_e = np.zeros((4))  #Error integrated epsilon band
+    eint_b = np.zeros((4))  #Error integrated beta band
     T = np.array([1.3, 10., 20., 30.])
     EDC_e = () #EDC alpha band
-    EDC_a = () #EDC alpha band
-    Bkg_e = (); Bkg_a = ()
+    EDC_b = () #EDC alpha band
+    Bkg_e = (); Bkg_b = ()
     _EDC_e = () #Index EDC epsilon band
-    _EDC_a = () #Index EDC alpha band
-    _Top_e = (); _Top_a = ()
-    _Bot_e = (); _Bot_a = ()
-    _Left_e = (); _Left_a = ()
-    _Right_e = (); _Right_a = ()
+    _EDC_b = () #Index EDC alpha band
+    _Top_e = (); _Top_b = ()
+    _Bot_e = (); _Bot_b = ()
+    _Left_e = (); _Left_b = ()
+    _Right_e = (); _Right_b = ()
     
     
     for j in range(4): 
@@ -1696,58 +1697,63 @@ def CSROfig4(colmap = cm.ocean_r, print_fig = False):
             D.ang2k(D.ang, Ekin=40, lat_unit=True, a=5.5, b=5.5, c=11, 
                       V0=0, thdg=2.5, tidg=0, phidg=42)
             int_norm = D.int_norm * 1.5
+            eint_norm = D.eint_norm * 1.5
         else: 
             D.ang2k(D.ang, Ekin=40, lat_unit=True, a=5.5, b=5.5, c=11, 
                       V0=0, thdg=2.9, tidg=0, phidg=42)
             int_norm = D.int_norm
+            eint_norm = D.eint_norm
             
         en_norm = D.en_norm - .008
         val, _edc_e = utils.find(D.ks[:, 0], edc_e_val)
         val, _edcw_e = utils.find(D.ks[:, 0], edc_e_val - edcw_e_val)
-        val, _edc_a = utils.find(D.ks[:, 0], edc_a_val)
-        val, _edcw_a = utils.find(D.ks[:, 0], edc_a_val - edcw_a_val)
+        val, _edc_b = utils.find(D.ks[:, 0], edc_b_val)
+        val, _edcw_b = utils.find(D.ks[:, 0], edc_b_val - edcw_b_val)
         val, _top_e = utils.find(en_norm[0, :], top_e)
-        val, _top_a = utils.find(en_norm[0, :], top_a)
+        val, _top_b = utils.find(en_norm[0, :], top_b)
         val, _bot_e = utils.find(en_norm[0, :], bot_e)
-        val, _bot_a = utils.find(en_norm[0, :], bot_a)
+        val, _bot_b = utils.find(en_norm[0, :], bot_b)
         val, _left_e = utils.find(D.ks[:, 0], left_e)
-        val, _left_a = utils.find(D.ks[:, 0], left_a)
+        val, _left_b = utils.find(D.ks[:, 0], left_b)
         val, _right_e = utils.find(D.ks[:, 0], right_e)
-        val, _right_a = utils.find(D.ks[:, 0], right_a)
+        val, _right_b = utils.find(D.ks[:, 0], right_b)
         
         edc_e = np.sum(int_norm[_edcw_e:_edc_e, :], axis=0) / (_edc_e - _edcw_e + 1)
     #    for i in range(edc_e.size):
     #        edc_e[i] = edc_e[i] - np.min(int_norm[:, i])
     #    edc_e = edc_e - np.amin(int_norm, axis=0)
         bkg_e = utils.Shirley(en_norm[_edc_e], edc_e)
-        edc_a = np.sum(int_norm[_edcw_a:_edc_a, :], axis=0) / (_edc_a - _edcw_a + 1)
+        edc_b = np.sum(int_norm[_edcw_b:_edc_b, :], axis=0) / (_edc_b - _edcw_b + 1)
     #    for i in range(edc_a.size):
     #        edc_a[i] = edc_a[i] - np.min(int_norm[:, i])
     #    edc_a = edc_a - np.amin(int_norm, axis=0)
-        bkg_a = utils.Shirley(en_norm[_edc_a], edc_a)
+        bkg_b = utils.Shirley(en_norm[_edc_b], edc_b)
         int_e[j] = np.sum(int_norm[_left_e:_right_e, _bot_e:_top_e])
-        int_a[j] = np.sum(int_norm[_left_a:_right_a, _bot_a:_top_a])
+        int_b[j] = np.sum(int_norm[_left_b:_right_b, _bot_b:_top_b])
+        eint_e[j] = np.sum(eint_norm[_left_e:_right_e, _bot_e:_top_e])
+        eint_b[j] = np.sum(eint_norm[_left_b:_right_b, _bot_b:_top_b])
         spec = spec + (int_norm,)
         en = en + (en_norm,)
         k = k + (D.ks,)
         EDC_e = EDC_e + (edc_e,)
-        EDC_a = EDC_a + (edc_a,)
+        EDC_b = EDC_b + (edc_b,)
         Bkg_e = Bkg_e + (bkg_e,)
-        Bkg_a = Bkg_a + (bkg_a,)
+        Bkg_b = Bkg_b + (bkg_b,)
         _EDC_e = _EDC_e + (_edc_e,)
-        _EDC_a = _EDC_a + (_edc_a,)
+        _EDC_b = _EDC_b + (_edc_b,)
         _Top_e = _Top_e + (_top_e,)
-        _Top_a = _Top_a + (_top_a,)
+        _Top_b = _Top_b + (_top_b,)
         _Bot_e = _Bot_e + (_bot_e,)
-        _Bot_a = _Bot_a + (_bot_a,)
+        _Bot_b = _Bot_b + (_bot_b,)
         _Left_e = _Left_e + (_left_e,)
-        _Left_a = _Left_a + (_left_a,)
+        _Left_b = _Left_b + (_left_b,)
         _Right_e = _Right_e + (_right_e,)
-        _Right_a = _Right_a + (_right_a,)
+        _Right_b = _Right_b + (_right_b,)  
         
+    eint_e = eint_e / int_e
+    eint_b = eint_b / int_e
     int_e = int_e / int_e[0]
-    int_a = int_a / int_a[0]
-    
+    int_b = int_b / int_b[0]
     def CSROfig4abcd():
         lbls = [r'(a) $T=1.3\,$K', r'(b) $T=10\,$K', r'(c) $T=20\,$K', r'(d) $T=30\,$K']
         for j in range(4): 
@@ -1757,19 +1763,21 @@ def CSROfig4(colmap = cm.ocean_r, print_fig = False):
     #        plt.contourf(k[j], en[j], spec[j], 200, cmap=colmap,
     #                         vmin=.02 * np.max(spec[j]), vmax=.165 * np.max(spec[j]))
             plt.contourf(k[j], en[j], spec[j], 200, cmap=colmap,
-                             vmin=.01 * np.max(spec[j]), vmax=.25 * np.max(spec[j]))
+                             vmin=.01 * np.max(spec[0]), vmax=.28 * np.max(spec[0]))
             if j == 0:
                 plt.yticks(np.arange(-.1, .03, .02), ('-100', '-80', '-60', '-40', '-20',
                        '0', '20'))
                 plt.ylabel('$\omega\,(\mathrm{meV})$', fontdict = font)
                 plt.plot([k[j][_EDC_e[j], 0], k[j][_EDC_e[j], 0]], [en[j][0, 0], en[j][0, -1]],
-                     linestyle='-.', color=c, linewidth=.5)
-                plt.plot([k[j][_EDC_a[j], 0], k[j][_EDC_a[j], 0]], [en[j][0, 0], en[j][0, -1]],
-                     linestyle='-.', color=c, linewidth=.5)
+                     linestyle='-.', color='C9', linewidth=.5)
+                plt.plot([k[j][_EDC_b[j], 0], k[j][_EDC_b[j], 0]], [en[j][0, 0], en[j][0, -1]],
+                     linestyle='-.', color='C9', linewidth=.5)
+                plt.text(-1.06, .007, r'$\bar{\epsilon}$-band', color='r')
+                plt.text(-.5, .007, r'$\bar{\beta}$-band', color='C1')
             elif j == 3:
                 plt.plot([k[j][_EDC_e[j], 0], k[j][_EDC_e[j], 0]], [en[j][0, 0], en[j][0, -1]],
                      linestyle='-.', color='k', linewidth=.5)
-                plt.plot([k[j][_EDC_a[j], 0], k[j][_EDC_a[j], 0]], [en[j][0, 0], en[j][0, -1]],
+                plt.plot([k[j][_EDC_b[j], 0], k[j][_EDC_b[j], 0]], [en[j][0, 0], en[j][0, -1]],
                      linestyle='-.', color='k', linewidth=.5)
                 plt.yticks(np.arange(-.1, .05, .02), [])
             else: 
@@ -1790,17 +1798,17 @@ def CSROfig4(colmap = cm.ocean_r, print_fig = False):
                      [en[j][0, _Bot_e[j]], en[j][0, _Bot_e[j]]],
                      linestyle='--', color='r', linewidth=.5)
             
-            plt.plot([k[j][_Left_a[j], 0], k[j][_Left_a[j], 0]], 
-                     [en[j][0, _Top_a[j]], en[j][0, _Bot_a[j]]],
+            plt.plot([k[j][_Left_b[j], 0], k[j][_Left_b[j], 0]], 
+                     [en[j][0, _Top_b[j]], en[j][0, _Bot_b[j]]],
                      linestyle='--', color='C1', linewidth=.5)
-            plt.plot([k[j][_Right_a[j], 0], k[j][_Right_a[j], 0]], 
-                     [en[j][0, _Top_a[j]], en[j][0, _Bot_a[j]]],
+            plt.plot([k[j][_Right_b[j], 0], k[j][_Right_b[j], 0]], 
+                     [en[j][0, _Top_b[j]], en[j][0, _Bot_b[j]]],
                      linestyle='--', color='C1', linewidth=.5)
-            plt.plot([k[j][_Left_a[j], 0], k[j][_Right_a[j], 0]], 
-                     [en[j][0, _Top_a[j]], en[j][0, _Top_a[j]]],
+            plt.plot([k[j][_Left_b[j], 0], k[j][_Right_b[j], 0]], 
+                     [en[j][0, _Top_b[j]], en[j][0, _Top_b[j]]],
                      linestyle='--', color='r', linewidth=.5)
-            plt.plot([k[j][_Left_a[j], 0], k[j][_Right_a[j], 0]], 
-                     [en[j][0, _Bot_a[j]], en[j][0, _Bot_a[j]]],
+            plt.plot([k[j][_Left_b[j], 0], k[j][_Right_b[j], 0]], 
+                     [en[j][0, _Bot_b[j]], en[j][0, _Bot_b[j]]],
                      linestyle='--', color='r', linewidth=.5)
             
             ax.xaxis.tick_top()
@@ -1818,7 +1826,7 @@ def CSROfig4(colmap = cm.ocean_r, print_fig = False):
     
     def CSROfig4efg():
         lbls = [r'(e) $\bar{\epsilon}$-band', r'(f) $\bar{\epsilon}$-band (zoom)', 
-                r'(g) $\bar{\alpha}$-band (zoom)']
+                r'(g) $\bar{\beta}$-band (zoom)']
         lbls_x = [-.77, -.093, -.093]
         lbls_y = [2.05, .99, .99]
         plt.figure(20004, figsize=(8, 8), clear=True)
@@ -1830,16 +1838,16 @@ def CSROfig4(colmap = cm.ocean_r, print_fig = False):
         ax = plt.subplot(2, 2, 2) 
         ax.set_position([.08 + .31, .5, .3, .3])
         EDCn_e = ()
-        EDCn_a = ()
+        EDCn_b = ()
         for j in range(4):
             tmp_e = EDC_e[j]-Bkg_e[j]
-            tmp_a = EDC_a[j]-Bkg_a[j]
+            tmp_b = EDC_b[j]-Bkg_b[j]
             tot_e = integrate.trapz(tmp_e, en[j][_EDC_e[j]])
             edcn_e = tmp_e / tot_e
-            edcn_a = tmp_a / tot_e
+            edcn_b = tmp_b / tot_e
             plt.plot(en[j][_EDC_e[j]], edcn_e, 'o', markersize=1)
             EDCn_e = EDCn_e + (edcn_e,)
-            EDCn_a = EDCn_a + (edcn_a,)
+            EDCn_b = EDCn_b + (edcn_b,)
         plt.figure(2004)
         for j in range(2):
             ax = plt.subplot(2, 4, j + 5) 
@@ -1869,8 +1877,8 @@ def CSROfig4(colmap = cm.ocean_r, print_fig = False):
         ax = plt.subplot(2, 4, 7) 
         ax.set_position([.08 + 2 * .21, .29, .2, .2])
         plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
-        plt.plot(en[0][_EDC_a[0]], EDCn_a[0], 'o', markersize=1, color='C9')
-        plt.plot(en[3][_EDC_a[3]], EDCn_a[3], 'o', markersize=1, color='k', alpha = .8)
+        plt.plot(en[0][_EDC_b[0]], EDCn_b[0], 'o', markersize=1, color='C9')
+        plt.plot(en[3][_EDC_b[3]], EDCn_b[3], 'o', markersize=1, color='k', alpha = .8)
         plt.yticks([])
         plt.xticks(np.arange(-.08, .06, .04), ('-80', '-40', '0', '40'))
         plt.xlim(xmin=-.1, xmax=.05)
@@ -1878,13 +1886,16 @@ def CSROfig4(colmap = cm.ocean_r, print_fig = False):
         plt.ylim(ymin=0, ymax=1.1)
         plt.xlabel(r'$\omega$ (meV)')
         plt.text(lbls_x[-1], lbls_y[-1], lbls[-1])
-        
+        return en, EDCn_e, EDCn_b, EDC_e, EDC_b, Bkg_e, Bkg_b, _EDC_e, _EDC_b
+    
     def CSROfig4h():
         ax = plt.subplot(2, 4, 8) 
         ax.set_position([.08 + 3 * .21, .29, .2, .2])
         plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
-        plt.plot(T, int_e, 'ro')
-        plt.plot(T, int_a, 'C1o')
+        plt.errorbar(T, int_e, yerr=eint_e, linewidth=.5,
+                     capsize=2, color='red', fmt='o', ms=5)
+        plt.errorbar(T, int_b, yerr=eint_b, linewidth=.5,
+                     capsize=2, color='C1', fmt='d', ms=5)
         plt.plot([1.3, 32], [1, .695], 'r--', linewidth=.5)
         plt.plot([1.3, 32], [1, 1], 'C1--', linewidth=.5)
         plt.xticks(T)
@@ -1899,13 +1910,119 @@ def CSROfig4(colmap = cm.ocean_r, print_fig = False):
                    fontdict = font, fontsize=8)
         plt.text(1.3, 1.032, r'(h)')
         plt.text(8, .83, r'$\bar{\epsilon}$-band', color='r')
-        plt.text(15, .95, r'$\bar{\alpha}$-band', color='C1')
+        plt.text(15, .95, r'$\bar{\beta}$-band', color='C1')
         
     plt.figure(2004, figsize=(8, 8), clear=True)
     CSROfig4abcd()
-    CSROfig4efg()
+    en, EDCn_e, EDCn_b, EDC_e, EDC_b, Bkg_e, Bkg_b, _EDC_e, _EDC_b = CSROfig4efg()
     CSROfig4h()
     if print_fig == True:
         plt.savefig(
                 '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig4.png', 
                 dpi = 300,bbox_inches="tight")
+    return en, EDCn_e, EDCn_b, EDC_e, EDC_b, Bkg_e, Bkg_b, _EDC_e, _EDC_b
+
+def CSROfig5(print_fig = False):
+    """
+    Analysis Z of epsilon band
+    """
+    en, EDCn_e, EDCn_b, EDC_e, EDC_b, Bkg_e, Bkg_b, _EDC_e, _EDC_b = CSROfig4()
+    d = 1e-6
+    D = 1e6
+    p_edc_i = np.array([6.9e-1, 7.3e-3, 4.6, 4.7e-3, 4.1e-2, 2.6e-3,
+                        1e0, -.2, .3, 1, -.1, 1e-1])
+    bounds_fl = ([p_edc_i[0] - D, p_edc_i[1] - d, p_edc_i[2] - d,
+                  p_edc_i[3] - D, p_edc_i[4] - D, p_edc_i[5] - D],
+                 [p_edc_i[0] + D, p_edc_i[1] + d, p_edc_i[2] + d, 
+                  p_edc_i[3] + D, p_edc_i[4] + D, p_edc_i[5] + D])
+    
+    plt.figure('20005a', figsize=(10, 10), clear=True)
+    titles = [r'$T=1.3\,$K', r'$T=10\,$K', r'$T=20\,$K', r'$T=30\,$K']
+    lbls = [r'(a)', r'(b)', r'(c)', r'(d)',
+            r'(e)', r'(f)', r'(g)', r'(h)',
+            r'(i)', r'(j)', r'(k)', r'(l)']
+    cols = ([0, 1, 1], [0, .7, .7], [0, .4, .4], [0, 0, 0])
+    cols_r = ([0, 0, 0], [0, .4, .4], [0, .7, .7], [0, 1, 1])
+    xx = np.arange(-2, .5, .001)
+    Z = np.ones((4))
+    for j in range(4):
+        ###First row###
+        Bkg = Bkg_e[j]
+        Bkg[0] = 0
+        Bkg[-1] = 0
+        ax = plt.subplot(5, 4, j + 1) 
+        ax.set_position([.08 + j * .21, .61, .2, .2])
+        plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+        plt.plot(en[j][_EDC_e[j]], EDC_e[j], 'o', markersize=1, color=cols[j])
+        plt.fill(en[j][_EDC_e[j]], Bkg, '--', linewidth=1, color='C8', alpha=.3)
+        plt.yticks([])
+        plt.xticks(np.arange(-.8, .2, .2), [])
+        plt.xlim(xmin=-.8, xmax=.1)
+        plt.ylim(ymin=0, ymax=.02)
+        plt.text(-.77, .001, r'Background')
+        plt.text(-.77, .0183, lbls[j])
+        plt.title(titles[j], fontsize=15)
+        if j == 0:
+            plt.ylabel(r'Intensity (a.u.)')
+        ###Third row#
+        ax = plt.subplot(5, 4, j + 13) 
+        ax.set_position([.08 + j * .21, .18, .2, .2])
+        plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+        plt.plot(en[j][_EDC_e[j]], EDCn_e[j], 'o', markersize=1, color=cols[j])
+        
+        p_fl, cov_edc = curve_fit(
+                utils_math.FL_simple, en[j][_EDC_e[j]][900:-1], 
+                EDCn_e[j][900:-1], 
+                p_edc_i[0: -6], bounds=bounds_fl)
+        f_fl = utils_math.FL_simple(xx, *p_fl)
+            
+        plt.yticks([])
+        plt.xticks(np.arange(-.8, .2, .1))
+        plt.xlim(xmin=-.1, xmax=.05)
+        plt.ylim(ymin=0, ymax=1.1)
+        plt.xlabel(r'$\omega$ (eV)')
+        if j == 0:
+            plt.ylabel(r'Intensity (a.u.)')
+            plt.text(-.095, .2, 
+                     r'$\int \, \, \mathcal{A}_\mathrm{coh.}(k\approx k_\mathrm{F}^{\bar\epsilon}, \omega) \, \mathrm{d}\omega$')
+        plt.text(-.095, 1.01, lbls[j + 8])
+        ###Second row###
+        ax = plt.subplot(5, 4, j + 9) 
+        ax.set_position([.08 + j * .21, .4, .2, .2])
+        plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+        plt.plot(en[j][_EDC_e[j]], EDCn_e[j], 'o', markersize=1, color=cols[j])
+        
+        bounds = (np.concatenate((p_fl - D, p_edc_i[6:] - D), axis=0),
+                  np.concatenate((p_fl + D, p_edc_i[6:] + D), axis=0))
+        bnd = 300
+        p_edc, cov_edc = curve_fit(
+                utils_math.Full_mod, en[j][_EDC_e[j]][bnd:-1], EDCn_e[j][bnd:-1], 
+                np.concatenate((p_fl, p_edc_i[-6:]), axis=0), bounds=bounds)
+        f_edc = utils_math.Full_mod(xx, *p_edc)
+        plt.plot(xx, f_edc,'--', color=cols_r[j], linewidth=1.5)
+        f_mod = utils_math.gauss_mod(xx, *p_edc[-6:])
+        f_fl = utils_math.FL_simple(xx, *p_edc[0:6]) 
+        plt.fill(xx, f_mod, alpha=.3, color=cols[j])
+        plt.yticks([])
+        plt.xticks(np.arange(-.8, .2, .2))
+        plt.xlim(xmin=-.8, xmax=.1)
+        plt.ylim(ymin=0, ymax=2.2)
+        if j == 0:
+            plt.ylabel(r'Intensity (a.u.)')
+            plt.text(-.68, .3, 
+                     r'$\int \, \, \mathcal{A}_\mathrm{inc.}(k\approx k_\mathrm{F}^{\bar\epsilon}, \omega) \, \mathrm{d}\omega$')
+        plt.text(-.77, 2.03, lbls[j + 4])  
+        ###Third row###
+        ax = plt.subplot(5, 4, j + 13) 
+        plt.fill(xx, f_fl, alpha=.3, color=cols[j])
+        p = plt.plot(xx, f_edc,'--', color=cols_r[j],  linewidth=2)
+        plt.legend(p, [r'$\mathcal{A}_\mathrm{coh.} + \mathcal{A}_\mathrm{inc.}$'], frameon=False)
+        ###Calculate Z###
+        A_mod = integrate.trapz(f_mod, xx)
+        A_fl = integrate.trapz(f_fl, xx)
+        Z[j] = A_fl / A_mod
+    if print_fig == True:
+        plt.savefig(
+                '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig5.png', 
+                dpi = 300,bbox_inches="tight")
+    return Z
