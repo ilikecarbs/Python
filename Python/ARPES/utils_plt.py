@@ -1676,11 +1676,13 @@ def CSROfig4(colmap = cm.ocean_r, print_fig = False):
     eint_e = np.zeros((4))  #Error integrated epsilon band
     eint_b = np.zeros((4))  #Error integrated beta band
     T = np.array([1.3, 10., 20., 30.])
-    EDC_e = () #EDC alpha band
-    EDC_b = () #EDC alpha band
+    EDC_e = () #EDC epsilon band
+    EDC_b = () #EDC beta band
+    eEDC_e = () #EDC error epsilon band
+    eEDC_b = () #EDC error beta band
     Bkg_e = (); Bkg_b = ()
     _EDC_e = () #Index EDC epsilon band
-    _EDC_b = () #Index EDC alpha band
+    _EDC_b = () #Index EDC beta band
     _Top_e = (); _Top_b = ()
     _Bot_e = (); _Bot_b = ()
     _Left_e = (); _Left_b = ()
@@ -1712,21 +1714,17 @@ def CSROfig4(colmap = cm.ocean_r, print_fig = False):
         val, _top_e = utils.find(en_norm[0, :], top_e)
         val, _top_b = utils.find(en_norm[0, :], top_b)
         val, _bot_e = utils.find(en_norm[0, :], bot_e)
-        val, _bot_b = utils.find(en_norm[0, :], bot_b)
+        val, _bot_b = utils.find(ena_norm[0, :], bot_b)
         val, _left_e = utils.find(D.ks[:, 0], left_e)
         val, _left_b = utils.find(D.ks[:, 0], left_b)
         val, _right_e = utils.find(D.ks[:, 0], right_e)
         val, _right_b = utils.find(D.ks[:, 0], right_b)
         
         edc_e = np.sum(int_norm[_edcw_e:_edc_e, :], axis=0) / (_edc_e - _edcw_e + 1)
-    #    for i in range(edc_e.size):
-    #        edc_e[i] = edc_e[i] - np.min(int_norm[:, i])
-    #    edc_e = edc_e - np.amin(int_norm, axis=0)
+        eedc_e = np.sum(eint_norm[_edcw_e:_edc_e, :], axis=0) / (_edc_e - _edcw_e + 1)
         bkg_e = utils.Shirley(en_norm[_edc_e], edc_e)
         edc_b = np.sum(int_norm[_edcw_b:_edc_b, :], axis=0) / (_edc_b - _edcw_b + 1)
-    #    for i in range(edc_a.size):
-    #        edc_a[i] = edc_a[i] - np.min(int_norm[:, i])
-    #    edc_a = edc_a - np.amin(int_norm, axis=0)
+        eedc_b = np.sum(eint_norm[_edcw_b:_edc_b, :], axis=0) / (_edc_b - _edcw_b + 1)
         bkg_b = utils.Shirley(en_norm[_edc_b], edc_b)
         int_e[j] = np.sum(int_norm[_left_e:_right_e, _bot_e:_top_e])
         int_b[j] = np.sum(int_norm[_left_b:_right_b, _bot_b:_top_b])
@@ -1737,6 +1735,8 @@ def CSROfig4(colmap = cm.ocean_r, print_fig = False):
         k = k + (D.ks,)
         EDC_e = EDC_e + (edc_e,)
         EDC_b = EDC_b + (edc_b,)
+        eEDC_e = eEDC_e + (eedc_e,)
+        eEDC_b = eEDC_b + (eedc_b,)
         Bkg_e = Bkg_e + (bkg_e,)
         Bkg_b = Bkg_b + (bkg_b,)
         _EDC_e = _EDC_e + (_edc_e,)
@@ -1837,17 +1837,23 @@ def CSROfig4(colmap = cm.ocean_r, print_fig = False):
             plt.plot(en[j][_EDC_e[j]], Bkg_e[j], 'o', markersize=1)
         ax = plt.subplot(2, 2, 2) 
         ax.set_position([.08 + .31, .5, .3, .3])
-        EDCn_e = ()
-        EDCn_b = ()
+        EDCn_e = () #normalized
+        EDCn_b = () #normalized
+        eEDCn_e = () #normalized
+        eEDCn_b = () #normalized
         for j in range(4):
             tmp_e = EDC_e[j]-Bkg_e[j]
             tmp_b = EDC_b[j]-Bkg_b[j]
             tot_e = integrate.trapz(tmp_e, en[j][_EDC_e[j]])
             edcn_e = tmp_e / tot_e
+            eedcn_e = eEDC_e[j] / tot_e
             edcn_b = tmp_b / tot_e
+            eedcn_b = eEDC_b[j] / tot_e
             plt.plot(en[j][_EDC_e[j]], edcn_e, 'o', markersize=1)
             EDCn_e = EDCn_e + (edcn_e,)
             EDCn_b = EDCn_b + (edcn_b,)
+            eEDCn_e = eEDCn_e + (eedcn_e,)
+            eEDCn_b = eEDCn_b + (eedcn_b,)
         plt.figure(2004)
         for j in range(2):
             ax = plt.subplot(2, 4, j + 5) 
@@ -1886,7 +1892,8 @@ def CSROfig4(colmap = cm.ocean_r, print_fig = False):
         plt.ylim(ymin=0, ymax=1.1)
         plt.xlabel(r'$\omega$ (meV)')
         plt.text(lbls_x[-1], lbls_y[-1], lbls[-1])
-        return en, EDCn_e, EDCn_b, EDC_e, EDC_b, Bkg_e, Bkg_b, _EDC_e, _EDC_b
+        return (en, EDCn_e, EDCn_b, EDC_e, EDC_b, Bkg_e, Bkg_b, _EDC_e, _EDC_b,
+                eEDCn_e, eEDCn_b, eEDC_e, eEDC_b)
     
     def CSROfig4h():
         ax = plt.subplot(2, 4, 8) 
@@ -1914,20 +1921,24 @@ def CSROfig4(colmap = cm.ocean_r, print_fig = False):
         
     plt.figure(2004, figsize=(8, 8), clear=True)
     CSROfig4abcd()
-    en, EDCn_e, EDCn_b, EDC_e, EDC_b, Bkg_e, Bkg_b, _EDC_e, _EDC_b = CSROfig4efg()
+    (en, EDCn_e, EDCn_b, EDC_e, EDC_b, Bkg_e, Bkg_b, _EDC_e, _EDC_b,
+     eEDCn_e, eEDCn_b, eEDC_e, eEDC_b) = CSROfig4efg()
     CSROfig4h()
     if print_fig == True:
         plt.savefig(
                 '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig4.png', 
                 dpi = 300,bbox_inches="tight")
-    return en, EDCn_e, EDCn_b, EDC_e, EDC_b, Bkg_e, Bkg_b, _EDC_e, _EDC_b
+    return (en, EDCn_e, EDCn_b, EDC_e, EDC_b, Bkg_e, Bkg_b, _EDC_e, _EDC_b,
+                eEDCn_e, eEDCn_b, eEDC_e, eEDC_b)
 
 def CSROfig5(print_fig = False):
     """
     Analysis Z of epsilon band
     """
-    en, EDCn_e, EDCn_b, EDC_e, EDC_b, Bkg_e, Bkg_b, _EDC_e, _EDC_b = CSROfig4()
+    (en, EDCn_e, EDCn_b, EDC_e, EDC_b, Bkg_e, Bkg_b, _EDC_e, _EDC_b,
+                eEDCn_e, eEDCn_b, eEDC_e, eEDC_b) = CSROfig4()
     d = 1e-6
+    plt.figure(2005, figsize=(10, 10), clear=True)
     D = 1e6
     p_edc_i = np.array([6.9e-1, 7.3e-3, 4.6, 4.7e-3, 4.1e-2, 2.6e-3,
                         1e0, -.2, .3, 1, -.1, 1e-1])
@@ -1936,7 +1947,6 @@ def CSROfig5(print_fig = False):
                  [p_edc_i[0] + D, p_edc_i[1] + d, p_edc_i[2] + d, 
                   p_edc_i[3] + D, p_edc_i[4] + D, p_edc_i[5] + D])
     
-    plt.figure('20005a', figsize=(10, 10), clear=True)
     titles = [r'$T=1.3\,$K', r'$T=10\,$K', r'$T=20\,$K', r'$T=30\,$K']
     lbls = [r'(a)', r'(b)', r'(c)', r'(d)',
             r'(e)', r'(f)', r'(g)', r'(h)',
@@ -1970,7 +1980,7 @@ def CSROfig5(print_fig = False):
         plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
         plt.plot(en[j][_EDC_e[j]], EDCn_e[j], 'o', markersize=1, color=cols[j])
         
-        p_fl, cov_edc = curve_fit(
+        p_fl, cov_fl = curve_fit(
                 utils_math.FL_simple, en[j][_EDC_e[j]][900:-1], 
                 EDCn_e[j][900:-1], 
                 p_edc_i[0: -6], bounds=bounds_fl)
