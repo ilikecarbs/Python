@@ -59,32 +59,70 @@ CSROfig3:  (L): Polarization and orbital characters. Figure 3 in paper
 CSROfig4:  (L): Temperature dependence. Figure 4 in paper
 CSROfig5:  (L): Analysis Z epsilon band
 """
-
-utils_plt.CSROfig5(print_fig=True)
+#--------
+#utils_plt.CROfig1(print_fig=True)
+#utils_plt.CROfig2(print_fig=True)
+#utils_plt.CROfig3(print_fig=True)
+#utils_plt.CROfig4(print_fig=True)
+#utils_plt.CROfig5(print_fig=True)
+#utils_plt.CROfig6(print_fig=True)
+#utils_plt.CROfig7(print_fig=True)
+#utils_plt.CROfig8(print_fig=True)
+#utils_plt.CROfig9(print_fig=True)
+#utils_plt.CROfig10(print_fig=True)
+#utils_plt.CROfig11(print_fig=True)
+#utils_plt.CROfig12(print_fig=True)
+#utils_plt.CROfig13(print_fig=True)
+#utils_plt.CROfig14(print_fig=True)
+#--------
+#utils_plt.CSROfig1(print_fig=True)
+#utils_plt.CSROfig2(print_fig=True)
+#utils_plt.CSROfig3(print_fig=True)
+#utils_plt.CSROfig4(print_fig=True)
+#utils_plt.CSROfig5(print_fig=True)
 
 #%%
-
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
-file = 8
+files = [25, 26, 27, 28]
 gold = 14
 mat = 'CSRO20'
 year = 2017
 sample = 'S1'
-D = ARPES.Bessy(file, mat, year, sample)
-D.norm(gold)
-D.FS(e = 0.07, ew = .02, norm = True)
-D.ang2kFS(D.ang, Ekin=36, lat_unit=True, a=5.5, b=5.5, c=11, 
-          V0=0, thdg=2.7, tidg=-1.5, phidg=42)
-FS = D.map
-for i in range(FS.shape[1]):
-    FS[:, i] = np.divide(FS[:, i], np.sum(FS[:, i]))  #Flatten
-plt.figure(20004, figsize=(8, 8), clear=True)
-ax = plt.subplot(1, 3, 2) 
-ax.set_position([.3, .3, .4, .4])
-plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
-plt.contourf(D.kx, D.ky, FS, 300,
-           cmap=cm.ocean_r)
-plt.grid(alpha=.5)
+
+spec = ()
+en = ()
+k = ()
+T = np.array([1.3, 10., 20., 30.])
+EDC_e = () #EDC alpha band
+EDC_b = () #EDC alpha band
+Bkg_e = (); Bkg_b = ()
+_EDC_e = () #Index EDC epsilon band
+_EDC_b = () #Index EDC alpha band
+_Top_e = (); _Top_b = ()
+_Bot_e = (); _Bot_b = ()
+_Left_e = (); _Left_b = ()
+_Right_e = (); _Right_b = ()
+
+
+for j in range(4): 
+    D = ARPES.Bessy(files[j], mat, year, sample)
+    D.norm(gold)
+#    D.restrict(bot=.7, top=.9, left=.33, right=.5)
+#    D.restrict(bot=.7, top=.9, left=.0, right=1)
+    D.bkg(norm=True)
+    if j == 0:
+        D.ang2k(D.ang, Ekin=40, lat_unit=True, a=5.5, b=5.5, c=11, 
+                  V0=0, thdg=2.5, tidg=0, phidg=42)
+        int_norm = D.int_norm * 1.5
+        eint_norm = D.eint_norm * 1.5
+    else: 
+        D.ang2k(D.ang, Ekin=40, lat_unit=True, a=5.5, b=5.5, c=11, 
+                  V0=0, thdg=2.9, tidg=0, phidg=42)
+        int_norm = D.int_norm
+        eint_norm = D.eint_norm
+        
+    en_norm = D.en_norm - .008
+
 
 #%%
 en, EDCn_e, EDCn_b, EDC_e, EDC_b, Bkg_e, Bkg_b, _EDC_e, _EDC_b = utils_plt.CSROfig4()
@@ -99,7 +137,7 @@ bounds_fl = ([p_edc_i[0] - D, p_edc_i[1] - d, p_edc_i[2] - d,
              [p_edc_i[0] + D, p_edc_i[1] + d, p_edc_i[2] + d, 
               p_edc_i[3] + D, p_edc_i[4] + D, p_edc_i[5] + D])
 
-plt.figure('20005a', figsize=(10, 10), clear=True)
+plt.figure(2005, figsize=(10, 10), clear=True)
 titles = [r'$T=1.3\,$K', r'$T=10\,$K', r'$T=20\,$K', r'$T=30\,$K']
 lbls = [r'(a)', r'(b)', r'(c)', r'(d)',
         r'(e)', r'(f)', r'(g)', r'(h)',
@@ -133,10 +171,11 @@ for j in range(4):
     plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
     plt.plot(en[j][_EDC_e[j]], EDCn_e[j], 'o', markersize=1, color=cols[j])
     
-    p_fl, cov_edc = curve_fit(
+    p_fl, cov_fl = curve_fit(
             utils_math.FL_simple, en[j][_EDC_e[j]][900:-1], 
             EDCn_e[j][900:-1], 
-            p_edc_i[0: -6], bounds=bounds_fl)
+            p_edc_i[0: -6], 
+            bounds=bounds_fl, sigma=EDCn_e[j][900:-1]/1000, absolute_sigma=False)
     f_fl = utils_math.FL_simple(xx, *p_fl)
         
     plt.yticks([])
@@ -178,18 +217,69 @@ for j in range(4):
     ###Third row###
     ax = plt.subplot(5, 4, j + 13) 
     plt.fill(xx, f_fl, alpha=.3, color=cols[j])
-    p=plt.plot(xx, f_edc,'--', color=cols_r[j],  linewidth=2)
+    p = plt.plot(xx, f_edc,'--', color=cols_r[j],  linewidth=2)
     plt.legend(p, [r'$\mathcal{A}_\mathrm{coh.} + \mathcal{A}_\mathrm{inc.}$'], frameon=False)
     ###Calculate Z###
-    A_edc = integrate.trapz(f_edc, xx)
     A_mod = integrate.trapz(f_mod, xx)
     A_fl = integrate.trapz(f_fl, xx)
     Z[j] = A_fl / A_mod
-print(('\n Z = ' + str(np.round(Z, 3))))
+    
+#%%
+from uncertainties import ufloat
+import uncertainties.unumpy as unumpy
+
+xx = np.arange(-2, .5, .01)
+def uFL_simple(x, p0, p1, p2, p3, p4, p5,
+           ep0, ep1, ep2, ep3, ep4, ep5):
+    
+    ReS = ufloat(p0, ep0) * x
+    ImS = ufloat(p1, ep1) + ufloat(p2, ep2) * x ** 2;
+    
+    return (ufloat(p4, ep4) * 1 / np.pi * 
+            ImS / ((x - ReS - ufloat(p3, ep3)) ** 2 + ImS ** 2) * 
+            (unumpy.exp((x - 0) / ufloat(p5, ep5)) + 1) ** -1)
+        
+perr_fl = np.sqrt(np.diag(cov_fl))
+
+pfull_fl = np.concatenate((p_fl, perr_fl), axis=0)
+
+uf_fl = uFL_simple(xx, *pfull_fl)
+
+plt.figure(20005, figsize=(8, 8), clear=True)
+plt.subplot(121)
+plt.errorbar(xx, unumpy.nominal_values(uf_fl), yerr=unumpy.std_devs(uf_fl))
+plt.subplot(122)
+plt.plot(xx, unumpy.nominal_values(uf_fl))
+
+
+    
 #%%
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
-#file = 62151
-file = 62087
+file = 8
+gold = 14
+mat = 'CSRO20'
+year = 2017
+sample = 'S1'
+D = ARPES.Bessy(file, mat, year, sample)
+D.norm(gold)
+D.FS(e = 0.07, ew = .02, norm = True)
+D.ang2kFS(D.ang, Ekin=36, lat_unit=True, a=5.5, b=5.5, c=11, 
+          V0=0, thdg=2.7, tidg=-1.5, phidg=42)
+FS = D.map
+for i in range(FS.shape[1]):
+    FS[:, i] = np.divide(FS[:, i], np.sum(FS[:, i]))  #Flatten
+plt.figure(20004, figsize=(8, 8), clear=True)
+ax = plt.subplot(1, 3, 2) 
+ax.set_position([.3, .3, .4, .4])
+plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
+plt.contourf(D.kx, D.ky, FS, 300,
+           cmap=cm.ocean_r)
+plt.grid(alpha=.5)
+
+#%%
+os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+file = 62151
+#file = 62087
 gold = 62081
 mat = 'CSRO20'
 year = 2017

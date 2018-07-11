@@ -11,6 +11,8 @@ from numpy import linalg as la
 import utils_plt as uplt 
 from scipy.stats import exponnorm
 from scipy import special
+from uncertainties import ufloat
+import uncertainties.umath as umath
 
 def paramSRO():
     """
@@ -244,6 +246,18 @@ def FL_simple(x, p0, p1, p2, p3, p4, p5):
 
     return (p4 * 1 / np.pi * ImS / ((x - ReS - p3) ** 2 + ImS ** 2) * 
             (np.exp((x - 0) / p5) + 1) ** -1)
+    
+def uFL_simple(x, p0, p1, p2, p3, p4, p5,
+               ep0, ep1, ep2, ep3, ep4, ep5):
+    """
+    Fermi liquid quasiparticle with simple self energy
+    """
+    ReS = ufloat(p0, ep0) * x
+    ImS = ufloat(p1, ep1) + ufloat(p2, ep2) * x ** 2;
+
+    return (ufloat(p4, ep4) * 1 / np.pi * 
+            ImS / ((x - ReS - ufloat(p3, ep3)) ** 2 + ImS ** 2) * 
+            (umath.exp((x - 0) / ufloat(p5, ep5)) + 1) ** -1)
     
 def gauss_mod(x, p0, p1, p2, p3, p4, p5):
     """

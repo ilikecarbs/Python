@@ -1719,6 +1719,7 @@ def CSROfig4(colmap = cm.ocean_r, print_fig = False):
         val, _right_b = utils.find(D.ks[:, 0], right_b)
         
         edc_e = np.sum(int_norm[_edcw_e:_edc_e, :], axis=0) / (_edc_e - _edcw_e + 1)
+        eedc_e = np.sum(eint_norm[_edcw_e:_edc_e, :], axis=0) / (_edc_e - _edcw_e + 1)
     #    for i in range(edc_e.size):
     #        edc_e[i] = edc_e[i] - np.min(int_norm[:, i])
     #    edc_e = edc_e - np.amin(int_norm, axis=0)
@@ -1928,6 +1929,7 @@ def CSROfig5(print_fig = False):
     """
     en, EDCn_e, EDCn_b, EDC_e, EDC_b, Bkg_e, Bkg_b, _EDC_e, _EDC_b = CSROfig4()
     d = 1e-6
+    plt.figure(2005, figsize=(10, 10), clear=True)
     D = 1e6
     p_edc_i = np.array([6.9e-1, 7.3e-3, 4.6, 4.7e-3, 4.1e-2, 2.6e-3,
                         1e0, -.2, .3, 1, -.1, 1e-1])
@@ -1936,7 +1938,6 @@ def CSROfig5(print_fig = False):
                  [p_edc_i[0] + D, p_edc_i[1] + d, p_edc_i[2] + d, 
                   p_edc_i[3] + D, p_edc_i[4] + D, p_edc_i[5] + D])
     
-    plt.figure('20005a', figsize=(10, 10), clear=True)
     titles = [r'$T=1.3\,$K', r'$T=10\,$K', r'$T=20\,$K', r'$T=30\,$K']
     lbls = [r'(a)', r'(b)', r'(c)', r'(d)',
             r'(e)', r'(f)', r'(g)', r'(h)',
