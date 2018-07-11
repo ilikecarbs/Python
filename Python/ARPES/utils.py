@@ -47,18 +47,21 @@ def norm(self, gold):
         os.chdir('/Users/denyssutter/Documents/library/Python')
         en_norm = np.ones(self.ens.shape)
         int_norm = np.ones(self.int.shape)
+        eint_norm = np.ones(self.eint.shape)
         if np.size(self.int.shape) == 2:
             for i in range(self.angs.shape[0]):
                 en_norm[i, :] = self.en - Ef[i]
                 int_norm[i, :] = np.divide(self.int[i, :], norm[i])
+                eint_norm[i, :] = np.divide(self.eint[i, :], norm[i])
         elif np.size(self.int.shape) == 3:
             for i in range(self.angs.shape[1]):
                 en_norm[:, i, :] = self.en - Ef[i]
                 int_norm[:, i, :] = np.divide(self.int[:, i, :], norm[i])
+                eint_norm[:, i, :] = np.divide(self.eint[:, i, :], norm[i])
     except OSError:
         os.chdir('/Users/denyssutter/Documents/library/Python')
         print('- No gold files: {}'.format(self.gold),'\n')
-    return en_norm, int_norm
+    return en_norm, int_norm, eint_norm
 
 def shift(self, gold): 
     """
@@ -133,7 +136,7 @@ def bkg(self, norm):
     
 def restrict(self, bot, top, left, right):
     if self.int.ndim == 2:
-        d1, d2 = self.int.shape
+        d1, d2 = self.int.shapes
         val, _bot = find(range(d2), bot * d2)
         val, _top = find(range(d2), top * d2)
         val, _left = find(range(d1), left * d1)
@@ -144,7 +147,9 @@ def restrict(self, bot, top, left, right):
         angs_restr = self.angs[_left:_right, _bot:_top]
         en_norm_restr = self.en_norm[_left:_right, _bot:_top]
         int_restr = self.int[_left:_right, _bot:_top]
+        eint_restr = self.eint[_left:_right, _bot:_top]
         int_norm_restr = self.int_norm[_left:_right, _bot:_top]
+        eint_norm_restr = self.eint_norm[_left:_right, _bot:_top]
         pol_restr = 0
         pols_restr = 0
     elif self.int.ndim == 3:
@@ -161,9 +166,12 @@ def restrict(self, bot, top, left, right):
         angs_restr = self.angs[_bot:_top, _left:_right, :]
         en_norm_restr = self.en_norm[_bot:_top, _left:_right, :]
         int_restr = self.int[_bot:_top, _left:_right, :]
+        eint_restr = self.int[_bot:_top, _left:_right, :]
         int_norm_restr = self.int[_bot:_top, _left:_right, :]
+        eint_norm_restr = self.int[_bot:_top, _left:_right, :]
     return (en_restr, ens_restr, en_norm_restr, ang_restr, 
-            angs_restr, pol_restr, pols_restr, int_restr, int_norm_restr)
+            angs_restr, pol_restr, pols_restr,
+            int_restr, eint_restr, int_norm_restr, eint_norm_restr)
 
 def FS_restrict(self, bot, top, left, right):
     d1, d2 = self.map.shape

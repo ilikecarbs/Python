@@ -30,7 +30,7 @@ class DLS:
         print('\n ~ Initializing Diamond Light Source data file: \n {}'.format(self.path), 
               '\n', '==========================================')
         f = h5py.File(path,'r')
-        intensity  = list(f['/entry1/analyser/data'])
+        intensity_list  = list(f['/entry1/analyser/data'])
         ang = np.array(list(f['/entry1/analyser/angles']))
         self.ang = ang
         en = np.array(list(f['/entry1/analyser/energies']))
@@ -38,7 +38,9 @@ class DLS:
         try: 
             pol = np.array(list(f['/entry1/analyser/sapolar']))
             self.pol = pol
-            self.int  = np.array(intensity)[:,:,:]
+            intensity = np.array(intensity_list)[:,:,:]
+            self.int  = intensity
+            self.eint = np.sqrt(intensity)
             self.ens   = np.broadcast_to(en, (pol.size, ang.size, en.size))
             self.angs  = np.transpose(
                             np.broadcast_to(ang, (pol.size, en.size, ang.size)),
@@ -48,7 +50,9 @@ class DLS:
                                 (2, 0, 1))
         except KeyError:
             print('- No polar angles available \n')
-            self.int = np.asarray(intensity)[0, :, :]
+            intensity = np.asarray(intensity_list)[0, :, :]
+            self.int = intensity
+            self.eint = np.sqrt(intensity)
             self.ens = np.broadcast_to(en, (ang.size, en.size))
             self.angs = np.transpose(np.broadcast_to(ang, (en.size, ang.size)))
         photon = list(f['/entry1/instrument/monochromator/energy'])
@@ -58,9 +62,10 @@ class DLS:
               '\n', '==========================================')  
                 
     def norm(self, gold):  #Normalize Data file with gold
-        en_norm, int_norm = u.norm(self, gold)
+        en_norm, int_norm, eint_norm = u.norm(self, gold)
         self.en_norm = en_norm
         self.int_norm = int_norm
+        self.eint_norm = eint_norm
         print('\n ~ Data normalized',
               '\n', '==========================================')   
         
@@ -94,7 +99,8 @@ class DLS:
         
     def restrict(self, bot = 0, top = 1, left = 0, right = 1): #restrict spectrum
         (en_restr, ens_restr, en_norm_restr, ang_restr, angs_restr, pol_restr, 
-         pols_restr, int_restr, int_norm_restr) = u.restrict(
+         pols_restr, int_restr, eint_restr,
+         int_norm_restr, eint_norm_restr) = u.restrict(
                  self, bot, top, left, right)
         self.en = en_restr
         self.ens = ens_restr
@@ -104,7 +110,9 @@ class DLS:
         self.pols = pols_restr
         self.en_norm = en_norm_restr
         self.int = int_restr
+        self.eint = eint_restr
         self.int_norm = int_norm_restr
+        self.eint_norm = eint_norm_restr
         print('\n ~ Spectra restricted',
               '\n', '==========================================')  
         
@@ -200,6 +208,7 @@ class ALS:
                 self.pols  = np.transpose(np.broadcast_to(
                                 pol, (ang.size, en.size, pol.size)), (2, 0, 1))
             self.int = intensity
+            self.eint = np.sqrt(intensity)
         self.pol = pol
         self.ang = ang
         self.en = en
@@ -209,9 +218,10 @@ class ALS:
               '\n', '==========================================')  
                 
     def norm(self, gold):  #Normalize Data file with gold
-        en_norm, int_norm = u.norm(self, gold)
+        en_norm, int_norm, eint_norm = u.norm(self, gold)
         self.en_norm = en_norm
         self.int_norm = int_norm
+        self.eint_norm = eint_norm
         print('\n ~ Data normalized',
               '\n', '==========================================')   
         
@@ -245,7 +255,8 @@ class ALS:
         
     def restrict(self, bot = 0, top = 1, left = 0, right = 1): #restrict spectrum
         (en_restr, ens_restr, en_norm_restr, ang_restr, angs_restr, pol_restr, 
-         pols_restr, int_restr, int_norm_restr) = u.restrict(
+         pols_restr, int_restr, eint_restr,
+         int_norm_restr, eint_norm_restr) = u.restrict(
                  self, bot, top, left, right)
         self.en = en_restr
         self.ens = ens_restr
@@ -255,9 +266,11 @@ class ALS:
         self.pols = pols_restr
         self.en_norm = en_norm_restr
         self.int = int_restr
+        self.eint = eint_restr
         self.int_norm = int_norm_restr
+        self.eint_norm = eint_norm_restr
         print('\n ~ Spectra restricted',
-              '\n', '==========================================')   
+              '\n', '==========================================')  
         
     def ang2k(self, angdg, Ekin, lat_unit=False, a=5.33, b=5.33, c=11, 
               V0=0, thdg=0, tidg=0, phidg=0):      
@@ -322,11 +335,14 @@ class SIS:
         data  = (f['Electron Analyzer/Image Data'])
         intensity = np.array(data)
         self.int = intensity
+        self.eint = np.sqrt(intensity)
         if data.ndim == 3:
             self.int = np.transpose(intensity, (2, 1, 0))
+            self.eint = np.sqrt(intensity)
             d1, d2, d3 = data.shape
         elif data.ndim == 2:
             self.int = np.transpose(intensity)
+            self.eint = np.sqrt(intensity)
             d1, d2 = data.shape
         e_i, de = data.attrs['Axis0.Scale']
         a_i, da = data.attrs['Axis1.Scale']
@@ -365,9 +381,10 @@ class SIS:
               '\n', '==========================================')  
                 
     def norm(self, gold):  #Normalize Data file with gold
-        en_norm, int_norm = u.norm(self, gold)
+        en_norm, int_norm, eint_norm = u.norm(self, gold)
         self.en_norm = en_norm
         self.int_norm = int_norm
+        self.eint_norm = eint_norm
         print('\n ~ Data normalized',
               '\n', '==========================================')   
         
@@ -399,9 +416,10 @@ class SIS:
         print('\n ~ Backgorund subtracted',
               '\n', '==========================================')    
         
-    def restrict(self, bot=0, top=1, left=0, right=1): #restrict spectrum
+    def restrict(self, bot = 0, top = 1, left = 0, right = 1): #restrict spectrum
         (en_restr, ens_restr, en_norm_restr, ang_restr, angs_restr, pol_restr, 
-         pols_restr, int_restr, int_norm_restr) = u.restrict(
+         pols_restr, int_restr, eint_restr,
+         int_norm_restr, eint_norm_restr) = u.restrict(
                  self, bot, top, left, right)
         self.en = en_restr
         self.ens = ens_restr
@@ -411,7 +429,9 @@ class SIS:
         self.pols = pols_restr
         self.en_norm = en_norm_restr
         self.int = int_restr
+        self.eint = eint_restr
         self.int_norm = int_norm_restr
+        self.eint_norm = eint_norm_restr
         print('\n ~ Spectra restricted',
               '\n', '==========================================')  
  
@@ -508,21 +528,24 @@ class Bessy:
                             np.broadcast_to(pol, (ang.size, en.size, pol.size)),
                                 (2, 0, 1))
             self.int = intensity
+            self.eint = np.sqrt(intensity)
         else:
             path_int = ''.join(['Ca_',str(file),'int','.dat'])
-            intensity = np.loadtxt(folder + path_int)
+            intensity = np.transpose(np.loadtxt(folder + path_int))
             print('- No polar angles available \n')
             self.ens = np.broadcast_to(en, (ang.size, en.size))
             self.angs = np.transpose(np.broadcast_to(ang, (en.size, ang.size)))
-            self.int = np.transpose(intensity)
+            self.int = intensity
+            self.eint = np.sqrt(intensity)
         print('\n ~ Initialization complete. Data has {} dimensions'.format(
                 len(np.shape(self.int))),
               '\n', '==========================================')  
                 
     def norm(self, gold):  #Normalize Data file with gold
-        en_norm, int_norm = u.norm(self, gold)
+        en_norm, int_norm, eint_norm = u.norm(self, gold)
         self.en_norm = en_norm
         self.int_norm = int_norm
+        self.eint_norm = eint_norm
         print('\n ~ Data normalized',
               '\n', '==========================================')   
         
@@ -554,9 +577,10 @@ class Bessy:
         print('\n ~ Backgorund subtracted',
               '\n', '==========================================')    
         
-    def restrict(self, bot=0, top=1, left=0, right=1): #restrict spectrum
+    def restrict(self, bot = 0, top = 1, left = 0, right = 1): #restrict spectrum
         (en_restr, ens_restr, en_norm_restr, ang_restr, angs_restr, pol_restr, 
-         pols_restr, int_restr, int_norm_restr) = u.restrict(
+         pols_restr, int_restr, eint_restr,
+         int_norm_restr, eint_norm_restr) = u.restrict(
                  self, bot, top, left, right)
         self.en = en_restr
         self.ens = ens_restr
@@ -566,7 +590,9 @@ class Bessy:
         self.pols = pols_restr
         self.en_norm = en_norm_restr
         self.int = int_restr
+        self.eint = eint_restr
         self.int_norm = int_norm_restr
+        self.eint_norm = eint_norm_restr
         print('\n ~ Spectra restricted',
               '\n', '==========================================')  
  
