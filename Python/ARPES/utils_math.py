@@ -172,6 +172,14 @@ def lor(x, p0, p1, p2,
     """
     return (p2 / (1 + ((x - p0) / p1) ** 2) + 
             p3 + p4 * x + p5 * x ** 2)
+
+def lorHWHM(x, p0, p1, p2, 
+        p3, p4, p5):
+    """
+    Single lorentzians on a quadratic background
+    """
+    return (p2 / (np.pi * p2 / 2 * (1 + ((x - p0) / p1 * 2) ** 2)) +
+            p3 + p4 * x + p5 ** 2)
     
 def lor2(x, p0, p1, 
          p2, p3, 

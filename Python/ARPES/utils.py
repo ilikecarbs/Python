@@ -136,7 +136,7 @@ def bkg(self, norm):
     
 def restrict(self, bot, top, left, right):
     if self.int.ndim == 2:
-        d1, d2 = self.int.shapes
+        d1, d2 = self.int.shape
         val, _bot = find(range(d2), bot * d2)
         val, _top = find(range(d2), top * d2)
         val, _left = find(range(d1), left * d1)

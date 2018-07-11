@@ -79,9 +79,10 @@ CSROfig5:  (L): Analysis Z epsilon band
 #utils_plt.CSROfig2(print_fig=True)
 #utils_plt.CSROfig3(print_fig=True)
 #utils_plt.CSROfig4(print_fig=True)
-#utils_plt.CSROfig5(print_fig=True)
+utils_plt.CSROfig5(print_fig=True)
 
 #%%
+colmap = cm.ocean_r
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 files = [25, 26, 27, 28]
 gold = 14
@@ -90,25 +91,23 @@ year = 2017
 sample = 'S1'
 
 spec = ()
+espec = ()
 en = ()
 k = ()
+Width = ()
+eWidth = ()
+Pos = ()
+ePos = ()
 T = np.array([1.3, 10., 20., 30.])
-EDC_e = () #EDC alpha band
-EDC_b = () #EDC alpha band
-Bkg_e = (); Bkg_b = ()
-_EDC_e = () #Index EDC epsilon band
-_EDC_b = () #Index EDC alpha band
-_Top_e = (); _Top_b = ()
-_Bot_e = (); _Bot_b = ()
-_Left_e = (); _Left_b = ()
-_Right_e = (); _Right_b = ()
-
-
-for j in range(4): 
+mdc_t_val = .001
+mdc_b_val = -.09
+n_spec = 4
+n_show = 30
+scale = 1e-4
+for j in range(n_spec): 
     D = ARPES.Bessy(files[j], mat, year, sample)
     D.norm(gold)
-#    D.restrict(bot=.7, top=.9, left=.33, right=.5)
-#    D.restrict(bot=.7, top=.9, left=.0, right=1)
+    D.restrict(bot=.7, top=.9, left=.3, right=.54)
     D.bkg(norm=True)
     if j == 0:
         D.ang2k(D.ang, Ekin=40, lat_unit=True, a=5.5, b=5.5, c=11, 
@@ -119,16 +118,126 @@ for j in range(4):
         D.ang2k(D.ang, Ekin=40, lat_unit=True, a=5.5, b=5.5, c=11, 
                   V0=0, thdg=2.9, tidg=0, phidg=42)
         int_norm = D.int_norm
-        eint_norm = D.eint_norm
-        
+        eint_norm = D.eint_norm        
     en_norm = D.en_norm - .008
+    spec = spec + (int_norm,)
+    espec = espec + (eint_norm,)
+    en = en + (en_norm,)
+    k = k + (D.ks,)
+    
+plt.figure('20006a', figsize=(10, 10), clear=True)
+for j in range(n_spec):
+    ax = plt.subplot(3, 4, j + 1) 
+    ax.set_position([.08 + j * .21, .7, .2, .2])
+    plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+    plt.contourf(k[j], en[j], spec[j], 200, cmap=colmap,
+                     vmin=.0 * np.max(spec[0]), vmax=1 * np.max(spec[0]))
+    plt.plot([-1, 0], [0, 0], 'k:')
+    plt.plot([-1, 0], [mdc_t_val, mdc_t_val], 'r--', linewidth=.5)
+    plt.plot([-1, 0], [mdc_b_val, mdc_b_val], 'r--', linewidth=.5)
+    if j == 0:
+        plt.ylabel('$\omega\,(\mathrm{meV})$', fontdict = font)
+        plt.yticks(np.arange(-.2, .1, .05))
+    else:
+        plt.yticks(np.arange(-.2, .1, .05), [])
+    plt.xticks(np.arange(-.7, -.2, .2))
+    plt.xlim(xmax=-.1, xmin=-.6)
+    plt.ylim(ymax=.05, ymin=-.15)
+    
+    val, _mdc_t = utils.find(en[j][0, :], mdc_t_val)
+    val, _mdc_b = utils.find(en[j][0, :], mdc_b_val)
+    mdc_seq = np.arange(_mdc_t,_mdc_b, -1)
+    pos = np.zeros((_mdc_t - _mdc_b))
+    epos = np.zeros((_mdc_t - _mdc_b))
+    width = np.zeros((_mdc_t - _mdc_b))
+    ewidth = np.zeros((_mdc_t - _mdc_b))
+    
+    ax = plt.subplot(3, 4, j + 5) 
+    ax.set_position([.08 + j * .21, .47, .2, .2])
+    plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+    n = 0
+    p_mdc = []
+    for i in mdc_seq:
+        n += 1
+        mdc_k = k[j][:, i]
+        mdc_int = spec[j][:, i]
+        mdc_eint = espec[j][:, i]
+        if np.mod(n, n_show) == 0:
+            plt.errorbar(mdc_k, mdc_int - scale * n, mdc_eint, 
+                         linewidth=.5, capsize=.1, color='k', fmt='o', ms=.5)
+        
+         ###Fit MDC###
+        d = 1e-2
+        eps = 1e-5
+        D = 1e5
+        p_mdc_i = np.array(
+                    [-.33, .04, .001,
+                     .0, .0, .0])
+#        return (p2 / (1 + ((x - p0) / p1) ** 2) + 
+#            p3 + p4 * x + p5 * x ** 2)
+        if n > 10:
+            p_mdc_i = p_mdc
+            bounds_bot = np.array([
+                            p_mdc_i[0] - d, p_mdc_i[1] - d, p_mdc_i[2] - D, 
+                            p_mdc_i[3] - D, p_mdc_i[4] - D, p_mdc_i[5] - eps])
+            bounds_top = np.array([
+                            p_mdc_i[0] + d, p_mdc_i[1] + d, p_mdc_i[2] + D, 
+                            p_mdc_i[3] + D, p_mdc_i[4] + D, p_mdc_i[5] + eps])
+        
+        else:
+            bounds_bot = np.array([
+                            p_mdc_i[0] - D, p_mdc_i[1] - D, p_mdc_i[2] - D, 
+                            p_mdc_i[3] - D, p_mdc_i[4] - D, p_mdc_i[5] - D])
+            bounds_top = np.array([
+                            p_mdc_i[0] + D, p_mdc_i[1] + D, p_mdc_i[2] + D, 
+                            p_mdc_i[3] + D, p_mdc_i[4] + D, p_mdc_i[5] + D])
+        bounds = (bounds_bot, bounds_top)
+        
+        p_mdc, c_mdc = curve_fit(
+            utils_math.lor, mdc_k, mdc_int, p0=p_mdc_i, bounds=bounds)
+        
+        err_mdc = np.sqrt(np.diag(c_mdc))
+        pos[n - 1] = p_mdc[0]
+        epos[n - 1] = err_mdc[0]
+        width[n - 1] = p_mdc[1]
+        ewidth[n - 1] = err_mdc[1]
+        b_mdc = utils_math.poly2(mdc_k, 0, *p_mdc[-3:])
+        f_mdc = utils_math.lor(mdc_k, *p_mdc)
+#        f_mdc[0] = 0
+#        f_mdc[-1] = 0
+        if np.mod(n, n_show) == 0:
+            plt.plot(mdc_k, f_mdc - scale * n, 'C9--')
+            plt.plot(mdc_k, b_mdc - scale * n, 'k--', linewidth=.5, alpha=.2)   
+    ax = plt.subplot(3, 4, j + 1) 
+    plt.plot(pos, en[j][0, mdc_seq], 'C9o', ms=1)
+    
+    ax = plt.subplot(3, 4, j + 9) 
+    ax.set_position([.08 + j * .21, .24, .2, .2])
+    plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+    plt.errorbar(-en[j][0][mdc_seq], width, ewidth,
+                         linewidth=.5, capsize=.1, color='k', fmt='o', ms=.5)
+    
+    Pos = Pos + (pos,)
+    ePos = ePos + (epos,)
+    Width = Width + (width,)
+    eWidth = eWidth + (ewidth,)
 
+
+plt.figure('20006b', figsize=(10, 10), clear=True)
+for j in range(n_spec):
+    ax = plt.subplot(2, 4, j + 1) 
+    ax.set_position([.08 + j * .21, .7, .2, .2])
+    plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+    plt.plot(Pos[j])
+    plt.plot(Width[j])
 
 #%%
-en, EDCn_e, EDCn_b, EDC_e, EDC_b, Bkg_e, Bkg_b, _EDC_e, _EDC_b = utils_plt.CSROfig4()
+(en, EDCn_e, EDCn_b, EDC_e, EDC_b, Bkg_e, Bkg_b, _EDC_e, _EDC_b,
+                eEDCn_e, eEDCn_b, eEDC_e, eEDC_b) = utils_plt.CSROfig4()
 #%%
 from scipy import integrate
 d = 1e-6
+plt.figure(2005, figsize=(10, 10), clear=True)
 D = 1e6
 p_edc_i = np.array([6.9e-1, 7.3e-3, 4.6, 4.7e-3, 4.1e-2, 2.6e-3,
                     1e0, -.2, .3, 1, -.1, 1e-1])
@@ -137,7 +246,6 @@ bounds_fl = ([p_edc_i[0] - D, p_edc_i[1] - d, p_edc_i[2] - d,
              [p_edc_i[0] + D, p_edc_i[1] + d, p_edc_i[2] + d, 
               p_edc_i[3] + D, p_edc_i[4] + D, p_edc_i[5] + D])
 
-plt.figure(2005, figsize=(10, 10), clear=True)
 titles = [r'$T=1.3\,$K', r'$T=10\,$K', r'$T=20\,$K', r'$T=30\,$K']
 lbls = [r'(a)', r'(b)', r'(c)', r'(d)',
         r'(e)', r'(f)', r'(g)', r'(h)',
@@ -175,9 +283,8 @@ for j in range(4):
             utils_math.FL_simple, en[j][_EDC_e[j]][900:-1], 
             EDCn_e[j][900:-1], 
             p_edc_i[0: -6], 
-            bounds=bounds_fl, sigma=EDCn_e[j][900:-1]/1000, absolute_sigma=False)
+            bounds=bounds_fl, sigma=eEDCn_e[j][900:-1])
     f_fl = utils_math.FL_simple(xx, *p_fl)
-        
     plt.yticks([])
     plt.xticks(np.arange(-.8, .2, .1))
     plt.xlim(xmin=-.1, xmax=.05)
@@ -223,7 +330,7 @@ for j in range(4):
     A_mod = integrate.trapz(f_mod, xx)
     A_fl = integrate.trapz(f_fl, xx)
     Z[j] = A_fl / A_mod
-    
+
 #%%
 from uncertainties import ufloat
 import uncertainties.unumpy as unumpy
@@ -240,7 +347,6 @@ def uFL_simple(x, p0, p1, p2, p3, p4, p5,
             (unumpy.exp((x - 0) / ufloat(p5, ep5)) + 1) ** -1)
         
 perr_fl = np.sqrt(np.diag(cov_fl))
-
 pfull_fl = np.concatenate((p_fl, perr_fl), axis=0)
 
 uf_fl = uFL_simple(xx, *pfull_fl)
