@@ -60,6 +60,7 @@ CSROfig4:  (L): Temperature dependence. Figure 4 in paper
 CSROfig5:  (L): Analysis Z epsilon band
 CSROfig6:  Analysis MDC's beta band
 CSROfig7:  Background subtraction
+CSROfig8:  Extraction LDA Fermi velocity
 """
 #--------
 #utils_plt.CROfig1(print_fig=True)
@@ -84,79 +85,10 @@ CSROfig7:  Background subtraction
 #Z = utils_plt.CSROfig5(print_fig=True)
 #(Pos, ePos, Width, eWidth) = utils_plt.CSROfig6(print_fig=True)
 #utils_plt.CSROfig7(print_fig=True)
-#%%
-colmap = cm.ocean_r
-os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
-files = [25, 26, 27, 28]
-gold = 14
-mat = 'CSRO20'
-year = 2017
-sample = 'S1'
-plt.figure('2007', figsize=(8, 8), clear=True)
-titles = [r'$T=1.3\,$K', r'$T=10\,$K', r'$T=20\,$K', r'$T=30\,$K']
-lbls = [r'(a)', r'(b)', r'(c)']
-j = 0
-_bkg = [False, True]
-for i in range(2):
-    D = ARPES.Bessy(files[j], mat, year, sample)
-    D.norm(gold)
-    D.bkg(norm=_bkg[i])
-    
-    if i == 0:
-        edc_bkg = np.zeros((D.en.size))
-        for ii in range(D.en.size):
-            edc_bkg[ii] = np.min(D.int_norm[:, ii])
-        edc_bkg[0] = 0
-    if j == 0:
-        D.ang2k(D.ang, Ekin=40, lat_unit=True, a=5.5, b=5.5, c=11, 
-                  V0=0, thdg=2.5, tidg=0, phidg=42)
-        int_norm = D.int_norm * 1.5
-        eint_norm = D.eint_norm * 1.5
-    else: 
-        D.ang2k(D.ang, Ekin=40, lat_unit=True, a=5.5, b=5.5, c=11, 
-                  V0=0, thdg=2.9, tidg=0, phidg=42)
-        int_norm = D.int_norm
-        eint_norm = D.eint_norm        
-    en_norm = D.en_norm - .008
-    
-    ax = plt.subplot(1, 3, i + 1) 
-    ax.set_position([.08 + i * .26, .3, .25, .5])
-    plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
-    plt.contourf(D.ks, en_norm, int_norm, 100, cmap=colmap,
-                     vmin=.0, vmax=.05)
-    plt.plot([np.min(D.ks), np.max(D.ks)], [0, 0], 'k:')
-    if i == 0:
-        plt.ylabel('$\omega\,(\mathrm{meV})$', fontdict=font)
-        plt.yticks(np.arange(-.8, .2, .2))
-    else:
-        plt.yticks(np.arange(-.8, .2, .2), [])
-    plt.xticks([-1, 0], ('S', r'$\Gamma$'))
-    plt.ylim(ymax = .1, ymin=-.8)
-    plt.text(-1.2, .06, lbls[i])
-
-ax = plt.subplot(1, 3, 3) 
-ax.set_position([.08 + .52, .3, .25, .5])
-plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
-plt.plot(edc_bkg, en_norm[0], 'ko', ms=1)
-plt.fill(edc_bkg, en_norm[0], alpha=.2, color='C8')
-plt.plot([0, 1], [0, 0], 'k:')
-plt.xticks([])
-plt.yticks(np.arange(-.8, .2, .2), [])
-plt.ylim(ymax = .1, ymin=-.8)
-plt.xlim(xmax = np.max(edc_bkg) * 1.1, xmin=0)
-plt.text(.0025, -.45, 'Background EDC')
-plt.text(.0008, .06, lbls[2])
-plt.xlabel('Intensity (a.u.)', fontdict=font)
-pos = ax.get_position()
-cax = plt.axes([pos.x0+pos.width+0.01 ,
-                    pos.y0, 0.01, pos.height])
-cbar = plt.colorbar(cax = cax, ticks = None)
-cbar.set_ticks([])
-cbar.set_clim(np.min(int_norm), np.max(int_norm))
-
-
+v_LDA = utils_plt.CSROfig8(print_fig=True)
 
 #%%
+v_LDA = 2.3411686586990417 
 colmap = cm.ocean_r
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 files = [25, 26, 27, 28]
@@ -228,21 +160,7 @@ for j in range(n_spec):
     plt.title(titles[j], fontsize=15)
     
 
-#%%
-plt.figure('20006b', figsize=(10, 10), clear=True)
-for j in range(n_spec):
-    ax = plt.subplot(2, 4, j + 1) 
-    ax.set_position([.08 + j * .21, .7, .2, .2])
-#    plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
-#    plt.plot(Pos[j])
-#    plt.plot(Width[j])
-    plt.errorbar(mdc_k, mdc_int, mdc_eint, 
-                         linewidth=.5, capsize=.1, color='k', fmt='o', ms=.5)
-    plt.plot(mdc_k, utils_math.lorHWHM(mdc_k, -.35, 3e-1, 1e-3,
-                     .0, .0, .0))
-#%%
-(en, EDCn_e, EDCn_b, EDC_e, EDC_b, Bkg_e, Bkg_b, _EDC_e, _EDC_b,
-                eEDCn_e, eEDCn_b, eEDC_e, eEDC_b) = utils_plt.CSROfig4()
+
 #%%
 from scipy import integrate
 d = 1e-6

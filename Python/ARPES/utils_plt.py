@@ -2303,3 +2303,62 @@ def CSROfig7(colmap=cm.ocean_r, print_fig=False):
         plt.savefig(
                 '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig7.png', 
                 dpi = 300,bbox_inches="tight")
+        
+def CSROfig8(colmap=cm.bone_r, print_fig=False):
+    """
+    Extraction LDA Fermi velocity
+    """ 
+    os.chdir('/Users/denyssutter/Documents/PhD/data')
+    xz_lda = np.loadtxt('LDA_CSRO_xz.dat')
+    os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+    #[0, 56, 110, 187, 241, 266, 325, 350]  = [G,X,S,G,Y,T,G,Z]
+    m, n = 8000, 351 #dimensions energy, full k-path
+    size = 187 - 110
+    bot, top = 3840, 4055 #restrict energy window
+    data = np.array([xz_lda]) #combine data
+    spec = np.reshape(data[0, :, 2], (n, m)) #reshape into n,m
+    spec = spec[110:187, bot:top] #restrict data to bot, top
+    #spec = np.flipud(spec)
+    spec_en = np.linspace(-8, 8, m) #define energy data
+    spec_en = spec_en[bot:top] #restrict energy data
+    spec_en = np.broadcast_to(spec_en, (spec.shape))
+    spec_k = np.linspace(-np.sqrt(2) * np.pi / 5.5, 0, size)
+    spec_k = np.transpose(
+                np.broadcast_to(spec_k, (spec.shape[1], spec.shape[0])))
+    max_pts = np.ones((size))
+    for i in range(size):
+        max_pts[i] = spec[i, :].argmax()
+    ini = 40
+    fin = 48
+    max_pts = max_pts[ini:fin]
+    
+    max_k = spec_k[ini:fin, 0]
+    max_en = spec_en[0, max_pts.astype(int)]
+    p_max, c_max = curve_fit(
+                    utils_math.poly1, max_k, max_en)
+    v_LDA = p_max[1]
+    xx = np.arange(-.43, -.27, .01)
+    plt.figure(2008, figsize=(8, 8), clear=True)
+    ax = plt.subplot(1, 3, 1) 
+    ax.set_position([.2, .24, .5, .3])
+    plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
+    plt.contourf(spec_k, spec_en, spec, 200, cmap=colmap) 
+    plt.plot(xx, utils_math.poly1(xx, *p_max), 'C9--', linewidth=1)
+    plt.plot(max_k, max_en, 'ro', ms=2)
+    plt.plot([np.min(spec_k), 0], [0, 0], 'k:')
+    plt.yticks(np.arange(-1, 1, .1))
+    plt.ylim(ymax=.1, ymin=-.3)
+    plt.ylabel(r'$\omega$ (eV)', fontdict=font)
+    plt.xlabel(r'$k_{\Gamma - \mathrm{S}}\, (\mathrm{\AA}^{-1})$', fontdict=font)
+    plt.text(-.3, -.15, '$v_\mathrm{LDA}=$' + str(np.round(v_LDA,2)) + ' eV$\,\mathrm{\AA}$')
+    pos = ax.get_position()
+    cax = plt.axes([pos.x0+pos.width + 0.01 ,
+                        pos.y0, 0.01, pos.height])
+    cbar = plt.colorbar(cax = cax, ticks = None)
+    cbar.set_ticks([])
+    cbar.set_clim(np.min(spec), np.max(spec))
+    if print_fig == True:
+        plt.savefig(
+                '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig8.png', 
+                dpi = 300,bbox_inches="tight")
+    return v_LDA
