@@ -1688,7 +1688,6 @@ def CSROfig4(colmap = cm.ocean_r, print_fig = False):
     _Left_e = (); _Left_b = ()
     _Right_e = (); _Right_b = ()
     
-    
     for j in range(4): 
         D = ARPES.Bessy(files[j], mat, year, sample)
         D.norm(gold)
@@ -1714,7 +1713,7 @@ def CSROfig4(colmap = cm.ocean_r, print_fig = False):
         val, _top_e = utils.find(en_norm[0, :], top_e)
         val, _top_b = utils.find(en_norm[0, :], top_b)
         val, _bot_e = utils.find(en_norm[0, :], bot_e)
-        val, _bot_b = utils.find(ena_norm[0, :], bot_b)
+        val, _bot_b = utils.find(en_norm[0, :], bot_b)
         val, _left_e = utils.find(D.ks[:, 0], left_e)
         val, _left_b = utils.find(D.ks[:, 0], left_b)
         val, _right_e = utils.find(D.ks[:, 0], right_e)
@@ -1969,10 +1968,10 @@ def CSROfig5(print_fig = False):
         plt.xticks(np.arange(-.8, .2, .2), [])
         plt.xlim(xmin=-.8, xmax=.1)
         plt.ylim(ymin=0, ymax=.02)
-        plt.text(-.77, .001, r'Background')
         plt.text(-.77, .0183, lbls[j])
         plt.title(titles[j], fontsize=15)
         if j == 0:
+            plt.text(-.77, .001, r'Background')
             plt.ylabel(r'Intensity (a.u.)')
         ###Third row#
         ax = plt.subplot(5, 4, j + 13) 
@@ -2036,3 +2035,271 @@ def CSROfig5(print_fig = False):
                 '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig5.png', 
                 dpi = 300,bbox_inches="tight")
     return Z
+
+def CSROfig6(colmap=cm.ocean_r, print_fig=False):
+    """
+    Analysis MDC's beta band
+    """
+    os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+    files = [25, 26, 27, 28]
+    gold = 14
+    mat = 'CSRO20'
+    year = 2017
+    sample = 'S1'
+    
+    spec = ()
+    espec = ()
+    en = ()
+    k = ()
+    Width = ()
+    eWidth = ()
+    Pos = ()
+    ePos = ()
+    mdc_t_val = .001
+    mdc_b_val = -.1
+    n_spec = 4
+    scale = 5e-5
+    c = (0, 238 / 256, 118 / 256)
+    cols = ([0, 1, 1], [0, .7, .7], [0, .4, .4], [0, 0, 0])
+    cols_r = ([0, 0, 0], [0, .4, .4], [0, .7, .7], [0, 1, 1])
+    for j in range(n_spec): 
+        D = ARPES.Bessy(files[j], mat, year, sample)
+        D.norm(gold)
+        D.restrict(bot=.7, top=.9, left=.31, right=.6)
+        D.bkg(norm=True)
+        if j == 0:
+            D.ang2k(D.ang, Ekin=40, lat_unit=True, a=5.5, b=5.5, c=11, 
+                      V0=0, thdg=2.5, tidg=0, phidg=42)
+            int_norm = D.int_norm * 1.5
+            eint_norm = D.eint_norm * 1.5
+        else: 
+            D.ang2k(D.ang, Ekin=40, lat_unit=True, a=5.5, b=5.5, c=11, 
+                      V0=0, thdg=2.9, tidg=0, phidg=42)
+            int_norm = D.int_norm
+            eint_norm = D.eint_norm        
+        en_norm = D.en_norm - .008
+        spec = spec + (int_norm,)
+        espec = espec + (eint_norm,)
+        en = en + (en_norm,)
+        k = k + (D.ks,)
+        
+    plt.figure('2006', figsize=(10, 10), clear=True)
+    titles = [r'$T=1.3\,$K', r'$T=10\,$K', r'$T=20\,$K', r'$T=30\,$K']
+    lbls = [r'(a)', r'(b)', r'(c)', r'(d)',
+                r'(e)', r'(f)', r'(g)', r'(h)',
+                r'(i)', r'(j)', r'(k)', r'(l)']
+    for j in range(n_spec):
+        val, _mdc_t = utils.find(en[j][0, :], mdc_t_val)
+        val, _mdc_b = utils.find(en[j][0, :], mdc_b_val)
+        mdc_seq = np.arange(_mdc_t,_mdc_b, -1)
+        pos = np.zeros((_mdc_t - _mdc_b))
+        epos = np.zeros((_mdc_t - _mdc_b))
+        width = np.zeros((_mdc_t - _mdc_b))
+        ewidth = np.zeros((_mdc_t - _mdc_b))
+        ###First row###
+        ax = plt.subplot(3, 4, j + 1) 
+        ax.set_position([.08 + j * .21, .66, .2, .2])
+        plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+        plt.contourf(k[j], en[j], spec[j], 200, cmap=colmap,
+                         vmin=.0 * np.max(spec[0]), vmax=1 * np.max(spec[0]))
+        plt.plot([-1, 0], [en[j][0, mdc_seq[2]], en[j][0, mdc_seq[2]]], '-.',
+                 color=c, linewidth=.5)
+        plt.plot([-1, 0], [en[j][0, mdc_seq[50]], en[j][0, mdc_seq[50]]], '-.',
+                 color=c, linewidth=.5)
+        plt.plot([-1, 0], [en[j][0, mdc_seq[100]], en[j][0, mdc_seq[100]]], '-.',
+                 color=c, linewidth=.5)
+        plt.plot([-1, 0], [0, 0], 'k:')
+        if j == 0:
+            plt.ylabel('$\omega\,(\mathrm{meV})$', fontdict = font)
+            plt.yticks(np.arange(-.2, .1, .05), 
+                       ('-200', '-150', '-100', '-50', '0', '50'))
+            plt.text(-.58, .009, r'MDC maxima (Lorentzian fit)', color='C8')
+        else:
+            plt.yticks(np.arange(-.2, .1, .05), [])
+        plt.xticks(np.arange(-.8, -.2, .2), [])
+        plt.xlim(xmax=-.1, xmin=-.6)
+        plt.ylim(ymax=.05, ymin=-.15)
+        plt.text(-.585, .035, lbls[j])
+        plt.title(titles[j], fontsize=15)
+        ###Second row###
+        ax = plt.subplot(3, 4, j + 5) 
+        ax.set_position([.08 + j * .21, .45, .2, .2])
+        plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+        n = 0
+        p_mdc = []
+        for i in mdc_seq:
+            _sl1 = 10
+            _sl2 = 155
+            n += 1
+            mdc_k = k[j][:, i]
+            mdc_int = spec[j][:, i]
+            mdc_eint = espec[j][:, i]
+            if any(x==n for x in [1, 50, 100]):
+                plt.errorbar(mdc_k, mdc_int - scale * n**1.15, mdc_eint, 
+                             linewidth=.5, capsize=.1, color=cols[j], fmt='o', ms=.5)
+    #            plt.errorbar([mdc_k[_sl1], mdc_k[_sl2]], 
+    #                         [mdc_int[_sl1] - scale * n**1.15, mdc_int[_sl2] - scale * n**1.15], 
+    #                         [mdc_eint[_sl1], mdc_eint[_sl2]], 
+    #                         linewidth=.5, capsize=.1, color='r', fmt='o', ms=2)
+            ###Fit MDC###
+            d = 1e-2
+            eps = 1e-8
+            D = 1e5
+            const_i = mdc_int[_sl2]
+            slope_i = (mdc_int[_sl1] - mdc_int[_sl2])/(mdc_k[_sl1] - mdc_k[_sl2])
+            
+            p_mdc_i = np.array(
+                        [-.34, 1e-1, 1e-3,
+                         const_i, slope_i, .0])
+            if n > 70:
+                p_mdc_i = p_mdc
+                bounds_bot = np.array([
+                                p_mdc_i[0] - d, p_mdc_i[1] - d, p_mdc_i[2] - D, 
+                                p_mdc_i[3] - D, p_mdc_i[4] - eps, p_mdc_i[5] - eps])
+                bounds_top = np.array([
+                                p_mdc_i[0] + d, p_mdc_i[1] + d, p_mdc_i[2] + D, 
+                                p_mdc_i[3] + D, p_mdc_i[4] + eps, p_mdc_i[5] + eps])
+            else:
+                bounds_bot = np.array([
+                                p_mdc_i[0] - D, p_mdc_i[1] - D, p_mdc_i[2] - D, 
+                                p_mdc_i[3] - D, p_mdc_i[4] - D, p_mdc_i[5] - eps])
+                bounds_top = np.array([
+                                p_mdc_i[0] + D, p_mdc_i[1] + D, p_mdc_i[2] + D, 
+                                p_mdc_i[3] + D, p_mdc_i[4] + D, p_mdc_i[5] + eps])
+            bounds = (bounds_bot, bounds_top)
+            
+            p_mdc, c_mdc = curve_fit(
+                utils_math.lorHWHM, mdc_k, mdc_int, p0=p_mdc_i, bounds=bounds)
+            err_mdc = np.sqrt(np.diag(c_mdc))
+            pos[n - 1] = p_mdc[0]
+            epos[n - 1] = err_mdc[0]
+            width[n - 1] = p_mdc[1] / 2 * np.pi / 5.5 #HWHM in inverse Anstrom
+            ewidth[n - 1] = err_mdc[1] / 2 * np.pi / 5.5
+            b_mdc = utils_math.poly2(mdc_k, 0, *p_mdc[-3:])
+            f_mdc = utils_math.lorHWHM(mdc_k, *p_mdc)
+    #        if np.mod(n, n_show) == 0:
+            if any(x==n for x in [1, 50, 100]):
+                plt.plot(mdc_k, f_mdc - scale * n**1.15, '--', color=cols_r[j])
+                plt.plot(mdc_k, b_mdc - scale * n**1.15, 'C8-', linewidth=2, alpha=.3)
+        if j == 0:
+            plt.ylabel('Intensity (a.u.)', fontdict = font)
+            plt.text(-.58, -.009, r'Background', color='C8')
+        plt.yticks([])
+        plt.xticks(np.arange(-.8, -.2, .2))
+        plt.xlim(xmax=-.1, xmin=-.6)
+        plt.ylim(ymin=-.01, ymax = .003)
+        plt.text(-.585, .0021, lbls[j + 4])
+        plt.xlabel(r'$k_{\Gamma - \mathrm{S}}\,(\pi/a)$')
+        ###First row again###
+        ax = plt.subplot(3, 4, j + 1) 
+        plt.plot(pos, en[j][0, mdc_seq], 'C8o', ms=.5)
+        if j == 3:
+            pos = ax.get_position()
+            cax = plt.axes([pos.x0+pos.width+0.01 ,
+                                pos.y0, 0.01, pos.height])
+            cbar = plt.colorbar(cax = cax, ticks = None)
+            cbar.set_ticks([])
+            cbar.set_clim(np.min(int_norm), np.max(int_norm))
+        ###Third row###
+        ax = plt.subplot(3, 4, j + 9) 
+        ax.set_position([.08 + j * .21, .2, .2, .2])
+        plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+        plt.errorbar(-en[j][0][mdc_seq], width, ewidth,
+                             linewidth=.5, capsize=.1, color=cols[j], fmt='o', ms=.5)
+        
+        im_bot = np.array([0 - eps, 1 - D, -.1 - d, 1 - D])
+        im_top = np.array([0 + eps, 1 + D, -.1 + d, 1 + D])
+        im_bounds = (im_bot, im_top)
+        p_im, c_im = curve_fit(
+                utils_math.poly2, -en[j][0][mdc_seq], width, bounds=im_bounds)
+        plt.plot(-en[j][0][mdc_seq], utils_math.poly2(-en[j][0][mdc_seq], *p_im),
+                 '--', color=cols_r[j])
+        if j == 0:
+            plt.ylabel('HWHM $(\AA^{-1})$', fontdict = font)
+            plt.yticks(np.arange(0, 1, .05))
+            plt.text(.005, .05, r'Quadratic fit', fontdict = font)
+        else:
+            plt.yticks(np.arange(0, 1, .05), [])
+        plt.xticks(np.arange(0, .1, .02), ('0', '-20', '-40', '-60', '-80', '-100'))
+        plt.xlabel(r'$\omega$ (meV)', fontdict = font)
+        plt.xlim(xmax=-en[j][0][mdc_seq[-1]], xmin=-en[j][0][mdc_seq[0]])
+        plt.ylim(ymax=.1, ymin=0)
+        plt.text(.0025, .092, lbls[j + 8])
+        
+        Pos = Pos + (pos,)
+        ePos = ePos + (epos,)
+        Width = Width + (width,)
+        eWidth = eWidth + (ewidth,)
+        
+    if print_fig == True:
+        plt.savefig(
+                '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig6.png', 
+                dpi = 300,bbox_inches="tight")
+    return Pos, ePos, Width, eWidth
+
+def CSROfig7(colmap=cm.ocean_r, print_fig=False):
+    """
+    Background subtraction
+    """
+    os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+    file = 25
+    gold = 14
+    mat = 'CSRO20'
+    year = 2017
+    sample = 'S1'
+    plt.figure('2007', figsize=(8, 8), clear=True)
+    lbls = [r'(a)', r'(b)', r'(c)']
+    _bkg = [False, True]
+    for i in range(2):
+        D = ARPES.Bessy(file, mat, year, sample)
+        D.norm(gold)
+        D.bkg(norm=_bkg[i])
+        
+        if i == 0:
+            edc_bkg = np.zeros((D.en.size))
+            for ii in range(D.en.size):
+                edc_bkg[ii] = np.min(D.int_norm[:, ii])
+            edc_bkg[0] = 0
+        D.ang2k(D.ang, Ekin=40, lat_unit=True, a=5.5, b=5.5, c=11, 
+                  V0=0, thdg=2.5, tidg=0, phidg=42)
+        int_norm = D.int_norm * 1.5
+        en_norm = D.en_norm - .008
+        
+        ax = plt.subplot(1, 3, i + 1) 
+        ax.set_position([.08 + i * .26, .3, .25, .5])
+        plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+        plt.contourf(D.ks, en_norm, int_norm, 100, cmap=colmap,
+                         vmin=.0, vmax=.05)
+        plt.plot([np.min(D.ks), np.max(D.ks)], [0, 0], 'k:')
+        if i == 0:
+            plt.ylabel('$\omega\,(\mathrm{meV})$', fontdict=font)
+            plt.yticks(np.arange(-.8, .2, .2))
+        else:
+            plt.yticks(np.arange(-.8, .2, .2), [])
+        plt.xticks([-1, 0], ('S', r'$\Gamma$'))
+        plt.ylim(ymax = .1, ymin=-.8)
+        plt.text(-1.2, .06, lbls[i])
+    
+    ax = plt.subplot(1, 3, 3) 
+    ax.set_position([.08 + .52, .3, .25, .5])
+    plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+    plt.plot(edc_bkg, en_norm[0], 'ko', ms=1)
+    plt.fill(edc_bkg, en_norm[0], alpha=.2, color='C8')
+    plt.plot([0, 1], [0, 0], 'k:')
+    plt.xticks([])
+    plt.yticks(np.arange(-.8, .2, .2), [])
+    plt.ylim(ymax = .1, ymin=-.8)
+    plt.xlim(xmax = np.max(edc_bkg) * 1.1, xmin=0)
+    plt.text(.0025, -.45, 'Background EDC')
+    plt.text(.0008, .06, lbls[2])
+    plt.xlabel('Intensity (a.u.)', fontdict=font)
+    pos = ax.get_position()
+    cax = plt.axes([pos.x0+pos.width+0.01 ,
+                        pos.y0, 0.01, pos.height])
+    cbar = plt.colorbar(cax = cax, ticks = None)
+    cbar.set_ticks([])
+    cbar.set_clim(np.min(int_norm), np.max(int_norm))
+    if print_fig == True:
+        plt.savefig(
+                '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig7.png', 
+                dpi = 300,bbox_inches="tight")
