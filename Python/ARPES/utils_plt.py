@@ -2053,8 +2053,9 @@ def CSROfig6(colmap=cm.ocean_r, print_fig=False):
     k = ()
     Width = ()
     eWidth = ()
-    Pos = ()
-    ePos = ()
+    Loc_en = ()
+    Loc = ()
+    eLoc = ()
     mdc_t_val = .001
     mdc_b_val = -.1
     n_spec = 4
@@ -2068,12 +2069,12 @@ def CSROfig6(colmap=cm.ocean_r, print_fig=False):
         D.restrict(bot=.7, top=.9, left=.31, right=.6)
         D.bkg(norm=True)
         if j == 0:
-            D.ang2k(D.ang, Ekin=40, lat_unit=True, a=5.5, b=5.5, c=11, 
+            D.ang2k(D.ang, Ekin=40 - 4.5, lat_unit=False, a=5.5, b=5.5, c=11, 
                       V0=0, thdg=2.5, tidg=0, phidg=42)
             int_norm = D.int_norm * 1.5
             eint_norm = D.eint_norm * 1.5
         else: 
-            D.ang2k(D.ang, Ekin=40, lat_unit=True, a=5.5, b=5.5, c=11, 
+            D.ang2k(D.ang, Ekin=40 - 4.5, lat_unit=False, a=5.5, b=5.5, c=11, 
                       V0=0, thdg=2.9, tidg=0, phidg=42)
             int_norm = D.int_norm
             eint_norm = D.eint_norm        
@@ -2081,7 +2082,7 @@ def CSROfig6(colmap=cm.ocean_r, print_fig=False):
         spec = spec + (int_norm,)
         espec = espec + (eint_norm,)
         en = en + (en_norm,)
-        k = k + (D.ks,)
+        k = k + (D.ks * np.sqrt(2),)
         
     plt.figure('2006', figsize=(10, 10), clear=True)
     titles = [r'$T=1.3\,$K', r'$T=10\,$K', r'$T=20\,$K', r'$T=30\,$K']
@@ -2092,13 +2093,13 @@ def CSROfig6(colmap=cm.ocean_r, print_fig=False):
         val, _mdc_t = utils.find(en[j][0, :], mdc_t_val)
         val, _mdc_b = utils.find(en[j][0, :], mdc_b_val)
         mdc_seq = np.arange(_mdc_t,_mdc_b, -1)
-        pos = np.zeros((_mdc_t - _mdc_b))
-        epos = np.zeros((_mdc_t - _mdc_b))
+        loc = np.zeros((_mdc_t - _mdc_b))
+        eloc = np.zeros((_mdc_t - _mdc_b))
         width = np.zeros((_mdc_t - _mdc_b))
         ewidth = np.zeros((_mdc_t - _mdc_b))
         ###First row###
-        ax = plt.subplot(3, 4, j + 1) 
-        ax.set_position([.08 + j * .21, .66, .2, .2])
+        ax = plt.subplot(4, 4, j + 1) 
+        ax.set_position([.08 + j * .21, .76, .2, .2])
         plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
         plt.contourf(k[j], en[j], spec[j], 200, cmap=colmap,
                          vmin=.0 * np.max(spec[0]), vmax=1 * np.max(spec[0]))
@@ -2113,17 +2114,17 @@ def CSROfig6(colmap=cm.ocean_r, print_fig=False):
             plt.ylabel('$\omega\,(\mathrm{meV})$', fontdict = font)
             plt.yticks(np.arange(-.2, .1, .05), 
                        ('-200', '-150', '-100', '-50', '0', '50'))
-            plt.text(-.58, .009, r'MDC maxima (Lorentzian fit)', color='C8')
+            plt.text(-.43, .009, r'MDC maxima (Lorentzian fit)', color='C8')
         else:
             plt.yticks(np.arange(-.2, .1, .05), [])
-        plt.xticks(np.arange(-.8, -.2, .2), [])
-        plt.xlim(xmax=-.1, xmin=-.6)
+        plt.xticks(np.arange(-1, 0, .1), [])
+        plt.xlim(xmax=-.05, xmin=-.45)
         plt.ylim(ymax=.05, ymin=-.15)
-        plt.text(-.585, .035, lbls[j])
+        plt.text(-.44, .035, lbls[j])
         plt.title(titles[j], fontsize=15)
         ###Second row###
-        ax = plt.subplot(3, 4, j + 5) 
-        ax.set_position([.08 + j * .21, .45, .2, .2])
+        ax = plt.subplot(4, 4, j + 5) 
+        ax.set_position([.08 + j * .21, .55, .2, .2])
         plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
         n = 0
         p_mdc = []
@@ -2145,11 +2146,11 @@ def CSROfig6(colmap=cm.ocean_r, print_fig=False):
             d = 1e-2
             eps = 1e-8
             D = 1e5
-            const_i = mdc_int[_sl2]
+            const_i = mdc_int[_sl2] 
             slope_i = (mdc_int[_sl1] - mdc_int[_sl2])/(mdc_k[_sl1] - mdc_k[_sl2])
             
             p_mdc_i = np.array(
-                        [-.34, 1e-1, 1e-3,
+                        [-.27, 5e-2, 1e-3,
                          const_i, slope_i, .0])
             if n > 70:
                 p_mdc_i = p_mdc
@@ -2171,28 +2172,28 @@ def CSROfig6(colmap=cm.ocean_r, print_fig=False):
             p_mdc, c_mdc = curve_fit(
                 utils_math.lorHWHM, mdc_k, mdc_int, p0=p_mdc_i, bounds=bounds)
             err_mdc = np.sqrt(np.diag(c_mdc))
-            pos[n - 1] = p_mdc[0]
-            epos[n - 1] = err_mdc[0]
-            width[n - 1] = p_mdc[1] / 2 * np.pi / 5.5 #HWHM in inverse Anstrom
-            ewidth[n - 1] = err_mdc[1] / 2 * np.pi / 5.5
+            loc[n - 1] = p_mdc[0]
+            eloc[n - 1] = err_mdc[0]
+            width[n - 1] = p_mdc[1]
+            ewidth[n - 1] = err_mdc[1]
             b_mdc = utils_math.poly2(mdc_k, 0, *p_mdc[-3:])
             f_mdc = utils_math.lorHWHM(mdc_k, *p_mdc)
-    #        if np.mod(n, n_show) == 0:
             if any(x==n for x in [1, 50, 100]):
                 plt.plot(mdc_k, f_mdc - scale * n**1.15, '--', color=cols_r[j])
                 plt.plot(mdc_k, b_mdc - scale * n**1.15, 'C8-', linewidth=2, alpha=.3)
         if j == 0:
             plt.ylabel('Intensity (a.u.)', fontdict = font)
-            plt.text(-.58, -.009, r'Background', color='C8')
+            plt.text(-.43, -.0092, r'Background', color='C8')
         plt.yticks([])
-        plt.xticks(np.arange(-.8, -.2, .2))
-        plt.xlim(xmax=-.1, xmin=-.6)
+        plt.xticks(np.arange(-1, 0, .1))
+        plt.xlim(xmax=-.05, xmin=-.45)
         plt.ylim(ymin=-.01, ymax = .003)
-        plt.text(-.585, .0021, lbls[j + 4])
-        plt.xlabel(r'$k_{\Gamma - \mathrm{S}}\,(\pi/a)$')
+        plt.text(-.44, .0021, lbls[j + 4])
+        plt.xlabel(r'$k_{\Gamma - \mathrm{S}}\,(\mathrm{\AA}^{-1})$', fontdict=font)
         ###First row again###
-        ax = plt.subplot(3, 4, j + 1) 
-        plt.plot(pos, en[j][0, mdc_seq], 'C8o', ms=.5)
+        ax = plt.subplot(4, 4, j + 1) 
+        loc_en = en[j][0, mdc_seq]
+        plt.plot(loc, loc_en, 'C8o', ms=.5)
         if j == 3:
             pos = ax.get_position()
             cax = plt.axes([pos.x0+pos.width+0.01 ,
@@ -2201,11 +2202,11 @@ def CSROfig6(colmap=cm.ocean_r, print_fig=False):
             cbar.set_ticks([])
             cbar.set_clim(np.min(int_norm), np.max(int_norm))
         ###Third row###
-        ax = plt.subplot(3, 4, j + 9) 
-        ax.set_position([.08 + j * .21, .2, .2, .2])
+        ax = plt.subplot(4, 4, j + 9) 
+        ax.set_position([.08 + j * .21, .29, .2, .2])
         plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
         plt.errorbar(-en[j][0][mdc_seq], width, ewidth,
-                             linewidth=.5, capsize=.1, color=cols[j], fmt='o', ms=.5)
+                     color=cols[j], linewidth=.5, capsize=2, fmt='o', ms=2)
         
         im_bot = np.array([0 - eps, 1 - D, -.1 - d, 1 - D])
         im_top = np.array([0 + eps, 1 + D, -.1 + d, 1 + D])
@@ -2215,7 +2216,7 @@ def CSROfig6(colmap=cm.ocean_r, print_fig=False):
         plt.plot(-en[j][0][mdc_seq], utils_math.poly2(-en[j][0][mdc_seq], *p_im),
                  '--', color=cols_r[j])
         if j == 0:
-            plt.ylabel('HWHM $(\AA^{-1})$', fontdict = font)
+            plt.ylabel('HWHM $(\mathrm{\AA}^{-1})$', fontdict = font)
             plt.yticks(np.arange(0, 1, .05))
             plt.text(.005, .05, r'Quadratic fit', fontdict = font)
         else:
@@ -2223,11 +2224,12 @@ def CSROfig6(colmap=cm.ocean_r, print_fig=False):
         plt.xticks(np.arange(0, .1, .02), ('0', '-20', '-40', '-60', '-80', '-100'))
         plt.xlabel(r'$\omega$ (meV)', fontdict = font)
         plt.xlim(xmax=-en[j][0][mdc_seq[-1]], xmin=-en[j][0][mdc_seq[0]])
-        plt.ylim(ymax=.1, ymin=0)
-        plt.text(.0025, .092, lbls[j + 8])
+        plt.ylim(ymax=.13, ymin=0)
+        plt.text(.0025, .12, lbls[j + 8])
         
-        Pos = Pos + (pos,)
-        ePos = ePos + (epos,)
+        Loc_en = Loc_en + (loc_en,)
+        Loc = Loc + (loc,)
+        eLoc = eLoc + (eloc,)
         Width = Width + (width,)
         eWidth = eWidth + (ewidth,)
         
@@ -2235,7 +2237,7 @@ def CSROfig6(colmap=cm.ocean_r, print_fig=False):
         plt.savefig(
                 '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig6.png', 
                 dpi = 300,bbox_inches="tight")
-    return Pos, ePos, Width, eWidth
+    return Loc_en, Loc, eLoc, Width, eWidth
 
 def CSROfig7(colmap=cm.ocean_r, print_fig=False):
     """
@@ -2337,6 +2339,7 @@ def CSROfig8(colmap=cm.bone_r, print_fig=False):
     p_max, c_max = curve_fit(
                     utils_math.poly1, max_k, max_en)
     v_LDA = p_max[1]
+    k_F = -p_max[0] / p_max[1]
     xx = np.arange(-.43, -.27, .01)
     plt.figure(2008, figsize=(8, 8), clear=True)
     ax = plt.subplot(1, 3, 1) 
@@ -2361,4 +2364,4 @@ def CSROfig8(colmap=cm.bone_r, print_fig=False):
         plt.savefig(
                 '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig8.png', 
                 dpi = 300,bbox_inches="tight")
-    return v_LDA
+    return k_F, v_LDA

@@ -185,7 +185,7 @@ def lorHWHM(x, p0, p1, p2,
     """
     Single lorentzians on a quadratic background HWHM version
     """
-    return (p2 / (np.pi * p1 / 2 * (1 + ((x - p0) / (p1 / 2)) ** 2)) +
+    return (p2 / (np.pi * p1 * (1 + ((x - p0) / p1) ** 2)) +
             p3 + p4 * x + p5 ** 2)
     
 def lor2(x, p0, p1, 
