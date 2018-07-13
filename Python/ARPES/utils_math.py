@@ -158,6 +158,13 @@ def FDsl(x, p0, p1, p2, p3, p4):
     """
     return p3 + (p2 + p4 * x) * (np.exp((x - p1) / p0) + 1) ** -1
 
+def poly1(x, p0, p1):
+    """
+    Polynomial first order
+    p0 + p1 * x
+    """
+    return p0 + p1 * x
+
 def poly2(x, p0, p1, p2, p3):
     """
     Polynomial second order
@@ -178,7 +185,7 @@ def lorHWHM(x, p0, p1, p2,
     """
     Single lorentzians on a quadratic background HWHM version
     """
-    return (p2 / (np.pi * p1 / 2 * (1 + ((x - p0) / (p1 / 2)) ** 2)) +
+    return (p2 / (np.pi * p1 * (1 + ((x - p0) / p1) ** 2)) +
             p3 + p4 * x + p5 ** 2)
     
 def lor2(x, p0, p1, 

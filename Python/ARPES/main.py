@@ -60,6 +60,8 @@ CSROfig4:  (L): Temperature dependence. Figure 4 in paper
 CSROfig5:  (L): Analysis Z epsilon band
 CSROfig6:  Analysis MDC's beta band
 CSROfig7:  Background subtraction
+CSROfig8:  Extraction LDA Fermi velocity
+CSROfig9:  ReS vs ImS
 """
 #--------
 #utils_plt.CROfig1(print_fig=True)
@@ -82,292 +84,32 @@ CSROfig7:  Background subtraction
 #utils_plt.CSROfig3(print_fig=True)
 #utils_plt.CSROfig4(print_fig=True)
 #Z = utils_plt.CSROfig5(print_fig=True)
-#(Pos, ePos, Width, eWidth) = utils_plt.CSROfig6(print_fig=True)
+#Z, Re, Loc_en, Width, eWidth = utils_plt.CSROfig6(print_fig=True)
 #utils_plt.CSROfig7(print_fig=True)
-#%%
-colmap = cm.ocean_r
-os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
-files = [25, 26, 27, 28]
-gold = 14
-mat = 'CSRO20'
-year = 2017
-sample = 'S1'
-plt.figure('2007', figsize=(8, 8), clear=True)
-titles = [r'$T=1.3\,$K', r'$T=10\,$K', r'$T=20\,$K', r'$T=30\,$K']
-lbls = [r'(a)', r'(b)', r'(c)']
-j = 0
-_bkg = [False, True]
-for i in range(2):
-    D = ARPES.Bessy(files[j], mat, year, sample)
-    D.norm(gold)
-    D.bkg(norm=_bkg[i])
-    
-    if i == 0:
-        edc_bkg = np.zeros((D.en.size))
-        for ii in range(D.en.size):
-            edc_bkg[ii] = np.min(D.int_norm[:, ii])
-        edc_bkg[0] = 0
-    if j == 0:
-        D.ang2k(D.ang, Ekin=40, lat_unit=True, a=5.5, b=5.5, c=11, 
-                  V0=0, thdg=2.5, tidg=0, phidg=42)
-        int_norm = D.int_norm * 1.5
-        eint_norm = D.eint_norm * 1.5
-    else: 
-        D.ang2k(D.ang, Ekin=40, lat_unit=True, a=5.5, b=5.5, c=11, 
-                  V0=0, thdg=2.9, tidg=0, phidg=42)
-        int_norm = D.int_norm
-        eint_norm = D.eint_norm        
-    en_norm = D.en_norm - .008
-    
-    ax = plt.subplot(1, 3, i + 1) 
-    ax.set_position([.08 + i * .26, .3, .25, .5])
-    plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
-    plt.contourf(D.ks, en_norm, int_norm, 100, cmap=colmap,
-                     vmin=.0, vmax=.05)
-    plt.plot([np.min(D.ks), np.max(D.ks)], [0, 0], 'k:')
-    if i == 0:
-        plt.ylabel('$\omega\,(\mathrm{meV})$', fontdict=font)
-        plt.yticks(np.arange(-.8, .2, .2))
-    else:
-        plt.yticks(np.arange(-.8, .2, .2), [])
-    plt.xticks([-1, 0], ('S', r'$\Gamma$'))
-    plt.ylim(ymax = .1, ymin=-.8)
-    plt.text(-1.2, .06, lbls[i])
+#k_F, v_LDA = utils_plt.CSROfig8(print_fig=True)
+utils_plt.CSROfig9(print_fig=True)
 
-ax = plt.subplot(1, 3, 3) 
-ax.set_position([.08 + .52, .3, .25, .5])
+
+#%%
+Z_e = utils_plt.CSROfig5()
+Z_b, eZ_b, Re, Loc_en, Width, eWidth = utils_plt.CSROfig6()
+
+#%%
+plt.figure('2010', figsize=(8, 8), clear=True)
+e_cols = np.array([[0, 1, 1], [0, .7, .7], [0, .4, .4], [0, 0, 0]])
+b_cols = ['khaki', 'darkkhaki', 'goldenrod', 'darkgoldenrod']
+T = np.array([1.3, 10, 20, 30])
+    
+ax = plt.subplot(1, 2, 1) 
+ax.set_position([.08, .3, .3, .3])
 plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
-plt.plot(edc_bkg, en_norm[0], 'ko', ms=1)
-plt.fill(edc_bkg, en_norm[0], alpha=.2, color='C8')
-plt.plot([0, 1], [0, 0], 'k:')
-plt.xticks([])
-plt.yticks(np.arange(-.8, .2, .2), [])
-plt.ylim(ymax = .1, ymin=-.8)
-plt.xlim(xmax = np.max(edc_bkg) * 1.1, xmin=0)
-plt.text(.0025, -.45, 'Background EDC')
-plt.text(.0008, .06, lbls[2])
-plt.xlabel('Intensity (a.u.)', fontdict=font)
-pos = ax.get_position()
-cax = plt.axes([pos.x0+pos.width+0.01 ,
-                    pos.y0, 0.01, pos.height])
-cbar = plt.colorbar(cax = cax, ticks = None)
-cbar.set_ticks([])
-cbar.set_clim(np.min(int_norm), np.max(int_norm))
 
+plt.errorbar(T, Z_e, Z_e,
+             color='r', linewidth=.5, capsize=2, fmt='d', ms=2)
+plt.errorbar(T, Z_b, eZ_b,
+             color='C1', linewidth=.5, capsize=2, fmt='o', ms=2)
+plt.ylim(ymax=1, ymin=0)
 
-
-#%%
-colmap = cm.ocean_r
-os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
-files = [25, 26, 27, 28]
-gold = 14
-mat = 'CSRO20'
-year = 2017
-sample = 'S1'
-
-spec = ()
-espec = ()
-en = ()
-k = ()
-Width = ()
-eWidth = ()
-Pos = ()
-ePos = ()
-T = np.array([1.3, 10., 20., 30.])
-mdc_t_val = .001
-mdc_b_val = -.1
-n_spec = 4
-n_show = 30
-scale = 5e-5
-vLDA   = 2.1909
-c = (0, 238 / 256, 118 / 256)
-cols = ([0, 1, 1], [0, .7, .7], [0, .4, .4], [0, 0, 0])
-cols_r = ([0, 0, 0], [0, .4, .4], [0, .7, .7], [0, 1, 1])
-for j in range(n_spec): 
-    D = ARPES.Bessy(files[j], mat, year, sample)
-    D.norm(gold)
-    D.restrict(bot=.7, top=.9, left=.31, right=.6)
-    D.bkg(norm=True)
-    if j == 0:
-        D.ang2k(D.ang, Ekin=40, lat_unit=True, a=5.5, b=5.5, c=11, 
-                  V0=0, thdg=2.5, tidg=0, phidg=42)
-        int_norm = D.int_norm * 1.5
-        eint_norm = D.eint_norm * 1.5
-    else: 
-        D.ang2k(D.ang, Ekin=40, lat_unit=True, a=5.5, b=5.5, c=11, 
-                  V0=0, thdg=2.9, tidg=0, phidg=42)
-        int_norm = D.int_norm
-        eint_norm = D.eint_norm        
-    en_norm = D.en_norm - .008
-    spec = spec + (int_norm,)
-    espec = espec + (eint_norm,)
-    en = en + (en_norm,)
-    k = k + (D.ks,)
-    
-plt.figure('2007', figsize=(10, 10), clear=True)
-titles = [r'$T=1.3\,$K', r'$T=10\,$K', r'$T=20\,$K', r'$T=30\,$K']
-lbls = [r'(a)', r'(b)', r'(c)', r'(d)',
-            r'(e)', r'(f)', r'(g)', r'(h)',
-            r'(i)', r'(j)', r'(k)', r'(l)']
-for j in range(n_spec):
-    ###First row###
-    ax = plt.subplot(3, 4, j + 1) 
-    ax.set_position([.08 + j * .21, .66, .2, .2])
-    plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
-    plt.contourf(k[j], en[j], spec[j], 200, cmap=colmap,
-                     vmin=.0 * np.max(spec[0]), vmax=1 * np.max(spec[0]))
-    if j == 0:
-        plt.ylabel('$\omega\,(\mathrm{meV})$', fontdict = font)
-        plt.yticks(np.arange(-.2, .1, .05), ('-200', '-150', '-100', '-50', '0', '50'))
-    else:
-        plt.yticks(np.arange(-.2, .1, .05), [])
-    plt.xticks(np.arange(-.8, -.2, .2), [])
-    plt.xlim(xmax=-.1, xmin=-.6)
-    plt.ylim(ymax=.05, ymin=-.15)
-    plt.text(-.585, .035, lbls[j])
-    plt.title(titles[j], fontsize=15)
-    
-
-#%%
-plt.figure('20006b', figsize=(10, 10), clear=True)
-for j in range(n_spec):
-    ax = plt.subplot(2, 4, j + 1) 
-    ax.set_position([.08 + j * .21, .7, .2, .2])
-#    plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
-#    plt.plot(Pos[j])
-#    plt.plot(Width[j])
-    plt.errorbar(mdc_k, mdc_int, mdc_eint, 
-                         linewidth=.5, capsize=.1, color='k', fmt='o', ms=.5)
-    plt.plot(mdc_k, utils_math.lorHWHM(mdc_k, -.35, 3e-1, 1e-3,
-                     .0, .0, .0))
-#%%
-(en, EDCn_e, EDCn_b, EDC_e, EDC_b, Bkg_e, Bkg_b, _EDC_e, _EDC_b,
-                eEDCn_e, eEDCn_b, eEDC_e, eEDC_b) = utils_plt.CSROfig4()
-#%%
-from scipy import integrate
-d = 1e-6
-plt.figure(2005, figsize=(10, 10), clear=True)
-D = 1e6
-p_edc_i = np.array([6.9e-1, 7.3e-3, 4.6, 4.7e-3, 4.1e-2, 2.6e-3,
-                    1e0, -.2, .3, 1, -.1, 1e-1])
-bounds_fl = ([p_edc_i[0] - D, p_edc_i[1] - d, p_edc_i[2] - d,
-              p_edc_i[3] - D, p_edc_i[4] - D, p_edc_i[5] - D],
-             [p_edc_i[0] + D, p_edc_i[1] + d, p_edc_i[2] + d, 
-              p_edc_i[3] + D, p_edc_i[4] + D, p_edc_i[5] + D])
-
-titles = [r'$T=1.3\,$K', r'$T=10\,$K', r'$T=20\,$K', r'$T=30\,$K']
-lbls = [r'(a)', r'(b)', r'(c)', r'(d)',
-        r'(e)', r'(f)', r'(g)', r'(h)',
-        r'(i)', r'(j)', r'(k)', r'(l)']
-cols = ([0, 1, 1], [0, .7, .7], [0, .4, .4], [0, 0, 0])
-cols_r = ([0, 0, 0], [0, .4, .4], [0, .7, .7], [0, 1, 1])
-xx = np.arange(-2, .5, .001)
-Z = np.ones((4))
-for j in range(4):
-    ###First row###
-    Bkg = Bkg_e[j]
-    Bkg[0] = 0
-    Bkg[-1] = 0
-    ax = plt.subplot(5, 4, j + 1) 
-    ax.set_position([.08 + j * .21, .61, .2, .2])
-    plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
-    plt.plot(en[j][_EDC_e[j]], EDC_e[j], 'o', markersize=1, color=cols[j])
-    plt.fill(en[j][_EDC_e[j]], Bkg, '--', linewidth=1, color='C8', alpha=.3)
-    plt.yticks([])
-    plt.xticks(np.arange(-.8, .2, .2), [])
-    plt.xlim(xmin=-.8, xmax=.1)
-    plt.ylim(ymin=0, ymax=.02)
-    plt.text(-.77, .001, r'Background')
-    plt.text(-.77, .0183, lbls[j])
-    plt.title(titles[j], fontsize=15)
-    if j == 0:
-        plt.ylabel(r'Intensity (a.u.)')
-    ###Third row#
-    ax = plt.subplot(5, 4, j + 13) 
-    ax.set_position([.08 + j * .21, .18, .2, .2])
-    plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
-    plt.plot(en[j][_EDC_e[j]], EDCn_e[j], 'o', markersize=1, color=cols[j])
-    
-    p_fl, cov_fl = curve_fit(
-            utils_math.FL_simple, en[j][_EDC_e[j]][900:-1], 
-            EDCn_e[j][900:-1], 
-            p_edc_i[0: -6], 
-            bounds=bounds_fl, sigma=eEDCn_e[j][900:-1])
-    f_fl = utils_math.FL_simple(xx, *p_fl)
-    plt.yticks([])
-    plt.xticks(np.arange(-.8, .2, .1))
-    plt.xlim(xmin=-.1, xmax=.05)
-    plt.ylim(ymin=0, ymax=1.1)
-    plt.xlabel(r'$\omega$ (eV)')
-    if j == 0:
-        plt.ylabel(r'Intensity (a.u.)')
-        plt.text(-.095, .2, 
-                 r'$\int \, \, \mathcal{A}_\mathrm{coh.}(k\approx k_\mathrm{F}^{\bar\epsilon}, \omega) \, \mathrm{d}\omega$')
-    plt.text(-.095, 1.01, lbls[j + 8])
-    ###Second row###
-    ax = plt.subplot(5, 4, j + 9) 
-    ax.set_position([.08 + j * .21, .4, .2, .2])
-    plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
-    plt.plot(en[j][_EDC_e[j]], EDCn_e[j], 'o', markersize=1, color=cols[j])
-    
-    bounds = (np.concatenate((p_fl - D, p_edc_i[6:] - D), axis=0),
-              np.concatenate((p_fl + D, p_edc_i[6:] + D), axis=0))
-    bnd = 300
-    p_edc, cov_edc = curve_fit(
-            utils_math.Full_mod, en[j][_EDC_e[j]][bnd:-1], EDCn_e[j][bnd:-1], 
-            np.concatenate((p_fl, p_edc_i[-6:]), axis=0), bounds=bounds)
-    f_edc = utils_math.Full_mod(xx, *p_edc)
-    plt.plot(xx, f_edc,'--', color=cols_r[j], linewidth=1.5)
-    f_mod = utils_math.gauss_mod(xx, *p_edc[-6:])
-    f_fl = utils_math.FL_simple(xx, *p_edc[0:6]) 
-    plt.fill(xx, f_mod, alpha=.3, color=cols[j])
-    plt.yticks([])
-    plt.xticks(np.arange(-.8, .2, .2))
-    plt.xlim(xmin=-.8, xmax=.1)
-    plt.ylim(ymin=0, ymax=2.2)
-    if j == 0:
-        plt.ylabel(r'Intensity (a.u.)')
-        plt.text(-.68, .3, 
-                 r'$\int \, \, \mathcal{A}_\mathrm{inc.}(k\approx k_\mathrm{F}^{\bar\epsilon}, \omega) \, \mathrm{d}\omega$')
-    plt.text(-.77, 2.03, lbls[j + 4])  
-    ###Third row###
-    ax = plt.subplot(5, 4, j + 13) 
-    plt.fill(xx, f_fl, alpha=.3, color=cols[j])
-    p = plt.plot(xx, f_edc,'--', color=cols_r[j],  linewidth=2)
-    plt.legend(p, [r'$\mathcal{A}_\mathrm{coh.} + \mathcal{A}_\mathrm{inc.}$'], frameon=False)
-    ###Calculate Z###
-    A_mod = integrate.trapz(f_mod, xx)
-    A_fl = integrate.trapz(f_fl, xx)
-    Z[j] = A_fl / A_mod
-
-#%%
-from uncertainties import ufloat
-import uncertainties.unumpy as unumpy
-
-xx = np.arange(-2, .5, .01)
-def uFL_simple(x, p0, p1, p2, p3, p4, p5,
-           ep0, ep1, ep2, ep3, ep4, ep5):
-    
-    ReS = ufloat(p0, ep0) * x
-    ImS = ufloat(p1, ep1) + ufloat(p2, ep2) * x ** 2;
-    
-    return (ufloat(p4, ep4) * 1 / np.pi * 
-            ImS / ((x - ReS - ufloat(p3, ep3)) ** 2 + ImS ** 2) * 
-            (unumpy.exp((x - 0) / ufloat(p5, ep5)) + 1) ** -1)
-        
-perr_fl = np.sqrt(np.diag(cov_fl))
-pfull_fl = np.concatenate((p_fl, perr_fl), axis=0)
-
-uf_fl = uFL_simple(xx, *pfull_fl)
-
-plt.figure(20005, figsize=(8, 8), clear=True)
-plt.subplot(121)
-plt.errorbar(xx, unumpy.nominal_values(uf_fl), yerr=unumpy.std_devs(uf_fl))
-plt.subplot(122)
-plt.plot(xx, unumpy.nominal_values(uf_fl))
-
-
-    
 #%%
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 file = 8

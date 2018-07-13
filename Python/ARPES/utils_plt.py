@@ -2046,34 +2046,41 @@ def CSROfig6(colmap=cm.ocean_r, print_fig=False):
     mat = 'CSRO20'
     year = 2017
     sample = 'S1'
-    
-    spec = ()
-    espec = ()
-    en = ()
-    k = ()
-    Width = ()
-    eWidth = ()
-    Pos = ()
-    ePos = ()
-    mdc_t_val = .001
-    mdc_b_val = -.1
-    n_spec = 4
-    scale = 5e-5
-    c = (0, 238 / 256, 118 / 256)
+    ###Create Placeholders###
+    spec = () #ARPES spectra
+    espec = () #Errors on signal
+    en = () #energy scale
+    k = () #momenta
+    Z = () #quasiparticle residuum
+    eZ = () #error
+    Re = () #Real part of self energy
+    Width = () #MDC Half width at half maximum
+    eWidth = () #error
+    Loc_en = () #Associated energy
+    mdc_t_val = .001 #start energy of MDC analysis
+    mdc_b_val = -.1 #end energy of MDC analysis
+    n_spec = 4 #how many temperatures are analysed
+    scale = 5e-5 #helper variable for plotting
+    ###Colors###
+    c = (0, 238 / 256, 118 / 256) 
     cols = ([0, 1, 1], [0, .7, .7], [0, .4, .4], [0, 0, 0])
     cols_r = ([0, 0, 0], [0, .4, .4], [0, .7, .7], [0, 1, 1])
+    Re_cols = ['khaki', 'darkkhaki', 'goldenrod', 'darkgoldenrod']
+    Re_cols_r = ['darkgoldenrod', 'goldenrod', 'darkkhaki', 'khaki']
+    v_LDA = 2.3411686586990417  #Fermi velocity from LDA fit
+    xx = np.arange(-.4, .25, .01) #helper variable for plotting
     for j in range(n_spec): 
-        D = ARPES.Bessy(files[j], mat, year, sample)
-        D.norm(gold)
-        D.restrict(bot=.7, top=.9, left=.31, right=.6)
-        D.bkg(norm=True)
+        D = ARPES.Bessy(files[j], mat, year, sample) #Load Bessy data
+        D.norm(gold) #noramlized
+        D.restrict(bot=.7, top=.9, left=.31, right=.6) #restrict data set
+        D.bkg(norm=True) #subtract background
         if j == 0:
-            D.ang2k(D.ang, Ekin=40, lat_unit=True, a=5.5, b=5.5, c=11, 
-                      V0=0, thdg=2.5, tidg=0, phidg=42)
-            int_norm = D.int_norm * 1.5
-            eint_norm = D.eint_norm * 1.5
+            D.ang2k(D.ang, Ekin=40 - 4.5, lat_unit=False, a=5.5, b=5.5, c=11, 
+                      V0=0, thdg=2.5, tidg=0, phidg=42) #plot as inverse Angstrom
+            int_norm = D.int_norm * 1.5 #intensity adjustment from background comparison
+            eint_norm = D.eint_norm * 1.5 #error adjustment
         else: 
-            D.ang2k(D.ang, Ekin=40, lat_unit=True, a=5.5, b=5.5, c=11, 
+            D.ang2k(D.ang, Ekin=40 - 4.5, lat_unit=False, a=5.5, b=5.5, c=11, 
                       V0=0, thdg=2.9, tidg=0, phidg=42)
             int_norm = D.int_norm
             eint_norm = D.eint_norm        
@@ -2081,24 +2088,25 @@ def CSROfig6(colmap=cm.ocean_r, print_fig=False):
         spec = spec + (int_norm,)
         espec = espec + (eint_norm,)
         en = en + (en_norm,)
-        k = k + (D.ks,)
+        k = k + (D.ks * np.sqrt(2),) #D.ks is only kx -> but we analyze along diagonal
         
     plt.figure('2006', figsize=(10, 10), clear=True)
     titles = [r'$T=1.3\,$K', r'$T=10\,$K', r'$T=20\,$K', r'$T=30\,$K']
     lbls = [r'(a)', r'(b)', r'(c)', r'(d)',
                 r'(e)', r'(f)', r'(g)', r'(h)',
-                r'(i)', r'(j)', r'(k)', r'(l)']
+                r'(i)', r'(j)', r'(k)', r'(l)',
+                r'(k)', r'(l)', r'(m)', r'(n)']
     for j in range(n_spec):
-        val, _mdc_t = utils.find(en[j][0, :], mdc_t_val)
-        val, _mdc_b = utils.find(en[j][0, :], mdc_b_val)
-        mdc_seq = np.arange(_mdc_t,_mdc_b, -1)
-        pos = np.zeros((_mdc_t - _mdc_b))
-        epos = np.zeros((_mdc_t - _mdc_b))
-        width = np.zeros((_mdc_t - _mdc_b))
-        ewidth = np.zeros((_mdc_t - _mdc_b))
+        val, _mdc_t = utils.find(en[j][0, :], mdc_t_val) #Get indices
+        val, _mdc_b = utils.find(en[j][0, :], mdc_b_val) #Get indices
+        mdc_seq = np.arange(_mdc_t,_mdc_b, -1) #range of indices
+        loc = np.zeros((_mdc_t - _mdc_b)) #placeholders maximum position
+        eloc = np.zeros((_mdc_t - _mdc_b)) #corresponding errors
+        width = np.zeros((_mdc_t - _mdc_b)) #placheholder HWHM
+        ewidth = np.zeros((_mdc_t - _mdc_b)) #corresponding error
         ###First row###
-        ax = plt.subplot(3, 4, j + 1) 
-        ax.set_position([.08 + j * .21, .66, .2, .2])
+        ax = plt.subplot(4, 4, j + 1) 
+        ax.set_position([.08 + j * .21, .76, .2, .2])
         plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
         plt.contourf(k[j], en[j], spec[j], 200, cmap=colmap,
                          vmin=.0 * np.max(spec[0]), vmax=1 * np.max(spec[0]))
@@ -2113,46 +2121,44 @@ def CSROfig6(colmap=cm.ocean_r, print_fig=False):
             plt.ylabel('$\omega\,(\mathrm{meV})$', fontdict = font)
             plt.yticks(np.arange(-.2, .1, .05), 
                        ('-200', '-150', '-100', '-50', '0', '50'))
-            plt.text(-.58, .009, r'MDC maxima (Lorentzian fit)', color='C8')
+            plt.text(-.43, .009, r'MDC maxima', color='C8')
+            plt.text(-.24, .009, r'$v_\mathrm{LDA}$', color='C4')
         else:
             plt.yticks(np.arange(-.2, .1, .05), [])
-        plt.xticks(np.arange(-.8, -.2, .2), [])
-        plt.xlim(xmax=-.1, xmin=-.6)
+        plt.xticks(np.arange(-1, 0, .1), [])
+        plt.xlim(xmax=-.05, xmin=-.45)
         plt.ylim(ymax=.05, ymin=-.15)
-        plt.text(-.585, .035, lbls[j])
+        plt.text(-.44, .035, lbls[j])
         plt.title(titles[j], fontsize=15)
         ###Second row###
-        ax = plt.subplot(3, 4, j + 5) 
-        ax.set_position([.08 + j * .21, .45, .2, .2])
+        ax = plt.subplot(4, 4, j + 5) 
+        ax.set_position([.08 + j * .21, .55, .2, .2])
         plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
         n = 0
         p_mdc = []
         for i in mdc_seq:
-            _sl1 = 10
-            _sl2 = 155
-            n += 1
-            mdc_k = k[j][:, i]
-            mdc_int = spec[j][:, i]
-            mdc_eint = espec[j][:, i]
+            _sl1 = 10 #Index used for background endpoint slope
+            _sl2 = 155 #other endpoint
+            n += 1 #counter
+            mdc_k = k[j][:, i] #current MDC k-axis
+            mdc_int = spec[j][:, i] #current MDC
+            mdc_eint = espec[j][:, i] #error
             if any(x==n for x in [1, 50, 100]):
                 plt.errorbar(mdc_k, mdc_int - scale * n**1.15, mdc_eint, 
                              linewidth=.5, capsize=.1, color=cols[j], fmt='o', ms=.5)
-    #            plt.errorbar([mdc_k[_sl1], mdc_k[_sl2]], 
-    #                         [mdc_int[_sl1] - scale * n**1.15, mdc_int[_sl2] - scale * n**1.15], 
-    #                         [mdc_eint[_sl1], mdc_eint[_sl2]], 
-    #                         linewidth=.5, capsize=.1, color='r', fmt='o', ms=2)
             ###Fit MDC###
-            d = 1e-2
-            eps = 1e-8
-            D = 1e5
-            const_i = mdc_int[_sl2]
-            slope_i = (mdc_int[_sl1] - mdc_int[_sl2])/(mdc_k[_sl1] - mdc_k[_sl2])
-            
+            d = 1e-2 #small boundary
+            eps = 1e-8 #essentially fixed boundary
+            D = 1e5 #essentially free boundary
+            const_i = mdc_int[_sl2] #constant background estimation
+            slope_i = (mdc_int[_sl1] - mdc_int[_sl2])/(mdc_k[_sl1] - mdc_k[_sl2]) #slope estimation
             p_mdc_i = np.array(
-                        [-.34, 1e-1, 1e-3,
-                         const_i, slope_i, .0])
-            if n > 70:
+                        [-.27, 5e-2, 1e-3,
+                         const_i, slope_i, .0]) #initial values
+            if n > 70: #take fixed initial values until it reaches THIS iteration, then take last outcome as inital values
                 p_mdc_i = p_mdc
+                ###p0: position, p1: width, p2: amplitude###
+                ###p3: constant bkg, p4: slope, p5: curvature###
                 bounds_bot = np.array([
                                 p_mdc_i[0] - d, p_mdc_i[1] - d, p_mdc_i[2] - D, 
                                 p_mdc_i[3] - D, p_mdc_i[4] - eps, p_mdc_i[5] - eps])
@@ -2166,33 +2172,102 @@ def CSROfig6(colmap=cm.ocean_r, print_fig=False):
                 bounds_top = np.array([
                                 p_mdc_i[0] + D, p_mdc_i[1] + D, p_mdc_i[2] + D, 
                                 p_mdc_i[3] + D, p_mdc_i[4] + D, p_mdc_i[5] + eps])
-            bounds = (bounds_bot, bounds_top)
-            
+            bounds = (bounds_bot, bounds_top) #boundaries
             p_mdc, c_mdc = curve_fit(
-                utils_math.lorHWHM, mdc_k, mdc_int, p0=p_mdc_i, bounds=bounds)
-            err_mdc = np.sqrt(np.diag(c_mdc))
-            pos[n - 1] = p_mdc[0]
-            epos[n - 1] = err_mdc[0]
-            width[n - 1] = p_mdc[1] / 2 * np.pi / 5.5 #HWHM in inverse Anstrom
-            ewidth[n - 1] = err_mdc[1] / 2 * np.pi / 5.5
-            b_mdc = utils_math.poly2(mdc_k, 0, *p_mdc[-3:])
-            f_mdc = utils_math.lorHWHM(mdc_k, *p_mdc)
-    #        if np.mod(n, n_show) == 0:
+                utils_math.lorHWHM, mdc_k, mdc_int, p0=p_mdc_i, bounds=bounds) #fit curve
+            err_mdc = np.sqrt(np.diag(c_mdc)) #errors estimation of parameters
+            loc[n - 1] = p_mdc[0] #position of fit
+            eloc[n - 1] = err_mdc[0] #error
+            width[n - 1] = p_mdc[1] #HWHM of fit (2 times this value is FWHM)
+            ewidth[n - 1] = err_mdc[1] #error
+            b_mdc = utils_math.poly2(mdc_k, 0, *p_mdc[-3:]) #background
+            f_mdc = utils_math.lorHWHM(mdc_k, *p_mdc) #fit
+            ###Plot the fits###
             if any(x==n for x in [1, 50, 100]):
                 plt.plot(mdc_k, f_mdc - scale * n**1.15, '--', color=cols_r[j])
                 plt.plot(mdc_k, b_mdc - scale * n**1.15, 'C8-', linewidth=2, alpha=.3)
         if j == 0:
             plt.ylabel('Intensity (a.u.)', fontdict = font)
-            plt.text(-.58, -.009, r'Background', color='C8')
+            plt.text(-.43, -.0092, r'Background', color='C8')
         plt.yticks([])
-        plt.xticks(np.arange(-.8, -.2, .2))
-        plt.xlim(xmax=-.1, xmin=-.6)
+        plt.xticks(np.arange(-1, 0, .1))
+        plt.xlim(xmax=-.05, xmin=-.45)
         plt.ylim(ymin=-.01, ymax = .003)
-        plt.text(-.585, .0021, lbls[j + 4])
-        plt.xlabel(r'$k_{\Gamma - \mathrm{S}}\,(\pi/a)$')
+        plt.text(-.44, .0021, lbls[j + 4])
+        plt.xlabel(r'$k_{\Gamma - \mathrm{S}}\,(\mathrm{\AA}^{-1})$', fontdict=font)
+        ###Third row###
+        loc_en = en[j][0, mdc_seq] #energies of Lorentzian fits
+        ax = plt.subplot(4, 4, j + 9) 
+        ax.set_position([.08 + j * .21, .29, .2, .2])
+        plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+        plt.errorbar(-loc_en, width, ewidth,
+                     color=cols[j], linewidth=.5, capsize=2, fmt='o', ms=2)
+        ###Fitting the width
+        im_bot = np.array([0 - eps, 1 - D, -.1 - d, 1 - D])
+        im_top = np.array([0 + eps, 1 + D, -.1 + d, 1 + D])
+        im_bounds = (im_bot, im_top)
+        p_im, c_im = curve_fit(
+                utils_math.poly2, -loc_en, width, bounds=im_bounds)
+        plt.plot(-loc_en, utils_math.poly2(-loc_en, *p_im),
+                 '--', color=cols_r[j])
+        if j == 0:
+            plt.ylabel('HWHM $(\mathrm{\AA}^{-1})$', fontdict = font)
+            plt.yticks(np.arange(0, 1, .05))
+            plt.text(.005, .05, r'Quadratic fit', fontdict = font)
+        else:
+            plt.yticks(np.arange(0, 1, .05), [])
+        plt.xticks(np.arange(0, .1, .02), [])
+        plt.xlim(xmax=-loc_en[-1], xmin=-loc_en[0])
+        plt.ylim(ymax=.13, ymin=0)
+        plt.text(.0025, .12, lbls[j + 8])
+        ###Fourth row###
+        k_F = loc[0] #Position first fit
+        p0 = -k_F * v_LDA #get constant from y=v_LDA*x + p0 (y=0, x=k_F)
+        yy = p0 + xx * v_LDA #For plotting v_LDA
+        en_LDA = p0 + loc * v_LDA #Energies
+        re = loc_en - en_LDA #Real part of self energy
+        ###Plotting###
+        ax = plt.subplot(4, 4, j + 13) 
+        ax.set_position([.08 + j * .21, .08, .2, .2])
+        plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+        plt.errorbar(-loc_en, re, ewidth * v_LDA,
+                     color=Re_cols[j], linewidth=.5, capsize=2, fmt='o', ms=2)
+        _bot = 0 #first index of fitting ReS
+        _top = 20 #last index of fitting ReS
+        re_bot = np.array([0 - eps, 1 - D]) #upper boundary
+        re_top = np.array([0 + eps, 1 + D]) #bottom boundary
+        re_bounds = (re_bot, re_top) #boundaries
+        p_re, c_re = curve_fit(
+                utils_math.poly1, -loc_en[_bot:_top], re[_bot:_top], 
+                bounds=re_bounds) #fit ReS
+        dre = -p_re[1] #dReS / dw 
+        edre = np.sqrt(np.diag(c_re))[1]
+        plt.plot(-loc_en, utils_math.poly1(-loc_en, *p_re),
+                 '--', color=Re_cols_r[j])
+        z = 1 / (1 - dre) #quasiparticle residue
+        ez = np.abs(1 / (1 - dre)**2 * edre)
+        if j == 0:
+            plt.ylabel(r'$\mathfrak{Re}\Sigma$ (meV)', 
+                       fontdict = font)
+            plt.yticks(np.arange(0, .15, .05), ('0', '50', '100'))
+            plt.text(.02, .03, r'Linear fit', fontsize=12, color=Re_cols[-1])
+        else:
+            plt.yticks(np.arange(0, .15, .05), [])
+        plt.xticks(np.arange(0, .1, .02), ('0', '-20', '-40', '-60', '-80', '-100'))
+        plt.xlabel(r'$\omega$ (meV)', fontdict = font)
+        plt.xlim(xmax=-loc_en[-1], xmin=-loc_en[0])
+        plt.ylim(ymax=.15, ymin=0)
+        plt.text(.0025, .14, lbls[j + 12])
         ###First row again###
-        ax = plt.subplot(3, 4, j + 1) 
-        plt.plot(pos, en[j][0, mdc_seq], 'C8o', ms=.5)
+        ax = plt.subplot(4, 4, j + 1) 
+        plt.plot(loc, loc_en, 'C8o', ms=.5)
+        if j == 0:
+            plt.plot(xx, yy, 'C4--', lw=1)
+            ax.arrow(loc[20], -.05, 0, loc_en[20]+.04, 
+                     head_width=0.01, head_length=0.01, fc='r', ec='r')
+            ax.arrow(loc[20], -.05, 0, loc_en[20]+.005, 
+                     head_width=0.01, head_length=0.01, fc='r', ec='r')
+            plt.text(-.26, -.05, r'$\mathfrak{Re}\Sigma(\omega)$', color='r')
         if j == 3:
             pos = ax.get_position()
             cax = plt.axes([pos.x0+pos.width+0.01 ,
@@ -2200,42 +2275,18 @@ def CSROfig6(colmap=cm.ocean_r, print_fig=False):
             cbar = plt.colorbar(cax = cax, ticks = None)
             cbar.set_ticks([])
             cbar.set_clim(np.min(int_norm), np.max(int_norm))
-        ###Third row###
-        ax = plt.subplot(3, 4, j + 9) 
-        ax.set_position([.08 + j * .21, .2, .2, .2])
-        plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
-        plt.errorbar(-en[j][0][mdc_seq], width, ewidth,
-                             linewidth=.5, capsize=.1, color=cols[j], fmt='o', ms=.5)
-        
-        im_bot = np.array([0 - eps, 1 - D, -.1 - d, 1 - D])
-        im_top = np.array([0 + eps, 1 + D, -.1 + d, 1 + D])
-        im_bounds = (im_bot, im_top)
-        p_im, c_im = curve_fit(
-                utils_math.poly2, -en[j][0][mdc_seq], width, bounds=im_bounds)
-        plt.plot(-en[j][0][mdc_seq], utils_math.poly2(-en[j][0][mdc_seq], *p_im),
-                 '--', color=cols_r[j])
-        if j == 0:
-            plt.ylabel('HWHM $(\AA^{-1})$', fontdict = font)
-            plt.yticks(np.arange(0, 1, .05))
-            plt.text(.005, .05, r'Quadratic fit', fontdict = font)
-        else:
-            plt.yticks(np.arange(0, 1, .05), [])
-        plt.xticks(np.arange(0, .1, .02), ('0', '-20', '-40', '-60', '-80', '-100'))
-        plt.xlabel(r'$\omega$ (meV)', fontdict = font)
-        plt.xlim(xmax=-en[j][0][mdc_seq[-1]], xmin=-en[j][0][mdc_seq[0]])
-        plt.ylim(ymax=.1, ymin=0)
-        plt.text(.0025, .092, lbls[j + 8])
-        
-        Pos = Pos + (pos,)
-        ePos = ePos + (epos,)
+        Z = Z + (z,)
+        eZ = eZ + (ez,)
+        Re = Re + (re,)
+        Loc_en = Loc_en + (loc_en,)
         Width = Width + (width,)
         eWidth = eWidth + (ewidth,)
-        
+    print(Z)
     if print_fig == True:
         plt.savefig(
                 '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig6.png', 
                 dpi = 300,bbox_inches="tight")
-    return Pos, ePos, Width, eWidth
+    return Z, eZ, Re, Loc_en, Width, eWidth
 
 def CSROfig7(colmap=cm.ocean_r, print_fig=False):
     """
@@ -2302,4 +2353,125 @@ def CSROfig7(colmap=cm.ocean_r, print_fig=False):
     if print_fig == True:
         plt.savefig(
                 '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig7.png', 
+                dpi = 300,bbox_inches="tight")
+        
+def CSROfig8(colmap=cm.bone_r, print_fig=False):
+    """
+    Extraction LDA Fermi velocity
+    """ 
+    os.chdir('/Users/denyssutter/Documents/PhD/data')
+    xz_lda = np.loadtxt('LDA_CSRO_xz.dat')
+    os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+    #[0, 56, 110, 187, 241, 266, 325, 350]  = [G,X,S,G,Y,T,G,Z]
+    m, n = 8000, 351 #dimensions energy, full k-path
+    size = 187 - 110
+    bot, top = 3840, 4055 #restrict energy window
+    data = np.array([xz_lda]) #combine data
+    spec = np.reshape(data[0, :, 2], (n, m)) #reshape into n,m
+    spec = spec[110:187, bot:top] #restrict data to bot, top
+    #spec = np.flipud(spec)
+    spec_en = np.linspace(-8, 8, m) #define energy data
+    spec_en = spec_en[bot:top] #restrict energy data
+    spec_en = np.broadcast_to(spec_en, (spec.shape))
+    spec_k = np.linspace(-np.sqrt(2) * np.pi / 5.5, 0, size)
+    spec_k = np.transpose(
+                np.broadcast_to(spec_k, (spec.shape[1], spec.shape[0])))
+    max_pts = np.ones((size))
+    for i in range(size):
+        max_pts[i] = spec[i, :].argmax()
+    ini = 40
+    fin = 48
+    max_pts = max_pts[ini:fin]
+    
+    max_k = spec_k[ini:fin, 0]
+    max_en = spec_en[0, max_pts.astype(int)]
+    p_max, c_max = curve_fit(
+                    utils_math.poly1, max_k, max_en)
+    v_LDA = p_max[1]
+    k_F = -p_max[0] / p_max[1]
+    xx = np.arange(-.43, -.27, .01)
+    plt.figure(2008, figsize=(8, 8), clear=True)
+    ax = plt.subplot(1, 3, 1) 
+    ax.set_position([.2, .24, .5, .3])
+    plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
+    plt.contourf(spec_k, spec_en, spec, 200, cmap=colmap) 
+    plt.plot(xx, utils_math.poly1(xx, *p_max), 'C9--', linewidth=1)
+    plt.plot(max_k, max_en, 'ro', ms=2)
+    plt.plot([np.min(spec_k), 0], [0, 0], 'k:')
+    plt.yticks(np.arange(-1, 1, .1))
+    plt.ylim(ymax=.1, ymin=-.3)
+    plt.ylabel(r'$\omega$ (eV)', fontdict=font)
+    plt.xlabel(r'$k_{\Gamma - \mathrm{S}}\, (\mathrm{\AA}^{-1})$', fontdict=font)
+    plt.text(-.3, -.15, '$v_\mathrm{LDA}=$' + str(np.round(v_LDA,2)) + ' eV$\,\mathrm{\AA}$')
+    pos = ax.get_position()
+    cax = plt.axes([pos.x0+pos.width + 0.01 ,
+                        pos.y0, 0.01, pos.height])
+    cbar = plt.colorbar(cax = cax, ticks = None)
+    cbar.set_ticks([])
+    cbar.set_clim(np.min(spec), np.max(spec))
+    if print_fig == True:
+        plt.savefig(
+                '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig8.png', 
+                dpi = 300,bbox_inches="tight")
+    return k_F, v_LDA
+
+def CSROfig9(print_fig=False):
+    """
+    ReS vs ImS
+    """ 
+    Z, eZ, Re, Loc_en, Width, eWidth = CSROfig6()
+    v_LDA = 2.3411686586990417  
+    plt.figure('2009', figsize=(8, 8), clear=True)
+    lbls = [r'(a)  $T=1.3\,$K', r'(b)  $T=10\,$K', r'(c)  $T=20\,$K', 
+            r'(d)  $T=30\,$K']
+    Im_cols = np.array([[0, 1, 1], [0, .7, .7], [0, .4, .4], [0, 0, 0]])
+    Re_cols = ['khaki', 'darkkhaki', 'goldenrod', 'darkgoldenrod']
+    n_spec = 4
+    position = ([.1, .55, .4, .4],
+                [.1 + .41, .55, .4, .4],
+                [.1, .55 - .41, .4, .4],
+                [.1 + .41, .55 - .41, .4, .4])
+    offset = [.048, .043, .04, .043]
+    n = 0
+    for j in range(n_spec):
+        en = -Loc_en[j]
+        re = Re[j]
+        width = Width[j]
+        ewidth = eWidth[j]
+        z = Z[j]
+        im = width * v_LDA - offset[j]
+        eim = ewidth * v_LDA
+        
+        ax = plt.subplot(2, 2, j + 1) 
+        ax.set_position(position[j])
+        plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+        plt.errorbar(en, im, eim,
+                     color=Im_cols[j], linewidth=.5, capsize=2, fmt='d', ms=2)
+        plt.errorbar(en, re / (1 - z), ewidth * v_LDA / (1 - z),
+                     color=Re_cols[j], linewidth=.5, capsize=2, fmt='o', ms=2)
+        plt.text(.002, .235, lbls[j], fontdict=font)
+        if j==0:
+            plt.text(.005, .14, r'$\mathfrak{Re}\Sigma \, (1-Z)^{-1}$',
+                     fontsize=15, color=Re_cols[3])
+            plt.text(.06, .014, r'$\mathfrak{Im}\Sigma$',
+                     fontsize=15, color=Im_cols[2])
+        if any(x==j for x in [0, 2]):
+            plt.ylabel( 'Self energy (meV)', fontdict=font)
+            plt.yticks(np.arange(0, .25, .05), ('0', '50', '100', '150', '200'))
+            plt.xticks(np.arange(0, .1, .02), [])
+        else:
+            plt.yticks(np.arange(0, .15, .05), [])
+        if any(x==j for x in [2, 3]):    
+            plt.xticks(np.arange(0, .1, .02), 
+                       ('0', '-20', '-40', '-60', '-80', '-100'))
+            plt.xlabel('$\omega\,(\mathrm{meV})$', fontdict=font)
+        else:
+            plt.xticks(np.arange(0, .1, .02), ())
+        n += 1
+        plt.xlim(xmax=.1, xmin=0)
+        plt.ylim(ymax=.25, ymin=0)
+        plt.grid(True, alpha=.2)
+    if print_fig == True:
+        plt.savefig(
+                '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig9.png', 
                 dpi = 300,bbox_inches="tight")
