@@ -2052,6 +2052,7 @@ def CSROfig6(colmap=cm.ocean_r, print_fig=False):
     en = () #energy scale
     k = () #momenta
     Z = () #quasiparticle residuum
+    eZ = () #error
     Re = () #Real part of self energy
     Width = () #MDC Half width at half maximum
     eWidth = () #error
@@ -2240,9 +2241,11 @@ def CSROfig6(colmap=cm.ocean_r, print_fig=False):
                 utils_math.poly1, -loc_en[_bot:_top], re[_bot:_top], 
                 bounds=re_bounds) #fit ReS
         dre = -p_re[1] #dReS / dw 
+        edre = np.sqrt(np.diag(c_re))[1]
         plt.plot(-loc_en, utils_math.poly1(-loc_en, *p_re),
                  '--', color=Re_cols_r[j])
         z = 1 / (1 - dre) #quasiparticle residue
+        ez = np.abs(1 / (1 - dre)**2 * edre)
         if j == 0:
             plt.ylabel(r'$\mathfrak{Re}\Sigma$ (meV)', 
                        fontdict = font)
@@ -2273,6 +2276,7 @@ def CSROfig6(colmap=cm.ocean_r, print_fig=False):
             cbar.set_ticks([])
             cbar.set_clim(np.min(int_norm), np.max(int_norm))
         Z = Z + (z,)
+        eZ = eZ + (ez,)
         Re = Re + (re,)
         Loc_en = Loc_en + (loc_en,)
         Width = Width + (width,)
@@ -2282,7 +2286,7 @@ def CSROfig6(colmap=cm.ocean_r, print_fig=False):
         plt.savefig(
                 '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig6.png', 
                 dpi = 300,bbox_inches="tight")
-    return Z, Re, Loc_en, Width, eWidth
+    return Z, eZ, Re, Loc_en, Width, eWidth
 
 def CSROfig7(colmap=cm.ocean_r, print_fig=False):
     """
@@ -2410,3 +2414,64 @@ def CSROfig8(colmap=cm.bone_r, print_fig=False):
                 '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig8.png', 
                 dpi = 300,bbox_inches="tight")
     return k_F, v_LDA
+
+def CSROfig9(print_fig=False):
+    """
+    ReS vs ImS
+    """ 
+    Z, eZ, Re, Loc_en, Width, eWidth = CSROfig6()
+    v_LDA = 2.3411686586990417  
+    plt.figure('2009', figsize=(8, 8), clear=True)
+    lbls = [r'(a)  $T=1.3\,$K', r'(b)  $T=10\,$K', r'(c)  $T=20\,$K', 
+            r'(d)  $T=30\,$K']
+    Im_cols = np.array([[0, 1, 1], [0, .7, .7], [0, .4, .4], [0, 0, 0]])
+    Re_cols = ['khaki', 'darkkhaki', 'goldenrod', 'darkgoldenrod']
+    n_spec = 4
+    position = ([.1, .55, .4, .4],
+                [.1 + .41, .55, .4, .4],
+                [.1, .55 - .41, .4, .4],
+                [.1 + .41, .55 - .41, .4, .4])
+    offset = [.048, .043, .04, .043]
+    n = 0
+    for j in range(n_spec):
+        en = -Loc_en[j]
+        re = Re[j]
+        width = Width[j]
+        ewidth = eWidth[j]
+        z = Z[j]
+        im = width * v_LDA - offset[j]
+        eim = ewidth * v_LDA
+        
+        ax = plt.subplot(2, 2, j + 1) 
+        ax.set_position(position[j])
+        plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+        plt.errorbar(en, im, eim,
+                     color=Im_cols[j], linewidth=.5, capsize=2, fmt='d', ms=2)
+        plt.errorbar(en, re / (1 - z), ewidth * v_LDA / (1 - z),
+                     color=Re_cols[j], linewidth=.5, capsize=2, fmt='o', ms=2)
+        plt.text(.002, .235, lbls[j], fontdict=font)
+        if j==0:
+            plt.text(.005, .14, r'$\mathfrak{Re}\Sigma \, (1-Z)^{-1}$',
+                     fontsize=15, color=Re_cols[3])
+            plt.text(.06, .014, r'$\mathfrak{Im}\Sigma$',
+                     fontsize=15, color=Im_cols[2])
+        if any(x==j for x in [0, 2]):
+            plt.ylabel( 'Self energy (meV)', fontdict=font)
+            plt.yticks(np.arange(0, .25, .05), ('0', '50', '100', '150', '200'))
+            plt.xticks(np.arange(0, .1, .02), [])
+        else:
+            plt.yticks(np.arange(0, .15, .05), [])
+        if any(x==j for x in [2, 3]):    
+            plt.xticks(np.arange(0, .1, .02), 
+                       ('0', '-20', '-40', '-60', '-80', '-100'))
+            plt.xlabel('$\omega\,(\mathrm{meV})$', fontdict=font)
+        else:
+            plt.xticks(np.arange(0, .1, .02), ())
+        n += 1
+        plt.xlim(xmax=.1, xmin=0)
+        plt.ylim(ymax=.25, ymin=0)
+        plt.grid(True, alpha=.2)
+    if print_fig == True:
+        plt.savefig(
+                '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig9.png', 
+                dpi = 300,bbox_inches="tight")
