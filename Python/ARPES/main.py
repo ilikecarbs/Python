@@ -57,11 +57,11 @@ CSROfig1:  Experimental data: Figure 1 CSRO20 paper
 CSROfig2:  Experimental PSI data: Figure 2 CSCRO20 paper
 CSROfig3:  (L): Polarization and orbital characters. Figure 3 in paper
 CSROfig4:  (L): Temperature dependence. Figure 4 in paper
-CSROfig5:  (L): Analysis Z epsilon band
-CSROfig6:  Analysis MDC's beta band
+CSROfig5:  (L): Analysis Z epsilon band (load=True)
+CSROfig6:  Analysis MDC's beta band (load=True)
 CSROfig7:  Background subtraction
 CSROfig8:  Extraction LDA Fermi velocity
-CSROfig9:  ReS vs ImS
+CSROfig9:  ReSigma vs ImSigma (load=True)
 """
 #--------
 #utils_plt.CROfig1(print_fig=True)
@@ -83,33 +83,160 @@ CSROfig9:  ReS vs ImS
 #utils_plt.CSROfig2(print_fig=True)
 #utils_plt.CSROfig3(print_fig=True)
 #utils_plt.CSROfig4(print_fig=True)
-#Z = utils_plt.CSROfig5(print_fig=True)
-#Z, Re, Loc_en, Width, eWidth = utils_plt.CSROfig6(print_fig=True)
+#utils_plt.CSROfig5(print_fig=True)
+utils_plt.CSROfig6(print_fig=True)
 #utils_plt.CSROfig7(print_fig=True)
-#k_F, v_LDA = utils_plt.CSROfig8(print_fig=True)
-utils_plt.CSROfig9(print_fig=True)
-
-
+#utils_plt.CSROfig8(print_fig=True)
+#utils_plt.CSROfig9(print_fig=True)
 #%%
-Z_e = utils_plt.CSROfig5()
-Z_b, eZ_b, Re, Loc_en, Width, eWidth = utils_plt.CSROfig6()
-
+os.chdir('/Users/denyssutter/Documents/PhD/data')
+en = np.loadtxt('Data_CSROfig4_en.dat');
+EDCn_e = np.loadtxt('Data_CSROfig4_EDCn_e.dat');
+EDCn_b = np.loadtxt('Data_CSROfig4_EDCn_b.dat');
+EDC_e = np.loadtxt('Data_CSROfig4_EDC_e.dat');
+EDC_b = np.loadtxt('Data_CSROfig4_EDC_b.dat');
+Bkg_e = np.loadtxt('Data_CSROfig4_Bkg_e.dat');
+Bkg_b = np.loadtxt('Data_CSROfig4_Bkg_b.dat');
+_EDC_e = np.loadtxt('Data_CSROfig4__EDC_e.dat', dtype=np.int32);
+_EDC_b = np.loadtxt('Data_CSROfig4__EDC_b.dat', dtype=np.int32);
+eEDCn_e = np.loadtxt('Data_CSROfig4_eEDCn_e.dat');
+eEDCn_b = np.loadtxt('Data_CSROfig4_eEDCn_b.dat');
+eEDC_e = np.loadtxt('Data_CSROfig4_eEDC_e.dat');
+eEDC_b = np.loadtxt('Data_CSROfig4_eEDC_b.dat');
+dims = np.loadtxt('Data_CSROfig4_dims.dat',dtype=np.int32);
+print('\n ~ Data loaded (en, EDCs + normalized + indices + Bkgs)',
+      '\n', '==========================================')  
+os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 #%%
+en = np.reshape(np.ravel(en), (dims[0], dims[1], dims[2]))
+EDCn_e = np.reshape(np.ravel(EDCn_e), (dims[0], dims[2]))
+EDCn_b = np.reshape(np.ravel(EDCn_b), (dims[0], dims[2]))
+EDC_e = np.reshape(np.ravel(EDC_e), (dims[0], dims[2]))
+EDC_b = np.reshape(np.ravel(EDC_b), (dims[0], dims[2]))
+Bkg_e = np.reshape(np.ravel(Bkg_e), (dims[0], dims[2]))
+Bkg_b = np.reshape(np.ravel(Bkg_b), (dims[0], dims[2]))
+_EDC_e = np.reshape(np.ravel(_EDC_e), (dims[0]))
+_EDC_b = np.reshape(np.ravel(_EDC_b), (dims[0]))
+eEDCn_e = np.reshape(np.ravel(eEDCn_e), (dims[0], dims[2]))
+eEDCn_b = np.reshape(np.ravel(eEDCn_b), (dims[0], dims[2]))
+eEDC_e = np.reshape(np.ravel(eEDC_e), (dims[0], dims[2]))
+eEDC_b = np.reshape(np.ravel(eEDC_b), (dims[0], dims[2]))
+
+
+j = 0
+en[j][_EDC_e[j]]
+#%%
+os.chdir('/Users/denyssutter/Documents/PhD/data')
+xz_lda = np.loadtxt('LDA_CSRO_xz.dat')
+os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+#%%
+#[0, 56, 110, 187, 241, 266, 325, 350]  = [G,X,S,G,Y,T,G,Z]
+m, n = 8000, 351 #dimensions energy, full k-path
+size = 187 - 110
+bot, top = 3840, 4055 #restrict energy window
+data = np.array([xz_lda]) #combine data
+spec = np.reshape(data[0, :, 2], (n, m)) #reshape into n,m
+spec = spec[110:187, bot:top] #restrict data to bot, top
+#spec = np.flipud(spec)
+spec_en = np.linspace(-8, 8, m) #define energy data
+spec_en = spec_en[bot:top] #restrict energy data
+spec_en = np.broadcast_to(spec_en, (spec.shape))
+spec_k = np.linspace(-np.sqrt(2) * np.pi / 5.5, 0, size)
+spec_k = np.transpose(
+            np.broadcast_to(spec_k, (spec.shape[1], spec.shape[0])))
+max_pts = np.ones((size))
+for i in range(size):
+    max_pts[i] = spec[i, :].argmax()
+ini = 40
+fin = 48
+max_pts = max_pts[ini:fin]
+
+max_k = spec_k[ini:fin, 0]
+max_en = spec_en[0, max_pts.astype(int)]
+p_max, c_max = curve_fit(
+                utils_math.poly1, max_k, max_en)
+v_LDA = p_max[1]
+ev_LDA = np.sqrt(np.diag(c_max))[1]
+k_F = -p_max[0] / p_max[1]
+xx = np.arange(-.43, -.27, .01)
+plt.figure(2008, figsize=(8, 8), clear=True)
+ax = plt.subplot(1, 3, 1) 
+ax.set_position([.2, .24, .5, .3])
+plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
+plt.contourf(spec_k, spec_en, spec, 200, cmap=cm.ocean_r) 
+plt.plot(xx, utils_math.poly1(xx, *p_max), 'C9--', linewidth=1)
+plt.plot(max_k, max_en, 'ro', ms=2)
+plt.plot([np.min(spec_k), 0], [0, 0], 'k:')
+plt.yticks(np.arange(-1, 1, .1))
+plt.ylim(ymax=.1, ymin=-.3)
+plt.ylabel(r'$\omega$ (eV)', fontdict=font)
+plt.xlabel(r'$k_{\Gamma - \mathrm{S}}\, (\mathrm{\AA}^{-1})$', fontdict=font)
+plt.text(-.3, -.15, '$v_\mathrm{LDA}=$' + str(np.round(v_LDA,2)) + ' eV$\,\mathrm{\AA}$')
+pos = ax.get_position()
+cax = plt.axes([pos.x0+pos.width + 0.01 ,
+                    pos.y0, 0.01, pos.height])
+cbar = plt.colorbar(cax = cax, ticks = None)
+cbar.set_ticks([])
+cbar.set_clim(np.min(spec), np.max(spec))
+#%%
+os.chdir('/Users/denyssutter/Documents/PhD/data')
+np.savetxt('Data_CSROfig8_v_LDA.dat', [v_LDA, ev_LDA])
+os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+#%%
+v_LDA = 2.3411686586990417
 plt.figure('2010', figsize=(8, 8), clear=True)
 e_cols = np.array([[0, 1, 1], [0, .7, .7], [0, .4, .4], [0, 0, 0]])
 b_cols = ['khaki', 'darkkhaki', 'goldenrod', 'darkgoldenrod']
 T = np.array([1.3, 10, 20, 30])
-    
+eZ_b = np.asarray(eZ_b)
+
+os.chdir('/Users/denyssutter/Documents/PhD/data')
+C_B = np.genfromtxt('Data_C_Braden.csv', delimiter=',')
+C_M = np.genfromtxt('Data_C_Maeno.csv', delimiter=',')
+R_1 = np.genfromtxt('Data_R_1.csv', delimiter=',')
+R_2 = np.genfromtxt('Data_R_2.csv', delimiter=',')
+os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+
+hbar = 1.0545717e-34
+NA = 6.022141e23
+kB = 1.38065e-23
+a = 5.33e-10
+m_e = 9.109383e-31
+m_LDA = 1.6032
+gamma = (np.pi * NA * kB ** 2 * a ** 2 / (3 * hbar ** 2)) * m_LDA * m_e
+Z_B = gamma / C_B[:, 1] 
+Z_M = gamma / C_M[:, 1] * 1e3
+
+
+
+xx = np.array([1e-3, 1e4])
+yy = 2.3 * xx ** 2
 ax = plt.subplot(1, 2, 1) 
-ax.set_position([.08, .3, .3, .3])
+ax.set_position([.2, .3, .3, .3])
 plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
-
-plt.errorbar(T, Z_e, Z_e,
-             color='r', linewidth=.5, capsize=2, fmt='d', ms=2)
-plt.errorbar(T, Z_b, eZ_b,
+plt.errorbar(T, Z_b, eZ_b * v_LDA,
              color='C1', linewidth=.5, capsize=2, fmt='o', ms=2)
-plt.ylim(ymax=1, ymin=0)
-
+plt.errorbar(T, Z_e, Z_e / v_LDA,
+             color='r', linewidth=.5, capsize=2, fmt='d', ms=2)
+plt.plot(C_B[:, 0], Z_B, 'o', ms=1, color='slateblue')
+plt.plot(C_M[:, 0], Z_M, 'o', ms=1, color='cadetblue')
+ax.set_xscale("log", nonposx='clip')
+plt.yticks(np.arange(0, .5, .1))
+plt.xlim(xmax=40, xmin=1)
+plt.ylim(ymax=.35, ymin=0)
+plt.xlabel(r'$T$ (K)')
+plt.ylabel(r'$Z$')
+###Inset###
+ax = plt.subplot(1, 2, 2) 
+ax.set_position([.28, .38, .15, .1])
+plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+plt.loglog(np.sqrt(R_1[:, 0]), R_1[:, 1], 'C8o', ms=3)
+plt.loglog(np.sqrt(R_2[:, 0]), R_2[:, 1], 'C8o', ms=3)
+plt.loglog(xx, yy, 'k--', lw=1)
+plt.ylabel(r'$\rho\,(\mu \Omega \mathrm{cm})$')
+plt.xlim(xmax=1e1, xmin=1e-1)
+plt.ylim(ymax=1e4, ymin=1e-2)
+plt.show()
 #%%
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 file = 8

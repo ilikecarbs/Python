@@ -383,6 +383,7 @@ def CROfig1(colmap = cm.bone_r, print_fig = False):
         plt.savefig(
                 '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CROfig1.png', 
                 dpi = 300,bbox_inches="tight")
+    plt.show()
     
 def CROfig2(colmap = cm.bone_r, print_fig = False):
     """
@@ -426,7 +427,8 @@ def CROfig2(colmap = cm.bone_r, print_fig = False):
         plt.savefig(
                 '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CROfig2.png', 
                 dpi = 300,bbox_inches="tight")
-
+    plt.show()
+    
 def CROfig3(colmap = cm.bone_r, print_fig = False):
     """
     Prepare and plot DFT data of Ca2RuO4 (OSMT)
@@ -456,7 +458,8 @@ def CROfig3(colmap = cm.bone_r, print_fig = False):
         plt.savefig(
                 '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CROfig3.png', 
                 dpi = 300,bbox_inches="tight")
-
+    plt.show()
+    
 def CROfig4(colmap = cm.bone_r, print_fig = False):
     """
     Prepare and plot DFT data of Ca2RuO4 (OSMT)
@@ -486,6 +489,7 @@ def CROfig4(colmap = cm.bone_r, print_fig = False):
         plt.savefig(
                 '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CROfig4.png', 
                 dpi = 300,bbox_inches="tight")
+    plt.show()
     
 def CROfig5(colmap = cm.ocean_r, print_fig = False):
     """
@@ -586,6 +590,7 @@ def CROfig5(colmap = cm.ocean_r, print_fig = False):
         plt.savefig(
                 '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CROfig5.png', 
                 dpi = 300,bbox_inches="tight")
+    plt.show()
     
 def CROfig6(colmap = cm.ocean_r, print_fig = False):
     """
@@ -658,7 +663,8 @@ def CROfig6(colmap = cm.ocean_r, print_fig = False):
         plt.savefig(
                     '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CROfig6.png', 
                     dpi = 300,bbox_inches="tight")
-
+    plt.show()
+        
 def CROfig7(colmap = cm.ocean_r, print_fig = False):
     """
     Photon energy dependence Ca2RuO4 
@@ -782,7 +788,8 @@ def CROfig7(colmap = cm.ocean_r, print_fig = False):
         plt.savefig(
                     '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CROfig7.png', 
                     dpi = 300,bbox_inches="tight")
-
+    plt.show()
+    
 def CROfig8(colmap = cm.ocean_r, print_fig = False):
     """
     Polarization dependence Ca2RuO4
@@ -881,7 +888,8 @@ def CROfig8(colmap = cm.ocean_r, print_fig = False):
         plt.savefig(
                     '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CROfig8.png', 
                     dpi = 300,bbox_inches="tight")
-        
+    plt.show()
+    
 def CROfig9(colmap = cm.bone_r, print_fig = False):
     """
     DMFT plot dxz/yz, dxy Ca2RuO4
@@ -936,7 +944,8 @@ def CROfig9(colmap = cm.bone_r, print_fig = False):
         plt.savefig(
                     '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CROfig9.png', 
                     dpi = 300,bbox_inches="tight")
-        
+    plt.show()
+    
 def CROfig10(colmap = cm.bone_r, print_fig = False):
     """
     DFT plot of Ca2RuO4: spaghetti and spectral representation plot
@@ -1020,7 +1029,8 @@ def CROfig10(colmap = cm.bone_r, print_fig = False):
         plt.savefig(
                     '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CROfig10.png', 
                     dpi = 300,bbox_inches="tight")
-        
+    plt.show()
+    
 def CROfig11(print_fig = False):
     """
     Multiplet analysis Ca2RuO4
@@ -1075,7 +1085,8 @@ def CROfig11(print_fig = False):
         plt.savefig(
                     '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CROfig11.png', 
                     dpi = 600,bbox_inches="tight")
-        
+    plt.show()
+    
 def CROfig12(colmap = cm.ocean_r, print_fig = False):
     """
     Constant energy maps oxygen band 
@@ -1085,7 +1096,8 @@ def CROfig12(colmap = cm.ocean_r, print_fig = False):
         plt.savefig(
                     '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CROfig12.png', 
                     dpi = 300,bbox_inches="tight")
-
+    plt.show()
+        
 def CROfig13(colmap = cm.ocean_r, print_fig = False):
     """
     Constant energy maps alpha band
@@ -1095,7 +1107,8 @@ def CROfig13(colmap = cm.ocean_r, print_fig = False):
         plt.savefig(
                     '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CROfig13.png', 
                     dpi = 300,bbox_inches="tight")
-        
+    plt.show()
+    
 def CROfig14(colmap = cm.ocean_r, print_fig = False):
     """
     Constant energy maps gamma band 
@@ -1105,6 +1118,8 @@ def CROfig14(colmap = cm.ocean_r, print_fig = False):
         plt.savefig(
                     '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CROfig14.png', 
                     dpi = 300,bbox_inches="tight")
+    plt.show()
+    
 """
 Figures Dissertation Ca1.8Sr0.2RuO4 (CSRO)
 """     
@@ -1303,7 +1318,8 @@ def CSROfig1(colmap = cm.ocean_r, print_fig = False):
         plt.savefig(
                     '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig1.png', 
                     dpi = 300,bbox_inches="tight")
-
+    plt.show()
+    
 def CSROfig2(colmap = cm.ocean_r, print_fig = False):
     """
     Experimental PSI data: Figure 2 CSCRO20 paper
@@ -1489,7 +1505,8 @@ def CSROfig2(colmap = cm.ocean_r, print_fig = False):
         plt.savefig(
                     '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig2.png', 
                     dpi = 300,bbox_inches="tight")
-        
+    plt.show()
+    
 def CSROfig3(colmap = cm.ocean_r, print_fig = False):
     """
     Polarization and orbital characters. Figure 3 in paper
@@ -1648,7 +1665,8 @@ def CSROfig3(colmap = cm.ocean_r, print_fig = False):
         plt.savefig(
                     '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig3.png', 
                     dpi = 300,bbox_inches="tight")
-            
+    plt.show()
+    
 def CSROfig4(colmap = cm.ocean_r, print_fig = False):
     """
     Temperature dependence. Figure 4 in paper
@@ -1921,21 +1939,75 @@ def CSROfig4(colmap = cm.ocean_r, print_fig = False):
     plt.figure(2004, figsize=(8, 8), clear=True)
     CSROfig4abcd()
     (en, EDCn_e, EDCn_b, EDC_e, EDC_b, Bkg_e, Bkg_b, _EDC_e, _EDC_b,
-     eEDCn_e, eEDCn_b, eEDC_e, eEDC_b) = CSROfig4efg()
+     eEDCn_e, eEDCn_b, eEDC_e, eEDC_b) = CSROfig4efg();
     CSROfig4h()
     if print_fig == True:
         plt.savefig(
                 '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig4.png', 
                 dpi = 300,bbox_inches="tight")
+    dims = np.array([len(en), en[0].shape[0], en[0].shape[1]]);
+    os.chdir('/Users/denyssutter/Documents/PhD/data')
+    np.savetxt('Data_CSROfig4_en.dat', np.ravel(en));
+    np.savetxt('Data_CSROfig4_EDCn_e.dat', np.ravel(EDCn_e));
+    np.savetxt('Data_CSROfig4_EDCn_b.dat', np.ravel(EDCn_b));
+    np.savetxt('Data_CSROfig4_EDC_e.dat', np.ravel(EDC_e));
+    np.savetxt('Data_CSROfig4_EDC_b.dat', np.ravel(EDC_b));
+    np.savetxt('Data_CSROfig4_Bkg_e.dat', np.ravel(Bkg_e));
+    np.savetxt('Data_CSROfig4_Bkg_b.dat', np.ravel(Bkg_b));
+    np.savetxt('Data_CSROfig4__EDC_e.dat', np.ravel(_EDC_e));
+    np.savetxt('Data_CSROfig4__EDC_b.dat', np.ravel(_EDC_b));
+    np.savetxt('Data_CSROfig4_eEDCn_e.dat', np.ravel(eEDCn_e));
+    np.savetxt('Data_CSROfig4_eEDCn_b.dat', np.ravel(eEDCn_b));
+    np.savetxt('Data_CSROfig4_eEDC_e.dat', np.ravel(eEDC_e));
+    np.savetxt('Data_CSROfig4_eEDC_b.dat', np.ravel(eEDC_b));
+    np.savetxt('Data_CSROfig4_dims.dat', dims);
+    print('\n ~ Data saved (en, EDCs + normalized + indices + Bkgs)',
+              '\n', '==========================================')  
+    os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
     return (en, EDCn_e, EDCn_b, EDC_e, EDC_b, Bkg_e, Bkg_b, _EDC_e, _EDC_b,
-                eEDCn_e, eEDCn_b, eEDC_e, eEDC_b)
-
-def CSROfig5(print_fig = False):
+                eEDCn_e, eEDCn_b, eEDC_e, eEDC_b, dims);
+    plt.show()
+    
+def CSROfig5(print_fig = False, load=True):
     """
     Analysis Z of epsilon band
     """
-    (en, EDCn_e, EDCn_b, EDC_e, EDC_b, Bkg_e, Bkg_b, _EDC_e, _EDC_b,
-                eEDCn_e, eEDCn_b, eEDC_e, eEDC_b) = CSROfig4()
+    if load == True:
+        os.chdir('/Users/denyssutter/Documents/PhD/data')
+        en = np.loadtxt('Data_CSROfig4_en.dat');
+        EDCn_e = np.loadtxt('Data_CSROfig4_EDCn_e.dat');
+        EDCn_b = np.loadtxt('Data_CSROfig4_EDCn_b.dat');
+        EDC_e = np.loadtxt('Data_CSROfig4_EDC_e.dat');
+        EDC_b = np.loadtxt('Data_CSROfig4_EDC_b.dat');
+        Bkg_e = np.loadtxt('Data_CSROfig4_Bkg_e.dat');
+        Bkg_b = np.loadtxt('Data_CSROfig4_Bkg_b.dat');
+        _EDC_e = np.loadtxt('Data_CSROfig4__EDC_e.dat', dtype=np.int32);
+        _EDC_b = np.loadtxt('Data_CSROfig4__EDC_b.dat', dtype=np.int32);
+        eEDCn_e = np.loadtxt('Data_CSROfig4_eEDCn_e.dat');
+        eEDCn_b = np.loadtxt('Data_CSROfig4_eEDCn_b.dat');
+        eEDC_e = np.loadtxt('Data_CSROfig4_eEDC_e.dat');
+        eEDC_b = np.loadtxt('Data_CSROfig4_eEDC_b.dat');
+        dims = np.loadtxt('Data_CSROfig4_dims.dat', dtype=np.int32);
+        print('\n ~ Data loaded (en, EDCs + normalized + indices + Bkgs)',
+              '\n', '==========================================')  
+        os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+    else:     
+        (en, EDCn_e, EDCn_b, EDC_e, EDC_b, Bkg_e, Bkg_b, _EDC_e, _EDC_b,
+                eEDCn_e, eEDCn_b, eEDC_e, eEDC_b, dims) = CSROfig4()
+    ###Reshape data###
+    en = np.reshape(np.ravel(en), (dims[0], dims[1], dims[2]))
+    EDCn_e = np.reshape(np.ravel(EDCn_e), (dims[0], dims[2]))
+    EDCn_b = np.reshape(np.ravel(EDCn_b), (dims[0], dims[2]))
+    EDC_e = np.reshape(np.ravel(EDC_e), (dims[0], dims[2]))
+    EDC_b = np.reshape(np.ravel(EDC_b), (dims[0], dims[2]))
+    Bkg_e = np.reshape(np.ravel(Bkg_e), (dims[0], dims[2]))
+    Bkg_b = np.reshape(np.ravel(Bkg_b), (dims[0], dims[2]))
+    _EDC_e = np.reshape(np.ravel(_EDC_e), (dims[0]))
+    _EDC_b = np.reshape(np.ravel(_EDC_b), (dims[0]))
+    eEDCn_e = np.reshape(np.ravel(eEDCn_e), (dims[0], dims[2]))
+    eEDCn_b = np.reshape(np.ravel(eEDCn_b), (dims[0], dims[2]))
+    eEDC_e = np.reshape(np.ravel(eEDC_e), (dims[0], dims[2]))
+    eEDC_b = np.reshape(np.ravel(eEDC_b), (dims[0], dims[2]))
     d = 1e-6
     plt.figure(2005, figsize=(10, 10), clear=True)
     D = 1e6
@@ -2034,12 +2106,26 @@ def CSROfig5(print_fig = False):
         plt.savefig(
                 '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig5.png', 
                 dpi = 300,bbox_inches="tight")
+    os.chdir('/Users/denyssutter/Documents/PhD/data')
+    np.savetxt('Data_CSROfig5_Z_e.dat', Z);
+    print('\n ~ Data saved (Z)',
+              '\n', '==========================================')  
+    os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
     return Z
-
-def CSROfig6(colmap=cm.ocean_r, print_fig=False):
+    plt.show()
+    
+def CSROfig6(colmap=cm.ocean_r, print_fig=False, load=True):
     """
     Analysis MDC's beta band
     """
+    if load == True:
+        os.chdir('/Users/denyssutter/Documents/PhD/data')
+        v_LDA_data = np.loadtxt('Data_CSROfig8_v_LDA.dat')
+        v_LDA = v_LDA_data[0]
+        ev_LDA = v_LDA_data[1]
+        os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+    else:     
+        v_LDA, ev_LDA = CSROfig8()
     os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
     files = [25, 26, 27, 28]
     gold = 14
@@ -2067,7 +2153,6 @@ def CSROfig6(colmap=cm.ocean_r, print_fig=False):
     cols_r = ([0, 0, 0], [0, .4, .4], [0, .7, .7], [0, 1, 1])
     Re_cols = ['khaki', 'darkkhaki', 'goldenrod', 'darkgoldenrod']
     Re_cols_r = ['darkgoldenrod', 'goldenrod', 'darkkhaki', 'khaki']
-    v_LDA = 2.3411686586990417  #Fermi velocity from LDA fit
     xx = np.arange(-.4, .25, .01) #helper variable for plotting
     for j in range(n_spec): 
         D = ARPES.Bessy(files[j], mat, year, sample) #Load Bessy data
@@ -2122,7 +2207,7 @@ def CSROfig6(colmap=cm.ocean_r, print_fig=False):
             plt.yticks(np.arange(-.2, .1, .05), 
                        ('-200', '-150', '-100', '-50', '0', '50'))
             plt.text(-.43, .009, r'MDC maxima', color='C8')
-            plt.text(-.24, .009, r'$v_\mathrm{LDA}$', color='C4')
+            plt.text(-.24, .009, r'$\epsilon_\mathrm{LDA}(\mathbf{k})$', color='C4')
         else:
             plt.yticks(np.arange(-.2, .1, .05), [])
         plt.xticks(np.arange(-1, 0, .1), [])
@@ -2275,18 +2360,31 @@ def CSROfig6(colmap=cm.ocean_r, print_fig=False):
             cbar = plt.colorbar(cax = cax, ticks = None)
             cbar.set_ticks([])
             cbar.set_clim(np.min(int_norm), np.max(int_norm))
-        Z = Z + (z,)
-        eZ = eZ + (ez,)
-        Re = Re + (re,)
-        Loc_en = Loc_en + (loc_en,)
-        Width = Width + (width,)
-        eWidth = eWidth + (ewidth,)
-    print(Z)
+        Z = Z + (z,);
+        eZ = eZ + (ez,);
+        Re = Re + (re,);
+        Loc_en = Loc_en + (loc_en,);
+        Width = Width + (width,);
+        eWidth = eWidth + (ewidth,);
+    print('Z=' + str(Z))
     if print_fig == True:
         plt.savefig(
                 '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig6.png', 
                 dpi = 300,bbox_inches="tight")
-    return Z, eZ, Re, Loc_en, Width, eWidth
+    dims = np.array([len(Re), Re[0].shape[0]])
+    os.chdir('/Users/denyssutter/Documents/PhD/data')
+    np.savetxt('Data_CSROfig6_Z_b.dat', np.ravel(Z));
+    np.savetxt('Data_CSROfig6_eZ_b.dat', np.ravel(eZ));
+    np.savetxt('Data_CSROfig6_Re.dat', np.ravel(Re));
+    np.savetxt('Data_CSROfig6_Loc_en.dat', np.ravel(Loc_en));
+    np.savetxt('Data_CSROfig6_Width.dat', np.ravel(Width));
+    np.savetxt('Data_CSROfig6_eWidth.dat', np.ravel(eWidth));
+    np.savetxt('Data_CSROfig6_dims.dat', np.ravel(dims));
+    print('\n ~ Data saved (Z, eZ, Re, Loc_en, Width, eWidth)',
+              '\n', '==========================================')  
+    os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+    plt.show()
+    return Z, eZ, Re, Loc_en, Width, eWidth, dims
 
 def CSROfig7(colmap=cm.ocean_r, print_fig=False):
     """
@@ -2354,7 +2452,8 @@ def CSROfig7(colmap=cm.ocean_r, print_fig=False):
         plt.savefig(
                 '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig7.png', 
                 dpi = 300,bbox_inches="tight")
-        
+    plt.show()
+    
 def CSROfig8(colmap=cm.bone_r, print_fig=False):
     """
     Extraction LDA Fermi velocity
@@ -2388,7 +2487,8 @@ def CSROfig8(colmap=cm.bone_r, print_fig=False):
     p_max, c_max = curve_fit(
                     utils_math.poly1, max_k, max_en)
     v_LDA = p_max[1]
-    k_F = -p_max[0] / p_max[1]
+    ev_LDA = np.sqrt(np.diag(c_max))[1]
+#    k_F = -p_max[0] / p_max[1]
     xx = np.arange(-.43, -.27, .01)
     plt.figure(2008, figsize=(8, 8), clear=True)
     ax = plt.subplot(1, 3, 1) 
@@ -2413,14 +2513,37 @@ def CSROfig8(colmap=cm.bone_r, print_fig=False):
         plt.savefig(
                 '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig8.png', 
                 dpi = 300,bbox_inches="tight")
-    return k_F, v_LDA
-
-def CSROfig9(print_fig=False):
+    os.chdir('/Users/denyssutter/Documents/PhD/data')
+    np.savetxt('Data_CSROfig8_v_LDA.dat', [v_LDA, ev_LDA])
+    os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+    return v_LDA, ev_LDA
+    plt.show()
+    
+def CSROfig9(print_fig=False, load=True):
     """
     ReS vs ImS
     """ 
-    Z, eZ, Re, Loc_en, Width, eWidth = CSROfig6()
-    v_LDA = 2.3411686586990417  
+    if load == True:
+        os.chdir('/Users/denyssutter/Documents/PhD/data')
+        Z = np.loadtxt('Data_CSROfig6_Z_b.dat')
+        eZ = np.loadtxt('Data_CSROfig6_eZ_b.dat')
+        Re = np.loadtxt('Data_CSROfig6_Re.dat')
+        Loc_en = np.loadtxt('Data_CSROfig6_Loc_en.dat')
+        Width = np.loadtxt('Data_CSROfig6_Width.dat')
+        eWidth = np.loadtxt('Data_CSROfig6_eWidth.dat')
+        dims = np.loadtxt('Data_CSROfig6_dims.dat', dtype=np.int32)
+        v_LDA_data = np.loadtxt('Data_CSROfig8_v_LDA.dat')
+        v_LDA = v_LDA_data[0]
+        ev_LDA = v_LDA_data[1]
+        os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+    else:     
+        Z, eZ, Re, Loc_en, Width, eWidth, dims = CSROfig6()
+        v_LDA, ev_LDA = CSROfig8()
+    
+    Re = np.reshape(np.ravel(Re), (dims[0], dims[1]))
+    Loc_en = np.reshape(np.ravel(Loc_en), (dims[0], dims[1]))
+    Width = np.reshape(np.ravel(Width), (dims[0], dims[1]))
+    eWidth = np.reshape(np.ravel(eWidth), (dims[0], dims[1]))
     plt.figure('2009', figsize=(8, 8), clear=True)
     lbls = [r'(a)  $T=1.3\,$K', r'(b)  $T=10\,$K', r'(c)  $T=20\,$K', 
             r'(d)  $T=30\,$K']
@@ -2435,19 +2558,19 @@ def CSROfig9(print_fig=False):
     n = 0
     for j in range(n_spec):
         en = -Loc_en[j]
-        re = Re[j]
         width = Width[j]
         ewidth = eWidth[j]
-        z = Z[j]
         im = width * v_LDA - offset[j]
         eim = ewidth * v_LDA
+        re = Re[j] / (1  - Z[j])
+        ere = ewidth * v_LDA / (1 - Z[j])
         
         ax = plt.subplot(2, 2, j + 1) 
         ax.set_position(position[j])
         plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
         plt.errorbar(en, im, eim,
                      color=Im_cols[j], linewidth=.5, capsize=2, fmt='d', ms=2)
-        plt.errorbar(en, re / (1 - z), ewidth * v_LDA / (1 - z),
+        plt.errorbar(en, re, ere,
                      color=Re_cols[j], linewidth=.5, capsize=2, fmt='o', ms=2)
         plt.text(.002, .235, lbls[j], fontdict=font)
         if j==0:
@@ -2460,7 +2583,7 @@ def CSROfig9(print_fig=False):
             plt.yticks(np.arange(0, .25, .05), ('0', '50', '100', '150', '200'))
             plt.xticks(np.arange(0, .1, .02), [])
         else:
-            plt.yticks(np.arange(0, .15, .05), [])
+            plt.yticks(np.arange(0, .25, .05), [])
         if any(x==j for x in [2, 3]):    
             plt.xticks(np.arange(0, .1, .02), 
                        ('0', '-20', '-40', '-60', '-80', '-100'))
@@ -2471,7 +2594,16 @@ def CSROfig9(print_fig=False):
         plt.xlim(xmax=.1, xmin=0)
         plt.ylim(ymax=.25, ymin=0)
         plt.grid(True, alpha=.2)
+    os.chdir('/Users/denyssutter/Documents/PhD/data')
+    np.savetxt('Data_CSROfig9_re.dat', re);
+    np.savetxt('Data_CSROfig9_ere.dat', ere);
+    np.savetxt('Data_CSROfig9_im.dat', im);
+    np.savetxt('Data_CSROfig9_eim.dat', eim);
+    print('\n ~ Data saved (re, ere, im, eim)',
+              '\n', '==========================================')  
+    os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
     if print_fig == True:
         plt.savefig(
                 '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig9.png', 
                 dpi = 300,bbox_inches="tight")
+    plt.show()
