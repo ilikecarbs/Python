@@ -84,7 +84,7 @@ class DLS:
     
     def FS_flatten(self, ang=True): #Flatten FS
         map_flat = u.FS_flatten(self, ang)
-        self.map_flat = map_flat
+        self.map = map_flat
         print('\n ~ FS flattened',
               '\n', '==========================================') 
         

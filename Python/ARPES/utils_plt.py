@@ -151,8 +151,10 @@ def plt_hv(self, a, aw):
     plt.figure(20007, figsize=(10, 10), clear=True)
     plt.contourf(hv, en, np.transpose(spec), 100, cmap = cm.ocean_r)
     plt.show()
-        
+    
 def plt_FS(self, coord):
+    plt.figure(20000, figsize=(8, 8), clear=True)
+    plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
     if coord == True:
         kx = self.kx
         ky = self.ky
@@ -161,10 +163,8 @@ def plt_FS(self, coord):
         kx = self.ang
         ky = self.pol
         dat = self.map
-    plt.figure(20000, figsize=(10,10), clear=True)
-    plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
     plt.contourf(kx, ky, dat, 100, cmap = cm.ocean_r)
-    plt.axis('equal')
+    plt.grid(alpha=.5)
     plt.colorbar()
     plt.show()
 
@@ -356,7 +356,7 @@ def CRO_FS_plot(colmap, e, v_min, fignr):
 Figures Dissertation Ca2RuO4 (CRO)
 """
 
-def CROfig1(colmap = cm.bone_r, print_fig = False):
+def CROfig1(colmap=cm.bone_r, print_fig=True):
     """
     Prepare and plot DFT data of Ca2RuO4 (final)
     """
@@ -385,7 +385,7 @@ def CROfig1(colmap = cm.bone_r, print_fig = False):
                 dpi = 300,bbox_inches="tight")
     plt.show()
     
-def CROfig2(colmap = cm.bone_r, print_fig = False):
+def CROfig2(colmap=cm.bone_r, print_fig=True):
     """
     Prepare and plot DMFT data of Ca2RuO4 
     """
@@ -429,7 +429,7 @@ def CROfig2(colmap = cm.bone_r, print_fig = False):
                 dpi = 300,bbox_inches="tight")
     plt.show()
     
-def CROfig3(colmap = cm.bone_r, print_fig = False):
+def CROfig3(colmap=cm.bone_r, print_fig=True):
     """
     Prepare and plot DFT data of Ca2RuO4 (OSMT)
     """
@@ -460,7 +460,7 @@ def CROfig3(colmap = cm.bone_r, print_fig = False):
                 dpi = 300,bbox_inches="tight")
     plt.show()
     
-def CROfig4(colmap = cm.bone_r, print_fig = False):
+def CROfig4(colmap=cm.bone_r, print_fig=True):
     """
     Prepare and plot DFT data of Ca2RuO4 (OSMT)
     """
@@ -491,7 +491,7 @@ def CROfig4(colmap = cm.bone_r, print_fig = False):
                 dpi = 300,bbox_inches="tight")
     plt.show()
     
-def CROfig5(colmap = cm.ocean_r, print_fig = False):
+def CROfig5(colmap=cm.ocean_r, print_fig=True):
     """
     Plot experimental Data Ca2RuO4
     """
@@ -592,7 +592,7 @@ def CROfig5(colmap = cm.ocean_r, print_fig = False):
                 dpi = 300,bbox_inches="tight")
     plt.show()
     
-def CROfig6(colmap = cm.ocean_r, print_fig = False):
+def CROfig6(colmap=cm.ocean_r, print_fig=True):
     """
     Constant energy map of Ca2RuO4 of alpha branch over two BZ's
     """
@@ -665,7 +665,7 @@ def CROfig6(colmap = cm.ocean_r, print_fig = False):
                     dpi = 300,bbox_inches="tight")
     plt.show()
         
-def CROfig7(colmap = cm.ocean_r, print_fig = False):
+def CROfig7(colmap=cm.ocean_r, print_fig=True):
     """
     Photon energy dependence Ca2RuO4 
     """
@@ -790,7 +790,7 @@ def CROfig7(colmap = cm.ocean_r, print_fig = False):
                     dpi = 300,bbox_inches="tight")
     plt.show()
     
-def CROfig8(colmap = cm.ocean_r, print_fig = False):
+def CROfig8(colmap=cm.ocean_r, print_fig=True):
     """
     Polarization dependence Ca2RuO4
     """
@@ -890,7 +890,7 @@ def CROfig8(colmap = cm.ocean_r, print_fig = False):
                     dpi = 300,bbox_inches="tight")
     plt.show()
     
-def CROfig9(colmap = cm.bone_r, print_fig = False):
+def CROfig9(colmap=cm.bone_r, print_fig=True):
     """
     DMFT plot dxz/yz, dxy Ca2RuO4
     """
@@ -946,7 +946,7 @@ def CROfig9(colmap = cm.bone_r, print_fig = False):
                     dpi = 300,bbox_inches="tight")
     plt.show()
     
-def CROfig10(colmap = cm.bone_r, print_fig = False):
+def CROfig10(colmap=cm.bone_r, print_fig=True):
     """
     DFT plot of Ca2RuO4: spaghetti and spectral representation plot
     """
@@ -1031,7 +1031,7 @@ def CROfig10(colmap = cm.bone_r, print_fig = False):
                     dpi = 300,bbox_inches="tight")
     plt.show()
     
-def CROfig11(print_fig = False):
+def CROfig11(print_fig=True):
     """
     Multiplet analysis Ca2RuO4
     """
@@ -1087,7 +1087,7 @@ def CROfig11(print_fig = False):
                     dpi = 600,bbox_inches="tight")
     plt.show()
     
-def CROfig12(colmap = cm.ocean_r, print_fig = False):
+def CROfig12(colmap=cm.ocean_r, print_fig=True):
     """
     Constant energy maps oxygen band 
     """
@@ -1098,7 +1098,7 @@ def CROfig12(colmap = cm.ocean_r, print_fig = False):
                     dpi = 300,bbox_inches="tight")
     plt.show()
         
-def CROfig13(colmap = cm.ocean_r, print_fig = False):
+def CROfig13(colmap=cm.ocean_r, print_fig=True):
     """
     Constant energy maps alpha band
     """
@@ -1109,7 +1109,7 @@ def CROfig13(colmap = cm.ocean_r, print_fig = False):
                     dpi = 300,bbox_inches="tight")
     plt.show()
     
-def CROfig14(colmap = cm.ocean_r, print_fig = False):
+def CROfig14(colmap=cm.ocean_r, print_fig=True):
     """
     Constant energy maps gamma band 
     """
@@ -1124,7 +1124,7 @@ def CROfig14(colmap = cm.ocean_r, print_fig = False):
 Figures Dissertation Ca1.8Sr0.2RuO4 (CSRO)
 """     
 
-def CSROfig1(colmap = cm.ocean_r, print_fig = False):
+def CSROfig1(colmap=cm.ocean_r, print_fig=True):
     """
     Experimental data: Figure 1 CSCRO20 paper
     """
@@ -1215,8 +1215,6 @@ def CSROfig1(colmap = cm.ocean_r, print_fig = False):
             plt.plot((utils_math.lor(A1.k[1], p_mdc[i], p_mdc[i + 8], p_mdc[i + 16], 
                      p_mdc[-3], p_mdc[-2], p_mdc[-1]) - b_mdc) / 30 + .001, 
                      A1.k[1], linewidth=.5, color=cols[i])
-#            if i == 6:
-#                p_mdc[7 + 16] /= 2
             plt.text(p_mdc[i + 16] / 20 + corr[i], p_mdc[i]-.03, lbls[i], 
                      fontdict=font, fontsize=10, color=cols[i])
         plt.plot(f_mdc / 30 + .001, A1.k[1], color=c, linewidth=.5)
@@ -1320,7 +1318,7 @@ def CSROfig1(colmap = cm.ocean_r, print_fig = False):
                     dpi = 300,bbox_inches="tight")
     plt.show()
     
-def CSROfig2(colmap = cm.ocean_r, print_fig = False):
+def CSROfig2(colmap=cm.ocean_r, print_fig=True):
     """
     Experimental PSI data: Figure 2 CSCRO20 paper
     """
@@ -1507,7 +1505,7 @@ def CSROfig2(colmap = cm.ocean_r, print_fig = False):
                     dpi = 300,bbox_inches="tight")
     plt.show()
     
-def CSROfig3(colmap = cm.ocean_r, print_fig = False):
+def CSROfig3(colmap=cm.ocean_r, print_fig=True):
     """
     Polarization and orbital characters. Figure 3 in paper
     """
@@ -1667,7 +1665,7 @@ def CSROfig3(colmap = cm.ocean_r, print_fig = False):
                     dpi = 300,bbox_inches="tight")
     plt.show()
     
-def CSROfig4(colmap = cm.ocean_r, print_fig = False):
+def CSROfig4(colmap=cm.ocean_r, print_fig=True):
     """
     Temperature dependence. Figure 4 in paper
     """      
@@ -1801,7 +1799,6 @@ def CSROfig4(colmap = cm.ocean_r, print_fig = False):
                 plt.yticks(np.arange(-.1, .05, .02), [])
             plt.plot([np.min(k[j]), np.max(k[j])], [0, 0], 'k:')
             
-            
             plt.plot([k[j][_Left_e[j], 0], k[j][_Left_e[j], 0]], 
                      [en[j][0, _Top_e[j]], en[j][0, _Bot_e[j]]],
                      linestyle='--', color='r', linewidth=.5)
@@ -1823,10 +1820,10 @@ def CSROfig4(colmap = cm.ocean_r, print_fig = False):
                      linestyle='--', color='C1', linewidth=.5)
             plt.plot([k[j][_Left_b[j], 0], k[j][_Right_b[j], 0]], 
                      [en[j][0, _Top_b[j]], en[j][0, _Top_b[j]]],
-                     linestyle='--', color='r', linewidth=.5)
+                     linestyle='--', color='C1', linewidth=.5)
             plt.plot([k[j][_Left_b[j], 0], k[j][_Right_b[j], 0]], 
                      [en[j][0, _Bot_b[j]], en[j][0, _Bot_b[j]]],
-                     linestyle='--', color='r', linewidth=.5)
+                     linestyle='--', color='C1', linewidth=.5)
             
             ax.xaxis.tick_top()
             plt.xticks(np.arange(-1, .5, 1.), [r'S', r'$\Gamma$'])
@@ -1964,9 +1961,9 @@ def CSROfig4(colmap = cm.ocean_r, print_fig = False):
     print('\n ~ Data saved (en, EDCs + normalized + indices + Bkgs)',
               '\n', '==========================================')  
     os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+    plt.show()
     return (en, EDCn_e, EDCn_b, EDC_e, EDC_b, Bkg_e, Bkg_b, _EDC_e, _EDC_b,
                 eEDCn_e, eEDCn_b, eEDC_e, eEDC_b, dims);
-    plt.show()
     
 def CSROfig5(print_fig = False, load=True):
     """
@@ -2114,7 +2111,7 @@ def CSROfig5(print_fig = False, load=True):
     return Z
     plt.show()
     
-def CSROfig6(colmap=cm.ocean_r, print_fig=False, load=True):
+def CSROfig6(colmap=cm.ocean_r, print_fig=True, load=True):
     """
     Analysis MDC's beta band
     """
@@ -2386,7 +2383,7 @@ def CSROfig6(colmap=cm.ocean_r, print_fig=False, load=True):
     plt.show()
     return Z, eZ, Re, Loc_en, Width, eWidth, dims
 
-def CSROfig7(colmap=cm.ocean_r, print_fig=False):
+def CSROfig7(colmap=cm.ocean_r, print_fig=True):
     """
     Background subtraction
     """
@@ -2454,7 +2451,7 @@ def CSROfig7(colmap=cm.ocean_r, print_fig=False):
                 dpi = 300,bbox_inches="tight")
     plt.show()
     
-def CSROfig8(colmap=cm.bone_r, print_fig=False):
+def CSROfig8(colmap=cm.bone_r, print_fig=True):
     """
     Extraction LDA Fermi velocity
     """ 
@@ -2519,7 +2516,7 @@ def CSROfig8(colmap=cm.bone_r, print_fig=False):
     return v_LDA, ev_LDA
     plt.show()
     
-def CSROfig9(print_fig=False, load=True):
+def CSROfig9(print_fig=True, load=True):
     """
     ReS vs ImS
     """ 
@@ -2607,3 +2604,79 @@ def CSROfig9(print_fig=False, load=True):
                 '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig9.png', 
                 dpi = 300,bbox_inches="tight")
     plt.show()
+    
+def CSROfig10(print_fig=True):
+    """
+    Quasiparticle Z
+    """ 
+    os.chdir('/Users/denyssutter/Documents/PhD/data')
+    Z_e = np.loadtxt('Data_CSROfig5_Z_e.dat');
+    Z_b = np.loadtxt('Data_CSROfig6_Z_b.dat');
+    eZ_b = np.loadtxt('Data_CSROfig6_eZ_b.dat');
+    v_LDA_data = np.loadtxt('Data_CSROfig8_v_LDA.dat')
+    v_LDA = v_LDA_data[0]
+    C_B = np.genfromtxt('Data_C_Braden.csv', delimiter=',')
+    C_M = np.genfromtxt('Data_C_Maeno.csv', delimiter=',')
+    R_1 = np.genfromtxt('Data_R_1.csv', delimiter=',')
+    R_2 = np.genfromtxt('Data_R_2.csv', delimiter=',')
+    print('\n ~ Data loaded (Zs, specific heat, transport data)',
+          '\n', '==========================================')  
+    os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+    
+    plt.figure('2010', figsize=(10, 10), clear=True)
+    T = np.array([1.3, 10, 20, 30])
+    hbar = 1.0545717e-34
+    NA = 6.022141e23
+    kB = 1.38065e-23
+    a = 5.33e-10
+    m_e = 9.109383e-31
+    m_LDA = 1.6032
+    gamma = (np.pi * NA * kB ** 2 * a ** 2 / (3 * hbar ** 2)) * m_LDA * m_e
+    Z_B = gamma / C_B[:, 1] 
+    Z_M = gamma / C_M[:, 1] * 1e3
+    xx = np.array([1e-3, 1e4])
+    yy = 2.3 * xx ** 2
+    ax = plt.subplot(1, 2, 1) 
+    ax.set_position([.2, .3, .3, .3])
+    plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+    plt.errorbar(T, Z_b, eZ_b * v_LDA,
+                 color='C1', linewidth=.5, capsize=2, fmt='o', ms=2)
+    plt.fill_between([0, 50], .24, .33, alpha=.1, color='C1')
+    plt.plot(39, .229, 'C1*')
+    #plt.plot(39, .326, 'C1+')
+    plt.arrow(28, .16, 8.5, .06, head_width=0.0, head_length=0, fc='k', ec='k')
+    plt.arrow(28, .125, 8.5, -.06, head_width=0.0, head_length=0, fc='k', ec='k')
+    plt.errorbar(T, Z_e, Z_e / v_LDA,
+                 color='r', linewidth=.5, capsize=2, fmt='d', ms=2)
+    plt.fill_between([0, 50], 0.01, .07, alpha=.1, color='r')
+    plt.plot(39, .052, 'r*')
+    #plt.plot(39, .175, 'r+')
+    plt.plot(C_B[:, 0], Z_B, 'o', ms=1, color='cadetblue')
+    plt.plot(C_M[:, 0], Z_M, 'o', ms=1, color='slateblue')
+    ax.set_xscale("log", nonposx='clip')
+    plt.yticks(np.arange(0, .5, .1))
+    plt.xlim(xmax=44, xmin=1)
+    plt.ylim(ymax=.4, ymin=0)
+    plt.xlabel(r'$T$ (K)')
+    plt.ylabel(r'$Z$')
+    plt.text(1.2, .37, 'S. Nakatsuji $\mathit{et\, \,al.}$', color='slateblue')
+    plt.text(1.2, .34, 'J. Baier $\mathit{et\, \,al.}$', color='cadetblue')
+    plt.text(2.5e0, .28, r'$\bar{\beta}$-band', color='C1')
+    plt.text(2.5e0, .04, r'$\bar{\epsilon}$-band', color='r')
+    plt.text(20, .135, 'DMFT')
+    ###Inset###
+    ax = plt.subplot(1, 2, 2) 
+    ax.set_position([.28, .38, .13, .08])
+    plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+    plt.loglog(np.sqrt(R_1[:, 0]), R_1[:, 1], 'o', ms=1, color='slateblue')
+    plt.loglog(np.sqrt(R_2[:, 0]), R_2[:, 1], 'o', ms=1, color='slateblue')
+    plt.loglog(xx, yy, 'k--', lw=1)
+    plt.ylabel(r'$\rho\,(\mu \Omega \mathrm{cm})$')
+    plt.xlim(xmax=1e1, xmin=1e-1)
+    plt.ylim(ymax=1e4, ymin=1e-2)
+    plt.text(2e-1, 1e1, r'$\propto T^2$')
+    plt.show()
+    if print_fig == True:
+        plt.savefig(
+                '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig10.png', 
+                dpi = 600,bbox_inches="tight")
