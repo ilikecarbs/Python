@@ -165,6 +165,7 @@ def plt_FS(self, coord):
         dat = self.map
     plt.contourf(kx, ky, dat, 100, cmap = cm.ocean_r)
     plt.grid(alpha=.5)
+    plt.axis('equal')
     plt.colorbar()
     plt.show()
 
@@ -1788,7 +1789,7 @@ def CSROfig4(colmap=cm.ocean_r, print_fig=True):
                 plt.plot([k[j][_EDC_b[j], 0], k[j][_EDC_b[j], 0]], [en[j][0, 0], en[j][0, -1]],
                      linestyle='-.', color='C9', linewidth=.5)
                 plt.text(-1.06, .007, r'$\bar{\epsilon}$-band', color='r')
-                plt.text(-.5, .007, r'$\bar{\beta}$-band', color='C1')
+                plt.text(-.5, .007, r'$\bar{\beta}$-band', color='m')
             elif j == 3:
                 plt.plot([k[j][_EDC_e[j], 0], k[j][_EDC_e[j], 0]], [en[j][0, 0], en[j][0, -1]],
                      linestyle='-.', color='k', linewidth=.5)
@@ -1814,16 +1815,16 @@ def CSROfig4(colmap=cm.ocean_r, print_fig=True):
             
             plt.plot([k[j][_Left_b[j], 0], k[j][_Left_b[j], 0]], 
                      [en[j][0, _Top_b[j]], en[j][0, _Bot_b[j]]],
-                     linestyle='--', color='C1', linewidth=.5)
+                     linestyle='--', color='m', linewidth=.5)
             plt.plot([k[j][_Right_b[j], 0], k[j][_Right_b[j], 0]], 
                      [en[j][0, _Top_b[j]], en[j][0, _Bot_b[j]]],
-                     linestyle='--', color='C1', linewidth=.5)
+                     linestyle='--', color='m', linewidth=.5)
             plt.plot([k[j][_Left_b[j], 0], k[j][_Right_b[j], 0]], 
                      [en[j][0, _Top_b[j]], en[j][0, _Top_b[j]]],
-                     linestyle='--', color='C1', linewidth=.5)
+                     linestyle='--', color='m', linewidth=.5)
             plt.plot([k[j][_Left_b[j], 0], k[j][_Right_b[j], 0]], 
                      [en[j][0, _Bot_b[j]], en[j][0, _Bot_b[j]]],
-                     linestyle='--', color='C1', linewidth=.5)
+                     linestyle='--', color='m', linewidth=.5)
             
             ax.xaxis.tick_top()
             plt.xticks(np.arange(-1, .5, 1.), [r'S', r'$\Gamma$'])
@@ -1916,9 +1917,9 @@ def CSROfig4(colmap=cm.ocean_r, print_fig=True):
         plt.errorbar(T, int_e, yerr=eint_e, linewidth=.5,
                      capsize=2, color='red', fmt='o', ms=5)
         plt.errorbar(T, int_b, yerr=eint_b, linewidth=.5,
-                     capsize=2, color='C1', fmt='d', ms=5)
+                     capsize=2, color='m', fmt='d', ms=5)
         plt.plot([1.3, 32], [1, .695], 'r--', linewidth=.5)
-        plt.plot([1.3, 32], [1, 1], 'C1--', linewidth=.5)
+        plt.plot([1.3, 32], [1, 1], 'm--', linewidth=.5)
         plt.xticks(T)
         plt.yticks(np.arange(.7, 1.05, .1))
         plt.xlim(xmax=32, xmin=0)
@@ -1931,7 +1932,7 @@ def CSROfig4(colmap=cm.ocean_r, print_fig=True):
                    fontdict = font, fontsize=8)
         plt.text(1.3, 1.032, r'(h)')
         plt.text(8, .83, r'$\bar{\epsilon}$-band', color='r')
-        plt.text(15, .95, r'$\bar{\beta}$-band', color='C1')
+        plt.text(15, .95, r'$\bar{\beta}$-band', color='m')
         
     plt.figure(2004, figsize=(8, 8), clear=True)
     CSROfig4abcd()
@@ -2640,9 +2641,9 @@ def CSROfig10(print_fig=True):
     ax.set_position([.2, .3, .3, .3])
     plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
     plt.errorbar(T, Z_b, eZ_b * v_LDA,
-                 color='C1', linewidth=.5, capsize=2, fmt='o', ms=2)
-    plt.fill_between([0, 50], .24, .33, alpha=.1, color='C1')
-    plt.plot(39, .229, 'C1*')
+                 color='m', linewidth=.5, capsize=2, fmt='o', ms=2)
+    plt.fill_between([0, 50], .24, .33, alpha=.1, color='m')
+    plt.plot(39, .229, 'm*')
     #plt.plot(39, .326, 'C1+')
     plt.arrow(28, .16, 8.5, .06, head_width=0.0, head_length=0, fc='k', ec='k')
     plt.arrow(28, .125, 8.5, -.06, head_width=0.0, head_length=0, fc='k', ec='k')
@@ -2661,7 +2662,7 @@ def CSROfig10(print_fig=True):
     plt.ylabel(r'$Z$')
     plt.text(1.2, .37, 'S. Nakatsuji $\mathit{et\, \,al.}$', color='slateblue')
     plt.text(1.2, .34, 'J. Baier $\mathit{et\, \,al.}$', color='cadetblue')
-    plt.text(2.5e0, .28, r'$\bar{\beta}$-band', color='C1')
+    plt.text(2.5e0, .28, r'$\bar{\beta}$-band', color='m')
     plt.text(2.5e0, .04, r'$\bar{\epsilon}$-band', color='r')
     plt.text(20, .135, 'DMFT')
     ###Inset###
@@ -2680,3 +2681,68 @@ def CSROfig10(print_fig=True):
         plt.savefig(
                 '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig10.png', 
                 dpi = 600,bbox_inches="tight")
+        
+def CSROfig11(print_fig=True):
+    """
+    Tight binding model CSRO
+    """    
+    os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+    kbnd = 2
+    tb = utils_math.TB(a = np.pi, kbnd = kbnd, kpoints = 300)  #Initialize tight binding model
+    param = utils_math.paramCSRO20()  
+#    param = utils_math.paramSRO()  
+    tb.CSRO(param, e0=0, vertices=True, proj=True) 
+    plt.figure('CSRO_projection')
+    plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+#    plt.grid(True, alpha=.5)
+    plt.plot([-1, 1], [1, 1], 'k-', lw=2)
+    plt.plot([-1, 1], [-1, -1], 'k-', lw=2)
+    plt.plot([1, 1], [-1, 1], 'k-', lw=2)
+    plt.plot([-1, -1], [-1, 1], 'k-', lw=2)
+    plt.xticks(np.arange(-kbnd - 1, kbnd + 1, 1))
+    plt.yticks(np.arange(-kbnd - 1, kbnd + 1, 1))
+    plt.xlim(xmax=kbnd, xmin=-kbnd)
+    plt.ylim(ymax=kbnd, ymin=-kbnd)
+    plt.xlabel(r'$k_x \, (\pi/a)$', fontdict=font)
+    plt.ylabel(r'$k_y \, (\pi/b)$', fontdict=font)
+#    plt.legend(('$\gamma z$', '$xy$'), loc=1, framealpha=1, fancybox=True, fontsize=12)
+    plt.legend(('$\gamma z$', '$xy$'), bbox_to_anchor=(0., 1.02, 1., .102), loc=3,
+       ncol=2, mode="expand", borderaxespad=0.)
+    if print_fig == True:
+        plt.savefig(
+                '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig11.png', 
+                dpi = 300,bbox_inches="tight")
+        
+def CSROfig12(print_fig=True):
+    """
+    Tight binding model SRO
+    """    
+    os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+    kbnd = 2
+    tb = utils_math.TB(a = np.pi, kbnd = kbnd, kpoints = 300)  #Initialize tight binding model
+    param = utils_math.paramSRO()  
+    tb.SRO(param, e0=0, vertices=True, proj=True) 
+    plt.figure('SRO_projection')
+    plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+#    plt.grid(True, alpha=.5)
+    plt.plot([-1, 1], [1, 1], 'k-', lw=2)
+    plt.plot([-1, 1], [-1, -1], 'k-', lw=2)
+    plt.plot([1, 1], [-1, 1], 'k-', lw=2)
+    plt.plot([-1, -1], [-1, 1], 'k-', lw=2)
+    plt.plot([-1, 0], [0, 1], 'k--', lw=1)
+    plt.plot([-1, 0], [0, -1], 'k--', lw=1)
+    plt.plot([0, 1], [1, 0], 'k--', lw=1)
+    plt.plot([0, 1], [-1, 0], 'k--', lw=1)
+    plt.xticks(np.arange(-kbnd - 1, kbnd + 1, 1))
+    plt.yticks(np.arange(-kbnd - 1, kbnd + 1, 1))
+    plt.xlim(xmax=kbnd, xmin=-kbnd)
+    plt.ylim(ymax=kbnd, ymin=-kbnd)
+    plt.xlabel(r'$k_x \, (\pi/a_\mathrm{sro})$', fontdict=font)
+    plt.ylabel(r'$k_y \, (\pi/b_\mathrm{sro})$', fontdict=font)
+#    plt.legend(('$\gamma z$', '$xy$'), loc=1, framealpha=1, fancybox=True, fontsize=12)
+    plt.legend(('$\gamma z$', '$xy$'), bbox_to_anchor=(0., 1.02, 1., .102), loc=3,
+       ncol=2, mode="expand", borderaxespad=0.)
+    if print_fig == True:
+        plt.savefig(
+                '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig12.png', 
+                dpi = 300,bbox_inches="tight")

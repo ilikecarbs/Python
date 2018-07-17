@@ -9,10 +9,13 @@ Created on Fri Jun 15 13:53:54 2018
 import numpy as np
 from numpy import linalg as la
 import utils_plt as uplt 
+import utils
 from scipy.stats import exponnorm
 from scipy import special
 from uncertainties import ufloat
 import uncertainties.umath as umath
+import matplotlib.pyplot as plt
+
 
 def paramSRO():
     """
@@ -30,7 +33,14 @@ def paramCSRO20():
               ('t5', .012), ('t6', 0), ('mu', .084), ('l', .037)])
     return param
 
-        
+def paramCSRO30():
+    """
+    Test set CSRO30
+    """
+    param = dict([('t1', .1), ('t2', .005), ('t3', .081), ('t4', .04),
+              ('t5', .01), ('t6', 0), ('mu', .08), ('l', .04)])
+    return param
+
 class TB:
     """
     Tight binding models
@@ -42,11 +52,12 @@ class TB:
         [X, Y] = np.meshgrid(x,y)
         self.coord = dict([('x', x), ('y', y), ('X', X), ('Y', Y)])
   
-    def SRO(self, param):
+    def SRO(self, param, e0=0, vertices=False, proj=False):
         #Load TB parameters
         t1 = param['t1']; t2 = param['t2']; t3 = param['t3']
         t4 = param['t4']; t5 = param['t5']; t6 = param['t6']
         mu = param['mu']; l = param['l']
+#        l = 0
         coord = self.coord
         a = self.a
         x = coord['x']; y = coord['y']; X = coord['X']; Y = coord['Y']
@@ -74,12 +85,71 @@ class TB:
                 yz[i,j] = eval[0]; xz[i,j] = eval[1]; xy[i,j] = eval[2]
         bndstr = dict([('yz', yz), ('xz', xz), ('xy', xy)])
         self.bndstr = bndstr
+        en = (yz, xz, xy)
+        C = ()
+        Pyz = np.array([[1, 0, 0], [0, 0, 0], [0, 0, 0]])
+        Pxz = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]])
+        Pxy = np.array([[0, 0, 0], [0, 0, 0], [0, 0, 1]])
+        plt.figure('SRO', figsize=(10, 3), clear=True)
+        n = 0
+        for i in en:
+            n += 1
+            plt.subplot(1, 3, n)
+            c = plt.contour(X, Y, i, colors = 'black', 
+                            linestyles = ':', levels = e0)
+            C = C + (c,)
+            plt.axis('equal')
+        if vertices == True:
+            plt.figure('SRO_vertices', figsize=(5, 5), clear=True)
+            if proj == True:
+                plt.figure('SRO_projection', figsize=(5, 5), clear=True)
+            for j in range(3):
+                p = C[j].collections[0].get_paths()
+                p = np.asarray(p)  
+                plt.figure('SRO_vertices')
+                V_x = ()
+                V_y = ()    
+                for i in range(len(p)):
+                    v = p[i].vertices
+                    v_x = v[:, 0]
+                    v_y = v[:, 1]
+                    V_x = V_x + (v_x,)
+                    V_y = V_y + (v_y,)
+                    plt.plot(v_x, v_y)
+                    plt.axis('equal')
+                    plt.text(v_x[0], v_y[0], str(i))
+                    plt.show()
+                if proj == True:
+                    plt.figure('SRO_projection')
+                    plt.plot(np.max(x) + 1, np.min(x) + 1, 'ro')
+                    plt.plot(np.max(x) + 1, np.min(x) + 1, 'bo')  
+                    for N in range(len(V_x)):
+                        for i in range(len(V_x[N])):
+                            val_x, ind_x = utils.find(x, V_x[N][i])
+                            val_y, ind_y = utils.find(y, V_y[N][i])
+                            eval_proj, evec_proj = la.eigh(H(ind_x, ind_y))
+                            eval_proj = np.real(eval_proj)
+                            wyz = np.real(
+                                    np.sum(
+                                            np.conj(evec_proj[:, j]) * \
+                                            (Pyz * evec_proj[:, j]))) 
+                            wxz = np.real(
+                                    np.sum(
+                                            np.conj(evec_proj[:, j]) * \
+                                            (Pxz * evec_proj[:, j]))) 
+                            wxy = np.real(
+                                    np.sum(
+                                            np.conj(evec_proj[:, j]) * \
+                                            (Pxy * evec_proj[:, j]))) 
+                            plt.plot(V_x[N][i], V_y[N][i], 'o', ms=2,
+                                     color=[min(1, wyz + wxz), 0, wxy])
         
-    def CSRO(self, param):
+        
+    def CSRO(self, param, e0=0, vertices=False, proj=True):
         #Load TB parameters
         t1 = param['t1']; t2 = param['t2']; t3 = param['t3']
         t4 = param['t4']; t5 = param['t5']; t6 = param['t6']
-        mu = param['mu']; l = param['l']
+        mu = param['mu']; l = param['l'] 
         coord = self.coord
         a = self.a
         x = coord['x']; y = coord['y']; X = coord['X']; Y = coord['Y']
@@ -121,7 +191,89 @@ class TB:
         bndstr = dict([('Ayz', Ayz), ('Axz', Axz), ('Axy', Axy),
                        ('Byz', Byz), ('Bxz', Bxz), ('Bxy', Bxy)])
         self.bndstr = bndstr
-                
+        en = (Ayz, Axz, Axy, Byz, Bxz, Bxy)
+        C = ()
+        PAyz = np.array([[1,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],
+                         [0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]])
+        PAxz = np.array([[0,0,0,0,0,0],[0,1,0,0,0,0],[0,0,0,0,0,0],
+                         [0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]])
+        PAxy = np.array([[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,1,0,0,0],
+                         [0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]])
+        PByz = np.array([[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],
+                         [0,0,0,1,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]])
+        PBxz = np.array([[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],
+                         [0,0,0,0,0,0],[0,0,0,0,1,0],[0,0,0,0,0,0]])
+        PBxy = np.array([[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],
+                         [0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,1]])
+
+        plt.figure('CSRO', figsize=(10, 6), clear=True)
+        n = 0
+        for i in en:
+            n += 1
+            plt.subplot(2, 3, n)
+            c = plt.contour(X, Y, i, colors = 'black', 
+                            linestyles = ':', levels = e0)
+            C = C + (c,)
+            plt.axis('equal')
+        if vertices == True:
+            plt.figure('CSRO_vertices', figsize=(5, 5), clear=True)
+            if proj == True:
+                plt.figure('CSRO_projection', figsize=(5, 5), clear=True)
+            for j in range(6):
+                p = C[j].collections[0].get_paths()
+                p = np.asarray(p)  
+                plt.figure('CSRO_vertices')
+                V_x = ()
+                V_y = ()    
+                for i in range(len(p)):
+                    v = p[i].vertices
+                    v_x = v[:, 0]
+                    v_y = v[:, 1]
+                    V_x = V_x + (v_x,)
+                    V_y = V_y + (v_y,)
+                    plt.plot(v_x, v_y)
+                    plt.axis('equal')
+                    plt.text(v_x[0], v_y[0], str(i))
+                    plt.show()
+                if proj == True:
+                    plt.figure('CSRO_projection')
+                    plt.plot(np.max(x) + 1, np.min(x) + 1, 'ro')
+                    plt.plot(np.max(x) + 1, np.min(x) + 1, 'bo')  
+#                    plt.plot(np.max(x) + 1, np.min(x) + 1, 'go')  
+                    for N in range(len(V_x)):
+                        for i in range(len(V_x[N])):
+                            val_x, ind_x = utils.find(x, V_x[N][i])
+                            val_y, ind_y = utils.find(y, V_y[N][i])
+                            eval_proj, evec_proj = la.eigh(H(ind_x, ind_y))
+                            eval_proj = np.real(eval_proj)
+                            wAyz = np.real(
+                                    np.sum(
+                                            np.conj(evec_proj[:, j]) * \
+                                            (PAxz * evec_proj[:, j]))) 
+                            wAxz = np.real(
+                                    np.sum(
+                                            np.conj(evec_proj[:, j]) * \
+                                            (PAyz * evec_proj[:, j]))) 
+                            wAxy = np.real(
+                                    np.sum(
+                                            np.conj(evec_proj[:, j]) * \
+                                            (PAxy * evec_proj[:, j]))) 
+                            wByz = np.real(
+                                    np.sum(
+                                            np.conj(evec_proj[:, j]) * \
+                                            (PBxz * evec_proj[:, j]))) 
+                            wBxz = np.real(
+                                    np.sum(
+                                            np.conj(evec_proj[:, j]) * \
+                                            (PByz * evec_proj[:, j]))) 
+                            wBxy = np.real(
+                                    np.sum(
+                                            np.conj(evec_proj[:, j]) * \
+                                            (PBxy * evec_proj[:, j]))) 
+                            plt.plot(V_x[N][i], V_y[N][i], 'o', ms=2,
+                                     color=[min(1, wAyz + wByz + wAxz + wBxz),
+                                            0, min(1, wAxy + wBxy)])
+        
     def simple(self, param):
         t1 = param['t1']; t2 = param['t2']; t3 = param['t3']
         t4 = param['t4']; t5 = param['t5']; mu = param['mu']   
