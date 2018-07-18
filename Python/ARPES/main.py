@@ -75,6 +75,7 @@ CSROfig9:  ReSigma vs ImSigma (load=True)
 CSROfig10: Quasiparticle Z
 CSROfig11: Tight binding model CSRO
 CSROfig12: Tight binding model SRO
+CSROfig13: TB along high symmetry directions, orbitally resolved
 
 ---------  To-Do ---------
 CSRO: kz dependence
@@ -113,27 +114,30 @@ CSRO: FS area counting
 #utils_plt.CSROfig9()
 #utils_plt.CSROfig10()
 #utils_plt.CSROfig11()
-utils_plt.CSROfig12()
+#utils_plt.CSROfig12()
+#utils_plt.CSROfig13()
 
 #%%
 """
 Loading Current Data:
 """
+
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 mat = 'CaMn2Sb2'
 year = 2018
 file = 'S3_FSM_fine_hv90_T230'
 mode = 'FSM'
-
 D = ARPES.CASS(file, mat, year, mode)
+utils.gold(file='S3_5', mat='CaMn2Sb2', year=2018, sample=1, Ef_ini=86.4, BL='CASS')
+D.norm(gold='S3_5')
 #%%
 #D.plt_hv()
-D.FS(e = 86.0, ew = .1, norm = False)
+D.FS(e = -.2, ew = .1, norm = True)
 D.ang2kFS(D.ang, Ekin=90-4.5, lat_unit=False, a=1, b=1, c=1, 
           V0=0, thdg=-6, tidg=24.5, phidg=-0)
 #D.FS_flatten(ang=True)
 D.plt_FS(coord=True)
-#D.plt_FS_polcut(norm=False, p=24.5, pw=.1)
+D.plt_FS_polcut(norm=True, p=24.6, pw=.5)
 
 #%%
 
@@ -166,14 +170,14 @@ Project: Density of states
 """
 
 os.chdir('/Users/denyssutter/Documents/PhD/data')
-Axz = np.loadtxt('Data_Axz_kpts_5000.dat')
-Ayz = np.loadtxt('Data_Ayz_kpts_5000.dat')
-Axy = np.loadtxt('Data_Axy_kpts_5000.dat')
-Bxz = np.loadtxt('Data_Bxz_kpts_5000.dat')
-Byz = np.loadtxt('Data_Byz_kpts_5000.dat')
-Bxy = np.loadtxt('Data_Bxy_kpts_5000.dat')
+Axz_dos = np.loadtxt('Data_Axz_kpts_5000.dat')
+Ayz_dos = np.loadtxt('Data_Ayz_kpts_5000.dat')
+Axy_dos = np.loadtxt('Data_Axy_kpts_5000.dat')
+Bxz_dos = np.loadtxt('Data_Bxz_kpts_5000.dat')
+Byz_dos = np.loadtxt('Data_Byz_kpts_5000.dat')
+Bxy_dos = np.loadtxt('Data_Bxy_kpts_5000.dat')
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
-bands = (Axz, Ayz, Axy, Bxz, Byz, Bxy)
+bands = (Axz_dos, Ayz_dos, Axy_dos, Bxz_dos, Byz_dos, Bxy_dos)
 #%%
 
 En = ()
@@ -221,26 +225,47 @@ plt.show()
 """
 Project: Advanced TB plot along direction
 """
-#x = np.linspace(-1, 1, 500)
-#y = np.linspace(-1, 1, 500)
-x = np.linspace(0, 2, 500)
-y = np.zeros(len(x))
+k_pts = 200
+x_GS = np.linspace(0, 1, k_pts)
+y_GS = np.linspace(0, 1, k_pts)
 
-en, spec = utils_math.CSRO_eval(x, y)
+x_SX = np.linspace(1, 0, k_pts)
+y_SX = np.ones(k_pts)
 
-v_bnd = .7 * np.max(spec)
-#plt.plot([x[0], x[-1]], [0, 0], 'k:')
+x_XG = np.zeros(k_pts)
+y_XG = np.linspace(1, 0, k_pts)
+
+x = (x_GS, x_SX, x_XG)
+y = (y_GS, y_SX, y_XG)
 plt.figure('TB_eval', figsize=(6, 6), clear=True)
-ax = plt.subplot(122)
-ax.set_position([.1, .3, .35 , .35])
-plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
-plt.contourf(x, en, spec, 200, cmap='PuOr', vmin=-v_bnd, vmax=v_bnd)
-pos = ax.get_position()
-cax = plt.axes([pos.x0+pos.width+0.01 ,
-                        pos.y0, 0.01, pos.height])
-cbar = plt.colorbar(cax = cax, ticks = None)
-cbar.set_ticks([])
-cbar.set_clim(np.min(spec), np.max(spec))
+for i in range(len(x)):
+    en, spec, bndstr = utils_math.CSRO_eval(x[i], y[i])
+    k = np.sqrt(x[i] ** 2 + y[i] ** 2)
+    v_bnd = .1
+    if i != 0:
+        ax = plt.subplot(2, 3, i + 1)
+        ax.set_position([.1 + i * .2 + .2 * (np.sqrt(2)-1), .2, .2 , .4])
+        plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
+        k = -k
+    else:
+        ax = plt.subplot(2, 3, i + 1)
+        ax.set_position([.1 + i * .2 , .2, .2 * np.sqrt(2) , .4])
+        plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
+    for j in range(len(bndstr)):
+        plt.plot(k, bndstr[j])
+    if i == 0:
+        plt.xticks([0, np.sqrt(2)], ('$\Gamma$', 'S'))
+        plt.yticks(np.arange(-1, 1, .2))
+    elif i==1:
+        plt.xticks([-np.sqrt(2), -1], ('', 'X'))
+        plt.yticks(np.arange(-1, 1, .2), [])
+    elif i==2:
+        plt.xticks([-1, 0], ('', '$\Gamma$'))
+        plt.yticks(np.arange(-1, 1, .2), [])
+    plt.plot([k[0], k[-1]], [0, 0], 'k:')    
+    plt.xlim(xmin=k[0], xmax=k[-1])
+    plt.ylim(ymax=np.max(en), ymin=np.min(en))
+
 plt.show()
 #%%
 """

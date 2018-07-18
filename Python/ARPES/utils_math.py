@@ -403,8 +403,9 @@ def CSRO_eval(x, y):
             val, _val = utils.find(en, en_value)
             spec[_val, i] = w
             n += 1
+    bndstr = (Ayz, Axz, Axy, Byz, Bxz, Bxy)
     spec = gaussian_filter(spec, sigma=3, mode='constant')
-    return en, spec      
+    return en, spec, bndstr   
 
 def FDsl(x, p0, p1, p2, p3, p4):
     """

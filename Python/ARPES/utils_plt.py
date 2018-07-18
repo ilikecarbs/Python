@@ -107,9 +107,13 @@ def plt_spec(self, norm):
     plt.show()
 
 def plt_FS_polcut(self, norm, p, pw):
+    p_val, p_ind = utils.find(self.pol, p)
+    pw_val, pw_ind = utils.find(self.pol, p - pw)
     if norm == True:
         k = self.angs
+        k = k[p_ind]
         en = self.en_norm
+        en = en[p_ind]
         dat = self.int_norm
     elif norm == 'shift':
         k = self.angs
@@ -119,12 +123,10 @@ def plt_FS_polcut(self, norm, p, pw):
         k = self.ang
         en = self.en
         dat = np.transpose(self.int)
-    p_val, p_ind = utils.find(self.pol, p)
-    pw_val, pw_ind = utils.find(self.pol, p - pw)
-    spec = np.sum(dat[:, : , pw_ind:p_ind], axis=2)
+    spec = np.sum(dat[pw_ind:p_ind, : , :], axis=0)
     plt.figure(('FS polcut' + str(self.filename)), figsize=(10, 10), clear=True)
     plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
-    plt.contourf(k, en, spec, 100, cmap = cm.ocean_r)
+    plt.contourf(k, en, spec, 200, cmap = cm.ocean_r)
     if norm == True:
         plt.plot([np.min(k), np.max(k)], [0, 0], 'k:')
     plt.xlabel(r'$k$', fontdict=font)   
@@ -2717,6 +2719,9 @@ def CSROfig11(print_fig=True):
         plt.contour(X, Y, i, colors = 'black', linestyles = '-', levels = 0,
                     alpha=.2)
     plt.contourf(kx, ky, FS, 200, cmap='PuOr', vmin=-v_bnd, vmax=v_bnd)
+    plt.text(-.1, -.1, r'$\Gamma$', fontsize=18, color='r')
+    plt.text(.9, .9, 'S', fontsize=18, color='r')
+    plt.text(-.1, .9, 'X', fontsize=18, color='r')
     plt.plot([-1, 1], [1, 1], 'k-', lw=2)
     plt.plot([-1, 1], [-1, -1], 'k-', lw=2)
     plt.plot([1, 1], [-1, 1], 'k-', lw=2)
@@ -2784,4 +2789,61 @@ def CSROfig12(print_fig=True):
     if print_fig == True:
         plt.savefig(
                 '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig12.png', 
+                dpi = 300,bbox_inches="tight")
+        
+def CSROfig13(print_fig=True):
+    """
+    TB along high symmetry directions, orbitally resolved
+    """    
+    k_pts = 300
+    x_GS = np.linspace(0, 1, k_pts)
+    y_GS = np.linspace(0, 1, k_pts)
+    
+    x_SX = np.linspace(1, 0, k_pts)
+    y_SX = np.ones(k_pts)
+    
+    x_XG = np.zeros(k_pts)
+    y_XG = np.linspace(1, 0, k_pts)
+    
+    x = (x_GS, x_SX, x_XG)
+    y = (y_GS, y_SX, y_XG)
+    plt.figure('TB_eval', figsize=(6, 6), clear=True)
+    for i in range(len(x)):
+        en, spec, bndstr = utils_math.CSRO_eval(x[i], y[i])
+        k = np.sqrt(x[i] ** 2 + y[i] ** 2)
+        v_bnd = .1
+        if i != 0:
+            ax = plt.subplot(2, 3, i + 1)
+            ax.set_position([.1 + i * .2 + .2 * (np.sqrt(2)-1), .2, .2 , .4])
+            plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
+            k = -k
+        else:
+            ax = plt.subplot(2, 3, i + 1)
+            ax.set_position([.1 + i * .2 , .2, .2 * np.sqrt(2) , .4])
+            plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
+        plt.contourf(k, en, spec, 200, 
+                     cmap='PuOr', vmin=-v_bnd, vmax=v_bnd)
+        for j in range(len(bndstr)):
+            plt.plot(k, bndstr[j], 'k-', alpha=.2)
+        if i == 0:
+            plt.xticks([0, np.sqrt(2)], ('$\Gamma$', 'S'))
+            plt.yticks(np.arange(-1, 1, .2))
+        elif i==1:
+            plt.xticks([-np.sqrt(2), -1], ('', 'X'))
+            plt.yticks(np.arange(-1, 1, .2), [])
+        elif i==2:
+            plt.xticks([-1, 0], ('', '$\Gamma$'))
+            plt.yticks(np.arange(-1, 1, .2), [])
+        plt.plot([k[0], k[-1]], [0, 0], 'k:')    
+        plt.ylim(ymax=np.max(en), ymin=np.min(en))
+    pos = ax.get_position()
+    cax = plt.axes([pos.x0+pos.width+0.01 ,
+                            pos.y0, 0.01, pos.height])
+    cbar = plt.colorbar(cax = cax, ticks = None)
+    cbar.set_ticks([])
+    cbar.set_clim(np.min(spec), np.max(spec))
+    plt.show()
+    if print_fig == True:
+        plt.savefig(
+                '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig13.png', 
                 dpi = 300,bbox_inches="tight")
