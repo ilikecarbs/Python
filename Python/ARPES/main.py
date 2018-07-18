@@ -75,16 +75,19 @@ CSROfig9:  ReSigma vs ImSigma (load=True)
 CSROfig10: Quasiparticle Z
 CSROfig11: Tight binding model CSRO
 CSROfig12: Tight binding model SRO
+CSROfig13: TB along high symmetry directions, orbitally resolved
+CSROfig14: (L): TB and density of states
 
 ---------  To-Do ---------
-CSRO: kz dependence
-CSRO: CSRO30 vs CSRO20 (FS and cuts)
-CSRO: TB DOS
-CSRO: TB specific heat
-CSRO: DOS calculations
+
+CSRO: TB with cuts
 CSRO: FS maps DMFT
 CSRO: Symmetrization
 CSRO: FS area counting 
+CSRO: ARPES cuts + TB
+CSRO: kz dependence
+CSRO: CSRO30 vs CSRO20 (FS and cuts)
+CSRO: TB specific heat
 """
 #--------
 #utils_plt.CROfig1()
@@ -114,27 +117,29 @@ CSRO: FS area counting
 #utils_plt.CSROfig10()
 #utils_plt.CSROfig11()
 #utils_plt.CSROfig12()
-
+#utils_plt.CSROfig13()
+#utils_plt.CSROfig14()
 #%%
 """
 Loading Current Data:
 """
+
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 mat = 'CaMn2Sb2'
 year = 2018
-sample = 'S2_FSM_hv82_T71'
+file = 'S3_FSM_fine_hv90_T230'
 mode = 'FSM'
-
-file = 1
-D = ARPES.CASS(file, mat, year, sample, mode)
+D = ARPES.CASS(file, mat, year, mode)
+utils.gold(file='S3_5', mat='CaMn2Sb2', year=2018, sample=1, Ef_ini=86.4, BL='CASS')
+D.norm(gold='S3_5')
 #%%
 #D.plt_hv()
-D.FS(e = 77.3, ew = .02, norm = False)
-D.ang2kFS(D.ang, Ekin=82, lat_unit=False, a=1, b=1, c=1, 
-          V0=0, thdg=0, tidg=15, phidg=-7)
-D.FS_flatten(ang=False)
+D.FS(e = -.2, ew = .1, norm = True)
+D.ang2kFS(D.ang, Ekin=90-4.5, lat_unit=False, a=1, b=1, c=1, 
+          V0=0, thdg=-6, tidg=24.5, phidg=-0)
+#D.FS_flatten(ang=True)
 D.plt_FS(coord=True)
-
+D.plt_FS_polcut(norm=True, p=24.6, pw=.5)
 
 #%%
 
@@ -161,136 +166,6 @@ tb.CSRO(param, e0=0, vertices=False, proj=False)
 #tb.plt_cont_TB_CSRO20()
 
 print(time.time()-start)
-#%%
-"""
-Project: Density of states
-"""
-
-os.chdir('/Users/denyssutter/Documents/PhD/data')
-Axz = np.loadtxt('Data_Axz_kpts_5000.dat')
-Ayz = np.loadtxt('Data_Ayz_kpts_5000.dat')
-Axy = np.loadtxt('Data_Axy_kpts_5000.dat')
-Bxz = np.loadtxt('Data_Bxz_kpts_5000.dat')
-Byz = np.loadtxt('Data_Byz_kpts_5000.dat')
-Bxy = np.loadtxt('Data_Bxy_kpts_5000.dat')
-os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
-bands = (Axz, Ayz, Axy, Bxz, Byz, Bxy)
-#%%
-
-En = ()
-DOS = ()
-N_bands = ()
-N_full= ()
-plt.figure('DOS', figsize=(8, 8), clear=True)
-n = 0
-for band in bands:
-    n += 1
-    ax = plt.subplot(2, 3, n) 
-    dos, bins, patches = plt.hist(np.ravel(band), bins=150, density=True,
-                                alpha=.2, color='C8')
-    en = np.zeros((len(dos)))
-    for i in range(len(dos)):
-        en[i] = (bins[i] + bins[i + 1]) / 2
-    ef, _ef = utils.find(en, 0.00)
-    n_full = np.trapz(dos, x=en)
-    n_band = np.trapz(dos[:_ef], x=en[:_ef])
-    plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
-    plt.plot(en, dos, color='k', lw=.5)
-    plt.fill_between(en[:_ef], dos[:_ef], 0, color='C1', alpha=.5)
-    plt.xlim(xmin=np.min(en), xmax=np.max(en))
-    N_full = N_full + (n_full,)
-    N_bands = N_bands + (n_band,)
-    En = En + (en,)
-    DOS = DOS + (dos,)
-N = np.sum(N_bands)
-print(N)
-plt.show()
-
-#%%
-"""
-Project: TB plot along direction
-"""
-from numpy import linalg as la
-a = np.pi
-
-#x = np.linspace(-1, 1, 200)
-#y = np.linspace(-1, 1, 200)
-x = np.linspace(0, 2, 200)
-y = np.zeros(len(x))
-
-#Load TB parameters
-param = utils_math.paramCSRO20()  
-t1 = param['t1']; t2 = param['t2']; t3 = param['t3']
-t4 = param['t4']; t5 = param['t5']; t6 = param['t6']
-mu = param['mu']; l = param['l']
-#Hopping terms
-fx = -2 * np.cos((x + y) / 2 * a)
-fy = -2 * np.cos((x - y) / 2 * a)
-f4 = -2 * t4 * (np.cos(x * a) + np.cos(y * a))
-f5 = -2 * t5 * (np.cos((x + y) * a) + np.cos((x - y) * a))
-f6 = -2 * t6 * (np.cos(x * a) - np.cos(y * a))
-#Placeholders energy eigenvalues
-Ayz = np.ones(len(x)); Axz = np.ones(len(x))
-Axy = np.ones(len(x)); Byz = np.ones(len(x)) 
-Bxz = np.ones(len(x)); Bxy = np.ones(len(x))
-wAyz = np.ones((len(x), 6)); wAxz = np.ones((len(x), 6))
-wAxy = np.ones((len(x), 6)); wByz = np.ones((len(x), 6))
-wBxz = np.ones((len(x), 6)); wBxy = np.ones((len(x), 6))
-
-###Projectors###
-PAyz = np.array([[1,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],
-                 [0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]])
-PAxz = np.array([[0,0,0,0,0,0],[0,1,0,0,0,0],[0,0,0,0,0,0],
-                 [0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]])
-PAxy = np.array([[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,1,0,0,0],
-                 [0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]])
-PByz = np.array([[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],
-                 [0,0,0,1,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]])
-PBxz = np.array([[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],
-                 [0,0,0,0,0,0],[0,0,0,0,1,0],[0,0,0,0,0,0]])
-PBxy = np.array([[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],
-                 [0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,1]])
-    
-#TB submatrix
-def A(i):
-    A = np.array([[-mu, complex(0,l) + f6[i], -l],
-                  [-complex(0,l) + f6[i], -mu, complex(0,l)],
-                  [-l, -complex(0,l), -mu + f4[i] + f5[i]]])
-    return A
-#TB submatrix
-def B(i): 
-    B = np.array([[t2 * fx[i] + t1 * fy[i], 0, 0],
-                  [0, t1 * fx[i] + t2 * fy[i], 0],
-                  [0, 0, t3 * (fx[i] + fy[i])]])
-    return B
-#Tight binding Hamiltonian
-def H(i):
-    C1 = np.concatenate((A(i), B(i)), 1)
-    C2 = np.concatenate((B(i), A(i)), 1)
-    H  = np.concatenate((C1, C2), 0)
-    return H
-#Diagonalization of symmetric Hermitian matrix on k-mesh
-plt.figure('TB_eval', figsize=(6, 6), clear=True)
-for i in range(len(x)):
-    eval, evec = la.eigh(H(i))
-    eval = np.real(eval)
-    Ayz[i] = eval[0]; Axz[i] = eval[1]; Axy[i] = eval[2]
-    Byz[i] = eval[3]; Bxz[i] = eval[4]; Bxy[i] = eval[5]
-    en = (Ayz[i], Axz[i], Axy[i], Byz[i], Bxz[i], Bxy[i])
-    n = 0
-    for en_value in en:
-        wAyz[i, n] = np.real(np.sum(np.conj(evec[:, n]) * (PAyz * evec[:, n]))) 
-        wAxz[i, n] = np.real(np.sum(np.conj(evec[:, n]) * (PAxz * evec[:, n]))) 
-        wAxy[i, n] = np.real(np.sum(np.conj(evec[:, n]) * (PAxy * evec[:, n]))) 
-        wByz[i, n] = np.real(np.sum(np.conj(evec[:, n]) * (PByz * evec[:, n]))) 
-        wBxz[i, n] = np.real(np.sum(np.conj(evec[:, n]) * (PBxz * evec[:, n]))) 
-        wBxy[i, n] = np.real(np.sum(np.conj(evec[:, n]) * (PBxy * evec[:, n]))) 
-        plt.plot(x[i], en_value, 'o', ms=3,
-                 color=[wAxz[i, n] + wBxz[i, n], wAyz[i, n] + wByz[i, n], wAxy[i, n] + wBxy[i, n]])
-        n += 1
-        
-plt.plot([x[0], x[-1]], [0, 0], 'k:')
-plt.show()
 
 #%%
 """
@@ -448,11 +323,4 @@ show_Y_lm(l=5,m=4)
 show_Y_lm(l=6,m=6)
         
 plt.show()
-
-
-
-
-
-
-
 

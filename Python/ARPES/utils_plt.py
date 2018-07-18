@@ -41,18 +41,13 @@ font = {'family': 'serif',
         'size': 12,
         }
 
-# +----------+ #
-# | Colormap | # ===============================================================
-# +----------+ #
 
 def rainbow_light():
     filepath = '/Users/denyssutter/Documents/library/Python/ARPES/cmap/rainbow_light.dat'
     data = np.loadtxt(filepath)
     colors = np.array([(i[0], i[1], i[2]) for i in data])
-    
     # Normalize the colors
     colors /= colors.max()
-    
     # Build the colormap
     rainbow_light = LinearSegmentedColormap.from_list('rainbow_light', colors, 
                                                       N=len(colors))
@@ -62,10 +57,8 @@ def rainbow_light_2():
     filepath = '/Users/denyssutter/Documents/library/Python/ARPES/cmap/rainbow_light_2.dat'
     data = np.loadtxt(filepath)
     colors = np.array([(i[0], i[1], i[2]) for i in data])
-    
     # Normalize the colors
     colors /= colors.max()
-    
     # Build the colormap
     rainbow_light_2 = LinearSegmentedColormap.from_list('rainbow_light', colors, 
                                                       N=len(colors))
@@ -75,10 +68,8 @@ def orbitals():
     colors = np.zeros((100,3))
     for i in range(100):
         colors[i,:] = [i/100, 0, 1 - i/100]
-        
     # Normalize the colors
     colors /= colors.max()
-    
     # Build the colormap
     orbitals = LinearSegmentedColormap.from_list('orbitals', colors, 
                                                       N=len(colors))
@@ -109,16 +100,20 @@ def plt_spec(self, norm):
     plt.figure(('spec' + str(self.filename)), figsize=(10, 10), clear=True)
     plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
     plt.contourf(k, en, dat, 100, cmap = cm.ocean_r)
-    if norm == True:
+    if norm != False:
         plt.plot([np.min(k), np.max(k)], [0, 0], 'k:')
-    plt.xlabel('$k_x$')   
-    plt.ylabel('\omega')
+    plt.xlabel('$k_x$', fontdict=font)   
+    plt.ylabel(r'$\omega$', fontdict=font)
     plt.show()
 
 def plt_FS_polcut(self, norm, p, pw):
+    p_val, p_ind = utils.find(self.pol, p)
+    pw_val, pw_ind = utils.find(self.pol, p - pw)
     if norm == True:
         k = self.angs
+        k = k[p_ind]
         en = self.en_norm
+        en = en[p_ind]
         dat = self.int_norm
     elif norm == 'shift':
         k = self.angs
@@ -128,17 +123,14 @@ def plt_FS_polcut(self, norm, p, pw):
         k = self.ang
         en = self.en
         dat = np.transpose(self.int)
-    p_val, p_ind = utils.find(self.pol, p)
-    pw_val, pw_ind = utils.find(self.pol, p - pw)
-    spec = np.sum(dat[:, : , pw_ind:p_ind], axis=2)
+    spec = np.sum(dat[pw_ind:p_ind, : , :], axis=0)
     plt.figure(('FS polcut' + str(self.filename)), figsize=(10, 10), clear=True)
     plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
-    plt.contourf(k, en, spec, 100, cmap = cm.ocean_r)
-    plt.plot([np.min(k), np.max(k)], [-2.8, -2.8], 'k:')
+    plt.contourf(k, en, spec, 200, cmap = cm.ocean_r)
     if norm == True:
         plt.plot([np.min(k), np.max(k)], [0, 0], 'k:')
-    plt.xlabel('$k$')   
-    plt.ylabel('\omega')
+    plt.xlabel(r'$k$', fontdict=font)   
+    plt.ylabel(r'$\omega$', fontdict=font)
     plt.show()
 
 def plt_hv(self, a, aw):
@@ -193,7 +185,8 @@ def plt_cont_TB_SRO(self, e0):
     for i in en:
         n = n + 1
         plt.subplot(1, 3, n)
-        plt.contour(X, Y, i, colors = 'black', linestyles = ':', levels = e0)
+        plt.contour(X, Y, i, 'k--', levels = e0,
+                    lw=1)
         plt.axis('equal')
   
 def plt_cont_TB_CSRO20(self, e0):   
@@ -986,6 +979,7 @@ def CROfig10(colmap=cm.bone_r, print_fig=True):
     DFT_k = np.linspace(0, 350, n)
     
     def CROfig10a():
+        
         ax = plt.subplot(121)
         ax.set_position([.1, .3, .35 , .35])
         plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
@@ -1335,7 +1329,6 @@ def CSROfig2(colmap=cm.ocean_r, print_fig=True):
     sample = 'data'
     D = ARPES.SIS(file, mat, year, sample) 
     D.FS(e = 19.3, ew = .01, norm = False)
-    D.FS_flatten(ang=False)
     """
     D.FS_restrict(bot=0, top=1, left=0, right=1)
     """
@@ -1396,6 +1389,7 @@ def CSROfig2(colmap=cm.ocean_r, print_fig=True):
     plt.plot(D.ky[:, 0], mdc, 'bo')
     plt.plot(D.ky[:, 0], f_mdc + b_mdc)
     plt.plot(D.ky[:, 0], b_mdc, 'k--')
+    
     def CSROfig2a():
         ax = plt.subplot(1, 4, 1) 
         ax.set_position([.08, .605, .4, .15])
@@ -1423,18 +1417,17 @@ def CSROfig2(colmap=cm.ocean_r, print_fig=True):
         plt.text(-.7, .36, r'(a)', fontsize=12)
     
     def CSROfig2b():
+        D.FS_flatten(ang=False)
         ax = plt.subplot(1, 4, 3) 
         ax.set_position([.08, .2, .4, .4])
         plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
-        plt.contourf(D.kx, D.ky, D.map_flat, 100, cmap=colmap,
-                     vmin=.6 * np.max(D.map_flat), vmax=1.0 * np.max(D.map_flat))
+        plt.contourf(D.kx, D.ky, D.map, 100, cmap=colmap,
+                     vmin=.6 * np.max(D.map), vmax=1.0 * np.max(D.map))
         plt.plot([-bnd, bnd], [-bnd, bnd], linestyle='-.', color=c, linewidth=.5)
         plt.plot([0, 0], [-bnd, bnd], linestyle='-.', color=c, linewidth=.5)
         ax.arrow(.55, .55, 0, .13, head_width=0.03, head_length=0.03, fc=c, ec=c)
         plt.xticks(np.arange(-10, 10, .5))
         plt.yticks(np.arange(-10, 10, .5),[])
-        
-        
         plt.axis('equal')
         plt.xlabel(r'$k_x \, (\pi/a)$')
         plt.text(-.7, .63, r'(b)', fontsize=12, color='w')
@@ -1445,33 +1438,33 @@ def CSROfig2(colmap=cm.ocean_r, print_fig=True):
                         pos.y0, 0.01, pos.height])
         cbar = plt.colorbar(cax = cax, ticks = None)
         cbar.set_ticks([])
-        cbar.set_clim(np.min(D.map_flat), np.max(D.map_flat))
+        cbar.set_clim(np.min(D.map), np.max(D.map))
         ###Tight Binding Model###
-        ax = plt.subplot(1, 4, 3) 
-        ax.set_position([.08, .2, .4, .4])
-        tb = utils_math.TB(a = np.pi, kbnd = 2, kpoints = 200)#Initialize 
-        param = utils_math.paramCSRO20()  #Load parameters
-        tb.CSRO(param)  #Calculate bandstructure
-        bndstr = tb.bndstr  #Load bandstructure
-        coord = tb.coord  #Load coordinates
-        X = coord['X']; Y = coord['Y']   
-        Byz = bndstr['Byz']
-        C = plt.contour(X, Y, Byz, colors = 'black', linestyles = ':', 
-                        alpha=0, levels = -0.00)
-        p = C.collections[0].get_paths()
-        p = np.asarray(p)
-        byz = np.array([16, 17, 20, 21])
-        ind = byz; col = 'k'
-        v = p[18].vertices
-        plt.plot(v[:, 0], v[:, 1], linestyle = ':', color = 'm', 
-                 linewidth=1)
-        v = p[19].vertices
-        plt.plot(v[:, 0], v[:, 1], linestyle = ':', color = 'C1', 
-                 linewidth=1)
-        for j in ind:
-            v = p[j].vertices
-            plt.plot(v[:, 0], v[:, 1], linestyle = ':', color = col, 
-                     linewidth=1)
+#        ax = plt.subplot(1, 4, 3) 
+#        ax.set_position([.08, .2, .4, .4])
+#        tb = utils_math.TB(a = np.pi, kbnd = 2, kpoints = 200)#Initialize 
+#        param = utils_math.paramCSRO20()  #Load parameters
+#        tb.CSRO(param)  #Calculate bandstructure
+#        bndstr = tb.bndstr  #Load bandstructure
+#        coord = tb.coord  #Load coordinates
+#        X = coord['X']; Y = coord['Y']   
+#        Byz = bndstr['Byz']
+#        C = plt.contour(X, Y, Byz, colors = 'black', linestyles = ':', 
+#                        alpha=0, levels = -0.00)
+#        p = C.collections[0].get_paths()
+#        p = np.asarray(p)
+#        byz = np.array([16, 17, 20, 21])
+#        ind = byz; col = 'k'
+#        v = p[18].vertices
+#        plt.plot(v[:, 0], v[:, 1], linestyle = ':', color = 'm', 
+#                 linewidth=1)
+#        v = p[19].vertices
+#        plt.plot(v[:, 0], v[:, 1], linestyle = ':', color = 'C1', 
+#                 linewidth=1)
+#        for j in ind:
+#            v = p[j].vertices
+#            plt.plot(v[:, 0], v[:, 1], linestyle = ':', color = col, 
+#                     linewidth=1)
         
     def CSROfig2c():
         ax = plt.subplot(1, 4, 4) 
@@ -2710,11 +2703,25 @@ def CSROfig11(print_fig=True):
     kbnd = 2
     tb = utils_math.TB(a = np.pi, kbnd = kbnd, kpoints = 300)  #Initialize tight binding model
     param = utils_math.paramCSRO20()  
-#    param = utils_math.paramSRO()  
-    tb.CSRO(param, e0=0, vertices=True, proj=True) 
-    plt.figure('CSRO_projection')
+    kx, ky, FS = tb.CSRO(param, e0=0, vertices=True, proj=True) 
+    bndstr = tb.bndstr
+    coord = tb.coord   
+    X = coord['X']; Y = coord['Y']   
+    Axz = bndstr['Axz']; Ayz = bndstr['Ayz']; Axy = bndstr['Axy']
+    Bxz = bndstr['Bxz']; Byz = bndstr['Byz']; Bxy = bndstr['Bxy']
+    en = (Axz, Ayz, Axy, Bxz, Byz, Bxy)
+    v_bnd = np.max(FS)
+    plt.figure(2011, figsize=(8, 8), clear=True)
+    ax = plt.subplot(122)
+    ax.set_position([.1, .3, .4 , .4])
     plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
-#    plt.grid(True, alpha=.5)
+    for i in en:
+        plt.contour(X, Y, i, colors = 'black', linestyles = '-', levels = 0,
+                    alpha=.2)
+    plt.contourf(kx, ky, FS, 200, cmap='PuOr', vmin=-v_bnd, vmax=v_bnd)
+    plt.text(-.1, -.1, r'$\Gamma$', fontsize=18, color='r')
+    plt.text(.9, .9, 'S', fontsize=18, color='r')
+    plt.text(-.1, .9, 'X', fontsize=18, color='r')
     plt.plot([-1, 1], [1, 1], 'k-', lw=2)
     plt.plot([-1, 1], [-1, -1], 'k-', lw=2)
     plt.plot([1, 1], [-1, 1], 'k-', lw=2)
@@ -2725,13 +2732,16 @@ def CSROfig11(print_fig=True):
     plt.ylim(ymax=kbnd, ymin=-kbnd)
     plt.xlabel(r'$k_x \, (\pi/a)$', fontdict=font)
     plt.ylabel(r'$k_y \, (\pi/b)$', fontdict=font)
-#    plt.legend(('$\gamma z$', '$xy$'), loc=1, framealpha=1, fancybox=True, fontsize=12)
-    plt.legend(('$\gamma z$', '$xy$'), bbox_to_anchor=(0., 1.02, 1., .102), loc=3,
-       ncol=2, mode="expand", borderaxespad=0.)
+    pos = ax.get_position()
+    cax = plt.axes([pos.x0+pos.width + 0.01 ,
+                        pos.y0, 0.01, pos.height])
+    cbar = plt.colorbar(cax = cax, ticks = None)
+    cbar.set_ticks([])
+    cbar.set_clim(np.min(FS), np.max(FS))
     if print_fig == True:
         plt.savefig(
                 '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig11.png', 
-                dpi = 300,bbox_inches="tight")
+                dpi = 600,bbox_inches="tight")
         
 def CSROfig12(print_fig=True):
     """
@@ -2741,10 +2751,21 @@ def CSROfig12(print_fig=True):
     kbnd = 2
     tb = utils_math.TB(a = np.pi, kbnd = kbnd, kpoints = 300)  #Initialize tight binding model
     param = utils_math.paramSRO()  
-    tb.SRO(param, e0=0, vertices=True, proj=True) 
-    plt.figure('SRO_projection')
+    kx, ky, FS = tb.SRO(param, e0=0, vertices=True, proj=True) 
+    bndstr = tb.bndstr
+    coord = tb.coord   
+    X = coord['X']; Y = coord['Y']   
+    xz = bndstr['xz']; yz = bndstr['yz']; xy = bndstr['xy']
+    en = (xz, yz, xy)
+    v_bnd = np.max(FS)
+    plt.figure(2012, figsize=(8, 8), clear=True)
+    ax = plt.subplot(122)
+    ax.set_position([.1, .3, .4 , .4])
     plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
-#    plt.grid(True, alpha=.5)
+    for i in en:
+        plt.contour(X, Y, i, colors = 'black', linestyles = '-', levels = 0,
+                    alpha=.2)
+    plt.contourf(kx, ky, FS, 200, cmap='PuOr', vmin=-v_bnd, vmax=v_bnd)
     plt.plot([-1, 1], [1, 1], 'k-', lw=2)
     plt.plot([-1, 1], [-1, -1], 'k-', lw=2)
     plt.plot([1, 1], [-1, 1], 'k-', lw=2)
@@ -2757,12 +2778,203 @@ def CSROfig12(print_fig=True):
     plt.yticks(np.arange(-kbnd - 1, kbnd + 1, 1))
     plt.xlim(xmax=kbnd, xmin=-kbnd)
     plt.ylim(ymax=kbnd, ymin=-kbnd)
-    plt.xlabel(r'$k_x \, (\pi/a_\mathrm{sro})$', fontdict=font)
-    plt.ylabel(r'$k_y \, (\pi/b_\mathrm{sro})$', fontdict=font)
-#    plt.legend(('$\gamma z$', '$xy$'), loc=1, framealpha=1, fancybox=True, fontsize=12)
-    plt.legend(('$\gamma z$', '$xy$'), bbox_to_anchor=(0., 1.02, 1., .102), loc=3,
-       ncol=2, mode="expand", borderaxespad=0.)
+    plt.xlabel(r'$k_x \, (\pi/a)$', fontdict=font)
+    plt.ylabel(r'$k_y \, (\pi/b)$', fontdict=font)
+    pos = ax.get_position()
+    cax = plt.axes([pos.x0+pos.width + 0.01 ,
+                        pos.y0, 0.01, pos.height])
+    cbar = plt.colorbar(cax = cax, ticks = None)
+    cbar.set_ticks([])
+    cbar.set_clim(np.min(FS), np.max(FS))
     if print_fig == True:
         plt.savefig(
                 '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig12.png', 
-                dpi = 300,bbox_inches="tight")
+                dpi = 600,bbox_inches="tight")
+        
+def CSROfig13(print_fig=True):
+    """
+    TB along high symmetry directions, orbitally resolved
+    """    
+    k_pts = 300
+    x_GS = np.linspace(0, 1, k_pts)
+    y_GS = np.linspace(0, 1, k_pts)
+    x_SX = np.linspace(1, 0, k_pts)
+    y_SX = np.ones(k_pts)
+    x_XG = np.zeros(k_pts)
+    y_XG = np.linspace(1, 0, k_pts)
+    
+    x = (x_GS, x_SX, x_XG)
+    y = (y_GS, y_SX, y_XG)
+    plt.figure('TB_eval', figsize=(6, 6), clear=True)
+    for i in range(len(x)):
+        en, spec, bndstr = utils_math.CSRO_eval(x[i], y[i])
+        k = np.sqrt(x[i] ** 2 + y[i] ** 2)
+        v_bnd = .1
+        if i != 0:
+            ax = plt.subplot(2, 3, i + 1)
+            ax.set_position([.1 + i * .2 + .2 * (np.sqrt(2)-1), .2, .2 , .4])
+            plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
+            k = -k
+        else:
+            ax = plt.subplot(2, 3, i + 1)
+            ax.set_position([.1 + i * .2 , .2, .2 * np.sqrt(2) , .4])
+            plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
+        plt.contourf(k, en, spec, 200, 
+                     cmap='PuOr', vmin=-v_bnd, vmax=v_bnd)
+        for j in range(len(bndstr)):
+            plt.plot(k, bndstr[j], 'k-', alpha=.2)
+        if i == 0:
+            plt.xticks([0, np.sqrt(2)], ('$\Gamma$', 'S'))
+            plt.yticks(np.arange(-1, 1, .2))
+        elif i==1:
+            plt.xticks([-np.sqrt(2), -1], ('', 'X'))
+            plt.yticks(np.arange(-1, 1, .2), [])
+        elif i==2:
+            plt.xticks([-1, 0], ('', '$\Gamma$'))
+            plt.yticks(np.arange(-1, 1, .2), [])
+        plt.plot([k[0], k[-1]], [0, 0], 'k:')    
+        plt.ylim(ymax=np.max(en), ymin=np.min(en))
+    pos = ax.get_position()
+    cax = plt.axes([pos.x0+pos.width+0.01 ,
+                            pos.y0, 0.01, pos.height])
+    cbar = plt.colorbar(cax = cax, ticks = None)
+    cbar.set_ticks([])
+    cbar.set_clim(np.min(spec), np.max(spec))
+    plt.show()
+    if print_fig == True:
+        plt.savefig(
+                '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig13.png', 
+                dpi = 600,bbox_inches="tight")
+
+def CSROfig14(print_fig=True):
+    """
+    TB and density of states
+    """    
+    os.chdir('/Users/denyssutter/Documents/PhD/data')
+    Axz_dos = np.loadtxt('Data_Axz_kpts_5000.dat')
+    Ayz_dos = np.loadtxt('Data_Ayz_kpts_5000.dat')
+    Axy_dos = np.loadtxt('Data_Axy_kpts_5000.dat')
+    Bxz_dos = np.loadtxt('Data_Bxz_kpts_5000.dat')
+    Byz_dos = np.loadtxt('Data_Byz_kpts_5000.dat')
+    Bxy_dos = np.loadtxt('Data_Bxy_kpts_5000.dat')
+    os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+    bands = (Ayz_dos, Axz_dos, Axy_dos, Byz_dos, Bxz_dos, Bxy_dos)
+    
+    En = ()
+    _EF = ()
+    DOS = ()
+    N_bands = ()
+    N_full= ()
+    plt.figure('DOS', figsize=(8, 8), clear=True)
+    n = 0
+    for band in bands:
+        n += 1
+        ax = plt.subplot(2, 3, n) 
+        plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
+        dos, bins, patches = plt.hist(np.ravel(band), bins=150, density=True,
+                                    alpha=.2, color='C8')
+        en = np.zeros((len(dos)))
+        for i in range(len(dos)):
+            en[i] = (bins[i] + bins[i + 1]) / 2
+        ef, _ef = utils.find(en, 0.003)
+        n_full = np.trapz(dos, x=en)
+        n_band = np.trapz(dos[:_ef], x=en[:_ef])
+        plt.plot(en, dos, color='k', lw=.5)
+        plt.fill_between(en[:_ef], dos[:_ef], 0, color='C1', alpha=.5)
+        if n < 4:
+            ax.set_position([.1 + (n - 1) * .29, .5, .28 , .23])
+            plt.xticks(np.arange(-.6, .3, .1), [])
+        else:
+            ax.set_position([.1 + (n - 4) * .29, .26, .28 , .23])
+            plt.xticks(np.arange(-.6, .3, .1))
+        if n == 5:
+            plt.xlabel(r'$\omega$ (eV)', fontdict=font)
+        if any(x==n for x in [1, 4]):
+            plt.ylabel('Intensity (a.u)', fontdict=font)
+        plt.yticks(np.arange(0, 40, 10), [])
+        plt.xlim(xmin=-.37, xmax=.21)
+        N_full = N_full + (n_full,)
+        N_bands = N_bands + (n_band,)
+        En = En + (en,)
+        _EF = _EF + (_ef,)
+        DOS = DOS + (dos,)
+    N = np.sum(N_bands)
+    k_pts = 200
+    x_GS = np.linspace(0, 1, k_pts)
+    y_GS = np.linspace(0, 1, k_pts)
+    x_SX = np.linspace(1, 0, k_pts)
+    y_SX = np.ones(k_pts)
+    x_XG = np.zeros(k_pts)
+    y_XG = np.linspace(1, 0, k_pts)
+    x = (x_GS, x_SX, x_XG)
+    y = (y_GS, y_SX, y_XG)
+    cols = ['C1', 'C0', 'm', 'C8', 'C9', 'C3']
+    plt.figure('TB_eval', figsize=(8, 8), clear=True)
+    for i in range(len(x)):
+        en, spec, bndstr = utils_math.CSRO_eval(x[i], y[i])
+        k = np.sqrt(x[i] ** 2 + y[i] ** 2)
+        if i != 0:
+            ax = plt.subplot(3, 3, i + 1)
+            ax.set_position([.1 + i * .15 + .15 * (np.sqrt(2) - 1), .2, .15 , .4])
+            plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
+            k = -k
+        else:
+            ax = plt.subplot(3, 3, i + 1)
+            ax.set_position([.1 + i * .15 , .2, .15 * np.sqrt(2) , .4])
+            plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
+        for j in range(len(bndstr)):
+            plt.plot(k, bndstr[j], color=cols[j])
+        if i == 0:
+            plt.xticks([0, np.sqrt(2)], ('$\Gamma$', 'S'))
+            plt.yticks(np.arange(-1, 1, .2))
+            plt.text(.05, .25, '(a)', fontdict=font)
+            plt.ylabel(r'$\omega$ (eV)', fontdict=font)
+        elif i==1:
+            plt.xticks([-np.sqrt(2), -1], ('', 'X'))
+            plt.yticks(np.arange(-1, 1, .2), [])
+        elif i==2:
+            plt.xticks([-1, 0], ('', '$\Gamma$'))
+            plt.yticks(np.arange(-1, 1, .2), [])
+        plt.plot([k[0], k[-1]], [0, 0], 'k:')    
+        plt.xlim(xmin=k[0], xmax=k[-1])
+        plt.ylim(ymax=np.max(en), ymin=np.min(en))
+    n = 0
+    for band in bands:
+        dos = DOS[n]
+        dos[0] = 0
+        dos[-1] = 0
+        ax = plt.subplot(3, 3, 9)
+        ax.set_position([.1 + 3 * .15 + .01 + .15 * (np.sqrt(2) - 1), .2, .15 * np.sqrt(2) , .4])
+        plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
+        ef, _ef = utils.find(En[n], 0.00)
+        plt.plot(DOS[n], En[n], color = 'k', lw=.5)
+        plt.fill_betweenx(En[n][:_ef], 0, DOS[n][:_ef], color=cols[n], alpha=.7)
+        plt.yticks(np.arange(-1, 1, .2), [])
+        plt.xticks([])
+        plt.ylim(ymax=np.max(en), ymin=np.min(en))
+        plt.xlim(xmax=35, xmin=0)
+        n += 1
+    plt.text(1, .25, '(b)', fontdict=font)
+    plt.xlabel('DOS $\partial_\omega\Omega_2(\omega)$', fontdict=font)
+    print(N)
+    plt.show()
+    if print_fig == True:
+        plt.savefig(
+                '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig14.png', 
+                dpi = 600,bbox_inches="tight")
+    os.chdir('/Users/denyssutter/Documents/PhD/data')
+    np.savetxt('Data_TB_DOS_Ayz.dat', DOS[0]);
+    np.savetxt('Data_TB_DOS_Axz.dat', DOS[1]);
+    np.savetxt('Data_TB_DOS_Axy.dat', DOS[2]);
+    np.savetxt('Data_TB_DOS_Byz.dat', DOS[3]);
+    np.savetxt('Data_TB_DOS_Bxz.dat', DOS[4]);
+    np.savetxt('Data_TB_DOS_Bxy.dat', DOS[5]);
+    np.savetxt('Data_TB_DOS_en_Ayz.dat', En[0]);
+    np.savetxt('Data_TB_DOS_en_Axz.dat', En[1]);
+    np.savetxt('Data_TB_DOS_en_Axy.dat', En[2]);
+    np.savetxt('Data_TB_DOS_en_Byz.dat', En[3]);
+    np.savetxt('Data_TB_DOS_en_Bxz.dat', En[4]);
+    np.savetxt('Data_TB_DOS_en_Bxy.dat', En[5]);
+    print('\n ~ Data saved Density of states',
+              '\n', '==========================================')  
+    os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')

@@ -4,6 +4,14 @@
 Created on Mon Jun 11 09:57:01 2018
 
 @author: denyssutter
+
+%%%%%%%%%%%%%%%%%%%%
+        utils
+%%%%%%%%%%%%%%%%%%%%
+
+Content:
+utilities for data manipulation
+
 """
 import os
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
@@ -276,8 +284,10 @@ def gold(file, mat, year, sample, Ef_ini, BL):
         D = ARPES.ALS(file, mat, year, sample)
     elif BL == 'Bessy':
         D = ARPES.Bessy(file, mat, year, sample)
-    bnd = 150
-    ch = 300
+    elif BL == 'CASS':
+        D = ARPES.CASS(file, mat, year, mode='cut')
+    bnd = 1
+    ch = 100
     plt.figure(5001)
     plt.subplot(211)
     enval, inden = find(D.en, Ef_ini-0.12)

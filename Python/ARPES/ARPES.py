@@ -4,6 +4,14 @@
 Created on Sun Jun 10 13:20:31 2018
 
 @author: denyssutter
+
+%%%%%%%%%%%%%%%%%%%%
+        ARPES
+%%%%%%%%%%%%%%%%%%%%
+
+Content:
+Data Loader and data manipulation ARPES files
+
 """
 import os
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
@@ -389,16 +397,30 @@ class CASS(Analysis):
     Data from Soleil
     Beamline: Cassiopee
     """    
-    def __init__(self, file, mat, year, sample, mode):  #Load Data file
+    def __init__(self, file, mat, year, mode):  #Load Data file
         self.file = file
         self.mat = mat
         self.mode = mode
         folder = ''.join(['/Users/denyssutter/Documents/Denys/',str(mat),
-                          '/CASS',str(year),'/',str(sample),'/'])
+                          '/CASS',str(year),'/',str(file),'/'])
+        self.folder = folder
         n_scans = (len([name for name in os.listdir(folder)\
                        if os.path.isfile(os.path.join(folder, name))])) / 2
-        n_scans = np.int(n_scans)
+        n_scans = np.int(n_scans - 1)
         if n_scans > 1:
+            if mode == 'cut':
+                intensity = np.loadtxt(folder + str(file) + '_int.dat')
+                intensity = np.transpose(intensity)
+                filename = file
+                self.filename = filename
+                en = np.loadtxt(folder + str(file) + '_en.dat')
+                ang = np.loadtxt(folder + str(file) + '_ang.dat')
+                path = folder 
+                self.en = en
+                self.ang = ang
+                self.ens = np.broadcast_to(en, (ang.size, en.size))
+                self.angs = np.transpose(np.broadcast_to(ang, (en.size, ang.size)))
+                self.path = path
             if mode == 'FSM':
                 pol = np.zeros(n_scans)
                 for scan in range(n_scans):
@@ -427,8 +449,6 @@ class CASS(Analysis):
                         self.ang = ang
                         intensity = np.zeros((n_scans, len(ang), len(en)))
                     intensity[scan] = np.transpose(data[:, 1:])
-            
-                
                 self.pol = pol
                 self.ens   = np.broadcast_to(en, (pol.size, ang.size, en.size))
                 self.angs  = np.transpose(
