@@ -5,8 +5,18 @@
 Created on Tue Jun 19 15:14:29 2018
 
 @author: denyssutter
-"""
 
+%%%%%%%%%%%%%%%%%%%%
+        main
+%%%%%%%%%%%%%%%%%%%%
+
+Content:
+1. Load all relevant modules
+2. Plot figures for thesis (uncomment relevant figure)
+3. Load current file in a running experiment
+4. Current projects
+
+"""
 import os
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 import utils_plt
@@ -17,8 +27,8 @@ import ARPES
 import numpy as np
 import time
 import matplotlib.cm as cm
-from scipy.stats import exponnorm
-from scipy.optimize import curve_fit
+#from scipy.stats import exponnorm
+#from scipy.optimize import curve_fit
 
 rainbow_light = utils_plt.rainbow_light
 cm.register_cmap(name='rainbow_light', cmap=rainbow_light)
@@ -36,7 +46,7 @@ font = {'family': 'serif',
 
 #%%
 """
---------   Ca2RuO4 Figures   --------
+---------  Ca2RuO4 Figures   ---------
 CROfig1:   DFT plot Ca2RuO4: figure 3 of Nature Comm.
 CROfig2:   (L): DMFT pot Ca2RuO4: figure 3 of Nature Comm.
 CROfig3:   DFT plot orbitally selective Mott scenario
@@ -52,7 +62,7 @@ CROfig12:  Constant energy maps oxygen band -5.2eV
 CROfig13:  Constant energy maps alpha band -0.5eV
 CROfig14:  Constant energy maps gamma band -2.4eV
 
---------   Ca1.8Sr0.2RuO4 Figures --------
+---------  Ca1.8Sr0.2RuO4 Figures ---------
 CSROfig1:  Experimental data: Figure 1 CSRO20 paper
 CSROfig2:  Experimental PSI data: Figure 2 CSCRO20 paper
 CSROfig3:  (L): Polarization and orbital characters. Figure 3 in paper
@@ -62,228 +72,69 @@ CSROfig6:  Analysis MDC's beta band (load=True)
 CSROfig7:  Background subtraction
 CSROfig8:  Extraction LDA Fermi velocity
 CSROfig9:  ReSigma vs ImSigma (load=True)
+CSROfig10: Quasiparticle Z
+CSROfig11: Tight binding model CSRO
+CSROfig12: Tight binding model SRO
+
+---------  To-Do ---------
+CSRO: kz dependence
+CSRO: CSRO30 vs CSRO20 (FS and cuts)
+CSRO: TB DOS
+CSRO: TB specific heat
+CSRO: DOS calculations
+CSRO: FS maps DMFT
+CSRO: Symmetrization
+CSRO: FS area counting 
 """
 #--------
-#utils_plt.CROfig1(print_fig=True)
-#utils_plt.CROfig2(print_fig=True)
-#utils_plt.CROfig3(print_fig=True)
-#utils_plt.CROfig4(print_fig=True)
-#utils_plt.CROfig5(print_fig=True)
-#utils_plt.CROfig6(print_fig=True)
-#utils_plt.CROfig7(print_fig=True)
-#utils_plt.CROfig8(print_fig=True)
-#utils_plt.CROfig9(print_fig=True)
-#utils_plt.CROfig10(print_fig=True)
-#utils_plt.CROfig11(print_fig=True)
-#utils_plt.CROfig12(print_fig=True)
-#utils_plt.CROfig13(print_fig=True)
-#utils_plt.CROfig14(print_fig=True)
+#utils_plt.CROfig1()
+#utils_plt.CROfig2()
+#utils_plt.CROfig3()
+#utils_plt.CROfig4()
+#utils_plt.CROfig5()
+#utils_plt.CROfig6()
+#utils_plt.CROfig7()
+#utils_plt.CROfig8()
+#utils_plt.CROfig9()
+#utils_plt.CROfig10()
+#utils_plt.CROfig11()
+#utils_plt.CROfig12()
+#utils_plt.CROfig13()
+#utils_plt.CROfig14()
 #--------
-#utils_plt.CSROfig1(print_fig=True)
-#utils_plt.CSROfig2(print_fig=True)
-#utils_plt.CSROfig3(print_fig=True)
-#utils_plt.CSROfig4(print_fig=True)
-#utils_plt.CSROfig5(print_fig=True)
-utils_plt.CSROfig6(print_fig=True)
-#utils_plt.CSROfig7(print_fig=True)
-#utils_plt.CSROfig8(print_fig=True)
-#utils_plt.CSROfig9(print_fig=True)
+#utils_plt.CSROfig1()
+#utils_plt.CSROfig2()
+#utils_plt.CSROfig3()
+#utils_plt.CSROfig4()
+#utils_plt.CSROfig5()
+#utils_plt.CSROfig6()
+#utils_plt.CSROfig7()
+#utils_plt.CSROfig8()
+#utils_plt.CSROfig9()
+#utils_plt.CSROfig10()
+#utils_plt.CSROfig11()
+#utils_plt.CSROfig12()
+
 #%%
-os.chdir('/Users/denyssutter/Documents/PhD/data')
-en = np.loadtxt('Data_CSROfig4_en.dat');
-EDCn_e = np.loadtxt('Data_CSROfig4_EDCn_e.dat');
-EDCn_b = np.loadtxt('Data_CSROfig4_EDCn_b.dat');
-EDC_e = np.loadtxt('Data_CSROfig4_EDC_e.dat');
-EDC_b = np.loadtxt('Data_CSROfig4_EDC_b.dat');
-Bkg_e = np.loadtxt('Data_CSROfig4_Bkg_e.dat');
-Bkg_b = np.loadtxt('Data_CSROfig4_Bkg_b.dat');
-_EDC_e = np.loadtxt('Data_CSROfig4__EDC_e.dat', dtype=np.int32);
-_EDC_b = np.loadtxt('Data_CSROfig4__EDC_b.dat', dtype=np.int32);
-eEDCn_e = np.loadtxt('Data_CSROfig4_eEDCn_e.dat');
-eEDCn_b = np.loadtxt('Data_CSROfig4_eEDCn_b.dat');
-eEDC_e = np.loadtxt('Data_CSROfig4_eEDC_e.dat');
-eEDC_b = np.loadtxt('Data_CSROfig4_eEDC_b.dat');
-dims = np.loadtxt('Data_CSROfig4_dims.dat',dtype=np.int32);
-print('\n ~ Data loaded (en, EDCs + normalized + indices + Bkgs)',
-      '\n', '==========================================')  
+"""
+Loading Current Data:
+"""
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+mat = 'CaMn2Sb2'
+year = 2018
+sample = 'S2_FSM_hv82_T71'
+mode = 'FSM'
+
+file = 1
+D = ARPES.CASS(file, mat, year, sample, mode)
 #%%
-en = np.reshape(np.ravel(en), (dims[0], dims[1], dims[2]))
-EDCn_e = np.reshape(np.ravel(EDCn_e), (dims[0], dims[2]))
-EDCn_b = np.reshape(np.ravel(EDCn_b), (dims[0], dims[2]))
-EDC_e = np.reshape(np.ravel(EDC_e), (dims[0], dims[2]))
-EDC_b = np.reshape(np.ravel(EDC_b), (dims[0], dims[2]))
-Bkg_e = np.reshape(np.ravel(Bkg_e), (dims[0], dims[2]))
-Bkg_b = np.reshape(np.ravel(Bkg_b), (dims[0], dims[2]))
-_EDC_e = np.reshape(np.ravel(_EDC_e), (dims[0]))
-_EDC_b = np.reshape(np.ravel(_EDC_b), (dims[0]))
-eEDCn_e = np.reshape(np.ravel(eEDCn_e), (dims[0], dims[2]))
-eEDCn_b = np.reshape(np.ravel(eEDCn_b), (dims[0], dims[2]))
-eEDC_e = np.reshape(np.ravel(eEDC_e), (dims[0], dims[2]))
-eEDC_b = np.reshape(np.ravel(eEDC_b), (dims[0], dims[2]))
+#D.plt_hv()
+D.FS(e = 77.3, ew = .02, norm = False)
+D.ang2kFS(D.ang, Ekin=82, lat_unit=False, a=1, b=1, c=1, 
+          V0=0, thdg=0, tidg=15, phidg=-7)
+D.FS_flatten(ang=False)
+D.plt_FS(coord=True)
 
-
-j = 0
-en[j][_EDC_e[j]]
-#%%
-os.chdir('/Users/denyssutter/Documents/PhD/data')
-xz_lda = np.loadtxt('LDA_CSRO_xz.dat')
-os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
-#%%
-#[0, 56, 110, 187, 241, 266, 325, 350]  = [G,X,S,G,Y,T,G,Z]
-m, n = 8000, 351 #dimensions energy, full k-path
-size = 187 - 110
-bot, top = 3840, 4055 #restrict energy window
-data = np.array([xz_lda]) #combine data
-spec = np.reshape(data[0, :, 2], (n, m)) #reshape into n,m
-spec = spec[110:187, bot:top] #restrict data to bot, top
-#spec = np.flipud(spec)
-spec_en = np.linspace(-8, 8, m) #define energy data
-spec_en = spec_en[bot:top] #restrict energy data
-spec_en = np.broadcast_to(spec_en, (spec.shape))
-spec_k = np.linspace(-np.sqrt(2) * np.pi / 5.5, 0, size)
-spec_k = np.transpose(
-            np.broadcast_to(spec_k, (spec.shape[1], spec.shape[0])))
-max_pts = np.ones((size))
-for i in range(size):
-    max_pts[i] = spec[i, :].argmax()
-ini = 40
-fin = 48
-max_pts = max_pts[ini:fin]
-
-max_k = spec_k[ini:fin, 0]
-max_en = spec_en[0, max_pts.astype(int)]
-p_max, c_max = curve_fit(
-                utils_math.poly1, max_k, max_en)
-v_LDA = p_max[1]
-ev_LDA = np.sqrt(np.diag(c_max))[1]
-k_F = -p_max[0] / p_max[1]
-xx = np.arange(-.43, -.27, .01)
-plt.figure(2008, figsize=(8, 8), clear=True)
-ax = plt.subplot(1, 3, 1) 
-ax.set_position([.2, .24, .5, .3])
-plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
-plt.contourf(spec_k, spec_en, spec, 200, cmap=cm.ocean_r) 
-plt.plot(xx, utils_math.poly1(xx, *p_max), 'C9--', linewidth=1)
-plt.plot(max_k, max_en, 'ro', ms=2)
-plt.plot([np.min(spec_k), 0], [0, 0], 'k:')
-plt.yticks(np.arange(-1, 1, .1))
-plt.ylim(ymax=.1, ymin=-.3)
-plt.ylabel(r'$\omega$ (eV)', fontdict=font)
-plt.xlabel(r'$k_{\Gamma - \mathrm{S}}\, (\mathrm{\AA}^{-1})$', fontdict=font)
-plt.text(-.3, -.15, '$v_\mathrm{LDA}=$' + str(np.round(v_LDA,2)) + ' eV$\,\mathrm{\AA}$')
-pos = ax.get_position()
-cax = plt.axes([pos.x0+pos.width + 0.01 ,
-                    pos.y0, 0.01, pos.height])
-cbar = plt.colorbar(cax = cax, ticks = None)
-cbar.set_ticks([])
-cbar.set_clim(np.min(spec), np.max(spec))
-#%%
-os.chdir('/Users/denyssutter/Documents/PhD/data')
-np.savetxt('Data_CSROfig8_v_LDA.dat', [v_LDA, ev_LDA])
-os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
-#%%
-v_LDA = 2.3411686586990417
-plt.figure('2010', figsize=(8, 8), clear=True)
-e_cols = np.array([[0, 1, 1], [0, .7, .7], [0, .4, .4], [0, 0, 0]])
-b_cols = ['khaki', 'darkkhaki', 'goldenrod', 'darkgoldenrod']
-T = np.array([1.3, 10, 20, 30])
-eZ_b = np.asarray(eZ_b)
-
-os.chdir('/Users/denyssutter/Documents/PhD/data')
-C_B = np.genfromtxt('Data_C_Braden.csv', delimiter=',')
-C_M = np.genfromtxt('Data_C_Maeno.csv', delimiter=',')
-R_1 = np.genfromtxt('Data_R_1.csv', delimiter=',')
-R_2 = np.genfromtxt('Data_R_2.csv', delimiter=',')
-os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
-
-hbar = 1.0545717e-34
-NA = 6.022141e23
-kB = 1.38065e-23
-a = 5.33e-10
-m_e = 9.109383e-31
-m_LDA = 1.6032
-gamma = (np.pi * NA * kB ** 2 * a ** 2 / (3 * hbar ** 2)) * m_LDA * m_e
-Z_B = gamma / C_B[:, 1] 
-Z_M = gamma / C_M[:, 1] * 1e3
-
-
-
-xx = np.array([1e-3, 1e4])
-yy = 2.3 * xx ** 2
-ax = plt.subplot(1, 2, 1) 
-ax.set_position([.2, .3, .3, .3])
-plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
-plt.errorbar(T, Z_b, eZ_b * v_LDA,
-             color='C1', linewidth=.5, capsize=2, fmt='o', ms=2)
-plt.errorbar(T, Z_e, Z_e / v_LDA,
-             color='r', linewidth=.5, capsize=2, fmt='d', ms=2)
-plt.plot(C_B[:, 0], Z_B, 'o', ms=1, color='slateblue')
-plt.plot(C_M[:, 0], Z_M, 'o', ms=1, color='cadetblue')
-ax.set_xscale("log", nonposx='clip')
-plt.yticks(np.arange(0, .5, .1))
-plt.xlim(xmax=40, xmin=1)
-plt.ylim(ymax=.35, ymin=0)
-plt.xlabel(r'$T$ (K)')
-plt.ylabel(r'$Z$')
-###Inset###
-ax = plt.subplot(1, 2, 2) 
-ax.set_position([.28, .38, .15, .1])
-plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
-plt.loglog(np.sqrt(R_1[:, 0]), R_1[:, 1], 'C8o', ms=3)
-plt.loglog(np.sqrt(R_2[:, 0]), R_2[:, 1], 'C8o', ms=3)
-plt.loglog(xx, yy, 'k--', lw=1)
-plt.ylabel(r'$\rho\,(\mu \Omega \mathrm{cm})$')
-plt.xlim(xmax=1e1, xmin=1e-1)
-plt.ylim(ymax=1e4, ymin=1e-2)
-plt.show()
-#%%
-os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
-file = 8
-gold = 14
-mat = 'CSRO20'
-year = 2017
-sample = 'S1'
-D = ARPES.Bessy(file, mat, year, sample)
-D.norm(gold)
-D.FS(e = 0.07, ew = .02, norm = True)
-D.ang2kFS(D.ang, Ekin=36, lat_unit=True, a=5.5, b=5.5, c=11, 
-          V0=0, thdg=2.7, tidg=-1.5, phidg=42)
-FS = D.map
-for i in range(FS.shape[1]):
-    FS[:, i] = np.divide(FS[:, i], np.sum(FS[:, i]))  #Flatten
-plt.figure(20004, figsize=(8, 8), clear=True)
-ax = plt.subplot(1, 3, 2) 
-ax.set_position([.3, .3, .4, .4])
-plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
-plt.contourf(D.kx, D.ky, FS, 300,
-           cmap=cm.ocean_r)
-plt.grid(alpha=.5)
-
-#%%
-os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
-file = 62151
-#file = 62087
-gold = 62081
-mat = 'CSRO20'
-year = 2017
-sample = 'S6'
-D = ARPES.DLS(file, mat, year, sample)
-D.norm(gold)
-#D.restrict(bot=0, top=1, left=.12, right=.9)
-D.FS(e = 0.0, ew = .02, norm = True)
-D.ang2kFS(D.ang, Ekin=22-4.5, lat_unit=True, a=5.5, b=5.5, c=11, 
-          V0=0, thdg=12, tidg=-2.5, phidg=45)
-FS = D.map
-for i in range(FS.shape[1]):
-    FS[:, i] = np.divide(FS[:, i], np.sum(FS[:, i]))  #Flatten
-plt.figure(20004, figsize=(8, 8), clear=True)
-ax = plt.subplot(1, 3, 2) 
-ax.set_position([.3, .3, .4, .4])
-plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
-plt.contourf(D.kx, D.ky, FS, 300,
-           cmap=cm.ocean_r)
-plt.grid(alpha=.5)
 
 #%%
 
@@ -294,25 +145,309 @@ Test Script for Tight binding models
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 
 start = time.time()
-tb = utils_math.TB(a = np.pi, kbnd = 2, kpoints = 200)  #Initialize tight binding model
+kbnd = 1
+tb = utils_math.TB(a = np.pi, kbnd = kbnd, kpoints = 50)  #Initialize tight binding model
 
 ####SRO TB hopping parameters###
-#param = umath.paramSRO()  
+#param = utils_math.paramSRO()  
 param = utils_math.paramCSRO20()  
 
 ###Calculate and Plot FS###
 #tb.simple(param) 
-#tb.SRO(param) 
-tb.CSRO(param)
-
+#tb.SRO(param, e0=0, vertices=False, proj=False) 
+tb.CSRO(param, e0=0, vertices=False, proj=False) 
 
 #tb.plt_cont_TB_SRO()
-tb.plt_cont_TB_CSRO20()
+#tb.plt_cont_TB_CSRO20()
 
 print(time.time()-start)
 #%%
+"""
+Project: Density of states
+"""
+
+os.chdir('/Users/denyssutter/Documents/PhD/data')
+Axz = np.loadtxt('Data_Axz_kpts_5000.dat')
+Ayz = np.loadtxt('Data_Ayz_kpts_5000.dat')
+Axy = np.loadtxt('Data_Axy_kpts_5000.dat')
+Bxz = np.loadtxt('Data_Bxz_kpts_5000.dat')
+Byz = np.loadtxt('Data_Byz_kpts_5000.dat')
+Bxy = np.loadtxt('Data_Bxy_kpts_5000.dat')
+os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+bands = (Axz, Ayz, Axy, Bxz, Byz, Bxy)
+#%%
+
+En = ()
+DOS = ()
+N_bands = ()
+N_full= ()
+plt.figure('DOS', figsize=(8, 8), clear=True)
+n = 0
+for band in bands:
+    n += 1
+    ax = plt.subplot(2, 3, n) 
+    dos, bins, patches = plt.hist(np.ravel(band), bins=150, density=True,
+                                alpha=.2, color='C8')
+    en = np.zeros((len(dos)))
+    for i in range(len(dos)):
+        en[i] = (bins[i] + bins[i + 1]) / 2
+    ef, _ef = utils.find(en, 0.00)
+    n_full = np.trapz(dos, x=en)
+    n_band = np.trapz(dos[:_ef], x=en[:_ef])
+    plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+    plt.plot(en, dos, color='k', lw=.5)
+    plt.fill_between(en[:_ef], dos[:_ef], 0, color='C1', alpha=.5)
+    plt.xlim(xmin=np.min(en), xmax=np.max(en))
+    N_full = N_full + (n_full,)
+    N_bands = N_bands + (n_band,)
+    En = En + (en,)
+    DOS = DOS + (dos,)
+N = np.sum(N_bands)
+print(N)
+plt.show()
+
+#%%
+"""
+Project: TB plot along direction
+"""
+from numpy import linalg as la
+a = np.pi
+
+#x = np.linspace(-1, 1, 200)
+#y = np.linspace(-1, 1, 200)
+x = np.linspace(0, 2, 200)
+y = np.zeros(len(x))
+
+#Load TB parameters
+param = utils_math.paramCSRO20()  
+t1 = param['t1']; t2 = param['t2']; t3 = param['t3']
+t4 = param['t4']; t5 = param['t5']; t6 = param['t6']
+mu = param['mu']; l = param['l']
+#Hopping terms
+fx = -2 * np.cos((x + y) / 2 * a)
+fy = -2 * np.cos((x - y) / 2 * a)
+f4 = -2 * t4 * (np.cos(x * a) + np.cos(y * a))
+f5 = -2 * t5 * (np.cos((x + y) * a) + np.cos((x - y) * a))
+f6 = -2 * t6 * (np.cos(x * a) - np.cos(y * a))
+#Placeholders energy eigenvalues
+Ayz = np.ones(len(x)); Axz = np.ones(len(x))
+Axy = np.ones(len(x)); Byz = np.ones(len(x)) 
+Bxz = np.ones(len(x)); Bxy = np.ones(len(x))
+wAyz = np.ones((len(x), 6)); wAxz = np.ones((len(x), 6))
+wAxy = np.ones((len(x), 6)); wByz = np.ones((len(x), 6))
+wBxz = np.ones((len(x), 6)); wBxy = np.ones((len(x), 6))
+
+###Projectors###
+PAyz = np.array([[1,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],
+                 [0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]])
+PAxz = np.array([[0,0,0,0,0,0],[0,1,0,0,0,0],[0,0,0,0,0,0],
+                 [0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]])
+PAxy = np.array([[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,1,0,0,0],
+                 [0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]])
+PByz = np.array([[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],
+                 [0,0,0,1,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]])
+PBxz = np.array([[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],
+                 [0,0,0,0,0,0],[0,0,0,0,1,0],[0,0,0,0,0,0]])
+PBxy = np.array([[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],
+                 [0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,1]])
+    
+#TB submatrix
+def A(i):
+    A = np.array([[-mu, complex(0,l) + f6[i], -l],
+                  [-complex(0,l) + f6[i], -mu, complex(0,l)],
+                  [-l, -complex(0,l), -mu + f4[i] + f5[i]]])
+    return A
+#TB submatrix
+def B(i): 
+    B = np.array([[t2 * fx[i] + t1 * fy[i], 0, 0],
+                  [0, t1 * fx[i] + t2 * fy[i], 0],
+                  [0, 0, t3 * (fx[i] + fy[i])]])
+    return B
+#Tight binding Hamiltonian
+def H(i):
+    C1 = np.concatenate((A(i), B(i)), 1)
+    C2 = np.concatenate((B(i), A(i)), 1)
+    H  = np.concatenate((C1, C2), 0)
+    return H
+#Diagonalization of symmetric Hermitian matrix on k-mesh
+plt.figure('TB_eval', figsize=(6, 6), clear=True)
+for i in range(len(x)):
+    eval, evec = la.eigh(H(i))
+    eval = np.real(eval)
+    Ayz[i] = eval[0]; Axz[i] = eval[1]; Axy[i] = eval[2]
+    Byz[i] = eval[3]; Bxz[i] = eval[4]; Bxy[i] = eval[5]
+    en = (Ayz[i], Axz[i], Axy[i], Byz[i], Bxz[i], Bxy[i])
+    n = 0
+    for en_value in en:
+        wAyz[i, n] = np.real(np.sum(np.conj(evec[:, n]) * (PAyz * evec[:, n]))) 
+        wAxz[i, n] = np.real(np.sum(np.conj(evec[:, n]) * (PAxz * evec[:, n]))) 
+        wAxy[i, n] = np.real(np.sum(np.conj(evec[:, n]) * (PAxy * evec[:, n]))) 
+        wByz[i, n] = np.real(np.sum(np.conj(evec[:, n]) * (PByz * evec[:, n]))) 
+        wBxz[i, n] = np.real(np.sum(np.conj(evec[:, n]) * (PBxz * evec[:, n]))) 
+        wBxy[i, n] = np.real(np.sum(np.conj(evec[:, n]) * (PBxy * evec[:, n]))) 
+        plt.plot(x[i], en_value, 'o', ms=3,
+                 color=[wAxz[i, n] + wBxz[i, n], wAyz[i, n] + wByz[i, n], wAxy[i, n] + wBxy[i, n]])
+        n += 1
+        
+plt.plot([x[0], x[-1]], [0, 0], 'k:')
+plt.show()
+
+#%%
+"""
+Project: Heat capacity
+"""
+DOS = dos
+En = en
+EF = 0
+
+nbins = len(En);
+T = np.arange(.01, 12, .005)
+kB = 8.6173303e-5
+C = np.ones(len(T)); Cp = np.ones(len(T))
+U = np.ones(len(T))
+stp = 10
+expnt = np.ones((nbins,len(T)))
+FD = np.ones((nbins, len(T)))
+dFD = np.ones((nbins, len(T)))
+expntext = np.ones((stp * nbins - (stp - 1), len(T)))
+FDext = np.ones((stp * nbins - (stp - 1), len(T)))
+dFDext = np.ones((stp * nbins - (stp - 1),len(T)))
+J       = 1.60218e-19
+mols    = 6.022140857e23
+
+dE      = En[1] - En[0]
+Enext   = np.arange(En[1], En[-1], dE / stp)
+#DOSext  = interp1(En,DOS,Enext,'spline');
+
+plt.plot(En, DOS)
+#plot([EF+2*kB*T(end) EF+2*kB*T(end)],[0 max(DOS)],'r--');
+#plot([EF-2*kB*T(end) EF-2*kB*T(end)],[0 max(DOS)],'r--');
+
+for t in range(len(T)):
+   expnt[:, t] = (En - EF) / (kB * T[t])
+#   expntext[:, t] = (Enext - EF) / (kB * T[t])
+   FD[:, t] = 1 / (np.exp(expnt[:,t]) + 1) 
+#   FDext[:, t] = 1 / (np.exp(expntext[:,t]) + 1) 
+
+for e in range(nbins):
+   dFD[e, 0:-1] = np.diff(FD[e, :]) / (T[2] - T[1]) 
+   dFD[e, -1] = dFD[e, -2]
+
+#for e in np.arange(0, nbins - (stp - 1), stp):
+#   dFDext[e, :-1] = np.diff(FDext[e, :]) / (T[2] - T[1])
+#   dFDext[e, -1] = dFDext[e, -2]
 
 
+Cpext = Cp;Uext = U;Cext = C;
+for t in range(len(T)):
+   Cp[t] = np.trapz((En - EF) * DOS * dFD[:,t], x=En)
+   U[t] = np.trapz((En - EF) * DOS * FD[:,t], x=En)  
+#   Cpext[t] = trapz(Enext,(Enext-EF).*DOSext.*dFDext(:,t)'); %Integrate + Derivative inside integral (dFD)
+#   Uext[t] = trapz(Enext,(Enext-EF).*DOSext.*FDext(:,t)');  %Integrate
+
+C[:-1] = np.diff(U[:]) / (T[2] - T[1]) 
+C[-1] = C[-2] 
+#Cext(1:end-1) = diff(Uext(:))./(T(2)-T(1)); Cext(end) = Cext(end-1); %heat cap. derivative after integration
+pre = J*mols*1000; 
+
+#gammap = pre * Cpext / T
+gamma  = pre * C / T
+plt.figure(r'$C_el$')
+plt.plot(T, gamma)
+#%%
+"""
+Project: Luttinger' theorem (FS counting)
+"""
+# Use Green's theorem to compute the area
+# enclosed by the given contour.
+def area(vs):
+    a = 0
+    x0,y0 = vs[0]
+    for [x1,y1] in vs[1:]:
+        dx = x1-x0
+        dy = y1-y0
+        a += 0.5*(y0*dx - x0*dy)
+        x0 = x1
+        y0 = y1
+    print(dx, dy)
+    return a
+
+
+# Generate some test data.
+delta = 0.01
+x = np.arange(-3.1, 3.1, delta)
+y = np.arange(-3.1, 3.1, delta)
+X, Y = np.meshgrid(x, y)
+r = np.sqrt(X**2 + Y**2)
+
+# Plot the data
+levels = [1.0,2.0,3.0]
+cs = plt.contour(X,Y,r,levels=levels)
+plt.clabel(cs, inline=1, fontsize=10)
+
+# Get one of the contours from the plot.
+for i in range(len(levels)):
+    contour = cs.collections[i]
+    vs = contour.get_paths()[0].vertices
+    # Compute area enclosed by vertices.
+    a = area(vs)
+    plt.axis('equal')
+    print("r = " + str(levels[i]) + ": a =" + str(a))
+plt.show()
+
+
+#%%
+"""
+Project: Experimental setup with orbitals
+"""
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.special import sph_harm 
+
+# nur fuer den Seiteneffekt: plt.gca(projection = '3d') funktioniert sonst nicht
+from mpl_toolkits.mplot3d import Axes3D 
+from matplotlib import cm
+
+theta_1d = np.linspace(0,   np.pi,  91) # 2 GRAD Schritte
+phi_1d   = np.linspace(0, 2*np.pi, 181) # 2 GRAD Schritte
+
+theta_2d, phi_2d = np.meshgrid(theta_1d, phi_1d)
+xyz_2d = np.array([np.sin(theta_2d) * np.sin(phi_2d),
+                  np.sin(theta_2d) * np.cos(phi_2d),
+                  np.cos(theta_2d)]) 
+
+colormap = cm.ScalarMappable( cmap=plt.get_cmap("cool"))
+colormap.set_clim(-.45, .45)
+limit = .5
+
+def show_Y_lm(l, m):
+    print("Y_%i_%i" % (l,m)) # zeigen, dass was passiert
+    plt.figure()
+    ax = plt.gca(projection = "3d")
+    
+    plt.title("$Y^{%i}_{%i}$" % (m,l))
+    Y_lm = sph_harm(m,l, phi_2d, theta_2d)
+    r = np.abs(Y_lm.real)*xyz_2d
+    ax.plot_surface(r[0], r[1], r[2], 
+                    facecolors=colormap.to_rgba(Y_lm.real), 
+                    rstride=2, cstride=2)
+    ax.set_xlim(-limit,limit)
+    ax.set_ylim(-limit,limit)
+    ax.set_zlim(-limit,limit)
+    ax.set_aspect("equal")
+    #ax.set_axis_off()
+    
+
+# Vorsicht: diese Schleifen erzeugen 16 plots (in 16 Fenstern)!
+for l in range(0,4):
+    for m in range(-l,l+1):
+        show_Y_lm(l,m)
+
+show_Y_lm(l=5,m=0)
+show_Y_lm(l=5,m=4)        
+show_Y_lm(l=6,m=6)
+        
+plt.show()
 
 
 

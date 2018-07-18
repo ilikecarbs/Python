@@ -13,7 +13,152 @@ import utils as u
 import utils_plt as uplt
 from astropy.io import fits
 
-class DLS:
+class Analysis:  
+    """
+    Class with all methods for basic data analysis
+    """  
+    def norm(self, gold):
+        """
+        Normalize data with a gold spectrum
+        """
+        en_norm, int_norm, eint_norm = u.norm(self, gold)
+        self.en_norm = en_norm
+        self.int_norm = int_norm
+        self.eint_norm = eint_norm
+        print('\n ~ Data normalized',
+              '\n', '==========================================')   
+        
+    def shift(self, gold):
+        """
+        Shift to the Fermi level without normalizing intensity
+        """
+        en_shift, int_shift = u.shift(self, gold)
+        self.en_norm = en_shift
+        self.int_shift = int_shift
+        print('\n ~ Only energy normalized',
+              '\n', '==========================================')   
+        
+    def flatten(self, norm=False): 
+        """
+        Flatten the spectra (Divide EDC by its sum per channel)
+        """
+        int_flat = u.flatten(self, norm)
+        self.int_flat = int_flat
+        print('\n ~ Spectra flattened',
+              '\n', '==========================================')   
+    
+    def FS_flatten(self, ang=True): 
+        """
+        Flatten FS (Divide for every angle by its sum)
+        """
+        map_flat = u.FS_flatten(self, ang)
+        self.map = map_flat
+        print('\n ~ FS flattened',
+              '\n', '==========================================') 
+        
+    def bkg(self, norm=False): 
+        """
+        Subtract a background EDC
+        """
+        int_bkg = u.bkg(self, norm)
+        if norm == True:
+            self.int_norm = int_bkg
+        elif norm == False:
+            self.int = int_bkg
+        print('\n ~ Backgorund subtracted',
+              '\n', '==========================================')    
+        
+    def restrict(self, bot = 0, top = 1, left = 0, right = 1):
+        """
+        Crop the data file
+        """
+        (en_restr, ens_restr, en_norm_restr, ang_restr, angs_restr, pol_restr, 
+         pols_restr, int_restr, eint_restr,
+         int_norm_restr, eint_norm_restr) = u.restrict(
+                 self, bot, top, left, right)
+        self.en = en_restr
+        self.ens = ens_restr
+        self.ang = ang_restr
+        self.angs = angs_restr
+        self.pol = pol_restr
+        self.pols = pols_restr
+        self.en_norm = en_norm_restr
+        self.int = int_restr
+        self.eint = eint_restr
+        self.int_norm = int_norm_restr
+        self.eint_norm = eint_norm_restr
+        print('\n ~ Spectra restricted',
+              '\n', '==========================================')  
+        
+    def ang2k(self, angdg, Ekin, lat_unit=False, a=5.33, b=5.33, c=11, 
+              V0=0, thdg=0, tidg=0, phidg=0):     
+        """
+        Conversion angle to reciprocal space
+        """
+        k, k_V0 = u.ang2k(self, angdg, Ekin, lat_unit, a, b, c, 
+                          V0, thdg, tidg, phidg)
+        self.k = k
+        self.k_V0 = k_V0
+        self.kxs = np.transpose(np.broadcast_to(k[0], 
+                                               (self.en.size, self.ang.size)))
+        self.kx_V0s = np.transpose(np.broadcast_to(k_V0[0], 
+                                               (self.en.size, self.ang.size)))
+        self.kys = np.transpose(np.broadcast_to(k[1], 
+                                               (self.en.size, self.ang.size)))
+        self.ky_V0s = np.transpose(np.broadcast_to(k_V0[1], 
+                                               (self.en.size, self.ang.size)))  
+        print('\n ~ Angles converted into k-space',
+              '\n', '==========================================')  
+        
+    def ang2kFS(self, angdg, Ekin, lat_unit=False, a=5.33, b=5.33, c=11, 
+                V0=0, thdg=0, tidg=0, phidg=0):   
+        """
+        Conversion angle to reciprocal space for a FS
+        """
+        kx, ky, kx_V0, ky_V0 = u.ang2kFS(self, angdg, Ekin, lat_unit, a, b, c, 
+                                         V0, thdg, tidg, phidg)
+        self.kx = kx
+        self.ky = ky
+        self.kx_V0 = kx_V0
+        self.ky_V0 = ky_V0
+        print('\n ~ Angles converted into k-space for Fermi surface',
+              '\n', '==========================================')  
+        
+    def FS(self, e=0, ew=0, norm=False): 
+        """
+        Extract Fermi Surface map
+        """
+        FSmap = u.FS(self, e, ew, norm)
+        self.map = FSmap
+        print('\n ~ Constant energy map extracted',
+              '\n', '==========================================')  
+        
+    def plt_spec(self, norm=False):
+        """
+        Plot ARPES spectrum
+        """
+        uplt.plt_spec(self, norm)
+    
+    def plt_FS_polcut(self, norm=False, p=0, pw=0):
+        """
+        Cut through FS at polar angle p
+        """
+        uplt.plt_FS_polcut(self, norm, p, pw)
+        
+    def plt_FS(self, coord=False):
+        """
+        Plot Fermi surface
+        """
+        uplt.plt_FS(self, coord)
+
+    def plt_hv(self, a=0, aw=0):
+        """
+        Plot all spectra of hv-scan
+        """
+        uplt.plt_hv(self, a, aw)
+
+
+class DLS(Analysis):
     """
     Data from Diamond Light Source
     Beamline: i05
@@ -26,6 +171,7 @@ class DLS:
         filename = ''.join(['i05-',str(file),'.nxs'])
         path = folder + filename
         self.path = path
+        self.filename = filename
         self.folder = folder
         print('\n ~ Initializing Diamond Light Source data file: \n {}'.format(self.path), 
               '\n', '==========================================')
@@ -60,109 +206,9 @@ class DLS:
         print('\n ~ Initialization complete. Data has {} dimensions'.format(
                 len(np.shape(self.int))),
               '\n', '==========================================')  
-                
-    def norm(self, gold):  #Normalize Data file with gold
-        en_norm, int_norm, eint_norm = u.norm(self, gold)
-        self.en_norm = en_norm
-        self.int_norm = int_norm
-        self.eint_norm = eint_norm
-        print('\n ~ Data normalized',
-              '\n', '==========================================')   
-        
-    def shift(self, gold): #Flatten spectra
-        en_shift, int_shift = u.shift(self, gold)
-        self.en_norm = en_shift
-        self.int_shift = int_shift
-        print('\n ~ Only energy normalized',
-              '\n', '==========================================')   
-        
-    def flatten(self, norm=False): #Flatten spectra
-        int_flat = u.flatten(self, norm)
-        self.int_flat = int_flat
-        print('\n ~ Spectra flattened',
-              '\n', '==========================================')   
+        super(DLS, self)
     
-    def FS_flatten(self, ang=True): #Flatten FS
-        map_flat = u.FS_flatten(self, ang)
-        self.map_flat = map_flat
-        print('\n ~ FS flattened',
-              '\n', '==========================================') 
-        
-    def bkg(self, norm=False): #Subtract background
-        int_bkg = u.bkg(self, norm)
-        if norm == True:
-            self.int_norm = int_bkg
-        elif norm == False:
-            self.int = int_bkg
-        print('\n ~ Backgorund subtracted',
-              '\n', '==========================================')    
-        
-    def restrict(self, bot = 0, top = 1, left = 0, right = 1): #restrict spectrum
-        (en_restr, ens_restr, en_norm_restr, ang_restr, angs_restr, pol_restr, 
-         pols_restr, int_restr, eint_restr,
-         int_norm_restr, eint_norm_restr) = u.restrict(
-                 self, bot, top, left, right)
-        self.en = en_restr
-        self.ens = ens_restr
-        self.ang = ang_restr
-        self.angs = angs_restr
-        self.pol = pol_restr
-        self.pols = pols_restr
-        self.en_norm = en_norm_restr
-        self.int = int_restr
-        self.eint = eint_restr
-        self.int_norm = int_norm_restr
-        self.eint_norm = eint_norm_restr
-        print('\n ~ Spectra restricted',
-              '\n', '==========================================')  
-        
-    def ang2k(self, angdg, Ekin, lat_unit=False, a=5.33, b=5.33, c=11, 
-              V0=0, thdg=0, tidg=0, phidg=0):      
-        k, k_V0 = u.ang2k(self, angdg, Ekin, lat_unit, a, b, c, 
-                          V0, thdg, tidg, phidg)
-        self.k = k
-        self.k_V0 = k_V0
-        self.kxs = np.transpose(np.broadcast_to(k[0], 
-                                               (self.en.size, self.ang.size)))
-        self.kx_V0s = np.transpose(np.broadcast_to(k_V0[0], 
-                                               (self.en.size, self.ang.size)))
-        self.kys = np.transpose(np.broadcast_to(k[1], 
-                                               (self.en.size, self.ang.size)))
-        self.ky_V0s = np.transpose(np.broadcast_to(k_V0[1], 
-                                               (self.en.size, self.ang.size)))  
-        print('\n ~ Angles converted into k-space',
-              '\n', '==========================================')  
-        
-    def ang2kFS(self, angdg, Ekin, lat_unit=False, a=5.33, b=5.33, c=11, 
-                V0=0, thdg=0, tidg=0, phidg=0):   
-        kx, ky, kx_V0, ky_V0 = u.ang2kFS(self, angdg, Ekin, lat_unit, a, b, c, 
-                                         V0, thdg, tidg, phidg)
-        self.kx = kx
-        self.ky = ky
-        self.kx_V0 = kx_V0
-        self.ky_V0 = ky_V0
-        print('\n ~ Angles converted into k-space for Fermi surface',
-              '\n', '==========================================')  
-        
-    def FS(self, e=0, ew=0, norm=False): #Extract Constant Energy Map
-        FSmap = u.FS(self, e, ew, norm)
-        self.map = FSmap
-        print('\n ~ Constant energy map extracted',
-              '\n', '==========================================')  
-        
-    def plt_spec(self, norm=False):
-        uplt.plt_spec(self, norm)
-    
-    def plt_FS_polcut(self, norm=False, p=0, pw=0):
-        uplt.plt_FS_polcut(self, norm, p, pw)
-        
-    def plt_FS(self, coord=False):
-        uplt.plt_FS(self, coord)
-
-    def plt_hv(self, a=0, aw=0):
-        uplt.plt_hv(self, a, aw)
-        
-class ALS:  
+class ALS(Analysis):  
     """
     Data from Advanced Light Source
     Beamline: Maestro
@@ -216,106 +262,9 @@ class ALS:
         print('\n ~ Initialization complete. Data has {} dimensions'.format(
                 len(np.shape(self.int))),
               '\n', '==========================================')  
-                
-    def norm(self, gold):  #Normalize Data file with gold
-        en_norm, int_norm, eint_norm = u.norm(self, gold)
-        self.en_norm = en_norm
-        self.int_norm = int_norm
-        self.eint_norm = eint_norm
-        print('\n ~ Data normalized',
-              '\n', '==========================================')   
+        super(ALS, self)
         
-    def shift(self, gold): #Flatten spectra
-        en_shift, int_shift = u.shift(self, gold)
-        self.en_norm = en_shift
-        self.int_norm = int_shift
-        print('\n ~ Only energy normalized',
-              '\n', '==========================================')   
-        
-    def flatten(self, norm=False): #Flatten spectra
-        int_flat = u.flatten(self, norm)
-        self.int_flat = int_flat
-        print('\n ~ Spectra flattened',
-              '\n', '==========================================')   
-    
-    def FS_flatten(self, ang=True): #Flatten FS
-        map_flat = u.FS_flatten(self, ang)
-        self.map_flat = map_flat
-        print('\n ~ FS flattened',
-              '\n', '==========================================') 
-    
-    def bkg(self, norm=False): #Subtract background
-            int_bkg = u.bkg(self, norm)
-            if norm == True:
-                self.int_norm = int_bkg
-            elif norm == False:
-                self.int = int_bkg
-            print('\n ~ Backgorund subtracted',
-                  '\n', '==========================================')    
-        
-    def restrict(self, bot = 0, top = 1, left = 0, right = 1): #restrict spectrum
-        (en_restr, ens_restr, en_norm_restr, ang_restr, angs_restr, pol_restr, 
-         pols_restr, int_restr, eint_restr,
-         int_norm_restr, eint_norm_restr) = u.restrict(
-                 self, bot, top, left, right)
-        self.en = en_restr
-        self.ens = ens_restr
-        self.ang = ang_restr
-        self.angs = angs_restr
-        self.pol = pol_restr
-        self.pols = pols_restr
-        self.en_norm = en_norm_restr
-        self.int = int_restr
-        self.eint = eint_restr
-        self.int_norm = int_norm_restr
-        self.eint_norm = eint_norm_restr
-        print('\n ~ Spectra restricted',
-              '\n', '==========================================')  
-        
-    def ang2k(self, angdg, Ekin, lat_unit=False, a=5.33, b=5.33, c=11, 
-              V0=0, thdg=0, tidg=0, phidg=0):      
-        k, k_V0 = u.ang2k(self, angdg, Ekin, lat_unit, a, b, c, 
-                          V0, thdg, tidg, phidg)
-        self.k = k
-        self.k_V0 = k_V0
-        self.ks = np.transpose(np.broadcast_to(k[0], 
-                                               (self.en.size, self.ang.size)))
-        self.k_V0s = np.transpose(np.broadcast_to(k_V0[0], 
-                                               (self.en.size, self.ang.size)))
-            
-        print('\n ~ Angles converted into k-space',
-              '\n', '==========================================')  
-        
-    def ang2kFS(self, angdg, Ekin, lat_unit=False, a=5.33, b=5.33, c=11, 
-                V0=0, thdg=0, tidg=0, phidg=0):   
-        kx, ky, kx_V0, ky_V0 = u.ang2kFS(self, angdg, Ekin, lat_unit, a, b, c, 
-                                         V0, thdg, tidg, phidg)
-        self.kx = kx
-        self.ky = ky
-        self.kx_V0 = kx_V0
-        self.ky_V0 = ky_V0
-        print('\n ~ Angles converted into k-space for Fermi surface',
-              '\n', '==========================================')  
-        
-    def FS(self, e=0, ew=0, norm=False): #Extract Constant Energy Map
-        FSmap = u.FS(self, e, ew, norm)
-        self.map = FSmap
-        print('\n ~ Constant energy map extracted',
-              '\n', '==========================================')  
-        
-    def plt_spec(self, norm=False):
-        uplt.plt_spec(self, norm)
-        
-    def plt_FS_polcut(self, norm=False, p=0, pw=0):
-        uplt.plt_FS_polcut(self, norm, p, pw)
-        
-    def plt_FS(self, coord=False):
-        uplt.plt_FS(self, coord)
-        
-    def plt_hv(self, a=0, aw=0):
-        uplt.plt_hv(self, a, aw)
-        
-class SIS:  
+class SIS(Analysis):  
     """
     Data from Swiss light source
     Beamline: SIS
@@ -327,6 +276,7 @@ class SIS:
                           '/SIS',str(year),'/',str(sample),'/'])
         filename = ''.join([str(file),'.h5'])
         path = folder + filename
+        self.filename = filename
         self.path = path
         self.folder = folder
         print('\n ~ Initializing SIS data file: \n {}'.format(self.path), 
@@ -379,117 +329,9 @@ class SIS:
         print('\n ~ Initialization complete. Data has {} dimensions'.format(
                 len(np.shape(self.int))),
               '\n', '==========================================')  
-                
-    def norm(self, gold):  #Normalize Data file with gold
-        en_norm, int_norm, eint_norm = u.norm(self, gold)
-        self.en_norm = en_norm
-        self.int_norm = int_norm
-        self.eint_norm = eint_norm
-        print('\n ~ Data normalized',
-              '\n', '==========================================')   
+        super(SIS, self)
         
-    def shift(self, gold): #Flatten spectra
-        en_shift, int_shift = u.shift(self, gold)
-        self.en_norm = en_shift
-        self.int_norm = int_shift
-        print('\n ~ Only energy normalized',
-              '\n', '==========================================')   
-        
-    def flatten(self, norm=False): #Flatten spectra
-        int_flat = u.flatten(self, norm)
-        self.int_flat = int_flat
-        print('\n ~ Spectra flattened',
-              '\n', '==========================================')
-        
-    def FS_flatten(self, ang=True): #Flatten FS
-        map_flat = u.FS_flatten(self, ang)
-        self.map_flat = map_flat
-        print('\n ~ FS flattened',
-              '\n', '==========================================')   
-    
-    def bkg(self, norm=False): #Subtract background
-        int_bkg = u.bkg(self, norm)
-        if norm == True:
-            self.int_norm = int_bkg
-        elif norm == False:
-            self.int = int_bkg
-        print('\n ~ Backgorund subtracted',
-              '\n', '==========================================')    
-        
-    def restrict(self, bot = 0, top = 1, left = 0, right = 1): #restrict spectrum
-        (en_restr, ens_restr, en_norm_restr, ang_restr, angs_restr, pol_restr, 
-         pols_restr, int_restr, eint_restr,
-         int_norm_restr, eint_norm_restr) = u.restrict(
-                 self, bot, top, left, right)
-        self.en = en_restr
-        self.ens = ens_restr
-        self.ang = ang_restr
-        self.angs = angs_restr
-        self.pol = pol_restr
-        self.pols = pols_restr
-        self.en_norm = en_norm_restr
-        self.int = int_restr
-        self.eint = eint_restr
-        self.int_norm = int_norm_restr
-        self.eint_norm = eint_norm_restr
-        print('\n ~ Spectra restricted',
-              '\n', '==========================================')  
- 
-    def FS_restrict(self, bot=0, top=1, left=0, right=1): #restrict FS
-        (ang_restr, angs_restr, pol_restr, pols_restr, map_restr) = u.FS_restrict(
-                 self, bot, top, left, right)
-        self.ang = ang_restr
-        self.angs = angs_restr
-        self.pol = pol_restr
-        self.pols = pols_restr
-        self.map = map_restr
-        print('\n ~ FS restricted',
-              '\n', '==========================================')  
-        
-    def ang2k(self, angdg, Ekin, lat_unit=False, a=5.33, b=5.33, c=11, 
-              V0=0, thdg=0, tidg=0, phidg=0):      
-        k, k_V0 = u.ang2k(self, angdg, Ekin, lat_unit, a, b, c, 
-                          V0, thdg, tidg, phidg)
-        self.k = k
-        self.k_V0 = k_V0
-        self.ks = np.transpose(np.broadcast_to(k[0], 
-                                               (self.en.size, self.ang.size)))
-        self.k_V0s = np.transpose(np.broadcast_to(k_V0[0], 
-                                               (self.en.size, self.ang.size)))
-            
-        print('\n ~ Angles converted into k-space',
-              '\n', '==========================================')  
-        
-    def ang2kFS(self, angdg, Ekin, lat_unit=False, a=5.33, b=5.33, c=11, 
-                V0=0, thdg=0, tidg=0, phidg=0):   
-        kx, ky, kx_V0, ky_V0 = u.ang2kFS(self, angdg, Ekin, lat_unit, a, b, c, 
-                                         V0, thdg, tidg, phidg)
-        self.kx = kx
-        self.ky = ky
-        self.kx_V0 = kx_V0
-        self.ky_V0 = ky_V0
-        print('\n ~ Angles converted into k-space for Fermi surface',
-              '\n', '==========================================')  
-        
-    def FS(self, e=0, ew=0, norm=False): #Extract Constant Energy Map
-        FSmap = u.FS(self, e, ew, norm)
-        self.map = FSmap
-        print('\n ~ Constant energy map extracted',
-              '\n', '==========================================')  
-        
-    def plt_spec(self, norm=False):
-        uplt.plt_spec(self, norm)
-    
-    def plt_FS_polcut(self, norm=False, p=0, pw=0):
-        uplt.plt_FS_polcut(self, norm, p, pw)
-        
-    def plt_FS(self, coord=False):
-        uplt.plt_FS(self, coord)
-        
-    def plt_hv(self, a=0, aw=0):
-        uplt.plt_hv(self, a, aw)
-        
-class Bessy:  
+class Bessy(Analysis):  
     """
     Data from Bessy
     Beamline: 1^3
@@ -503,7 +345,6 @@ class Bessy:
         path_ang = ''.join(['Ca_',str(file),'ang','.dat'])
         path_pol = ''.join(['Ca_',str(file),'pol','.dat'])
         path_en = ''.join(['Ca_',str(file),'en','.dat'])
-        
         ang = np.loadtxt(folder + path_ang)
         en = np.loadtxt(folder + path_en)
         if file == 8:
@@ -537,116 +378,109 @@ class Bessy:
             self.angs = np.transpose(np.broadcast_to(ang, (en.size, ang.size)))
             self.int = intensity
             self.eint = np.sqrt(intensity)
+        self.filename = path_int
+        print('\n ~ Initialization complete. Data has {} dimensions'.format(
+                len(np.shape(self.int))),
+              '\n', '==========================================')  
+        super(Bessy, self)
+        
+class CASS(Analysis):
+    """
+    Data from Soleil
+    Beamline: Cassiopee
+    """    
+    def __init__(self, file, mat, year, sample, mode):  #Load Data file
+        self.file = file
+        self.mat = mat
+        self.mode = mode
+        folder = ''.join(['/Users/denyssutter/Documents/Denys/',str(mat),
+                          '/CASS',str(year),'/',str(sample),'/'])
+        n_scans = (len([name for name in os.listdir(folder)\
+                       if os.path.isfile(os.path.join(folder, name))])) / 2
+        n_scans = np.int(n_scans)
+        if n_scans > 1:
+            if mode == 'FSM':
+                pol = np.zeros(n_scans)
+                for scan in range(n_scans):
+                    filename = ''.join(['FS_', str(scan + 1),'_ROI1_.txt'])
+                    info = ''.join(['FS_', str(scan + 1),'_i.txt'])
+                    path_info = folder + info
+                    path = folder + filename
+                    self.path = path
+                    print('\n ~ Initializing Cassiopee data file: \n {}'.format(self.path), 
+                          '\n', '==========================================')
+                    with open(path_info) as f: #read theta
+                        for line in f.readlines():
+                            if 'theta' in line:
+                                theta = line.strip('theta (deg):')
+                                pol[scan] = np.float32(theta.split())
+                    data = np.genfromtxt(path, skip_header = 44, delimiter='\t')
+                    if scan == 0:
+                        en = data[:, 0]
+                        with open(path) as f: #read angle
+                            for line in f.readlines():
+                                if 'Dimension 2 scale' in line:
+                                    ang_raw = line.strip('Dimension 2 scale=')
+                                    ang_raw = ang_raw.split()
+                                    ang = np.array(ang_raw, dtype=np.float32)  
+                        self.en = en
+                        self.ang = ang
+                        intensity = np.zeros((n_scans, len(ang), len(en)))
+                    intensity[scan] = np.transpose(data[:, 1:])
+            
+                
+                self.pol = pol
+                self.ens   = np.broadcast_to(en, (pol.size, ang.size, en.size))
+                self.angs  = np.transpose(
+                                np.broadcast_to(ang, (pol.size, en.size, ang.size)),
+                                    (0, 2, 1))
+                self.pols  = np.transpose(
+                                np.broadcast_to(pol, (ang.size, en.size, pol.size)),
+                                    (2, 0, 1))
+            elif mode == 'hv':
+                hv = np.zeros(n_scans)
+                for scan in range(n_scans):
+                    filename = ''.join(['hv_', str(scan + 1),'_ROI1_.txt'])
+                    info = ''.join(['hv_', str(scan + 1),'_i.txt'])
+                    path_info = folder + info
+                    path = folder + filename
+                    self.path = path
+                    print('\n ~ Initializing Cassiopee data file: \n {}'.format(self.path), 
+                          '\n', '==========================================')
+                    with open(path_info) as f:
+                        for line in f.readlines():
+                            if 'hv' in line:
+                                hv_raw = line.strip(('hv (eV):'))
+                                try:
+                                    hv[scan] = np.float32(hv_raw.split())
+                                except ValueError:   
+                                     print('')
+                    data = np.genfromtxt(path, skip_header = 44, delimiter='\t')
+                    if scan == 0:
+                        en = data[:, 0]
+                        with open(path) as f: #read angle
+                            for line in f.readlines():
+                                if 'Dimension 2 scale' in line:
+                                    ang_raw = line.strip('Dimension 2 scale=')
+                                    ang_raw = ang_raw.split()
+                                    ang = np.array(ang_raw, dtype=np.float32)  
+                        self.en = en
+                        self.ang = ang
+                        intensity = np.zeros((n_scans, len(ang), len(en)))
+                    intensity[scan] = np.transpose(data[:, 1:])
+                self.hv = hv
+                self.ens   = np.broadcast_to(en, (hv.size, ang.size, en.size))
+                self.angs  = np.transpose(
+                                np.broadcast_to(ang, (hv.size, en.size, ang.size)),
+                                    (0, 2, 1))
+                self.hvs  = np.transpose(
+                                np.broadcast_to(hv, (ang.size, en.size, hv.size)),
+                                    (2, 0, 1))
+        self.filename = filename
+        self.int = intensity
+        self.eint = np.sqrt(intensity)        
         print('\n ~ Initialization complete. Data has {} dimensions'.format(
                 len(np.shape(self.int))),
               '\n', '==========================================')  
                 
-    def norm(self, gold):  #Normalize Data file with gold
-        en_norm, int_norm, eint_norm = u.norm(self, gold)
-        self.en_norm = en_norm
-        self.int_norm = int_norm
-        self.eint_norm = eint_norm
-        print('\n ~ Data normalized',
-              '\n', '==========================================')   
-        
-    def shift(self, gold): #Flatten spectra
-        en_shift, int_shift = u.shift(self, gold)
-        self.en_norm = en_shift
-        self.int_norm = int_shift
-        print('\n ~ Only energy normalized',
-              '\n', '==========================================')   
-        
-    def flatten(self, norm=False): #Flatten spectra
-        int_flat = u.flatten(self, norm)
-        self.int_flat = int_flat
-        print('\n ~ Spectra flattened',
-              '\n', '==========================================')
-        
-    def FS_flatten(self, ang=True): #Flatten FS
-        map_flat = u.FS_flatten(self, ang)
-        self.map_flat = map_flat
-        print('\n ~ FS flattened',
-              '\n', '==========================================')   
-    
-    def bkg(self, norm=False): #Subtract background
-        int_bkg = u.bkg(self, norm)
-        if norm == True:
-            self.int_norm = int_bkg
-        elif norm == False:
-            self.int = int_bkg
-        print('\n ~ Backgorund subtracted',
-              '\n', '==========================================')    
-        
-    def restrict(self, bot = 0, top = 1, left = 0, right = 1): #restrict spectrum
-        (en_restr, ens_restr, en_norm_restr, ang_restr, angs_restr, pol_restr, 
-         pols_restr, int_restr, eint_restr,
-         int_norm_restr, eint_norm_restr) = u.restrict(
-                 self, bot, top, left, right)
-        self.en = en_restr
-        self.ens = ens_restr
-        self.ang = ang_restr
-        self.angs = angs_restr
-        self.pol = pol_restr
-        self.pols = pols_restr
-        self.en_norm = en_norm_restr
-        self.int = int_restr
-        self.eint = eint_restr
-        self.int_norm = int_norm_restr
-        self.eint_norm = eint_norm_restr
-        print('\n ~ Spectra restricted',
-              '\n', '==========================================')  
- 
-    def FS_restrict(self, bot=0, top=1, left=0, right=1): #restrict FS
-        (ang_restr, angs_restr, pol_restr, pols_restr, map_restr) = u.FS_restrict(
-                 self, bot, top, left, right)
-        self.ang = ang_restr
-        self.angs = angs_restr
-        self.pol = pol_restr
-        self.pols = pols_restr
-        self.map = map_restr
-        print('\n ~ FS restricted',
-              '\n', '==========================================')  
-        
-    def ang2k(self, angdg, Ekin, lat_unit=False, a=5.33, b=5.33, c=11, 
-              V0=0, thdg=0, tidg=0, phidg=0):      
-        k, k_V0 = u.ang2k(self, angdg, Ekin, lat_unit, a, b, c, 
-                          V0, thdg, tidg, phidg)
-        self.k = k
-        self.k_V0 = k_V0
-        self.ks = np.transpose(np.broadcast_to(k[0], 
-                                               (self.en.size, self.ang.size)))
-        self.k_V0s = np.transpose(np.broadcast_to(k_V0[0], 
-                                               (self.en.size, self.ang.size)))
-            
-        print('\n ~ Angles converted into k-space',
-              '\n', '==========================================')  
-        
-    def ang2kFS(self, angdg, Ekin, lat_unit=False, a=5.33, b=5.33, c=11, 
-                V0=0, thdg=0, tidg=0, phidg=0):   
-        kx, ky, kx_V0, ky_V0 = u.ang2kFS(self, angdg, Ekin, lat_unit, a, b, c, 
-                                         V0, thdg, tidg, phidg)
-        self.kx = kx
-        self.ky = ky
-        self.kx_V0 = kx_V0
-        self.ky_V0 = ky_V0
-        print('\n ~ Angles converted into k-space for Fermi surface',
-              '\n', '==========================================')  
-        
-    def FS(self, e=0, ew=0, norm=False): #Extract Constant Energy Map
-        FSmap = u.FS(self, e, ew, norm)
-        self.map = FSmap
-        print('\n ~ Constant energy map extracted',
-              '\n', '==========================================')  
-        
-    def plt_spec(self, norm=False):
-        uplt.plt_spec(self, norm)
-    
-    def plt_FS_polcut(self, norm=False, p=0, pw=0):
-        uplt.plt_FS_polcut(self, norm, p, pw)
-        
-    def plt_FS(self, coord=False):
-        uplt.plt_FS(self, coord)
-        
-    def plt_hv(self, a=0, aw=0):
-        uplt.plt_hv(self, a, aw)
-        
+        super(CASS, self)
