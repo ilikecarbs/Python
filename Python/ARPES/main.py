@@ -76,16 +76,18 @@ CSROfig10: Quasiparticle Z
 CSROfig11: Tight binding model CSRO
 CSROfig12: Tight binding model SRO
 CSROfig13: TB along high symmetry directions, orbitally resolved
+CSROfig14: (L): TB and density of states
 
 ---------  To-Do ---------
-CSRO: kz dependence
-CSRO: CSRO30 vs CSRO20 (FS and cuts)
-CSRO: TB DOS
-CSRO: TB specific heat
-CSRO: DOS calculations
+
+CSRO: TB with cuts
 CSRO: FS maps DMFT
 CSRO: Symmetrization
 CSRO: FS area counting 
+CSRO: ARPES cuts + TB
+CSRO: kz dependence
+CSRO: CSRO30 vs CSRO20 (FS and cuts)
+CSRO: TB specific heat
 """
 #--------
 #utils_plt.CROfig1()
@@ -116,7 +118,7 @@ CSRO: FS area counting
 #utils_plt.CSROfig11()
 #utils_plt.CSROfig12()
 #utils_plt.CSROfig13()
-
+#utils_plt.CSROfig14()
 #%%
 """
 Loading Current Data:
@@ -164,109 +166,7 @@ tb.CSRO(param, e0=0, vertices=False, proj=False)
 #tb.plt_cont_TB_CSRO20()
 
 print(time.time()-start)
-#%%
-"""
-Project: Density of states
-"""
 
-os.chdir('/Users/denyssutter/Documents/PhD/data')
-Axz_dos = np.loadtxt('Data_Axz_kpts_5000.dat')
-Ayz_dos = np.loadtxt('Data_Ayz_kpts_5000.dat')
-Axy_dos = np.loadtxt('Data_Axy_kpts_5000.dat')
-Bxz_dos = np.loadtxt('Data_Bxz_kpts_5000.dat')
-Byz_dos = np.loadtxt('Data_Byz_kpts_5000.dat')
-Bxy_dos = np.loadtxt('Data_Bxy_kpts_5000.dat')
-os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
-bands = (Axz_dos, Ayz_dos, Axy_dos, Bxz_dos, Byz_dos, Bxy_dos)
-#%%
-
-En = ()
-DOS = ()
-N_bands = ()
-N_full= ()
-plt.figure('DOS', figsize=(8, 8), clear=True)
-n = 0
-for band in bands:
-    n += 1
-    ax = plt.subplot(2, 3, n) 
-    plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
-    dos, bins, patches = plt.hist(np.ravel(band), bins=150, density=True,
-                                alpha=.2, color='C8')
-    en = np.zeros((len(dos)))
-    for i in range(len(dos)):
-        en[i] = (bins[i] + bins[i + 1]) / 2
-    ef, _ef = utils.find(en, 0.00)
-    n_full = np.trapz(dos, x=en)
-    n_band = np.trapz(dos[:_ef], x=en[:_ef])
-    plt.plot(en, dos, color='k', lw=.5)
-    plt.fill_between(en[:_ef], dos[:_ef], 0, color='C1', alpha=.5)
-    if n < 4:
-        ax.set_position([.1 + (n - 1) * .29, .5, .28 , .23])
-        plt.xticks(np.arange(-.6, .3, .1), [])
-    else:
-        ax.set_position([.1 + (n - 4) * .29, .26, .28 , .23])
-        plt.xticks(np.arange(-.6, .3, .1))
-    if n == 5:
-        plt.xlabel(r'$\omega$ (eV)', fontdict=font)
-    if any(x==n for x in [1, 4]):
-        plt.ylabel('Intensity (a.u)', fontdict=font)
-    plt.yticks(np.arange(0, 40, 10), [])
-    plt.xlim(xmin=-.37, xmax=.21)
-    N_full = N_full + (n_full,)
-    N_bands = N_bands + (n_band,)
-    En = En + (en,)
-    DOS = DOS + (dos,)
-N = np.sum(N_bands)
-print(N)
-plt.show()
-
-
-#%%
-"""
-Project: Advanced TB plot along direction
-"""
-k_pts = 200
-x_GS = np.linspace(0, 1, k_pts)
-y_GS = np.linspace(0, 1, k_pts)
-
-x_SX = np.linspace(1, 0, k_pts)
-y_SX = np.ones(k_pts)
-
-x_XG = np.zeros(k_pts)
-y_XG = np.linspace(1, 0, k_pts)
-
-x = (x_GS, x_SX, x_XG)
-y = (y_GS, y_SX, y_XG)
-plt.figure('TB_eval', figsize=(6, 6), clear=True)
-for i in range(len(x)):
-    en, spec, bndstr = utils_math.CSRO_eval(x[i], y[i])
-    k = np.sqrt(x[i] ** 2 + y[i] ** 2)
-    v_bnd = .1
-    if i != 0:
-        ax = plt.subplot(2, 3, i + 1)
-        ax.set_position([.1 + i * .2 + .2 * (np.sqrt(2)-1), .2, .2 , .4])
-        plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
-        k = -k
-    else:
-        ax = plt.subplot(2, 3, i + 1)
-        ax.set_position([.1 + i * .2 , .2, .2 * np.sqrt(2) , .4])
-        plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
-    for j in range(len(bndstr)):
-        plt.plot(k, bndstr[j])
-    if i == 0:
-        plt.xticks([0, np.sqrt(2)], ('$\Gamma$', 'S'))
-        plt.yticks(np.arange(-1, 1, .2))
-    elif i==1:
-        plt.xticks([-np.sqrt(2), -1], ('', 'X'))
-        plt.yticks(np.arange(-1, 1, .2), [])
-    elif i==2:
-        plt.xticks([-1, 0], ('', '$\Gamma$'))
-        plt.yticks(np.arange(-1, 1, .2), [])
-    plt.plot([k[0], k[-1]], [0, 0], 'k:')    
-    plt.xlim(xmin=k[0], xmax=k[-1])
-    plt.ylim(ymax=np.max(en), ymin=np.min(en))
-
-plt.show()
 #%%
 """
 Project: Heat capacity
@@ -423,11 +323,4 @@ show_Y_lm(l=5,m=4)
 show_Y_lm(l=6,m=6)
         
 plt.show()
-
-
-
-
-
-
-
 

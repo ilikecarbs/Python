@@ -332,7 +332,7 @@ def CSRO_eval(x, y):
     t4 = param['t4']; t5 = param['t5']; t6 = param['t6']
     mu = param['mu']; l = param['l']
     
-    en = np.linspace(-.65, .25, 500)
+    en = np.linspace(-.65, .3, 500)
     
     spec = np.zeros((len(en), len(x)))
     #Hopping terms
