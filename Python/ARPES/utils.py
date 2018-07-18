@@ -4,6 +4,14 @@
 Created on Mon Jun 11 09:57:01 2018
 
 @author: denyssutter
+
+%%%%%%%%%%%%%%%%%%%%
+        utils
+%%%%%%%%%%%%%%%%%%%%
+
+Content:
+utilities for data manipulation
+
 """
 import os
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')

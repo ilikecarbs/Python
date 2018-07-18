@@ -41,18 +41,13 @@ font = {'family': 'serif',
         'size': 12,
         }
 
-# +----------+ #
-# | Colormap | # ===============================================================
-# +----------+ #
 
 def rainbow_light():
     filepath = '/Users/denyssutter/Documents/library/Python/ARPES/cmap/rainbow_light.dat'
     data = np.loadtxt(filepath)
     colors = np.array([(i[0], i[1], i[2]) for i in data])
-    
     # Normalize the colors
     colors /= colors.max()
-    
     # Build the colormap
     rainbow_light = LinearSegmentedColormap.from_list('rainbow_light', colors, 
                                                       N=len(colors))
@@ -62,10 +57,8 @@ def rainbow_light_2():
     filepath = '/Users/denyssutter/Documents/library/Python/ARPES/cmap/rainbow_light_2.dat'
     data = np.loadtxt(filepath)
     colors = np.array([(i[0], i[1], i[2]) for i in data])
-    
     # Normalize the colors
     colors /= colors.max()
-    
     # Build the colormap
     rainbow_light_2 = LinearSegmentedColormap.from_list('rainbow_light', colors, 
                                                       N=len(colors))
@@ -75,10 +68,8 @@ def orbitals():
     colors = np.zeros((100,3))
     for i in range(100):
         colors[i,:] = [i/100, 0, 1 - i/100]
-        
     # Normalize the colors
     colors /= colors.max()
-    
     # Build the colormap
     orbitals = LinearSegmentedColormap.from_list('orbitals', colors, 
                                                       N=len(colors))
@@ -109,10 +100,10 @@ def plt_spec(self, norm):
     plt.figure(('spec' + str(self.filename)), figsize=(10, 10), clear=True)
     plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
     plt.contourf(k, en, dat, 100, cmap = cm.ocean_r)
-    if norm == True:
+    if norm != False:
         plt.plot([np.min(k), np.max(k)], [0, 0], 'k:')
-    plt.xlabel('$k_x$')   
-    plt.ylabel('\omega')
+    plt.xlabel('$k_x$', fontdict=font)   
+    plt.ylabel(r'$\omega$', fontdict=font)
     plt.show()
 
 def plt_FS_polcut(self, norm, p, pw):
@@ -134,11 +125,10 @@ def plt_FS_polcut(self, norm, p, pw):
     plt.figure(('FS polcut' + str(self.filename)), figsize=(10, 10), clear=True)
     plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
     plt.contourf(k, en, spec, 100, cmap = cm.ocean_r)
-    plt.plot([np.min(k), np.max(k)], [-2.8, -2.8], 'k:')
     if norm == True:
         plt.plot([np.min(k), np.max(k)], [0, 0], 'k:')
-    plt.xlabel('$k$')   
-    plt.ylabel('\omega')
+    plt.xlabel(r'$k$', fontdict=font)   
+    plt.ylabel(r'$\omega$', fontdict=font)
     plt.show()
 
 def plt_hv(self, a, aw):
@@ -193,7 +183,8 @@ def plt_cont_TB_SRO(self, e0):
     for i in en:
         n = n + 1
         plt.subplot(1, 3, n)
-        plt.contour(X, Y, i, colors = 'black', linestyles = ':', levels = e0)
+        plt.contour(X, Y, i, 'k--', levels = e0,
+                    lw=1)
         plt.axis('equal')
   
 def plt_cont_TB_CSRO20(self, e0):   
@@ -2710,11 +2701,22 @@ def CSROfig11(print_fig=True):
     kbnd = 2
     tb = utils_math.TB(a = np.pi, kbnd = kbnd, kpoints = 300)  #Initialize tight binding model
     param = utils_math.paramCSRO20()  
-#    param = utils_math.paramSRO()  
-    tb.CSRO(param, e0=0, vertices=True, proj=True) 
-    plt.figure('CSRO_projection')
+    kx, ky, FS = tb.CSRO(param, e0=0, vertices=True, proj=True) 
+    bndstr = tb.bndstr
+    coord = tb.coord   
+    X = coord['X']; Y = coord['Y']   
+    Axz = bndstr['Axz']; Ayz = bndstr['Ayz']; Axy = bndstr['Axy']
+    Bxz = bndstr['Bxz']; Byz = bndstr['Byz']; Bxy = bndstr['Bxy']
+    en = (Axz, Ayz, Axy, Bxz, Byz, Bxy)
+    v_bnd = np.max(FS)
+    plt.figure(2011, figsize=(8, 8), clear=True)
+    ax = plt.subplot(122)
+    ax.set_position([.1, .3, .4 , .4])
     plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
-#    plt.grid(True, alpha=.5)
+    for i in en:
+        plt.contour(X, Y, i, colors = 'black', linestyles = '-', levels = 0,
+                    alpha=.2)
+    plt.contourf(kx, ky, FS, 200, cmap='PuOr', vmin=-v_bnd, vmax=v_bnd)
     plt.plot([-1, 1], [1, 1], 'k-', lw=2)
     plt.plot([-1, 1], [-1, -1], 'k-', lw=2)
     plt.plot([1, 1], [-1, 1], 'k-', lw=2)
@@ -2725,9 +2727,12 @@ def CSROfig11(print_fig=True):
     plt.ylim(ymax=kbnd, ymin=-kbnd)
     plt.xlabel(r'$k_x \, (\pi/a)$', fontdict=font)
     plt.ylabel(r'$k_y \, (\pi/b)$', fontdict=font)
-#    plt.legend(('$\gamma z$', '$xy$'), loc=1, framealpha=1, fancybox=True, fontsize=12)
-    plt.legend(('$\gamma z$', '$xy$'), bbox_to_anchor=(0., 1.02, 1., .102), loc=3,
-       ncol=2, mode="expand", borderaxespad=0.)
+    pos = ax.get_position()
+    cax = plt.axes([pos.x0+pos.width + 0.01 ,
+                        pos.y0, 0.01, pos.height])
+    cbar = plt.colorbar(cax = cax, ticks = None)
+    cbar.set_ticks([])
+    cbar.set_clim(np.min(FS), np.max(FS))
     if print_fig == True:
         plt.savefig(
                 '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig11.png', 
@@ -2741,10 +2746,21 @@ def CSROfig12(print_fig=True):
     kbnd = 2
     tb = utils_math.TB(a = np.pi, kbnd = kbnd, kpoints = 300)  #Initialize tight binding model
     param = utils_math.paramSRO()  
-    tb.SRO(param, e0=0, vertices=True, proj=True) 
-    plt.figure('SRO_projection')
+    kx, ky, FS = tb.SRO(param, e0=0, vertices=True, proj=True) 
+    bndstr = tb.bndstr
+    coord = tb.coord   
+    X = coord['X']; Y = coord['Y']   
+    xz = bndstr['xz']; yz = bndstr['yz']; xy = bndstr['xy']
+    en = (xz, yz, xy)
+    v_bnd = np.max(FS)
+    plt.figure(2012, figsize=(8, 8), clear=True)
+    ax = plt.subplot(122)
+    ax.set_position([.1, .3, .4 , .4])
     plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
-#    plt.grid(True, alpha=.5)
+    for i in en:
+        plt.contour(X, Y, i, colors = 'black', linestyles = '-', levels = 0,
+                    alpha=.2)
+    plt.contourf(kx, ky, FS, 200, cmap='PuOr', vmin=-v_bnd, vmax=v_bnd)
     plt.plot([-1, 1], [1, 1], 'k-', lw=2)
     plt.plot([-1, 1], [-1, -1], 'k-', lw=2)
     plt.plot([1, 1], [-1, 1], 'k-', lw=2)
@@ -2757,11 +2773,14 @@ def CSROfig12(print_fig=True):
     plt.yticks(np.arange(-kbnd - 1, kbnd + 1, 1))
     plt.xlim(xmax=kbnd, xmin=-kbnd)
     plt.ylim(ymax=kbnd, ymin=-kbnd)
-    plt.xlabel(r'$k_x \, (\pi/a_\mathrm{sro})$', fontdict=font)
-    plt.ylabel(r'$k_y \, (\pi/b_\mathrm{sro})$', fontdict=font)
-#    plt.legend(('$\gamma z$', '$xy$'), loc=1, framealpha=1, fancybox=True, fontsize=12)
-    plt.legend(('$\gamma z$', '$xy$'), bbox_to_anchor=(0., 1.02, 1., .102), loc=3,
-       ncol=2, mode="expand", borderaxespad=0.)
+    plt.xlabel(r'$k_x \, (\pi/a)$', fontdict=font)
+    plt.ylabel(r'$k_y \, (\pi/b)$', fontdict=font)
+    pos = ax.get_position()
+    cax = plt.axes([pos.x0+pos.width + 0.01 ,
+                        pos.y0, 0.01, pos.height])
+    cbar = plt.colorbar(cax = cax, ticks = None)
+    cbar.set_ticks([])
+    cbar.set_clim(np.min(FS), np.max(FS))
     if print_fig == True:
         plt.savefig(
                 '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig12.png', 

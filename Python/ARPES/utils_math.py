@@ -4,6 +4,14 @@
 Created on Fri Jun 15 13:53:54 2018
 
 @author: denyssutter
+
+%%%%%%%%%%%%%%%%%%%%
+        ARPES
+%%%%%%%%%%%%%%%%%%%%
+
+Content:
+Data Loader and data manipulation ARPES files
+
 """
 
 import numpy as np
@@ -15,7 +23,8 @@ from scipy import special
 from uncertainties import ufloat
 import uncertainties.umath as umath
 import matplotlib.pyplot as plt
-
+from scipy.ndimage.filters import gaussian_filter
+import matplotlib.cm as cm
 
 def paramSRO():
     """
@@ -35,7 +44,7 @@ def paramCSRO20():
 
 def paramCSRO30():
     """
-    Test set CSRO30
+    Parameter test set CSRO30
     """
     param = dict([('t1', .1), ('t2', .005), ('t3', .081), ('t4', .04),
               ('t5', .01), ('t6', 0), ('mu', .08), ('l', .04)])
@@ -90,7 +99,6 @@ class TB:
         Pyz = np.array([[1, 0, 0], [0, 0, 0], [0, 0, 0]])
         Pxz = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]])
         Pxy = np.array([[0, 0, 0], [0, 0, 0], [0, 0, 1]])
-        plt.figure('SRO', figsize=(10, 3), clear=True)
         n = 0
         for i in en:
             n += 1
@@ -100,9 +108,10 @@ class TB:
             C = C + (c,)
             plt.axis('equal')
         if vertices == True:
-            plt.figure('SRO_vertices', figsize=(5, 5), clear=True)
             if proj == True:
-                plt.figure('SRO_projection', figsize=(5, 5), clear=True)
+                kx = np.linspace(np.min(x), np.max(x), 1000)
+                ky = np.linspace(np.min(y), np.max(y), 1000)
+                FS = np.zeros((len(kx), len(ky)))
             for j in range(3):
                 p = C[j].collections[0].get_paths()
                 p = np.asarray(p)  
@@ -120,9 +129,6 @@ class TB:
                     plt.text(v_x[0], v_y[0], str(i))
                     plt.show()
                 if proj == True:
-                    plt.figure('SRO_projection')
-                    plt.plot(np.max(x) + 1, np.min(x) + 1, 'ro')
-                    plt.plot(np.max(x) + 1, np.min(x) + 1, 'bo')  
                     for N in range(len(V_x)):
                         for i in range(len(V_x[N])):
                             val_x, ind_x = utils.find(x, V_x[N][i])
@@ -141,11 +147,24 @@ class TB:
                                     np.sum(
                                             np.conj(evec_proj[:, j]) * \
                                             (Pxy * evec_proj[:, j]))) 
-                            plt.plot(V_x[N][i], V_y[N][i], 'o', ms=2,
-                                     color=[min(1, wyz + wxz), 0, wxy])
-        
+                            
+                            wz = wyz + wxz
+                            w = wz - wxy
+                            xval, _xval = utils.find(kx, V_x[N][i])
+                            yval, _yval = utils.find(ky, V_y[N][i])
+                            FS[_xval, _yval] = w + 0
+                            n += 1
+#                            plt.plot(V_x[N][i], V_y[N][i], 'o', ms=2,
+#                                     color=[min(1, wAyz + wByz + wAxz + wBxz),
+#                                            0, min(1, wAxy + wBxy)])
+            FS = gaussian_filter(FS, sigma=10, mode='constant')
+            return kx, ky, FS
         
     def CSRO(self, param, e0=0, vertices=False, proj=True):
+        """
+        TB model for Ca1.8Sr0.2RuO4
+        
+        """
         #Load TB parameters
         t1 = param['t1']; t2 = param['t2']; t3 = param['t3']
         t4 = param['t4']; t5 = param['t5']; t6 = param['t6']
@@ -205,8 +224,6 @@ class TB:
                          [0,0,0,0,0,0],[0,0,0,0,1,0],[0,0,0,0,0,0]])
         PBxy = np.array([[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],
                          [0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,1]])
-
-        plt.figure('CSRO', figsize=(10, 6), clear=True)
         n = 0
         for i in en:
             n += 1
@@ -216,9 +233,10 @@ class TB:
             C = C + (c,)
             plt.axis('equal')
         if vertices == True:
-            plt.figure('CSRO_vertices', figsize=(5, 5), clear=True)
             if proj == True:
-                plt.figure('CSRO_projection', figsize=(5, 5), clear=True)
+                kx = np.linspace(np.min(x), np.max(x), 1000)
+                ky = np.linspace(np.min(y), np.max(y), 1000)
+                FS = np.zeros((len(kx), len(ky)))
             for j in range(6):
                 p = C[j].collections[0].get_paths()
                 p = np.asarray(p)  
@@ -236,10 +254,6 @@ class TB:
                     plt.text(v_x[0], v_y[0], str(i))
                     plt.show()
                 if proj == True:
-                    plt.figure('CSRO_projection')
-                    plt.plot(np.max(x) + 1, np.min(x) + 1, 'ro')
-                    plt.plot(np.max(x) + 1, np.min(x) + 1, 'bo')  
-#                    plt.plot(np.max(x) + 1, np.min(x) + 1, 'go')  
                     for N in range(len(V_x)):
                         for i in range(len(V_x[N])):
                             val_x, ind_x = utils.find(x, V_x[N][i])
@@ -270,10 +284,19 @@ class TB:
                                     np.sum(
                                             np.conj(evec_proj[:, j]) * \
                                             (PBxy * evec_proj[:, j]))) 
-                            plt.plot(V_x[N][i], V_y[N][i], 'o', ms=2,
-                                     color=[min(1, wAyz + wByz + wAxz + wBxz),
-                                            0, min(1, wAxy + wBxy)])
-        
+                            wz = wAyz + wAxz + wByz + wBxz
+                            wxy = wAxy + wBxy
+                            w = wz - wxy
+                            xval, _xval = utils.find(kx, V_x[N][i])
+                            yval, _yval = utils.find(ky, V_y[N][i])
+                            FS[_xval, _yval] = w + 0
+                            n += 1
+#                            plt.plot(V_x[N][i], V_y[N][i], 'o', ms=2,
+#                                     color=[min(1, wAyz + wByz + wAxz + wBxz),
+#                                            0, min(1, wAxy + wBxy)])
+            FS = gaussian_filter(FS, sigma=10, mode='constant')
+            return kx, ky, FS
+
     def simple(self, param):
         t1 = param['t1']; t2 = param['t2']; t3 = param['t3']
         t4 = param['t4']; t5 = param['t5']; mu = param['mu']   
@@ -301,7 +324,87 @@ class TB:
     def plt_cont_TB_simple(self, e0=0):
         uplt.plt_cont_TB_simple(self, e0)
         
-        
+def CSRO_eval(x, y):
+    a = np.pi
+    #Load TB parameters
+    param = paramCSRO20()  
+    t1 = param['t1']; t2 = param['t2']; t3 = param['t3']
+    t4 = param['t4']; t5 = param['t5']; t6 = param['t6']
+    mu = param['mu']; l = param['l']
+    
+    en = np.linspace(-.65, .25, 500)
+    
+    spec = np.zeros((len(en), len(x)))
+    #Hopping terms
+    fx = -2 * np.cos((x + y) / 2 * a)
+    fy = -2 * np.cos((x - y) / 2 * a)
+    f4 = -2 * t4 * (np.cos(x * a) + np.cos(y * a))
+    f5 = -2 * t5 * (np.cos((x + y) * a) + np.cos((x - y) * a))
+    f6 = -2 * t6 * (np.cos(x * a) - np.cos(y * a))
+    #Placeholders energy eigenvalues
+    Ayz = np.ones(len(x)); Axz = np.ones(len(x))
+    Axy = np.ones(len(x)); Byz = np.ones(len(x)) 
+    Bxz = np.ones(len(x)); Bxy = np.ones(len(x))
+    wAyz = np.ones((len(x), 6)); wAxz = np.ones((len(x), 6))
+    wAxy = np.ones((len(x), 6)); wByz = np.ones((len(x), 6))
+    wBxz = np.ones((len(x), 6)); wBxy = np.ones((len(x), 6))
+    
+    ###Projectors###
+    PAyz = np.array([[1,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],
+                     [0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]])
+    PAxz = np.array([[0,0,0,0,0,0],[0,1,0,0,0,0],[0,0,0,0,0,0],
+                     [0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]])
+    PAxy = np.array([[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,1,0,0,0],
+                     [0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]])
+    PByz = np.array([[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],
+                     [0,0,0,1,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]])
+    PBxz = np.array([[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],
+                     [0,0,0,0,0,0],[0,0,0,0,1,0],[0,0,0,0,0,0]])
+    PBxy = np.array([[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],
+                     [0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,1]])
+    #TB submatrix
+    def A(i):
+        A = np.array([[-mu, complex(0,l) + f6[i], -l],
+                      [-complex(0,l) + f6[i], -mu, complex(0,l)],
+                      [-l, -complex(0,l), -mu + f4[i] + f5[i]]])
+        return A
+    #TB submatrix
+    def B(i): 
+        B = np.array([[t2 * fx[i] + t1 * fy[i], 0, 0],
+                      [0, t1 * fx[i] + t2 * fy[i], 0],
+                      [0, 0, t3 * (fx[i] + fy[i])]])
+        return B
+    #Tight binding Hamiltonian
+    def H(i):
+        C1 = np.concatenate((A(i), B(i)), 1)
+        C2 = np.concatenate((B(i), A(i)), 1)
+        H  = np.concatenate((C1, C2), 0)
+        return H
+    #Diagonalization of symmetric Hermitian matrix on k-mesh
+    for i in range(len(x)):
+        eval, evec = la.eigh(H(i))
+        eval = np.real(eval)
+        Ayz[i] = eval[0]; Axz[i] = eval[1]; Axy[i] = eval[2]
+        Byz[i] = eval[3]; Bxz[i] = eval[4]; Bxy[i] = eval[5]
+        en_values = (Ayz[i], Axz[i], Axy[i], Byz[i], Bxz[i], Bxy[i])
+        n = 0
+        for en_value in en_values:
+            wAyz[i, n] = np.real(np.sum(np.conj(evec[:, n]) * (PAyz * evec[:, n]))) 
+            wAxz[i, n] = np.real(np.sum(np.conj(evec[:, n]) * (PAxz * evec[:, n]))) 
+            wAxy[i, n] = np.real(np.sum(np.conj(evec[:, n]) * (PAxy * evec[:, n]))) 
+            wByz[i, n] = np.real(np.sum(np.conj(evec[:, n]) * (PByz * evec[:, n]))) 
+            wBxz[i, n] = np.real(np.sum(np.conj(evec[:, n]) * (PBxz * evec[:, n]))) 
+            wBxy[i, n] = np.real(np.sum(np.conj(evec[:, n]) * (PBxy * evec[:, n]))) 
+    #        plt.plot(x[i], en_value, 'o', ms=1,
+    #                 color=[wAxz[i, n] + wBxz[i, n] + wAyz[i, n] + wByz[i, n], 0, wAxy[i, n] + wBxy[i, n]])
+            wz = wAyz[i, n] + wAxz[i, n] + wByz[i, n] + wBxz[i, n]
+            wxy = wAxy[i, n] + wBxy[i, n]
+            w = wz - wxy
+            val, _val = utils.find(en, en_value)
+            spec[_val, i] = w
+            n += 1
+    spec = gaussian_filter(spec, sigma=3, mode='constant')
+    return en, spec      
 
 def FDsl(x, p0, p1, p2, p3, p4):
     """

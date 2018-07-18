@@ -113,7 +113,7 @@ CSRO: FS area counting
 #utils_plt.CSROfig9()
 #utils_plt.CSROfig10()
 #utils_plt.CSROfig11()
-#utils_plt.CSROfig12()
+utils_plt.CSROfig12()
 
 #%%
 """
@@ -122,19 +122,18 @@ Loading Current Data:
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 mat = 'CaMn2Sb2'
 year = 2018
-sample = 'S2_FSM_hv82_T71'
+file = 'S3_FSM_fine_hv90_T230'
 mode = 'FSM'
 
-file = 1
-D = ARPES.CASS(file, mat, year, sample, mode)
+D = ARPES.CASS(file, mat, year, mode)
 #%%
 #D.plt_hv()
-D.FS(e = 77.3, ew = .02, norm = False)
-D.ang2kFS(D.ang, Ekin=82, lat_unit=False, a=1, b=1, c=1, 
-          V0=0, thdg=0, tidg=15, phidg=-7)
-D.FS_flatten(ang=False)
+D.FS(e = 86.0, ew = .1, norm = False)
+D.ang2kFS(D.ang, Ekin=90-4.5, lat_unit=False, a=1, b=1, c=1, 
+          V0=0, thdg=-6, tidg=24.5, phidg=-0)
+#D.FS_flatten(ang=True)
 D.plt_FS(coord=True)
-
+#D.plt_FS_polcut(norm=False, p=24.5, pw=.1)
 
 #%%
 
@@ -186,6 +185,7 @@ n = 0
 for band in bands:
     n += 1
     ax = plt.subplot(2, 3, n) 
+    plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
     dos, bins, patches = plt.hist(np.ravel(band), bins=150, density=True,
                                 alpha=.2, color='C8')
     en = np.zeros((len(dos)))
@@ -194,10 +194,20 @@ for band in bands:
     ef, _ef = utils.find(en, 0.00)
     n_full = np.trapz(dos, x=en)
     n_band = np.trapz(dos[:_ef], x=en[:_ef])
-    plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
     plt.plot(en, dos, color='k', lw=.5)
     plt.fill_between(en[:_ef], dos[:_ef], 0, color='C1', alpha=.5)
-    plt.xlim(xmin=np.min(en), xmax=np.max(en))
+    if n < 4:
+        ax.set_position([.1 + (n - 1) * .29, .5, .28 , .23])
+        plt.xticks(np.arange(-.6, .3, .1), [])
+    else:
+        ax.set_position([.1 + (n - 4) * .29, .26, .28 , .23])
+        plt.xticks(np.arange(-.6, .3, .1))
+    if n == 5:
+        plt.xlabel(r'$\omega$ (eV)', fontdict=font)
+    if any(x==n for x in [1, 4]):
+        plt.ylabel('Intensity (a.u)', fontdict=font)
+    plt.yticks(np.arange(0, 40, 10), [])
+    plt.xlim(xmin=-.37, xmax=.21)
     N_full = N_full + (n_full,)
     N_bands = N_bands + (n_band,)
     En = En + (en,)
@@ -206,92 +216,32 @@ N = np.sum(N_bands)
 print(N)
 plt.show()
 
+
 #%%
 """
-Project: TB plot along direction
+Project: Advanced TB plot along direction
 """
-from numpy import linalg as la
-a = np.pi
-
-#x = np.linspace(-1, 1, 200)
-#y = np.linspace(-1, 1, 200)
-x = np.linspace(0, 2, 200)
+#x = np.linspace(-1, 1, 500)
+#y = np.linspace(-1, 1, 500)
+x = np.linspace(0, 2, 500)
 y = np.zeros(len(x))
 
-#Load TB parameters
-param = utils_math.paramCSRO20()  
-t1 = param['t1']; t2 = param['t2']; t3 = param['t3']
-t4 = param['t4']; t5 = param['t5']; t6 = param['t6']
-mu = param['mu']; l = param['l']
-#Hopping terms
-fx = -2 * np.cos((x + y) / 2 * a)
-fy = -2 * np.cos((x - y) / 2 * a)
-f4 = -2 * t4 * (np.cos(x * a) + np.cos(y * a))
-f5 = -2 * t5 * (np.cos((x + y) * a) + np.cos((x - y) * a))
-f6 = -2 * t6 * (np.cos(x * a) - np.cos(y * a))
-#Placeholders energy eigenvalues
-Ayz = np.ones(len(x)); Axz = np.ones(len(x))
-Axy = np.ones(len(x)); Byz = np.ones(len(x)) 
-Bxz = np.ones(len(x)); Bxy = np.ones(len(x))
-wAyz = np.ones((len(x), 6)); wAxz = np.ones((len(x), 6))
-wAxy = np.ones((len(x), 6)); wByz = np.ones((len(x), 6))
-wBxz = np.ones((len(x), 6)); wBxy = np.ones((len(x), 6))
+en, spec = utils_math.CSRO_eval(x, y)
 
-###Projectors###
-PAyz = np.array([[1,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],
-                 [0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]])
-PAxz = np.array([[0,0,0,0,0,0],[0,1,0,0,0,0],[0,0,0,0,0,0],
-                 [0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]])
-PAxy = np.array([[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,1,0,0,0],
-                 [0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]])
-PByz = np.array([[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],
-                 [0,0,0,1,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]])
-PBxz = np.array([[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],
-                 [0,0,0,0,0,0],[0,0,0,0,1,0],[0,0,0,0,0,0]])
-PBxy = np.array([[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],
-                 [0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,1]])
-    
-#TB submatrix
-def A(i):
-    A = np.array([[-mu, complex(0,l) + f6[i], -l],
-                  [-complex(0,l) + f6[i], -mu, complex(0,l)],
-                  [-l, -complex(0,l), -mu + f4[i] + f5[i]]])
-    return A
-#TB submatrix
-def B(i): 
-    B = np.array([[t2 * fx[i] + t1 * fy[i], 0, 0],
-                  [0, t1 * fx[i] + t2 * fy[i], 0],
-                  [0, 0, t3 * (fx[i] + fy[i])]])
-    return B
-#Tight binding Hamiltonian
-def H(i):
-    C1 = np.concatenate((A(i), B(i)), 1)
-    C2 = np.concatenate((B(i), A(i)), 1)
-    H  = np.concatenate((C1, C2), 0)
-    return H
-#Diagonalization of symmetric Hermitian matrix on k-mesh
+v_bnd = .7 * np.max(spec)
+#plt.plot([x[0], x[-1]], [0, 0], 'k:')
 plt.figure('TB_eval', figsize=(6, 6), clear=True)
-for i in range(len(x)):
-    eval, evec = la.eigh(H(i))
-    eval = np.real(eval)
-    Ayz[i] = eval[0]; Axz[i] = eval[1]; Axy[i] = eval[2]
-    Byz[i] = eval[3]; Bxz[i] = eval[4]; Bxy[i] = eval[5]
-    en = (Ayz[i], Axz[i], Axy[i], Byz[i], Bxz[i], Bxy[i])
-    n = 0
-    for en_value in en:
-        wAyz[i, n] = np.real(np.sum(np.conj(evec[:, n]) * (PAyz * evec[:, n]))) 
-        wAxz[i, n] = np.real(np.sum(np.conj(evec[:, n]) * (PAxz * evec[:, n]))) 
-        wAxy[i, n] = np.real(np.sum(np.conj(evec[:, n]) * (PAxy * evec[:, n]))) 
-        wByz[i, n] = np.real(np.sum(np.conj(evec[:, n]) * (PByz * evec[:, n]))) 
-        wBxz[i, n] = np.real(np.sum(np.conj(evec[:, n]) * (PBxz * evec[:, n]))) 
-        wBxy[i, n] = np.real(np.sum(np.conj(evec[:, n]) * (PBxy * evec[:, n]))) 
-        plt.plot(x[i], en_value, 'o', ms=3,
-                 color=[wAxz[i, n] + wBxz[i, n], wAyz[i, n] + wByz[i, n], wAxy[i, n] + wBxy[i, n]])
-        n += 1
-        
-plt.plot([x[0], x[-1]], [0, 0], 'k:')
+ax = plt.subplot(122)
+ax.set_position([.1, .3, .35 , .35])
+plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
+plt.contourf(x, en, spec, 200, cmap='PuOr', vmin=-v_bnd, vmax=v_bnd)
+pos = ax.get_position()
+cax = plt.axes([pos.x0+pos.width+0.01 ,
+                        pos.y0, 0.01, pos.height])
+cbar = plt.colorbar(cax = cax, ticks = None)
+cbar.set_ticks([])
+cbar.set_clim(np.min(spec), np.max(spec))
 plt.show()
-
 #%%
 """
 Project: Heat capacity
