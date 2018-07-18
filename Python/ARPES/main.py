@@ -5,8 +5,18 @@
 Created on Tue Jun 19 15:14:29 2018
 
 @author: denyssutter
-"""
 
+%%%%%%%%%%%%%%%%%%%%
+        main
+%%%%%%%%%%%%%%%%%%%%
+
+Content:
+1. Load all relevant modules
+2. Plot figures for thesis (uncomment relevant figure)
+3. Load current file in a running experiment
+4. Current projects
+
+"""
 import os
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 import utils_plt
@@ -17,8 +27,8 @@ import ARPES
 import numpy as np
 import time
 import matplotlib.cm as cm
-from scipy.stats import exponnorm
-from scipy.optimize import curve_fit
+#from scipy.stats import exponnorm
+#from scipy.optimize import curve_fit
 
 rainbow_light = utils_plt.rainbow_light
 cm.register_cmap(name='rainbow_light', cmap=rainbow_light)
@@ -106,83 +116,26 @@ CSRO: FS area counting
 #utils_plt.CSROfig12()
 
 #%%
-
+"""
+Loading Current Data:
+"""
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 mat = 'CaMn2Sb2'
 year = 2018
-sample = 'S2_hv100_hv130_T230'
-mode = 'hv'
+sample = 'S2_FSM_hv82_T71'
+mode = 'FSM'
 
 file = 1
 D = ARPES.CASS(file, mat, year, sample, mode)
 #%%
-D.plt_hv()
-#D.FS(e = 86.2, ew = .02, norm = False)
-#D.ang2kFS(D.ang, Ekin=82, lat_unit=False, a=1, b=1, c=1, 
-#          V0=0, thdg=0, tidg=15, phidg=-7)
-#D.FS_flatten(ang=False)
-#D.plt_FS(coord=True)
+#D.plt_hv()
+D.FS(e = 77.3, ew = .02, norm = False)
+D.ang2kFS(D.ang, Ekin=82, lat_unit=False, a=1, b=1, c=1, 
+          V0=0, thdg=0, tidg=15, phidg=-7)
+D.FS_flatten(ang=False)
+D.plt_FS(coord=True)
 
-#%%
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.special import sph_harm 
 
-# nur fuer den Seiteneffekt: plt.gca(projection = '3d') funktioniert sonst nicht
-from mpl_toolkits.mplot3d import Axes3D 
-from matplotlib import cm
-
-theta_1d = np.linspace(0,   np.pi,  91) # 2 GRAD Schritte
-phi_1d   = np.linspace(0, 2*np.pi, 181) # 2 GRAD Schritte
-
-theta_2d, phi_2d = np.meshgrid(theta_1d, phi_1d)
-xyz_2d = np.array([np.sin(theta_2d) * np.sin(phi_2d),
-                  np.sin(theta_2d) * np.cos(phi_2d),
-                  np.cos(theta_2d)]) 
-
-colormap = cm.ScalarMappable( cmap=plt.get_cmap("cool"))
-colormap.set_clim(-.45, .45)
-limit = .5
-
-def show_Y_lm(l, m):
-    print("Y_%i_%i" % (l,m)) # zeigen, dass was passiert
-    plt.figure()
-    ax = plt.gca(projection = "3d")
-    
-    plt.title("$Y^{%i}_{%i}$" % (m,l))
-    Y_lm = sph_harm(m,l, phi_2d, theta_2d)
-    r = np.abs(Y_lm.real)*xyz_2d
-    ax.plot_surface(r[0], r[1], r[2], 
-                    facecolors=colormap.to_rgba(Y_lm.real), 
-                    rstride=2, cstride=2)
-    ax.set_xlim(-limit,limit)
-    ax.set_ylim(-limit,limit)
-    ax.set_zlim(-limit,limit)
-    ax.set_aspect("equal")
-    #ax.set_axis_off()
-    
-
-# Vorsicht: diese Schleifen erzeugen 16 plots (in 16 Fenstern)!
-for l in range(0,4):
-    for m in range(-l,l+1):
-        show_Y_lm(l,m)
-
-show_Y_lm(l=5,m=0)
-show_Y_lm(l=5,m=4)        
-show_Y_lm(l=6,m=6)
-        
-plt.show()
-#%%
-with open(path_info) as f:
-    for line in f.readlines():
-        if 'hv' in line:
-            hv_raw = line.strip(('hv (eV):'))
-            try:
-                hv = np.float32(hv_raw.split())
-                print(hv)
-            except ValueError:   
-                 print('')
-            
 #%%
 
 """
@@ -209,21 +162,10 @@ tb.CSRO(param, e0=0, vertices=False, proj=False)
 
 print(time.time()-start)
 #%%
-#bndstr = tb.bndstr
-#coord = tb.coord   
-#X = coord['X']; Y = coord['Y']   
-#Axz = bndstr['Axz']; Ayz = bndstr['Ayz']; Axy = bndstr['Axy']
-#Bxz = bndstr['Bxz']; Byz = bndstr['Byz']; Bxy = bndstr['Bxy']
-#bands = (Axz, Ayz, Axy, Bxz, Byz, Bxy)
-#os.chdir('/Users/denyssutter/Documents/PhD/data')
-#np.savetxt('Data_Axz_kpts_5000.dat', Axz)
-#np.savetxt('Data_Ayz_kpts_5000.dat', Ayz)
-#np.savetxt('Data_Axy_kpts_5000.dat', Axy)
-#np.savetxt('Data_Bxz_kpts_5000.dat', Bxz)
-#np.savetxt('Data_Byz_kpts_5000.dat', Byz)
-#np.savetxt('Data_Bxy_kpts_5000.dat', Bxy)
-#os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
-#%%
+"""
+Project: Density of states
+"""
+
 os.chdir('/Users/denyssutter/Documents/PhD/data')
 Axz = np.loadtxt('Data_Axz_kpts_5000.dat')
 Ayz = np.loadtxt('Data_Ayz_kpts_5000.dat')
@@ -234,6 +176,7 @@ Bxy = np.loadtxt('Data_Bxy_kpts_5000.dat')
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 bands = (Axz, Ayz, Axy, Bxz, Byz, Bxy)
 #%%
+
 En = ()
 DOS = ()
 N_bands = ()
@@ -264,6 +207,9 @@ print(N)
 plt.show()
 
 #%%
+"""
+Project: TB plot along direction
+"""
 from numpy import linalg as la
 a = np.pi
 
@@ -273,6 +219,7 @@ x = np.linspace(0, 2, 200)
 y = np.zeros(len(x))
 
 #Load TB parameters
+param = utils_math.paramCSRO20()  
 t1 = param['t1']; t2 = param['t2']; t3 = param['t3']
 t4 = param['t4']; t5 = param['t5']; t6 = param['t6']
 mu = param['mu']; l = param['l']
@@ -346,6 +293,9 @@ plt.plot([x[0], x[-1]], [0, 0], 'k:')
 plt.show()
 
 #%%
+"""
+Project: Heat capacity
+"""
 DOS = dos
 En = en
 EF = 0
@@ -405,6 +355,9 @@ gamma  = pre * C / T
 plt.figure(r'$C_el$')
 plt.plot(T, gamma)
 #%%
+"""
+Project: Luttinger' theorem (FS counting)
+"""
 # Use Green's theorem to compute the area
 # enclosed by the given contour.
 def area(vs):
@@ -442,126 +395,59 @@ for i in range(len(levels)):
     print("r = " + str(levels[i]) + ": a =" + str(a))
 plt.show()
 
-#%%
-os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
-file = 8
-gold = 14
-mat = 'CSRO20'
-year = 2017
-sample = 'S1'
-
-D = ARPES.Bessy(file, mat, year, sample)
-D.norm(gold)
-D.FS(e = 0.07, ew = .02, norm = True)
-D.ang2kFS(D.ang, Ekin=36, lat_unit=True, a=5.5, b=5.5, c=11, 
-          V0=0, thdg=2.7, tidg=-1.5, phidg=42)
-D.FS_flatten(ang=True)
-D.plt_FS(coord=True)
-
 
 #%%
-os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
-file = 62151
-gold = 62081
-mat = 'CSRO20'
-year = 2017
-sample = 'S6'
+"""
+Project: Experimental setup with orbitals
+"""
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.special import sph_harm 
 
-D = ARPES.DLS(file, mat, year, sample)
-D.norm(gold)
-D.restrict(bot=0, top=1, left=.12, right=.9)
-D.FS(e = 0.0, ew = .02, norm = True)
-D.ang2kFS(D.ang, Ekin=22-4.5, lat_unit=True, a=5.5, b=5.5, c=11, 
-          V0=0, thdg=12, tidg=-2.5, phidg=45)
-D.FS_flatten(ang=True)
-D.plt_FS(coord=True)
+# nur fuer den Seiteneffekt: plt.gca(projection = '3d') funktioniert sonst nicht
+from mpl_toolkits.mplot3d import Axes3D 
+from matplotlib import cm
 
+theta_1d = np.linspace(0,   np.pi,  91) # 2 GRAD Schritte
+phi_1d   = np.linspace(0, 2*np.pi, 181) # 2 GRAD Schritte
 
-#%%
-from numpy import linalg as la
-kpoints = 50
-e0 = 0
-a = np.pi
-kbnd = 2
+theta_2d, phi_2d = np.meshgrid(theta_1d, phi_1d)
+xyz_2d = np.array([np.sin(theta_2d) * np.sin(phi_2d),
+                  np.sin(theta_2d) * np.cos(phi_2d),
+                  np.cos(theta_2d)]) 
 
-x = np.linspace(-kbnd, kbnd, kpoints)
-y = np.linspace(-kbnd, kbnd, kpoints)
-[X, Y] = np.meshgrid(x,y)
-coord = dict([('x', x), ('y', y), ('X', X), ('Y', Y)])
+colormap = cm.ScalarMappable( cmap=plt.get_cmap("cool"))
+colormap.set_clim(-.45, .45)
+limit = .5
 
-Pyz = np.array([[1, 0, 0], [0, 0, 0], [0, 0, 0]])
-Pxz = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]])
-Pxy = np.array([[0, 0, 0], [0, 0, 0], [0, 0, 1]])
+def show_Y_lm(l, m):
+    print("Y_%i_%i" % (l,m)) # zeigen, dass was passiert
+    plt.figure()
+    ax = plt.gca(projection = "3d")
+    
+    plt.title("$Y^{%i}_{%i}$" % (m,l))
+    Y_lm = sph_harm(m,l, phi_2d, theta_2d)
+    r = np.abs(Y_lm.real)*xyz_2d
+    ax.plot_surface(r[0], r[1], r[2], 
+                    facecolors=colormap.to_rgba(Y_lm.real), 
+                    rstride=2, cstride=2)
+    ax.set_xlim(-limit,limit)
+    ax.set_ylim(-limit,limit)
+    ax.set_zlim(-limit,limit)
+    ax.set_aspect("equal")
+    #ax.set_axis_off()
+    
 
-t1 = param['t1']; t2 = param['t2']; t3 = param['t3']
-t4 = param['t4']; t5 = param['t5']; t6 = param['t6']
-mu = param['mu']; l = param['l']
-x = coord['x']; y = coord['y']; X = coord['X']; Y = coord['Y']
-#Hopping terms
-fyz = - 2 * t2 * np.cos(X * a) - 2 * t1 * np.cos(Y * a)
-fxz = - 2 * t1 * np.cos(X * a) - 2 * t2 * np.cos(Y * a)
-fxy = - 2 * t3 * (np.cos(X * a) + np.cos(Y * a)) - \
-        4 * t4 * (np.cos(X * a) * np.cos(Y * a)) - \
-        2 * t5 * (np.cos(2 * X * a) + np.cos(2 * Y * a))
-off = - 4 * t6 * (np.sin(X * a) * np.sin(Y * a))
-#Placeholders energy eigenvalues
-yz = np.ones((len(x), len(y))); xz = np.ones((len(x), len(y)))
-xy = np.ones((len(x), len(y))); wyz = np.ones((len(x)))
-wxz = np.ones((len(x))); wxy = np.ones((len(x)))
+# Vorsicht: diese Schleifen erzeugen 16 plots (in 16 Fenstern)!
+for l in range(0,4):
+    for m in range(-l,l+1):
+        show_Y_lm(l,m)
 
-#Tight binding Hamiltonian
-def H(i,j):
-    H = np.array([[fyz[i, j] - mu, off[i, j] + complex(0, l), -l],
-                  [off[i, j] - complex(0, l), fxz[i, j] - mu, complex(0, l)],
-                  [-l, -complex(0, l), fxy[i, j] - mu]])
-    return H
-plt.figure(20011, figsize=(5, 5), clear=True)
-plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
-#Diagonalization of symmetric Hermitian matrix on k-mesh
-#for n in range(1):
-for i in range(len(x)):
-    for j in range(len(y)):
-        eval, evec = la.eigh(H(i, j))
-        eval = np.real(eval)
-        yz[i, j] = eval[0]; xz[i, j] = eval[1]; xy[i, j] = eval[2]
-#            wyz[i] = np.sum(np.conj(evec[:, n]) * (Pyz * evec[:, n])) 
-#            wxz[i] = np.sum(np.conj(evec[:, n]) * (Pxz * evec[:, n])) 
-#            wxy[i] = np.sum(np.conj(evec[:, n]) * (Pxy * evec[:, n])) 
-#            plt.contour(X[i, j], Y[i, j], yz[i, j], levels=e0)
-            
-c = plt.contour(X, Y, xz, colors = 'black', linestyles = ':', 
-                            alpha=1, levels = 0)
-p = c.collections[0].get_paths()
-p = np.asarray(p)
-
-plt.figure('20011a', figsize=(5, 5), clear=True)
-for i in range(2):
-    v = p[i].vertices
-    plt.plot(v[:, 0], v[:, 1])
-    plt.axis('equal')
-    plt.show()
-#%%
-#X = coord['X']; Y = coord['Y']   
-#xz = bndstr['xz']; yz = bndstr['yz']; xy = bndstr['xy']
-en = (xz, yz, xy)
-plt.figure(20011, figsize=(5, 5), clear=True)
-plt.tick_params(direction='in', length=1.5, width=.5, colors='k')  
-n = 0
-for i in en:
-    n = n + 1
-    plt.contour(X, Y, i, colors = 'black', linestyles = ':', levels = e0)
-    plt.axis('equal')
-plt.xticks(np.arange(-3, 3, 1))
-plt.yticks(np.arange(-3, 3, 1))
-plt.xlim(xmax=2, xmin=-2)
-plt.ylim(ymax=2, ymin=-2)
-plt.xlabel(r'$k_x (\pi/a)$', fontdict=font)
-plt.ylabel(r'$k_y (\pi/b)$', fontdict=font)
-plt.grid(True, alpha=.2)
-plt.show()  
-#%%
-
-
+show_Y_lm(l=5,m=0)
+show_Y_lm(l=5,m=4)        
+show_Y_lm(l=6,m=6)
+        
+plt.show()
 
 
 

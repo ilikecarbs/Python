@@ -4,8 +4,18 @@
 Created on Wed Jun 20 11:30:51 2018
 
 @author: denyssutter
+
+%%%%%%%%%%%%%%%%%%%%
+      utils.plt
+%%%%%%%%%%%%%%%%%%%%
+
+Content:
+1. Plot utilities for data analysis 
+   (called by ARPES.py or utils.py or utils_math.py) 
+
+2. Plot figures for thesis
+
 """    
-    
 import os
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 import ARPES
@@ -96,7 +106,7 @@ def plt_spec(self, norm):
         k = self.ang
         en = self.en
         dat = np.transpose(self.int)
-    plt.figure(20006, figsize=(10, 10), clear=True)
+    plt.figure(('spec' + str(self.filename)), figsize=(10, 10), clear=True)
     plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
     plt.contourf(k, en, dat, 100, cmap = cm.ocean_r)
     if norm == True:
@@ -121,7 +131,7 @@ def plt_FS_polcut(self, norm, p, pw):
     p_val, p_ind = utils.find(self.pol, p)
     pw_val, pw_ind = utils.find(self.pol, p - pw)
     spec = np.sum(dat[:, : , pw_ind:p_ind], axis=2)
-    plt.figure(20005, figsize=(10, 10), clear=True)
+    plt.figure(('FS polcut' + str(self.filename)), figsize=(10, 10), clear=True)
     plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
     plt.contourf(k, en, spec, 100, cmap = cm.ocean_r)
     plt.plot([np.min(k), np.max(k)], [-2.8, -2.8], 'k:')
@@ -136,24 +146,19 @@ def plt_hv(self, a, aw):
     hv = self.hv
     en = self.en
     dat = self.int
-    a_val, a_ind = utils.find(self.ang, a)
-    aw_val, aw_ind = utils.find(self.ang, a - aw)
-    spec = np.sum(dat[:, aw_ind:a_ind+1, :], axis=1)
     ###Plotting###
     n = np.ceil(np.sqrt(self.hv.size))
-    plt.figure(2004, figsize=(10, 10), clear=True)
+    plt.figure(('hv scan' + str(self.filename)), figsize=(10, 10), clear=True)
     plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
     for i in range(self.hv.size):
         plt.subplot(n, n, i+1)
         plt.contourf(k, en, np.transpose(dat[i, :, :]), 100, cmap = cm.ocean_r)
         plt.xticks((0, 0), ('', ''))
         plt.title(str(np.round(hv[i], 0))+" eV")
-    plt.figure(20007, figsize=(10, 10), clear=True)
-    plt.contourf(hv, en, np.transpose(spec), 100, cmap = cm.ocean_r)
     plt.show()
     
 def plt_FS(self, coord):
-    plt.figure(20000, figsize=(8, 8), clear=True)
+    plt.figure(('FS' + str(self.file)), figsize=(8, 8), clear=True)
     plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
     if coord == True:
         kx = self.kx
@@ -174,7 +179,7 @@ def plt_cont_TB_simple(self, e0):
     coord = self.coord   
     X = coord['X']; Y = coord['Y']   
     en = bndstr['en']
-    plt.figure(20003, figsize=(10, 10), clear=True)
+    plt.figure('TB simple', figsize=(10, 10), clear=True)
     plt.contour(X, Y, en, levels = e0)
   
 def plt_cont_TB_SRO(self, e0):
@@ -183,7 +188,7 @@ def plt_cont_TB_SRO(self, e0):
     X = coord['X']; Y = coord['Y']   
     xz = bndstr['xz']; yz = bndstr['yz']; xy = bndstr['xy']
     en = (xz, yz, xy)
-    plt.figure(20002, figsize=(10, 3), clear=True)
+    plt.figure('TB SRO', figsize=(10, 3), clear=True)
     n = 0
     for i in en:
         n = n + 1
@@ -198,7 +203,7 @@ def plt_cont_TB_CSRO20(self, e0):
     Axz = bndstr['Axz']; Ayz = bndstr['Ayz']; Axy = bndstr['Axy']
     Bxz = bndstr['Bxz']; Byz = bndstr['Byz']; Bxy = bndstr['Bxy']
     en = (Axz, Ayz, Axy, Bxz, Byz, Bxy)
-    plt.figure(20001, figsize=(6, 4), clear=True)
+    plt.figure('TB CSRO20', figsize=(6, 4), clear=True)
     n = 0
     for i in en:
         n = n + 1
@@ -1669,7 +1674,22 @@ def CSROfig3(colmap=cm.ocean_r, print_fig=True):
 def CSROfig4(colmap=cm.ocean_r, print_fig=True):
     """
     Temperature dependence. Figure 4 in paper
-    """      
+    """  
+    ###Plot FS map for k-scale
+    os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+    file = 8
+    gold = 14
+    mat = 'CSRO20'
+    year = 2017
+    sample = 'S1'
+    D = ARPES.Bessy(file, mat, year, sample)
+    D.norm(gold)
+    D.FS(e = 0.07, ew = .02, norm = True)
+    D.ang2kFS(D.ang, Ekin=36, lat_unit=True, a=5.5, b=5.5, c=11, 
+              V0=0, thdg=2.7, tidg=-1.5, phidg=42)
+    D.FS_flatten(ang=True)
+    D.plt_FS(coord=True)  
+    ###Start Data loading for figure###
     os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
     files = [25, 26, 27, 28]
     gold = 14
