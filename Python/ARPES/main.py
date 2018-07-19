@@ -125,31 +125,6 @@ CSRO: TB specific heat
 #utils_plt.CSROfig17()
 #%%
 """
-Loading Current Data:
-"""
-
-os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
-mat = 'CaMn2Sb2'
-year = 2018
-file = 'S3_FSM_fine_hv90_T65'
-mode = 'FSM'
-D = ARPES.CASS(file, mat, year, mode)
-#utils.gold(file='S3_5', mat='CaMn2Sb2', year=2018, sample=1, Ef_ini=86.4, BL='CASS')
-#D.norm(gold='S3_5')
-#%%
-#D.plt_hv()
-D.FS(e = 86.4, ew = .1, norm = False)
-D.ang2kFS(D.ang, Ekin=90-4.5, lat_unit=False, a=1, b=1, c=1, 
-          V0=0, thdg=-6, tidg=24.5, phidg=-0)
-#D.FS_flatten(ang=True)
-D.plt_FS(coord=True)
-#D.plt_FS_polcut(norm=True, p=24.6, pw=.5)
-#%%
-plt.savefig(
-                '/Users/denyssutter/Documents/Denys/CaMn2Sb2/CASS2018/Figs/CSROfig16.png', 
-                dpi = 300,bbox_inches="tight")
-#%%
-"""
 Project: Heat capacity
 """
 DOS = dos

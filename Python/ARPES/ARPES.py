@@ -20,11 +20,18 @@ import numpy as np
 import utils as u
 import utils_plt as uplt
 from astropy.io import fits
+from igor import binarywave
 
 class Analysis:  
     """
     Class with all methods for basic data analysis
     """  
+    def gold(self, Ef_ini):
+        """
+        Fits and generates gold file
+        """
+        u.gold(self, Ef_ini)
+        
     def norm(self, gold):
         """
         Normalize data with a gold spectrum
@@ -73,7 +80,7 @@ class Analysis:
             self.int_norm = int_bkg
         elif norm == False:
             self.int = int_bkg
-        print('\n ~ Backgorund subtracted',
+        print('\n ~ Background subtracted',
               '\n', '==========================================')    
         
     def restrict(self, bot = 0, top = 1, left = 0, right = 1):
@@ -107,6 +114,7 @@ class Analysis:
                           V0, thdg, tidg, phidg)
         self.k = k
         self.k_V0 = k_V0
+        self.lat_unit = lat_unit
         self.kxs = np.transpose(np.broadcast_to(k[0], 
                                                (self.en.size, self.ang.size)))
         self.kx_V0s = np.transpose(np.broadcast_to(k_V0[0], 
@@ -129,6 +137,7 @@ class Analysis:
         self.ky = ky
         self.kx_V0 = kx_V0
         self.ky_V0 = ky_V0
+        self.lat_unit = lat_unit
         print('\n ~ Angles converted into k-space for Fermi surface',
               '\n', '==========================================')  
         
@@ -141,11 +150,11 @@ class Analysis:
         print('\n ~ Constant energy map extracted',
               '\n', '==========================================')  
         
-    def plt_spec(self, norm=False):
+    def plt_spec(self, norm=False, v_max=1):
         """
         Plot ARPES spectrum
         """
-        uplt.plt_spec(self, norm)
+        uplt.plt_spec(self, norm, v_max)
     
     def plt_FS_polcut(self, norm=False, p=0, pw=0):
         """
@@ -158,7 +167,13 @@ class Analysis:
         Plot Fermi surface
         """
         uplt.plt_FS(self, coord)
-
+    
+    def plt_FS_all(self, coord=False, norm=False):
+        """
+        Plot all Fermi surface maps
+        """
+        uplt.plt_FS_all(self, coord, norm)
+        
     def plt_hv(self, a=0, aw=0):
         """
         Plot all spectra of hv-scan
@@ -395,107 +410,149 @@ class Bessy(Analysis):
 class CASS(Analysis):
     """
     Data from Soleil
-    Beamline: Cassiopee
+    Beamline: Cassiopee, modes = {'FSM', 'hv', 'cut_txt', 'cut_ibw'}
     """    
     def __init__(self, file, mat, year, mode):  #Load Data file
         self.file = file
         self.mat = mat
         self.mode = mode
         folder = ''.join(['/Users/denyssutter/Documents/Denys/',str(mat),
-                          '/CASS',str(year),'/',str(file),'/'])
-        self.folder = folder
-        n_scans = (len([name for name in os.listdir(folder)\
-                       if os.path.isfile(os.path.join(folder, name))])) / 2
-        n_scans = np.int(n_scans)
-        if n_scans > 1:
-#            if mode == 'cut':
-#                intensity = np.loadtxt(folder + str(file) + '_int.dat')
-#                intensity = np.transpose(intensity)
-#                filename = file
-#                en = np.loadtxt(folder + str(file) + '_en.dat')
-#                ang = np.loadtxt(folder + str(file) + '_ang.dat')
-#                path = folder 
-#                self.en = en
-#                self.ang = ang
-#                self.ens = np.broadcast_to(en, (ang.size, en.size))
-#                self.angs = np.transpose(np.broadcast_to(ang, (en.size, ang.size)))
-#                self.path = path
-            if mode == 'FSM':
-                pol = np.zeros(n_scans)
-                for scan in range(n_scans):
-                    filename = ''.join(['FS_', str(scan + 1),'_ROI1_.txt'])
-                    info = ''.join(['FS_', str(scan + 1),'_i.txt'])
-                    path_info = folder + info
-                    path = folder + filename
-                    self.path = path
-                    print('\n ~ Initializing Cassiopee data file: \n {}'.format(self.path), 
-                          '\n', '==========================================')
-                    with open(path_info) as f: #read theta
+                          '/CASS',str(year),'/'])
+        if mode == 'cut_txt':
+            filename = ''.join([str(file),'.txt'])
+            path = folder + filename
+            with open(path, 'r') as f :
+                for i,line in enumerate(f.readlines()) :
+                    if line.startswith('Dimension 1 scale=') :
+                        en = line.split('=')[-1].split()
+                        en = np.array(en, dtype=float)
+                    elif line.startswith('Dimension 2 scale=') :
+                        ang = line.split('=')[-1].split()
+                        ang = np.array(ang, dtype=float)
+                    elif line.startswith('Excitation Energy') :
+                        hv = float(line.split('=')[-1])
+                    elif 'Data' in line:
+                        break
+            intensity = np.loadtxt(path, skiprows=i+1)[:,1:]
+            intensity = np.transpose(intensity)
+            self.ens = np.broadcast_to(en, (ang.size, en.size))
+            self.angs = np.transpose(np.broadcast_to(ang, (en.size, ang.size)))
+        elif mode == 'cut_ibw':
+            filename = ''.join([str(file),'.ibw'])
+            path = folder + filename
+            wave = binarywave.load(path)['wave']
+            intensity = np.array([wave['wData']])[0]
+            intensity = np.transpose(intensity)
+            # The `header` contains some metadata
+            header = wave['wave_header']
+            nDim = header['nDim']
+            steps = header['sfA']
+            starts = header['sfB']
+            en = np.linspace(starts[0], starts[0] + nDim[0] * steps[0], nDim[0])
+            ang = np.linspace(starts[1], starts[1] + nDim[1] * steps[1], nDim[1])
+            # Convert `note`, which is a bytestring of ASCII characters that 
+            # contains some metadata, to a list of strings
+            note = wave['note']
+            note = note.decode('ASCII').split('\r')
+            # Now the extraction fun begins. Most lines are of the form 
+            # `Some-kind-of-name=some-value`
+            metadata = dict()
+            for line in note :
+                # Split at '='. If it fails, we are not in a line that contains 
+                # useful information
+                try :
+                    name, val = line.split('=')
+                except ValueError :
+                    continue
+                metadata.update({name: val})
+            hv = metadata['Excitation Energy']
+            self.en = en
+            self.ang = ang
+            self.ens = np.broadcast_to(en, (ang.size, en.size))
+            self.angs = np.transpose(np.broadcast_to(ang, (en.size, ang.size)))
+        if mode == 'FSM':
+            sub_folder = ''.join([folder,str(file),'/'])
+            n_scans = (len([name for name in os.listdir(sub_folder)\
+                               if os.path.isfile(os.path.join(sub_folder, name))])) / 2
+            n_scans = np.int(n_scans)
+            pol = np.zeros(n_scans)
+            for scan in range(n_scans):
+                filename = ''.join(['FS_', str(scan + 1),'_ROI1_.txt'])
+                info = ''.join(['FS_', str(scan + 1),'_i.txt'])
+                path_info = sub_folder + info
+                path = sub_folder + filename
+                self.path = path
+                print('\n ~ Initializing Cassiopee data file: \n {}'.format(self.path), 
+                      '\n', '==========================================')
+                with open(path_info) as f: #read theta
+                    for line in f.readlines():
+                        if 'theta' in line:
+                            theta = line.strip('theta (deg):')
+                            pol[scan] = np.float32(theta.split())
+                data = np.genfromtxt(path, skip_header = 44, delimiter='\t')
+                if scan == 0:
+                    en = data[:, 0]
+                    with open(path) as f: #read angle
                         for line in f.readlines():
-                            if 'theta' in line:
-                                theta = line.strip('theta (deg):')
-                                pol[scan] = np.float32(theta.split())
-                    data = np.genfromtxt(path, skip_header = 44, delimiter='\t')
-                    if scan == 0:
-                        en = data[:, 0]
-                        with open(path) as f: #read angle
-                            for line in f.readlines():
-                                if 'Dimension 2 scale' in line:
-                                    ang_raw = line.strip('Dimension 2 scale=')
-                                    ang_raw = ang_raw.split()
-                                    ang = np.array(ang_raw, dtype=np.float32)  
-                        self.en = en
-                        self.ang = ang
-                        intensity = np.zeros((n_scans, len(ang), len(en)))
-                    intensity[scan] = np.transpose(data[:, 1:])
-                self.pol = pol
-                self.ens   = np.broadcast_to(en, (pol.size, ang.size, en.size))
-                self.angs  = np.transpose(
-                                np.broadcast_to(ang, (pol.size, en.size, ang.size)),
-                                    (0, 2, 1))
-                self.pols  = np.transpose(
-                                np.broadcast_to(pol, (ang.size, en.size, pol.size)),
-                                    (2, 0, 1))
-            elif mode == 'hv':
-                hv = np.zeros(n_scans)
-                for scan in range(n_scans):
-                    filename = ''.join(['hv_', str(scan + 1),'_ROI1_.txt'])
-                    info = ''.join(['hv_', str(scan + 1),'_i.txt'])
-                    path_info = folder + info
-                    path = folder + filename
-                    self.path = path
-                    print('\n ~ Initializing Cassiopee data file: \n {}'.format(self.path), 
-                          '\n', '==========================================')
-                    with open(path_info) as f:
+                            if 'Dimension 2 scale' in line:
+                                ang_raw = line.strip('Dimension 2 scale=')
+                                ang_raw = ang_raw.split()
+                                ang = np.array(ang_raw, dtype=np.float32)  
+                    intensity = np.zeros((n_scans, len(ang), len(en)))
+                intensity[scan] = np.transpose(data[:, 1:])
+            self.pol = pol
+            self.ens   = np.broadcast_to(en, (pol.size, ang.size, en.size))
+            self.angs  = np.transpose(
+                            np.broadcast_to(ang, (pol.size, en.size, ang.size)),
+                                (0, 2, 1))
+            self.pols  = np.transpose(
+                            np.broadcast_to(pol, (ang.size, en.size, pol.size)),
+                                (2, 0, 1))
+        elif mode == 'hv':
+            sub_folder = ''.join([folder,str(file),'/'])
+            n_scans = (len([name for name in os.listdir(sub_folder)\
+                               if os.path.isfile(os.path.join(sub_folder, name))])) / 2
+            n_scans = np.int(n_scans)
+            hv = np.zeros(n_scans)
+            for scan in range(n_scans):
+                filename = ''.join(['hv_', str(scan + 1),'_ROI1_.txt'])
+                info = ''.join(['hv_', str(scan + 1),'_i.txt'])
+                path_info = sub_folder + info
+                path = sub_folder + filename
+                self.path = path
+                print('\n ~ Initializing Cassiopee data file: \n {}'.format(self.path), 
+                      '\n', '==========================================')
+                with open(path_info) as f:
+                    for line in f.readlines():
+                        if 'hv' in line:
+                            hv_raw = line.strip(('hv (eV):'))
+                            try:
+                                hv[scan] = np.float32(hv_raw.split())
+                            except ValueError:   
+                                 print('')
+                data = np.genfromtxt(path, skip_header = 44, delimiter='\t')
+                if scan == 0:
+                    en = data[:, 0]
+                    with open(path) as f: #read angle
                         for line in f.readlines():
-                            if 'hv' in line:
-                                hv_raw = line.strip(('hv (eV):'))
-                                try:
-                                    hv[scan] = np.float32(hv_raw.split())
-                                except ValueError:   
-                                     print('')
-                    data = np.genfromtxt(path, skip_header = 44, delimiter='\t')
-                    if scan == 0:
-                        en = data[:, 0]
-                        with open(path) as f: #read angle
-                            for line in f.readlines():
-                                if 'Dimension 2 scale' in line:
-                                    ang_raw = line.strip('Dimension 2 scale=')
-                                    ang_raw = ang_raw.split()
-                                    ang = np.array(ang_raw, dtype=np.float32)  
-                        self.en = en
-                        self.ang = ang
-                        intensity = np.zeros((n_scans, len(ang), len(en)))
-                    intensity[scan] = np.transpose(data[:, 1:])
-                self.hv = hv
-                self.ens   = np.broadcast_to(en, (hv.size, ang.size, en.size))
-                self.angs  = np.transpose(
-                                np.broadcast_to(ang, (hv.size, en.size, ang.size)),
-                                    (0, 2, 1))
-                self.hvs  = np.transpose(
-                                np.broadcast_to(hv, (ang.size, en.size, hv.size)),
-                                    (2, 0, 1))
+                            if 'Dimension 2 scale' in line:
+                                ang_raw = line.strip('Dimension 2 scale=')
+                                ang_raw = ang_raw.split()
+                                ang = np.array(ang_raw, dtype=np.float32)  
+                    intensity = np.zeros((n_scans, len(ang), len(en)))
+                intensity[scan] = np.transpose(data[:, 1:])
+            self.hv = hv
+            self.ens   = np.broadcast_to(en, (hv.size, ang.size, en.size))
+            self.angs  = np.transpose(
+                            np.broadcast_to(ang, (hv.size, en.size, ang.size)),
+                                (0, 2, 1))
+            self.hvs  = np.transpose(
+                            np.broadcast_to(hv, (ang.size, en.size, hv.size)),
+                                (2, 0, 1))
         self.filename = filename
+        self.folder = folder
+        self.en = en
+        self.ang = ang
         self.int = intensity
         self.eint = np.sqrt(intensity)        
         print('\n ~ Initialization complete. Data has {} dimensions'.format(
