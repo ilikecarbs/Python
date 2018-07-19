@@ -85,6 +85,8 @@ orbitals = orbitals()
 cm.register_cmap(name='orbitals', cmap=orbitals)
 
 def plt_spec(self, norm):
+    plt.figure(('spec' + str(self.filename)), figsize=(10, 10), clear=True)
+    plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
     if norm == True:
         k = self.angs
         en = self.en_norm
@@ -97,12 +99,10 @@ def plt_spec(self, norm):
         k = self.ang
         en = self.en
         dat = np.transpose(self.int)
-    plt.figure(('spec' + str(self.filename)), figsize=(10, 10), clear=True)
-    plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
     plt.contourf(k, en, dat, 100, cmap = cm.ocean_r)
     if norm != False:
         plt.plot([np.min(k), np.max(k)], [0, 0], 'k:')
-    plt.xlabel('$k_x$', fontdict=font)   
+    plt.xlabel('Angles', fontdict=font)   
     plt.ylabel(r'$\omega$', fontdict=font)
     plt.show()
 
@@ -157,11 +157,16 @@ def plt_FS(self, coord):
         ky = self.ky
         dat = self.map
         plt.contourf(kx, ky, dat, 150, cmap = cm.ocean_r)
+        if self.lat_unit == True:
+            plt.xlabel(r'$k_x \, (\pi / a)$', fontdict=font)
+            plt.ylabel(r'$k_y \, (\pi / y)$', fontdict=font)
+        elif self.lat_unit == False:
+            plt.xlabel(r'$k_x \, (\mathrm{\AA}^{-1})$', fontdict=font)
+            plt.ylabel(r'$k_y \, (\mathrm{\AA}^{-1})$', fontdict=font)
     elif coord == False:
         kx = self.ang
         ky = self.pol
         dat = self.map
-    
     plt.grid(alpha=.5)
     plt.axis('equal')
     plt.colorbar()

@@ -16,7 +16,8 @@ utilities for data manipulation
 import os
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 import numpy as np
-import utils_math as umath
+import utils_math
+import utils_plt
 import ARPES
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
@@ -270,54 +271,45 @@ def FS(self, e, ew, norm): #Extract Constant Energy Map
         FSmap = np.sum(self.int[:, :, ew_ind:e_ind], axis=2)
     return FSmap
 
-def gold(file, mat, year, sample, Ef_ini, BL):
+def gold(self, Ef_ini):
     """
     Generates Files for Normalization
     """
-    if BL == 'DLS':
-        D = ARPES.DLS(file, mat, year, sample)
-    elif BL == 'SIS':
-        D = ARPES.SIS(file, mat, year, sample)
-    elif BL == 'ALS':
-        D = ARPES.ALS(file, mat, year, sample)
-    elif BL == 'Bessy':
-        D = ARPES.Bessy(file, mat, year, sample)
-    elif BL == 'CASS':
-        D = ARPES.CASS(file, mat, year, mode='cut')
     bnd = 1
     ch = 100
-    plt.figure(5001)
+    plt.figure('gold')
     plt.subplot(211)
-    enval, inden = find(D.en, Ef_ini-0.12)
-    plt.plot(D.en[inden:],D.int[ch,inden:],'bo',markersize=3)
-    p1_ini = [.001, Ef_ini, np.max(D.int[ch, :]), 20, 0]
-    Ef   = np.zeros(len(D.ang))
-    norm = np.zeros(len(D.ang))
-    for i in range(0,len(D.ang)):
+    enval, inden = find(self.en, Ef_ini-0.12)
+    plt.plot(self.en[inden:],self.int[ch,inden:],'bo',markersize=3)
+    p1_ini = [.001, Ef_ini, np.max(self.int[ch, :]), 20, 0]
+    Ef   = np.zeros(len(self.ang))
+    norm = np.zeros(len(self.ang))
+    for i in range(0,len(self.ang)):
         try:
-            popt, pcov = curve_fit(umath.FDsl, D.en[inden:], 
-                                   D.int[i,inden:], p1_ini)
+            popt, pcov = curve_fit(utils_math.FDsl, self.en[inden:], 
+                                   self.int[i,inden:], p1_ini)
         except RuntimeError:
             print("Error - convergence not reached")
         if i==ch:
-            plt.plot(D.en[inden:], umath.FDsl(D.en[inden:], 
+            plt.plot(self.en[inden:], utils_math.FDsl(self.en[inden:], 
                      popt[0], popt[1], popt[2], popt[3], popt[4]),'r-')
         Ef[i]   = popt[1]
-        norm[i] = sum(D.int[i,:])
+        norm[i] = sum(self.int[i,:])
         
     pini_poly2 = [Ef[ch], 0, 0, 0]
     #bounds_poly2 = ([-1, Ef[300]-1, -np.inf, -1], [1, Ef[300]+1, np.inf, 1])
-    popt, pcov = curve_fit(umath.poly2, D.ang[bnd:-bnd], 
+    popt, pcov = curve_fit(utils_math.poly2, self.ang[bnd:-bnd], 
                            Ef[bnd:-bnd], pini_poly2)
-    Ef_fit = umath.poly2(D.ang, popt[0], popt[1], popt[2], popt[3])
-    os.chdir(D.folder)
-    np.savetxt(''.join(['Ef_',str(file),'.dat']),Ef_fit)
-    np.savetxt(''.join(['norm_',str(file),'.dat']),norm)
+    Ef_fit = utils_math.poly2(self.ang, popt[0], popt[1], popt[2], popt[3])
+    os.chdir(self.folder)
+    np.savetxt(''.join(['Ef_',str(self.file),'.dat']),Ef_fit)
+    np.savetxt(''.join(['norm_',str(self.file),'.dat']),norm)
     os.chdir('/Users/denyssutter/Documents/library/Python')
     plt.subplot(212)
-    plt.plot(D.ang, Ef, 'bo')
-    plt.plot(D.ang, Ef_fit, 'r-')
+    plt.plot(self.ang, Ef, 'bo')
+    plt.plot(self.ang, Ef_fit, 'r-')
     plt.ylim(Ef[ch]-5, Ef[ch]+5)
     #label='fit: a=%0.2f, b=%5.2f, c=%5.2f' % tuple(popt))
+    self.plt_spec()
     plt.show()
         
