@@ -125,6 +125,26 @@ CSRO: TB specific heat
 #utils_plt.CSROfig17()
 #%%
 """
+Loading Current Data:
+"""
+os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+mat = 'CaMn2Sb2'
+year = 2018
+file = 'S3_hv50_hv100_T230'
+mode = 'hv'
+D = ARPES.CASS(file, mat, year, mode)
+D.flatten(norm=False)
+D.bkg(norm=False)
+D.plt_hv()
+#D.FS(e = 86.1, ew = .1, norm = False)
+#D.ang2kFS(D.ang, Ekin=90-4.5, lat_unit=False, a=1, b=1, c=1, 
+#          V0=0, thdg=-3.5, tidg=24.5, phidg=-0)
+#D.FS_flatten(ang=True)
+#D.plt_FS(coord=True)
+#D.plt_FS_polcut(norm=True, p=24.6, pw=.5)
+
+#%%
+"""
 Project: Heat capacity
 """
 DOS = dos

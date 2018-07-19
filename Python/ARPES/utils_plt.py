@@ -134,7 +134,7 @@ def plt_FS_polcut(self, norm, p, pw):
     plt.ylabel(r'$\omega$', fontdict=font)
     plt.show()
 
-def plt_hv(self, a, aw):
+def plt_hv(self):
     k = self.ang
     hv = self.hv
     en = self.en
@@ -146,8 +146,9 @@ def plt_hv(self, a, aw):
     for i in range(self.hv.size):
         plt.subplot(n, n, i+1)
         plt.contourf(k, en, np.transpose(dat[i, :, :]), 100, cmap = cm.ocean_r)
-        plt.xticks((0, 0), ('', ''))
-        plt.title(str(np.round(hv[i], 0))+" eV")
+        plt.xticks([])
+        plt.yticks([])
+        plt.title('hv = ' + str(np.round(hv[i], 0)) + ' eV')
     plt.show()
     
 def plt_FS(self, coord):
@@ -197,7 +198,7 @@ def plt_FS_all(self, coord, norm):
                     plt.yticks(np.arange(-10, 10, 1))
                 else:
                     plt.yticks(np.arange(-10, 10, 1), [])
-                if n > n_maps ** 2 - n_maps:
+                if n > n_maps ** 2 - n_maps - (n_maps ** 2 - len(en_range)):
                     plt.xlabel(r'$k_x \, (\pi / a)$', fontdict=font)
                     plt.xticks(np.arange(-10, 10, 1))
                 else:
@@ -208,7 +209,7 @@ def plt_FS_all(self, coord, norm):
                     plt.yticks(np.arange(-10, 10, 1))
                 else:
                     plt.yticks(np.arange(-10, 10, 1), [])
-                if n > n_maps ** 2 - n_maps:
+                if n > n_maps ** 2 - n_maps - (n_maps ** 2 - len(en_range)):
                     plt.xlabel(r'$k_x \, (\mathrm{\AA}^{-1})$', fontdict=font)
                     plt.xticks(np.arange(-10, 10, 1))
                 else:
@@ -575,8 +576,8 @@ def CROfig5(colmap=cm.ocean_r, print_fig=True):
         n += 1
         D = ARPES.DLS(file, mat, year, sample)
         D.shift(gold)
-        D.norm(gold)
         D.restrict(bot=.6, top=1, left=0, right=1)
+        D.norm(gold)
         D.flatten(norm=True)
         if n == 1:
             ax = plt.subplot(1, 4, n) 
@@ -859,10 +860,10 @@ def CROfig8(colmap=cm.ocean_r, print_fig=True):
     sample = 'T10'
     D1 = ARPES.DLS(file1, mat, year, sample)
     D2 = ARPES.DLS(file2, mat, year, sample)
-    D1.norm(48000)
-    D2.norm(48000)
     D1.restrict(bot=.6, top=1, left=0, right=1)
     D2.restrict(bot=.6, top=1, left=0, right=1)
+    D1.norm(gold=48000)
+    D2.norm(gold=48000)
     D1.flatten(norm=True)
     D2.flatten(norm=True)
     D1.ang2k(D1.ang, Ekin=65-4.5, lat_unit=True, a=3.89, b=3.89, c=11, 
@@ -1195,8 +1196,8 @@ def CSROfig1(colmap=cm.ocean_r, print_fig=True):
     year = 2017
     sample = 'S6'
     D = ARPES.DLS(file, mat, year, sample)
-    D.norm(gold)
     D.restrict(bot=0, top=1, left=.12, right=.9)
+    D.norm(gold)
     D.FS(e = 0.02, ew = .03, norm = True)
     D.ang2kFS(D.ang, Ekin=22-4.5, lat_unit=True, a=5.33, b=5.55, c=11, 
               V0=0, thdg=8.7, tidg=4, phidg=88)
@@ -1328,6 +1329,7 @@ def CSROfig1(colmap=cm.ocean_r, print_fig=True):
         tb = utils_math.TB(a = np.pi, kbnd = 2, kpoints = 200)#Initialize 
         param = utils_math.paramCSRO20()  #Load parameters
         tb.CSRO(param)  #Calculate bandstructure
+        plt.figure(2001)
         bndstr = tb.bndstr  #Load bandstructure
         coord = tb.coord  #Load coordinates
         X = coord['X']; Y = coord['Y']   
@@ -1601,16 +1603,15 @@ def CSROfig3(colmap=cm.ocean_r, print_fig=True):
     D = ARPES.Bessy(file, mat, year, sample)
     LH = ARPES.Bessy(file_LH, mat, year, sample)
     LV = ARPES.Bessy(file_LV, mat, year, sample)
+    D.restrict(bot=.7, top=.9, left=0, right=1)
+    LH.restrict(bot=.55, top=.85, left=0, right=1)
+    LV.restrict(bot=.55, top=.85, left=0, right=1)
     D.norm(gold)
     LH.norm(gold)
     LV.norm(gold)
 #    D.bkg(norm=True)
 #    LH.bkg(norm=True)
 #    LV.bkg(norm=True)
-    D.restrict(bot=.7, top=.9, left=0, right=1)
-    LH.restrict(bot=.55, top=.85, left=0, right=1)
-    LV.restrict(bot=.55, top=.85, left=0, right=1)
-    
     D.ang2k(D.ang, Ekin=40, lat_unit=True, a=5.5, b=5.5, c=11, 
               V0=0, thdg=2.7, tidg=0, phidg=42)
     LH.ang2k(LH.ang, Ekin=40, lat_unit=True, a=5.5, b=5.5, c=11, 
@@ -1621,7 +1622,7 @@ def CSROfig3(colmap=cm.ocean_r, print_fig=True):
     
     data = (D.int_norm, LH.int_norm, LV.int_norm)
     en = (D.en_norm - .008, LH.en_norm, LV.en_norm)
-    ks = (D.ks, LH.ks, LV.ks)
+    ks = (D.kxs, LH.kxs, LV.kxs)
     k = (D.k[0], LH.k[0], LV.k[0])
     b_par = (np.array([0, .0037, .0002, .002]),
              np.array([0, .0037, .0002, .002]),
@@ -1793,18 +1794,18 @@ def CSROfig4(colmap=cm.ocean_r, print_fig=True):
             eint_norm = D.eint_norm
             
         en_norm = D.en_norm - .008
-        val, _edc_e = utils.find(D.ks[:, 0], edc_e_val)
-        val, _edcw_e = utils.find(D.ks[:, 0], edc_e_val - edcw_e_val)
-        val, _edc_b = utils.find(D.ks[:, 0], edc_b_val)
-        val, _edcw_b = utils.find(D.ks[:, 0], edc_b_val - edcw_b_val)
+        val, _edc_e = utils.find(D.kxs[:, 0], edc_e_val)
+        val, _edcw_e = utils.find(D.kxs[:, 0], edc_e_val - edcw_e_val)
+        val, _edc_b = utils.find(D.kxs[:, 0], edc_b_val)
+        val, _edcw_b = utils.find(D.kxs[:, 0], edc_b_val - edcw_b_val)
         val, _top_e = utils.find(en_norm[0, :], top_e)
         val, _top_b = utils.find(en_norm[0, :], top_b)
         val, _bot_e = utils.find(en_norm[0, :], bot_e)
         val, _bot_b = utils.find(en_norm[0, :], bot_b)
-        val, _left_e = utils.find(D.ks[:, 0], left_e)
-        val, _left_b = utils.find(D.ks[:, 0], left_b)
-        val, _right_e = utils.find(D.ks[:, 0], right_e)
-        val, _right_b = utils.find(D.ks[:, 0], right_b)
+        val, _left_e = utils.find(D.kxs[:, 0], left_e)
+        val, _left_b = utils.find(D.kxs[:, 0], left_b)
+        val, _right_e = utils.find(D.kxs[:, 0], right_e)
+        val, _right_b = utils.find(D.kxs[:, 0], right_b)
         
         edc_e = np.sum(int_norm[_edcw_e:_edc_e, :], axis=0) / (_edc_e - _edcw_e + 1)
         eedc_e = np.sum(eint_norm[_edcw_e:_edc_e, :], axis=0) / (_edc_e - _edcw_e + 1)
@@ -1818,7 +1819,7 @@ def CSROfig4(colmap=cm.ocean_r, print_fig=True):
         eint_b[j] = np.sum(eint_norm[_left_b:_right_b, _bot_b:_top_b])
         spec = spec + (int_norm,)
         en = en + (en_norm,)
-        k = k + (D.ks,)
+        k = k + (D.kxs,)
         EDC_e = EDC_e + (edc_e,)
         EDC_b = EDC_b + (edc_b,)
         eEDC_e = eEDC_e + (eedc_e,)
@@ -2224,8 +2225,8 @@ def CSROfig6(colmap=cm.ocean_r, print_fig=True, load=True):
     xx = np.arange(-.4, .25, .01) #helper variable for plotting
     for j in range(n_spec): 
         D = ARPES.Bessy(files[j], mat, year, sample) #Load Bessy data
-        D.norm(gold) #noramlized
         D.restrict(bot=.7, top=.9, left=.31, right=.6) #restrict data set
+        D.norm(gold) #noramlized
         D.bkg(norm=True) #subtract background
         if j == 0:
             D.ang2k(D.ang, Ekin=40 - 4.5, lat_unit=False, a=5.5, b=5.5, c=11, 
@@ -2241,7 +2242,7 @@ def CSROfig6(colmap=cm.ocean_r, print_fig=True, load=True):
         spec = spec + (int_norm,)
         espec = espec + (eint_norm,)
         en = en + (en_norm,)
-        k = k + (D.ks * np.sqrt(2),) #D.ks is only kx -> but we analyze along diagonal
+        k = k + (D.kxs * np.sqrt(2),) #D.kxs is only kx -> but we analyze along diagonal
         
     plt.figure('2006', figsize=(10, 10), clear=True)
     titles = [r'$T=1.3\,$K', r'$T=10\,$K', r'$T=20\,$K', r'$T=30\,$K']
@@ -2485,9 +2486,9 @@ def CSROfig7(colmap=cm.ocean_r, print_fig=True):
         ax = plt.subplot(1, 3, i + 1) 
         ax.set_position([.08 + i * .26, .3, .25, .5])
         plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
-        plt.contourf(D.ks, en_norm, int_norm, 100, cmap=colmap,
+        plt.contourf(D.kxs, en_norm, int_norm, 100, cmap=colmap,
                          vmin=.0, vmax=.05)
-        plt.plot([np.min(D.ks), np.max(D.ks)], [0, 0], 'k:')
+        plt.plot([np.min(D.kxs), np.max(D.kxs)], [0, 0], 'k:')
         if i == 0:
             plt.ylabel('$\omega\,(\mathrm{meV})$', fontdict=font)
             plt.yticks(np.arange(-.8, .2, .2))

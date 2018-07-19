@@ -225,6 +225,7 @@ class TB:
         PBxy = np.array([[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],
                          [0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,1]])
         n = 0
+        plt.figure('CSRO TB', clear=True)
         for i in en:
             n += 1
             plt.subplot(2, 3, n)

@@ -58,7 +58,10 @@ class Analysis:
         Flatten the spectra (Divide EDC by its sum per channel)
         """
         int_flat = u.flatten(self, norm)
-        self.int_flat = int_flat
+        if norm == False:
+            self.int = int_flat
+        elif norm == True:
+            self.int_norm = int_flat
         print('\n ~ Spectra flattened',
               '\n', '==========================================')   
     
@@ -87,9 +90,8 @@ class Analysis:
         """
         Crop the data file
         """
-        (en_restr, ens_restr, en_norm_restr, ang_restr, angs_restr, pol_restr, 
-         pols_restr, int_restr, eint_restr,
-         int_norm_restr, eint_norm_restr) = u.restrict(
+        (en_restr, ens_restr, ang_restr, angs_restr, pol_restr, 
+         pols_restr, int_restr, eint_restr) = u.restrict(
                  self, bot, top, left, right)
         self.en = en_restr
         self.ens = ens_restr
@@ -97,11 +99,11 @@ class Analysis:
         self.angs = angs_restr
         self.pol = pol_restr
         self.pols = pols_restr
-        self.en_norm = en_norm_restr
+#        self.en_norm = en_norm_restr
         self.int = int_restr
         self.eint = eint_restr
-        self.int_norm = int_norm_restr
-        self.eint_norm = eint_norm_restr
+#        self.int_norm = int_norm_restr
+#        self.eint_norm = eint_norm_restr
         print('\n ~ Spectra restricted',
               '\n', '==========================================')  
         
@@ -174,11 +176,11 @@ class Analysis:
         """
         uplt.plt_FS_all(self, coord, norm)
         
-    def plt_hv(self, a=0, aw=0):
+    def plt_hv(self):
         """
         Plot all spectra of hv-scan
         """
-        uplt.plt_hv(self, a, aw)
+        uplt.plt_hv(self)
 
 
 class DLS(Analysis):

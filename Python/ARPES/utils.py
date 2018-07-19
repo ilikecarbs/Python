@@ -154,11 +154,11 @@ def restrict(self, bot, top, left, right):
         ens_restr = self.ens[_left:_right, _bot:_top]
         ang_restr = self.ang[_left:_right]
         angs_restr = self.angs[_left:_right, _bot:_top]
-        en_norm_restr = self.en_norm[_left:_right, _bot:_top]
+#        en_norm_restr = self.en_norm[_left:_right, _bot:_top]
         int_restr = self.int[_left:_right, _bot:_top]
         eint_restr = self.eint[_left:_right, _bot:_top]
-        int_norm_restr = self.int_norm[_left:_right, _bot:_top]
-        eint_norm_restr = self.eint_norm[_left:_right, _bot:_top]
+#        int_norm_restr = self.int_norm[_left:_right, _bot:_top]
+#        eint_norm_restr = self.eint_norm[_left:_right, _bot:_top]
         pol_restr = 0
         pols_restr = 0
     elif self.int.ndim == 3:
@@ -173,14 +173,17 @@ def restrict(self, bot, top, left, right):
         ens_restr = self.ens[_bot:_top, _left:_right]
         ang_restr = self.ang[_left:_right]
         angs_restr = self.angs[_bot:_top, _left:_right, :]
-        en_norm_restr = self.en_norm[_bot:_top, _left:_right, :]
+#        en_norm_restr = self.en_norm[_bot:_top, _left:_right, :]
         int_restr = self.int[_bot:_top, _left:_right, :]
         eint_restr = self.int[_bot:_top, _left:_right, :]
-        int_norm_restr = self.int[_bot:_top, _left:_right, :]
-        eint_norm_restr = self.int[_bot:_top, _left:_right, :]
-    return (en_restr, ens_restr, en_norm_restr, ang_restr, 
+#        int_norm_restr = self.int[_bot:_top, _left:_right, :]
+#        eint_norm_restr = self.int[_bot:_top, _left:_right, :]
+    return (en_restr, ens_restr, ang_restr, 
             angs_restr, pol_restr, pols_restr,
-            int_restr, eint_restr, int_norm_restr, eint_norm_restr)
+            int_restr, eint_restr)
+#    return (en_restr, ens_restr, en_norm_restr, ang_restr, 
+#            angs_restr, pol_restr, pols_restr,
+#            int_restr, eint_restr, int_norm_restr, eint_norm_restr)
 
 def FS_restrict(self, bot, top, left, right):
     d1, d2 = self.map.shape

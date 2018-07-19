@@ -135,3 +135,28 @@ D.ang2kFS(D.ang, Ekin=90-4.5, lat_unit=False, a=1, b=1, c=1,
 D.plt_FS_all(coord=True, norm=True)
 plt.savefig((path + str(D.file) + '.png'), 
                 dpi = 600,bbox_inches="tight")
+#%%
+"""
+Fermi Surface maps
+"""
+###High temperature T=230K###
+os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+mat = 'CaMn2Sb2'
+year = 2018
+file = 'S3_hv50_hv100_T230'
+mode = 'hv'
+D = ARPES.CASS(file, mat, year, mode)
+D.plt_hv()
+plt.savefig((path + str(D.file) + '.png'), 
+                dpi = 600,bbox_inches="tight")
+#%%
+###Low temperature T=65###
+os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+mat = 'CaMn2Sb2'
+year = 2018
+file = 'S3_hv50_hv100_T65'
+mode = 'hv'
+D = ARPES.CASS(file, mat, year, mode)
+D.plt_hv()
+plt.savefig((path + str(D.file) + '.png'), 
+                dpi = 600,bbox_inches="tight")
