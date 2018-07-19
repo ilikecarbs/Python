@@ -27,8 +27,8 @@ import ARPES
 import numpy as np
 import time
 import matplotlib.cm as cm
-#from scipy.stats import exponnorm
-#from scipy.optimize import curve_fit
+from scipy.stats import exponnorm
+from scipy.optimize import curve_fit
 
 rainbow_light = utils_plt.rainbow_light
 cm.register_cmap(name='rainbow_light', cmap=rainbow_light)
@@ -80,6 +80,8 @@ CSROfig14: (L): TB and density of states
 CSROfig15: DMFT FS
 CSROfig16: (L): DMFT bandstructure calculation
 CSROfig17: (L): LDA bandstructure calculation
+CSROfig18: CSRO30 Experimental band structure
+CSROfig19: CSRO30 Gamma - S cut epsilon pocket
 
 ---------  To-Do ---------
 
@@ -87,7 +89,6 @@ CSRO: TB with cuts
 CSRO: Symmetrization
 CSRO: FS area counting 
 CSRO: kz dependence
-CSRO: CSRO30 vs CSRO20 (FS and cuts)
 CSRO: TB specific heat
 """
 #--------
@@ -123,25 +124,8 @@ CSRO: TB specific heat
 #utils_plt.CSROfig15()
 #utils_plt.CSROfig16()
 #utils_plt.CSROfig17()
-#%%
-"""
-Loading Current Data:
-"""
-os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
-mat = 'CaMn2Sb2'
-year = 2018
-file = 'S3_hv50_hv100_T230'
-mode = 'hv'
-D = ARPES.CASS(file, mat, year, mode)
-D.flatten(norm=False)
-D.bkg(norm=False)
-D.plt_hv()
-#D.FS(e = 86.1, ew = .1, norm = False)
-#D.ang2kFS(D.ang, Ekin=90-4.5, lat_unit=False, a=1, b=1, c=1, 
-#          V0=0, thdg=-3.5, tidg=24.5, phidg=-0)
-#D.FS_flatten(ang=True)
-#D.plt_FS(coord=True)
-#D.plt_FS_polcut(norm=True, p=24.6, pw=.5)
+#utils_plt.CSROfig18()  
+utils_plt.CSROfig19()  
 
 #%%
 """

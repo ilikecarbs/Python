@@ -176,11 +176,11 @@ class Analysis:
         """
         uplt.plt_FS_all(self, coord, norm)
         
-    def plt_hv(self):
+    def plt_hv(self, v_max=1):
         """
         Plot all spectra of hv-scan
         """
-        uplt.plt_hv(self)
+        uplt.plt_hv(self, v_max)
 
 
 class DLS(Analysis):

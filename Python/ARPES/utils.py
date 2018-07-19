@@ -278,8 +278,8 @@ def gold(self, Ef_ini):
     """
     Generates Files for Normalization
     """
-    bnd = 1
-    ch = 100
+    bnd = 50
+    ch = 300
     plt.figure('gold')
     plt.subplot(211)
     enval, inden = find(self.en, Ef_ini-0.12)
