@@ -263,11 +263,11 @@ class TB:
                             wAyz = np.real(
                                     np.sum(
                                             np.conj(evec_proj[:, j]) * \
-                                            (PAxz * evec_proj[:, j]))) 
+                                            (PAyz * evec_proj[:, j]))) 
                             wAxz = np.real(
                                     np.sum(
                                             np.conj(evec_proj[:, j]) * \
-                                            (PAyz * evec_proj[:, j]))) 
+                                            (PAxz * evec_proj[:, j]))) 
                             wAxy = np.real(
                                     np.sum(
                                             np.conj(evec_proj[:, j]) * \
@@ -275,11 +275,11 @@ class TB:
                             wByz = np.real(
                                     np.sum(
                                             np.conj(evec_proj[:, j]) * \
-                                            (PBxz * evec_proj[:, j]))) 
+                                            (PByz * evec_proj[:, j]))) 
                             wBxz = np.real(
                                     np.sum(
                                             np.conj(evec_proj[:, j]) * \
-                                            (PByz * evec_proj[:, j]))) 
+                                            (PBxz * evec_proj[:, j]))) 
                             wBxy = np.real(
                                     np.sum(
                                             np.conj(evec_proj[:, j]) * \
@@ -331,9 +331,7 @@ def CSRO_eval(x, y):
     t1 = param['t1']; t2 = param['t2']; t3 = param['t3']
     t4 = param['t4']; t5 = param['t5']; t6 = param['t6']
     mu = param['mu']; l = param['l']
-    
     en = np.linspace(-.65, .3, 500)
-    
     spec = np.zeros((len(en), len(x)))
     #Hopping terms
     fx = -2 * np.cos((x + y) / 2 * a)

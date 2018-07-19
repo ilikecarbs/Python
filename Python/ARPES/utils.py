@@ -207,7 +207,6 @@ def ang2k(self, angdg, Ekin, lat_unit, a, b, c, V0, thdg, tidg, phidg):
     th = np.pi * thdg / 180
     ti = np.pi * tidg / 180
     phi = np.pi * phidg / 180
-    
     #Rotation matrices
     Ti = np.array([
             [1, 0, 0],
@@ -224,7 +223,6 @@ def ang2k(self, angdg, Ekin, lat_unit, a, b, c, V0, thdg, tidg, phidg):
             [0, 1, 0],
             [np.sin(th), 0, np.cos(th)]
             ])
-    
     #Build k-vector
     k_norm = np.sqrt(2 * me * Ekin) / hbar  #norm of k-vector
     k_norm_V0 = np.sqrt(2 * me * (Ekin + V0)) / hbar  #norm of k-vector 
