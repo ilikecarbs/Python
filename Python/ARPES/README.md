@@ -1,6 +1,6 @@
 ANGLE RESOLVED PHOTOEMISSION SPECTROSCOPY TOOLS
 
-- ARPES.py:       Data handling tools for i05 (Diamond Light Source), SIS (PSI), ALS (LBNL), one-cubed (Bessy), Soleil (CASSIOPEE)
+- ARPES.py:       Data analysis for i05 (Diamond Light Source), SIS (PSI), ALS (LBNL), one-cubed (Bessy), Soleil (CASSIOPEE)
 
 - GUI.py:         Building GUI for data analysis (under development)
 
