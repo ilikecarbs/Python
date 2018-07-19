@@ -84,7 +84,7 @@ cm.register_cmap(name='rainbow_light_2', cmap=rainbow_light_2)
 orbitals = orbitals()
 cm.register_cmap(name='orbitals', cmap=orbitals)
 
-def plt_spec(self, norm):
+def plt_spec(self, norm, v_max):
     plt.figure(('spec' + str(self.filename)), figsize=(10, 10), clear=True)
     plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
     if norm == True:
@@ -99,7 +99,8 @@ def plt_spec(self, norm):
         k = self.ang
         en = self.en
         dat = np.transpose(self.int)
-    plt.contourf(k, en, dat, 100, cmap = cm.ocean_r)
+    plt.contourf(k, en, dat, 100, cmap=cm.ocean_r, 
+                 vmin = 0, vmax=v_max * np.max(dat))
     if norm != False:
         plt.plot([np.min(k), np.max(k)], [0, 0], 'k:')
     plt.xlabel('Angles', fontdict=font)   
@@ -170,6 +171,44 @@ def plt_FS(self, coord):
     plt.grid(alpha=.5)
     plt.axis('equal')
     plt.colorbar()
+    plt.show()
+    
+def plt_FS_all(self, coord, norm):
+    if norm == False:
+        en_range = np.arange(np.min(self.en) + .2, np.max(self.en), .1)
+    elif norm == True:
+        en_range = np.arange(np.min(self.en_norm) + .2, np.max(self.en_norm), .1)
+    plt.figure(('FS' + str(self.file)), figsize=(8, 8), clear=True)
+    n_maps = np.ceil(np.sqrt(len(en_range)))
+    n = 0
+    for en in en_range:
+        n += 1
+        self.FS(e=en, ew=.1, norm=norm)
+        plt.subplot(n_maps, n_maps, n)
+        plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+        if coord == True:
+            kx = self.kx
+            ky = self.ky
+            dat = self.map
+            plt.contourf(kx, ky, dat, 150, cmap = cm.ocean_r)
+            if self.lat_unit == True:
+                if np.mod(n - 1 + n_maps, n_maps) == 0:
+                    plt.ylabel(r'$k_y \, (\pi / y)$', fontdict=font)
+                if n > n_maps ** 2 - n_maps:
+                    plt.xlabel(r'$k_x \, (\pi / a)$', fontdict=font)
+            elif self.lat_unit == False:
+                if np.mod(n - 1 + n_maps, n_maps) == 0:
+                    plt.ylabel(r'$k_y \, (\mathrm{\AA}^{-1})$', fontdict=font)
+                if n > n_maps ** 2 - n_maps:
+                    plt.xlabel(r'$k_x \, (\mathrm{\AA}^{-1})$', fontdict=font)
+        elif coord == False:
+            kx = self.ang
+            ky = self.pol
+            dat = self.map
+            plt.contourf(kx, ky, dat, 150, cmap = cm.ocean_r)
+        plt.title('energy = ' + str(np.round(en, 2)) + 'eV')
+        plt.grid(alpha=.5)
+        plt.axis('equal')
     plt.show()
 
 def plt_cont_TB_simple(self, e0):

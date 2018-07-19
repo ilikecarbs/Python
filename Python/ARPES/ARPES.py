@@ -80,7 +80,7 @@ class Analysis:
             self.int_norm = int_bkg
         elif norm == False:
             self.int = int_bkg
-        print('\n ~ Backgorund subtracted',
+        print('\n ~ Background subtracted',
               '\n', '==========================================')    
         
     def restrict(self, bot = 0, top = 1, left = 0, right = 1):
@@ -150,11 +150,11 @@ class Analysis:
         print('\n ~ Constant energy map extracted',
               '\n', '==========================================')  
         
-    def plt_spec(self, norm=False):
+    def plt_spec(self, norm=False, v_max=1):
         """
         Plot ARPES spectrum
         """
-        uplt.plt_spec(self, norm)
+        uplt.plt_spec(self, norm, v_max)
     
     def plt_FS_polcut(self, norm=False, p=0, pw=0):
         """
@@ -167,7 +167,13 @@ class Analysis:
         Plot Fermi surface
         """
         uplt.plt_FS(self, coord)
-
+    
+    def plt_FS_all(self, coord=False, norm=False):
+        """
+        Plot all Fermi surface maps
+        """
+        uplt.plt_FS_all(self, coord, norm)
+        
     def plt_hv(self, a=0, aw=0):
         """
         Plot all spectra of hv-scan

@@ -125,60 +125,6 @@ CSRO: TB specific heat
 #utils_plt.CSROfig17()
 #%%
 """
-Loading Current Data:
-"""
-
-os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
-mat = 'CaMn2Sb2'
-year = 2018
-file = 'S3_FSM_hv82_T230_Phin15'
-mode = 'FSM'
-D = ARPES.CASS(file, mat, year, mode)
-#%%
-utils.gold(file='S3_5', mat='CaMn2Sb2', year=2018, sample=1, Ef_ini=86.4, BL='CASS')
-D.norm(gold='S3_5')
-#%%
-#D.plt_hv()
-#D.FS(e = 86.4, ew = .1, norm = False)
-D.FS(e = 78.0, ew = .1, norm = False)
-D.ang2kFS(D.ang, Ekin=90-4.5, lat_unit=False, a=1, b=1, c=1, 
-          V0=0, thdg=-3.5, tidg=24.5, phidg=-0)
-#D.FS_flatten(ang=True)
-D.plt_FS(coord=True)
-#D.plt_FS_polcut(norm=True, p=24.6, pw=.5)
-#%%
-plt.savefig(
-                '/Users/denyssutter/Documents/Denys/CaMn2Sb2/CASS2018/Figs/CSROfig16.png', 
-                dpi = 300,bbox_inches="tight")
-#%%
-os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
-mat = 'CaMn2Sb2'
-year = 2018
-file = 'S30005'
-mode = 'cut_ibw'
-
-D = ARPES.CASS(file, mat, year, mode)
-D.gold(Ef_ini=86.4)
-
-#%%
-n_scans = (len([name for name in os.listdir(folder)\
-               if os.path.isfile(os.path.join(folder, name))])) / 2
-n_scans = np.int(n_scans)
-filename = ''.join(['FS_', str(scan + 1),'_ROI1_.txt'])
-info = ''.join(['FS_', str(scan + 1),'_i.txt'])
-path_info = folder + info
-path = folder + filename
-print('\n ~ Initializing Cassiopee data file: \n {}'.format(self.path), 
-      '\n', '==========================================')
-with open(path_info) as f: #read theta
-    for line in f.readlines():
-        if 'theta' in line:
-            theta = line.strip('theta (deg):')
-            pol[scan] = np.float32(theta.split())
-
-
-#%%
-"""
 Project: Heat capacity
 """
 DOS = dos
