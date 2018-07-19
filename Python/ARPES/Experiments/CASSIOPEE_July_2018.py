@@ -10,6 +10,8 @@ os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 import ARPES
 import matplotlib.pyplot as plt
 
+path = '/Users/denyssutter/Documents/PhD/data/Experiments/CASSIOPEE_July_2018/'
+
 """
 %%%%%%%%%%%%%%%%%%%%
       CaMn2Sb2
@@ -47,7 +49,7 @@ for i in range(len(files)):
     D.flatten(norm=True)
     D.bkg(norm=True)
     D.plt_spec(norm=True, v_max=.5)
-    plt.savefig(('/Users/denyssutter/Documents/library/Python/ARPES/Experiments/CASSIOPEE_July_2018/' + str(D.file) + '_bkg_norm.png'), 
+    plt.savefig((path + str(D.file) + '_bkg_norm.png'), 
                 dpi = 300,bbox_inches="tight")
 #%%
 ###Low temperature T=65K###
@@ -65,7 +67,7 @@ for i in range(len(files)):
     D.flatten(norm=True)
     D.bkg(norm=True)
     D.plt_spec(norm=True, v_max=.5)
-    plt.savefig(('/Users/denyssutter/Documents/library/Python/ARPES/Experiments/CASSIOPEE_July_2018/' + str(D.file) + '_bkg_norm.png'), 
+    plt.savefig((path + str(D.file) + '_bkg_norm.png'), 
                 dpi = 300,bbox_inches="tight")
 #%%
 ###Low temperature T=65K###
@@ -83,7 +85,7 @@ for i in range(len(files)):
     D.flatten(norm=True)
     D.bkg(norm=True)
     D.plt_spec(norm=True, v_max=.5)
-    plt.savefig(('/Users/denyssutter/Documents/library/Python/ARPES/Experiments/CASSIOPEE_July_2018/' + str(D.file) + '_bkg_norm.png'), 
+    plt.savefig((path + str(D.file) + '_bkg_norm.png'), 
                 dpi = 300,bbox_inches="tight")
 #%%
 """
@@ -101,7 +103,7 @@ D.norm(gold='S30005')
 D.ang2kFS(D.ang, Ekin=90-4.5, lat_unit=False, a=1, b=1, c=1, 
           V0=0, thdg=-6, tidg=24.5, phidg=-0)
 D.plt_FS_all(coord=True, norm=True)
-plt.savefig(('/Users/denyssutter/Documents/library/Python/ARPES/Experiments/CASSIOPEE_July_2018/' + str(D.file) + '.png'), 
+plt.savefig((path + str(D.file) + '.png'), 
                 dpi = 600,bbox_inches="tight")
 #%%
 ###Low temperature T=65K###
@@ -112,11 +114,11 @@ year = 2018
 file = 'S3_FSM_fine_hv90_T65'
 mode = 'FSM'
 D = ARPES.CASS(file, mat, year, mode)
-D.norm(gold='S30012')
+D.norm(gold='S30023')
 D.ang2kFS(D.ang, Ekin=90-4.5, lat_unit=False, a=1, b=1, c=1, 
           V0=0, thdg=-6, tidg=24.5, phidg=-0)
 D.plt_FS_all(coord=True, norm=True)
-plt.savefig(('/Users/denyssutter/Documents/library/Python/ARPES/Experiments/CASSIOPEE_July_2018/' + str(D.file) + '.png'), 
+plt.savefig((path + str(D.file) + '.png'), 
                 dpi = 600,bbox_inches="tight")
 #%%
 ###Low temperature T=65K###
@@ -131,5 +133,5 @@ D.norm(gold='S30021')
 D.ang2kFS(D.ang, Ekin=90-4.5, lat_unit=False, a=1, b=1, c=1, 
           V0=0, thdg=-6, tidg=24.5, phidg=-0)
 D.plt_FS_all(coord=True, norm=True)
-plt.savefig(('/Users/denyssutter/Documents/library/Python/ARPES/Experiments/CASSIOPEE_July_2018/' + str(D.file) + '.png'), 
+plt.savefig((path + str(D.file) + '.png'), 
                 dpi = 600,bbox_inches="tight")

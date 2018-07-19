@@ -194,18 +194,32 @@ def plt_FS_all(self, coord, norm):
             if self.lat_unit == True:
                 if np.mod(n - 1 + n_maps, n_maps) == 0:
                     plt.ylabel(r'$k_y \, (\pi / y)$', fontdict=font)
+                    plt.yticks(np.arange(-10, 10, 1))
+                else:
+                    plt.yticks(np.arange(-10, 10, 1), [])
                 if n > n_maps ** 2 - n_maps:
                     plt.xlabel(r'$k_x \, (\pi / a)$', fontdict=font)
+                    plt.xticks(np.arange(-10, 10, 1))
+                else:
+                    plt.xticks(np.arange(-10, 10, 1), [])
             elif self.lat_unit == False:
                 if np.mod(n - 1 + n_maps, n_maps) == 0:
                     plt.ylabel(r'$k_y \, (\mathrm{\AA}^{-1})$', fontdict=font)
+                    plt.yticks(np.arange(-10, 10, 1))
+                else:
+                    plt.yticks(np.arange(-10, 10, 1), [])
                 if n > n_maps ** 2 - n_maps:
                     plt.xlabel(r'$k_x \, (\mathrm{\AA}^{-1})$', fontdict=font)
+                    plt.xticks(np.arange(-10, 10, 1))
+                else:
+                    plt.xticks(np.arange(-10, 10, 1), [])
         elif coord == False:
             kx = self.ang
             ky = self.pol
             dat = self.map
             plt.contourf(kx, ky, dat, 150, cmap = cm.ocean_r)
+        plt.xlim(xmax=np.max(kx), xmin=np.min(kx))
+        plt.ylim(ymax=np.max(ky), ymin=np.min(ky))
         plt.title('energy = ' + str(np.round(en, 2)) + 'eV')
         plt.grid(alpha=.5)
         plt.axis('equal')
