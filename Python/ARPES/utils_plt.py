@@ -156,11 +156,12 @@ def plt_FS(self, coord):
         kx = self.kx
         ky = self.ky
         dat = self.map
+        plt.contourf(kx, ky, dat, 150, cmap = cm.ocean_r)
     elif coord == False:
         kx = self.ang
         ky = self.pol
         dat = self.map
-    plt.contourf(kx, ky, dat, 100, cmap = cm.ocean_r)
+    
     plt.grid(alpha=.5)
     plt.axis('equal')
     plt.colorbar()
@@ -1539,7 +1540,6 @@ def CSROfig3(colmap=cm.ocean_r, print_fig=True):
     mat = 'CSRO20'
     year = 2017
     sample = 'S1'
-    
     D = ARPES.Bessy(file, mat, year, sample)
     LH = ARPES.Bessy(file_LH, mat, year, sample)
     LV = ARPES.Bessy(file_LV, mat, year, sample)
@@ -1697,7 +1697,6 @@ def CSROfig4(colmap=cm.ocean_r, print_fig=True):
     bot_e = -.015; bot_b = -.015
     left_e = -1.1; left_b = -.5
     right_e = -.7; right_b = -.2
-    
     spec = ()
     en = ()
     k = ()
@@ -2701,7 +2700,7 @@ def CSROfig11(print_fig=True):
     """    
     os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
     kbnd = 2
-    tb = utils_math.TB(a = np.pi, kbnd = kbnd, kpoints = 300)  #Initialize tight binding model
+    tb = utils_math.TB(a = np.pi, kbnd = kbnd, kpoints = 500)  #Initialize tight binding model
     param = utils_math.paramCSRO20()  
     kx, ky, FS = tb.CSRO(param, e0=0, vertices=True, proj=True) 
     bndstr = tb.bndstr
@@ -2749,7 +2748,7 @@ def CSROfig12(print_fig=True):
     """    
     os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
     kbnd = 2
-    tb = utils_math.TB(a = np.pi, kbnd = kbnd, kpoints = 300)  #Initialize tight binding model
+    tb = utils_math.TB(a = np.pi, kbnd = kbnd, kpoints = 500)  #Initialize tight binding model
     param = utils_math.paramSRO()  
     kx, ky, FS = tb.SRO(param, e0=0, vertices=True, proj=True) 
     bndstr = tb.bndstr
@@ -2812,12 +2811,12 @@ def CSROfig13(print_fig=True):
         v_bnd = .1
         if i != 0:
             ax = plt.subplot(2, 3, i + 1)
-            ax.set_position([.1 + i * .2 + .2 * (np.sqrt(2)-1), .2, .2 , .4])
+            ax.set_position([.1 + i * .15 + .15 * (np.sqrt(2)-1), .2, .15 , .4])
             plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
             k = -k
         else:
             ax = plt.subplot(2, 3, i + 1)
-            ax.set_position([.1 + i * .2 , .2, .2 * np.sqrt(2) , .4])
+            ax.set_position([.1 + i * .15 , .2, .15 * np.sqrt(2) , .4])
             plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
         plt.contourf(k, en, spec, 200, 
                      cmap='PuOr', vmin=-v_bnd, vmax=v_bnd)
@@ -2978,3 +2977,234 @@ def CSROfig14(print_fig=True):
     print('\n ~ Data saved Density of states',
               '\n', '==========================================')  
     os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+    
+def CSROfig15(print_fig=True):
+    """
+    DMFT FS
+    """   
+    os.chdir('/Users/denyssutter/Documents/PhD/data')
+    FS_DMFT_xy_data = np.loadtxt('FS_DMFT_xy.dat')
+    FS_DMFT_xz_data = np.loadtxt('FS_DMFT_xz.dat')
+    FS_DMFT_yz_data = np.loadtxt('FS_DMFT_yz.dat')
+    FS_LDA_xy_data = np.loadtxt('FS_LDA_xy.dat')
+    FS_LDA_xz_data = np.loadtxt('FS_LDA_xz.dat')
+    FS_LDA_yz_data = np.loadtxt('FS_LDA_yz.dat')
+    os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+    m = 51
+    ###Reshape###
+    FS_DMFT_xy = np.reshape(FS_DMFT_xy_data, (m, m, 3))
+    FS_DMFT_xz = np.reshape(FS_DMFT_xz_data, (m, m, 3))
+    FS_DMFT_yz = np.reshape(FS_DMFT_yz_data, (m, m, 3))
+    FS_LDA_xy = np.reshape(FS_LDA_xy_data, (m, m, 3))
+    FS_LDA_xz = np.reshape(FS_LDA_xz_data, (m, m, 3))
+    FS_LDA_yz = np.reshape(FS_LDA_yz_data, (m, m, 3))
+    ###Normalize###
+    FS_DMFT_xy = FS_DMFT_xy / np.max(FS_DMFT_xy[:, :, 2])
+    FS_DMFT_xz = FS_DMFT_xz / np.max(FS_DMFT_xz[:, :, 2])
+    FS_DMFT_yz = FS_DMFT_yz / np.max(FS_DMFT_yz[:, :, 2])
+    FS_LDA_xy = FS_LDA_xy / np.max(FS_LDA_xy[:, :, 2])
+    FS_LDA_xz = FS_LDA_xz / np.max(FS_LDA_xz[:, :, 2])
+    FS_LDA_yz = FS_LDA_yz / np.max(FS_LDA_yz[:, :, 2])
+    ###Weight distribution###
+    FS_DMFT = (FS_DMFT_xz[:, :, 2] + FS_DMFT_yz[:, :, 2]) / 2 - FS_DMFT_xy[:, :, 2]
+    FS_LDA = (FS_LDA_xz[:, :, 2] + FS_LDA_yz[:, :, 2]) / 2 - FS_LDA_xy[:, :, 2]
+    ###Flip data###
+    d1 = FS_DMFT
+    d2 = np.fliplr(d1)
+    d3 = np.flipud(d2)
+    d4 = np.flipud(d1)
+    l1 = FS_LDA
+    l2 = np.fliplr(l1)
+    l3 = np.flipud(l2)
+    l4 = np.flipud(l1)
+    ####Placeholders
+    #DMFT = np.zeros((4 * m, 4 * m))
+    #LDA = np.zeros((4 * m, 4 * m))
+    #kx = np.linspace(-2, 2, 4 * m)
+    #ky = np.linspace(-2, 2, 4 * m)
+    ##Build data###
+    #for i in range(m):
+    #    for j in range(m):
+    #        DMFT[i, j] = d1[i, j]
+    #        DMFT[i, j + m] = d2[i, j]
+    #        DMFT[i, j + 2 * m] = d1[i, j]
+    #        DMFT[i, j + 3 * m] = d2[i, j]
+    #        DMFT[i + m, j] = d4[i, j]
+    #        DMFT[i + m, j + m] = d3[i, j]
+    #        DMFT[i + m, j + 2 * m] = d4[i, j]
+    #        DMFT[i + m, j + 3 * m] = d3[i, j]
+    #        DMFT[i + 2 * m, j] = d1[i, j]
+    #        DMFT[i + 2 * m, j + m] = d2[i, j]
+    #        DMFT[i + 2 * m, j + 2 * m] = d1[i, j]
+    #        DMFT[i + 2 * m, j + 3 * m] = d2[i, j]
+    #        DMFT[i + 3 * m, j] = d4[i, j]
+    #        DMFT[i + 3 * m, j + m] = d3[i, j]
+    #        DMFT[i + 3 * m, j + 2 * m] = d4[i, j]
+    #        DMFT[i + 3 * m, j + 3 * m] = d3[i, j]
+    #        LDA[i, j] = l1[i, j]
+    #        LDA[i, j + m] = l2[i, j]
+    #        LDA[i, j + 2 * m] = l1[i, j]
+    #        LDA[i, j + 3 * m] = l2[i, j]
+    #        LDA[i + m, j] = l4[i, j]
+    #        LDA[i + m, j + m] = l3[i, j]
+    #        LDA[i + m, j + 2 * m] = l4[i, j]
+    #        LDA[i + m, j + 3 * m] = l3[i, j]
+    #        LDA[i + 2 * m, j] = l1[i, j]
+    #        LDA[i + 2 * m, j + m] = l2[i, j]
+    #        LDA[i + 2 * m, j + 2 * m] = l1[i, j]
+    #        LDA[i + 2 * m, j + 3 * m] = l2[i, j]
+    #        LDA[i + 3 * m, j] = l4[i, j]
+    #        LDA[i + 3 * m, j + m] = l3[i, j]
+    #        LDA[i + 3 * m, j + 2 * m] = l4[i, j]
+    #        LDA[i + 3 * m, j + 3 * m] = l3[i, j]    
+    ###Placeholders###
+    DMFT = np.zeros((2 * m, 2 * m))
+    LDA = np.zeros((2 * m, 2 * m))
+    kx = np.linspace(-1, 1, 2 * m)
+    ky = np.linspace(-1, 1, 2 * m)
+    ###Build data###
+    for i in range(m):
+        for j in range(m):
+            DMFT[i, j] = d3[i, j]
+            DMFT[i, j + m] = d4[i, j]
+            DMFT[i + m, j] = d2[i, j]
+            DMFT[i + m, j + m] = d1[i, j]
+            LDA[i, j] = l3[i, j]
+            LDA[i, j + m] = l4[i, j]
+            LDA[i + m, j] = l2[i, j]
+            LDA[i + m, j + m] = l1[i, j]
+    ###Plot data###
+    v_d = np.max(DMFT)
+    plt.figure(2015, figsize=(8, 8), clear=True)
+    ax = plt.subplot(121)
+    ax.set_position([.1, .3, .4, .4])
+    plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
+    plt.contourf(kx, ky, DMFT, 300, cmap='PuOr', vmin=-v_d, vmax=v_d)
+    plt.text(-.05, -.05, r'$\Gamma$', fontsize=18, color='r')
+    plt.text(.95, .95, 'S', fontsize=18, color='r')
+    plt.text(-.06, .95, 'X', fontsize=18, color='r')
+    plt.xticks(np.arange(-2, 2, 1), [])
+    plt.yticks(np.arange(-2, 2, 1), [])
+    plt.ylim(ymax=1, ymin=-1)
+    plt.xlim(xmax=1, xmin=-1)
+    plt.xlabel(r'$k_x \, (\pi / a)$', fontdict=font)
+    plt.ylabel(r'$k_y \, (\pi / b)$', fontdict=font)
+    pos = ax.get_position()
+    cax = plt.axes([pos.x0+pos.width + 0.01 ,
+                        pos.y0, 0.01, pos.height])
+    cbar = plt.colorbar(cax = cax, ticks = None)
+    cbar.set_ticks([])
+    cbar.set_clim(np.min(DMFT), np.max(DMFT))
+    plt.show()
+    if print_fig == True:
+        plt.savefig(
+                '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig15.png', 
+                dpi = 600,bbox_inches="tight")
+        
+def CSROfig16(print_fig=True):
+    """
+    DMFT bandstructure calculation
+    """    
+    os.chdir('/Users/denyssutter/Documents/PhD/data')
+    xz_data = np.loadtxt('DMFT_CSRO_xz.dat')
+    yz_data = np.loadtxt('DMFT_CSRO_yz.dat')
+    xy_data = np.loadtxt('DMFT_CSRO_xy.dat')
+    os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+    #[0, 56, 110, 187, 241, 266, 325, 350]  = [G,X,S,G,Y,T,G,Z]
+    xz = np.reshape(xz_data[:, 2], (351, 8000))
+    yz = np.reshape(yz_data[:, 2], (351, 8000))
+    xy = np.reshape(xy_data[:, 2], (351, 8000))
+    DMFT = np.transpose(xz + yz - 2 * xy)
+    en = np.linspace(-8, 8, 8000)
+    k = np.linspace(0, 350, 351)
+    GX = DMFT[:, :56]
+    k_GX = k[:56]
+    XS = DMFT[:, 56:110]
+    k_XS = k[56:110]
+    SG = DMFT[:, 110:187]
+    k_SG = k[110:187]
+    v_bnd = np.max(DMFT)
+    k = (np.flipud(k_SG), np.flipud(k_XS), np.flipud(k_GX))
+    bndstr = (SG, XS, GX)
+    plt.figure('2016', figsize=(8, 8), clear=True)
+    for i in range(len(bndstr)):
+        if i != 0:
+            ax = plt.subplot(3, 3, i + 1)
+            ax.set_position([.1 + i * .15 + .15 * (np.sqrt(2) - 1), .2, .15 , .4])
+            plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
+        else:
+            ax = plt.subplot(3, 3, i + 1)
+            ax.set_position([.1 + i * .15 , .2, .15 * np.sqrt(2) , .4])
+            plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
+        plt.contourf(k[i], en, bndstr[i], 200, cmap='PuOr', vmax=v_bnd, vmin=-v_bnd)
+        if i == 0:
+            plt.xticks([110, 186], ('$\Gamma$', 'S')) 
+            plt.yticks(np.arange(-1, 1, .2))
+            plt.ylabel(r'$\omega$ (eV)', fontdict=font)
+        elif i==1:
+            plt.xticks([56, 109], ('', 'X'))
+            plt.yticks(np.arange(-1, 1, .2), [])
+        elif i==2:
+            plt.xticks([0, 55], ('', '$\Gamma$'))
+            plt.yticks(np.arange(-1, 1, .2), [])
+        plt.plot([k[i][0], k[i][-1]], [0, 0], 'k:')    
+        plt.ylim(ymax = .25, ymin=-.65)
+    plt.show()
+    if print_fig == True:
+        plt.savefig(
+                '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig16.png', 
+                dpi = 600,bbox_inches="tight")
+        
+def CSROfig17(print_fig=True):
+    """
+    LDA bandstructure calculation
+    """    
+    os.chdir('/Users/denyssutter/Documents/PhD/data')
+    xz_data = np.loadtxt('LDA_CSRO_xz.dat')
+    yz_data = np.loadtxt('LDA_CSRO_yz.dat')
+    xy_data = np.loadtxt('LDA_CSRO_xy.dat')
+    os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+    #[0, 56, 110, 187, 241, 266, 325, 350]  = [G,X,S,G,Y,T,G,Z]
+    xz = np.reshape(xz_data[:, 2], (351, 8000))
+    yz = np.reshape(yz_data[:, 2], (351, 8000))
+    xy = np.reshape(xy_data[:, 2], (351, 8000))
+    LDA = np.transpose(xz + yz - 2 * xy)
+    en = np.linspace(-8, 8, 8000)
+    k = np.linspace(0, 350, 351)
+    GX = LDA[:, :56]
+    k_GX = k[:56]
+    XS = LDA[:, 56:110]
+    k_XS = k[56:110]
+    SG = LDA[:, 110:187]
+    k_SG = k[110:187]
+    v_bnd = np.max(LDA)
+    k = (np.flipud(k_SG), np.flipud(k_XS), np.flipud(k_GX))
+    bndstr = (SG, XS, GX)
+    plt.figure(2017, figsize=(8, 8), clear=True)
+    for i in range(len(bndstr)):
+        if i != 0:
+            ax = plt.subplot(3, 3, i + 1)
+            ax.set_position([.1 + i * .15 + .15 * (np.sqrt(2) - 1), .2, .15 , .4])
+            plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
+        else:
+            ax = plt.subplot(3, 3, i + 1)
+            ax.set_position([.1 + i * .15 , .2, .15 * np.sqrt(2) , .4])
+            plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
+        plt.contourf(k[i], en, bndstr[i], 200, cmap='PuOr', vmax=v_bnd, vmin=-v_bnd)
+        if i == 0:
+            plt.xticks([110, 186], ('$\Gamma$', 'S')) 
+            plt.yticks(np.arange(-5, 2, .5))
+            plt.ylabel(r'$\omega$ (eV)', fontdict=font)
+        elif i==1:
+            plt.xticks([56, 109], ('', 'X'))
+            plt.yticks(np.arange(-5, 2, .5), [])
+        elif i==2:
+            plt.xticks([0, 55], ('', '$\Gamma$'))
+            plt.yticks(np.arange(-5, 2, .5), [])
+        plt.plot([k[i][0], k[i][-1]], [0, 0], 'k:')    
+        plt.ylim(ymax = 1, ymin=-2.5)
+    plt.show()
+    if print_fig == True:
+        plt.savefig(
+                '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig17.png', 
+                dpi = 600,bbox_inches="tight")

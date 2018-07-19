@@ -77,14 +77,15 @@ CSROfig11: Tight binding model CSRO
 CSROfig12: Tight binding model SRO
 CSROfig13: TB along high symmetry directions, orbitally resolved
 CSROfig14: (L): TB and density of states
+CSROfig15: DMFT FS
+CSROfig16: (L): DMFT bandstructure calculation
+CSROfig17: (L): LDA bandstructure calculation
 
 ---------  To-Do ---------
 
 CSRO: TB with cuts
-CSRO: FS maps DMFT
 CSRO: Symmetrization
 CSRO: FS area counting 
-CSRO: ARPES cuts + TB
 CSRO: kz dependence
 CSRO: CSRO30 vs CSRO20 (FS and cuts)
 CSRO: TB specific heat
@@ -119,6 +120,9 @@ CSRO: TB specific heat
 #utils_plt.CSROfig12()
 #utils_plt.CSROfig13()
 #utils_plt.CSROfig14()
+#utils_plt.CSROfig15()
+#utils_plt.CSROfig16()
+#utils_plt.CSROfig17()
 #%%
 """
 Loading Current Data:
@@ -127,46 +131,23 @@ Loading Current Data:
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 mat = 'CaMn2Sb2'
 year = 2018
-file = 'S3_FSM_fine_hv90_T230'
+file = 'S3_FSM_fine_hv90_T65'
 mode = 'FSM'
 D = ARPES.CASS(file, mat, year, mode)
-utils.gold(file='S3_5', mat='CaMn2Sb2', year=2018, sample=1, Ef_ini=86.4, BL='CASS')
-D.norm(gold='S3_5')
+#utils.gold(file='S3_5', mat='CaMn2Sb2', year=2018, sample=1, Ef_ini=86.4, BL='CASS')
+#D.norm(gold='S3_5')
 #%%
 #D.plt_hv()
-D.FS(e = -.2, ew = .1, norm = True)
+D.FS(e = 86.4, ew = .1, norm = False)
 D.ang2kFS(D.ang, Ekin=90-4.5, lat_unit=False, a=1, b=1, c=1, 
           V0=0, thdg=-6, tidg=24.5, phidg=-0)
 #D.FS_flatten(ang=True)
 D.plt_FS(coord=True)
-D.plt_FS_polcut(norm=True, p=24.6, pw=.5)
-
+#D.plt_FS_polcut(norm=True, p=24.6, pw=.5)
 #%%
-
-"""
-Test Script for Tight binding models
-"""
-
-os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
-
-start = time.time()
-kbnd = 1
-tb = utils_math.TB(a = np.pi, kbnd = kbnd, kpoints = 50)  #Initialize tight binding model
-
-####SRO TB hopping parameters###
-#param = utils_math.paramSRO()  
-param = utils_math.paramCSRO20()  
-
-###Calculate and Plot FS###
-#tb.simple(param) 
-#tb.SRO(param, e0=0, vertices=False, proj=False) 
-tb.CSRO(param, e0=0, vertices=False, proj=False) 
-
-#tb.plt_cont_TB_SRO()
-#tb.plt_cont_TB_CSRO20()
-
-print(time.time()-start)
-
+plt.savefig(
+                '/Users/denyssutter/Documents/Denys/CaMn2Sb2/CASS2018/Figs/CSROfig16.png', 
+                dpi = 300,bbox_inches="tight")
 #%%
 """
 Project: Heat capacity
