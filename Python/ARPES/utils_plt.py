@@ -41,7 +41,6 @@ font = {'family': 'serif',
         'size': 12,
         }
 
-
 def rainbow_light():
     filepath = '/Users/denyssutter/Documents/library/Python/ARPES/cmap/rainbow_light.dat'
     data = np.loadtxt(filepath)
@@ -152,14 +151,15 @@ def plt_hv(self, v_max):
         plt.title('hv = ' + str(np.round(hv[i], 0)) + ' eV')
     plt.show()
     
-def plt_FS(self, coord):
+def plt_FS(self, coord, v_max):
     plt.figure(('FS' + str(self.file)), figsize=(8, 8), clear=True)
     plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
     if coord == True:
         kx = self.kx
         ky = self.ky
         dat = self.map
-        plt.contourf(kx, ky, dat, 150, cmap = cm.ocean_r)
+        plt.contourf(kx, ky, dat, 150, cmap=cm.ocean_r, 
+                     vmin=0, vmax=v_max * np.max(dat))
         if self.lat_unit == True:
             plt.xlabel(r'$k_x \, (\pi / a)$', fontdict=font)
             plt.ylabel(r'$k_y \, (\pi / y)$', fontdict=font)
@@ -170,6 +170,10 @@ def plt_FS(self, coord):
         kx = self.ang
         ky = self.pol
         dat = self.map
+        plt.contourf(kx, ky, dat, 150, cmap=cm.ocean_r, 
+                     vmin=0, vmax=v_max * np.max(dat))
+        plt.xlabel('Ang.', fontdict=font)
+        plt.ylabel('Pol.', fontdict=font)
     plt.grid(alpha=.5)
     plt.axis('equal')
     plt.colorbar()

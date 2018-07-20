@@ -104,8 +104,6 @@ def flatten(self, norm):
         int_flat = self.int_norm
     elif norm == False:
         int_flat = self.int  
-    elif norm == 'shift':
-        int_flat = self.int_shift
     if int_flat.ndim == 2:
         for i in range(int_flat.shape[0]):
             int_flat[i, :] = np.divide(int_flat[i, :], np.sum(int_flat[i, :]))           
