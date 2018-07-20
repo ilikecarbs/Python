@@ -4,21 +4,20 @@
 
 Created on Tue Jun 19 15:14:29 2018
 
-@author: denyssutter
+@author: ilikecarbs
 
 %%%%%%%%%%%%%%%%%%%%
         main
 %%%%%%%%%%%%%%%%%%%%
 
-Content:
-1. Load all relevant modules
-2. Plot figures for thesis (uncomment relevant figure)
-3. Load current file in a running experiment
-4. Current projects
+**Development environment and plotting figures for dissertation**
+
+.. note::
+        To-Do:
+            -
 
 """
 import os
-os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 import utils_plt
 import utils_math 
 import utils
@@ -29,6 +28,8 @@ import time
 import matplotlib.cm as cm
 from scipy.stats import exponnorm
 from scipy.optimize import curve_fit
+
+os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 
 rainbow_light = utils_plt.rainbow_light
 cm.register_cmap(name='rainbow_light', cmap=rainbow_light)
@@ -44,7 +45,7 @@ font = {'family': 'serif',
         'size': 12,
         }
 
-#%%
+# %%
 """
 ---------  Ca2RuO4 Figures   ---------
 CROfig1:   DFT plot Ca2RuO4: figure 3 of Nature Comm.
@@ -87,54 +88,50 @@ CSROfig19: CSRO30 Gamma - S cut epsilon pocket
 
 CSRO: TB with cuts
 CSRO: Symmetrization
-CSRO: FS area counting 
+CSRO: FS area counting
 CSRO: kz dependence
 CSRO: TB specific heat
 """
-#--------
-#utils_plt.CROfig1()
-#utils_plt.CROfig2()
-#utils_plt.CROfig3()
-#utils_plt.CROfig4()
-#utils_plt.CROfig5()
-#utils_plt.CROfig6()
-#utils_plt.CROfig7()
-#utils_plt.CROfig8()
-#utils_plt.CROfig9()
-#utils_plt.CROfig10()
-#utils_plt.CROfig11()
-#utils_plt.CROfig12()
-#utils_plt.CROfig13()
-#utils_plt.CROfig14()
-#--------
-#utils_plt.CSROfig1()
-#utils_plt.CSROfig2()
-#utils_plt.CSROfig3()
-#utils_plt.CSROfig4()
-#utils_plt.CSROfig5()
-#utils_plt.CSROfig6()
-#utils_plt.CSROfig7()
-#utils_plt.CSROfig8()
-#utils_plt.CSROfig9()
-#utils_plt.CSROfig10()
-#utils_plt.CSROfig11()
-#utils_plt.CSROfig12()
-#utils_plt.CSROfig13()
-#utils_plt.CSROfig14()
-#utils_plt.CSROfig15()
-#utils_plt.CSROfig16()
-#utils_plt.CSROfig17()
-#utils_plt.CSROfig18()  
-#utils_plt.CSROfig19()  
+# --------
+# utils_plt.CROfig1()
+# utils_plt.CROfig2()
+# utils_plt.CROfig3()
+# utils_plt.CROfig4()
+# utils_plt.CROfig5()
+# utils_plt.CROfig6()
+# utils_plt.CROfig7()
+# utils_plt.CROfig8()
+# utils_plt.CROfig9()
+# utils_plt.CROfig10()
+# utils_plt.CROfig11()
+# utils_plt.CROfig12()
+# utils_plt.CROfig13()
+# utils_plt.CROfig14()
+# --------
+# utils_plt.CSROfig1()
+# utils_plt.CSROfig2()
+# utils_plt.CSROfig3()
+# utils_plt.CSROfig4()
+# utils_plt.CSROfig5()
+# utils_plt.CSROfig6()
+# utils_plt.CSROfig7()
+# utils_plt.CSROfig8()
+# utils_plt.CSROfig9()
+# utils_plt.CSROfig10()
+# utils_plt.CSROfig11()
+# utils_plt.CSROfig12()
+# utils_plt.CSROfig13()
+# utils_plt.CSROfig14()
+# utils_plt.CSROfig15()
+# utils_plt.CSROfig16()
+# utils_plt.CSROfig17()
+# utils_plt.CSROfig18()
+# utils_plt.CSROfig19()
 
-#%%
+# %%
 """
 Project: Heat capacity
 """
-DOS = dos
-En = en
-EF = 0
-
 nbins = len(En);
 T = np.arange(.01, 12, .005)
 kB = 8.6173303e-5

@@ -4,6 +4,17 @@
 Created on Wed Jun 20 20:39:55 2018
 
 @author: denyssutter
+
+%%%%%%%%%%%%%%%%%%%%
+        GUI
+%%%%%%%%%%%%%%%%%%%%
+
+**In development, many many things to do...**
+
+.. note::
+        To-Do:
+            -
+
 """
 
 from pyqtgraph.Qt import QtGui, QtCore, QtWidgets

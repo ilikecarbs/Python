@@ -3,30 +3,47 @@
 """
 Created on Mon Jun 11 09:57:01 2018
 
-@author: denyssutter
+@author: ilikecarbs
 
 %%%%%%%%%%%%%%%%%%%%
         utils
 %%%%%%%%%%%%%%%%%%%%
 
-Content:
-utilities for data manipulation
+**Useful helper functions, mainly used for ARPES.py**
+
+.. note::
+        To-Do:
+            -
 
 """
 import os
-os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 import numpy as np
 import utils_math
 import utils_plt
 import ARPES
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
-   
- 
-def find(array, value):
+
+
+def find(array, val):
+    """Returns array[_val], _val
+
+    **Searches entry in array closest to val.**
+
+    Args
+    ----------
+    :array: entry value in array
+    :_val: index of entry
+
+    Return
+    ------
+    :array[_val]:   entry value in array
+    :_val:          index of entry
+
+    """
     array = np.asarray(array)
-    idx = (np.abs(array - value)).argmin()
-    return array[idx], idx
+    _val = (np.abs(array - val)).argmin()
+    return array[_val], _val
 
 def Shirley(en, edc):
     N = len(en)
@@ -283,9 +300,23 @@ def FS(self, e, ew, norm): #Extract Constant Energy Map
         FSmap = np.sum(self.int[:, :, ew_ind:e_ind], axis=2)
     return FSmap
 
+
 def gold(self, Ef_ini):
-    """
-    Generates Files for Normalization
+    """Generates gold file
+
+    **Fits and generates gold file for normalization.**
+
+    Args
+    ----------
+    :Ef_ini: initial guess of Fermi level
+
+    Return
+    ------
+    Saves data files into the current sample folder
+
+    :Ef_file.dat:       array with fitted Fermi energies
+    :norm_file.dat:     total intensity per channel for normalization
+
     """
     bnd = 50
     ch = 300

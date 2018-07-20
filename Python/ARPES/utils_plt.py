@@ -3,19 +3,19 @@
 """
 Created on Wed Jun 20 11:30:51 2018
 
-@author: denyssutter
+@author: ilikecarbs
 
 %%%%%%%%%%%%%%%%%%%%
-      utils.plt
+      utils_plt
 %%%%%%%%%%%%%%%%%%%%
 
-Content:
-1. Plot utilities for data analysis 
-   (called by ARPES.py or utils.py or utils_math.py) 
+**Plotting helper functions**
 
-2. Plot figures for thesis
+.. note::
+        To-Do:
+            -
 
-"""    
+"""
 import os
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 import ARPES

@@ -3,20 +3,23 @@
 """
 Created on Fri Jun 15 13:53:54 2018
 
-@author: denyssutter
+@author: ilikecarbs
 
 %%%%%%%%%%%%%%%%%%%%
-        ARPES
+      utils_math
 %%%%%%%%%%%%%%%%%%%%
 
-Content:
-Data Loader and data manipulation ARPES files
+**Math functions for fitting and Tight binding models**
+
+.. note::
+        To-Do:
+            -
 
 """
 
 import numpy as np
 from numpy import linalg as la
-import utils_plt as uplt 
+import utils_plt as uplt
 import utils
 from scipy.stats import exponnorm
 from scipy import special
@@ -26,14 +29,16 @@ import matplotlib.pyplot as plt
 from scipy.ndimage.filters import gaussian_filter
 import matplotlib.cm as cm
 
+
 def paramSRO():
     """
     Parameter set of TB model Sr2RuO4 arXiv:1212.3994v1
     """
     param = dict([('t1', .145), ('t2', .016), ('t3', .081), ('t4', .039),
-              ('t5', .005), ('t6', 0), ('mu', .122), ('l', .032)])
+                  ('t5', .005), ('t6', 0), ('mu', .122), ('l', .032)])
     return param
-        
+
+
 def paramCSRO20():
     """
     Parameter set of TB model D. Sutter et al. :-)

@@ -3,13 +3,24 @@
 """
 Created on Thu Jul 19 15:10:01 2018
 
-@author: denyssutter
+@author: ilikecarbs
+
+%%%%%%%%%%%%%%%%%%%%%
+ CASSIOPEE July 2018
+%%%%%%%%%%%%%%%%%%%%%
+
+**ARPES experiment**
+
+.. note::
+        To-Do:
+            -
+
 """
 import os
-os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 import ARPES
 import matplotlib.pyplot as plt
 
+os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 path = '/Users/denyssutter/Documents/PhD/data/Experiments/CASSIOPEE_July_2018/'
 
 """
@@ -17,11 +28,11 @@ path = '/Users/denyssutter/Documents/PhD/data/Experiments/CASSIOPEE_July_2018/'
       CaMn2Sb2
 %%%%%%%%%%%%%%%%%%%%
 """
-#%%
+# %%
 """
 Gold
 """
-###file S30001-S30007 are .ibw files! -> mode='cut_ibw'
+# file S30001-S30007 are .ibw files! -> mode='cut_ibw'
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 mat = 'CaMn2Sb2'
 year = 2018
