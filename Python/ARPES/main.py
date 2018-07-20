@@ -73,7 +73,7 @@ CSROfig7:  Background subtraction
 CSROfig8:  Extraction LDA Fermi velocity
 CSROfig9:  ReSigma vs ImSigma (load=True)
 CSROfig10: Quasiparticle Z
-CSROfig11: Tight binding model CSRO
+CSROfig11: Tight binding model CSRO1
 CSROfig12: Tight binding model SRO
 CSROfig13: TB along high symmetry directions, orbitally resolved
 CSROfig14: (L): TB and density of states
@@ -125,7 +125,7 @@ CSRO: TB specific heat
 #utils_plt.CSROfig16()
 #utils_plt.CSROfig17()
 #utils_plt.CSROfig18()  
-utils_plt.CSROfig19()  
+#utils_plt.CSROfig19()  
 
 #%%
 """

@@ -577,8 +577,8 @@ def CROfig5(colmap=cm.ocean_r, print_fig=True):
         n += 1
         D = ARPES.DLS(file, mat, year, sample)
         D.shift(gold)
-        D.restrict(bot=.6, top=1, left=0, right=1)
         D.norm(gold)
+        D.restrict(bot=.6, top=1, left=0, right=1)
         D.flatten(norm=True)
         if n == 1:
             ax = plt.subplot(1, 4, n) 
@@ -861,10 +861,10 @@ def CROfig8(colmap=cm.ocean_r, print_fig=True):
     sample = 'T10'
     D1 = ARPES.DLS(file1, mat, year, sample)
     D2 = ARPES.DLS(file2, mat, year, sample)
-    D1.restrict(bot=.6, top=1, left=0, right=1)
-    D2.restrict(bot=.6, top=1, left=0, right=1)
     D1.norm(gold=48000)
     D2.norm(gold=48000)
+    D1.restrict(bot=.6, top=1, left=0, right=1)
+    D2.restrict(bot=.6, top=1, left=0, right=1)
     D1.flatten(norm=True)
     D2.flatten(norm=True)
     D1.ang2k(D1.ang, Ekin=65-4.5, lat_unit=True, a=3.89, b=3.89, c=11, 
@@ -1197,8 +1197,8 @@ def CSROfig1(colmap=cm.ocean_r, print_fig=True):
     year = 2017
     sample = 'S6'
     D = ARPES.DLS(file, mat, year, sample)
-    D.restrict(bot=0, top=1, left=.12, right=.9)
     D.norm(gold)
+    D.restrict(bot=0, top=1, left=.12, right=.9)
     D.FS(e = 0.02, ew = .03, norm = True)
     D.ang2kFS(D.ang, Ekin=22-4.5, lat_unit=True, a=5.33, b=5.55, c=11, 
               V0=0, thdg=8.7, tidg=4, phidg=88)
@@ -1604,12 +1604,12 @@ def CSROfig3(colmap=cm.ocean_r, print_fig=True):
     D = ARPES.Bessy(file, mat, year, sample)
     LH = ARPES.Bessy(file_LH, mat, year, sample)
     LV = ARPES.Bessy(file_LV, mat, year, sample)
-    D.restrict(bot=.7, top=.9, left=0, right=1)
-    LH.restrict(bot=.55, top=.85, left=0, right=1)
-    LV.restrict(bot=.55, top=.85, left=0, right=1)
     D.norm(gold)
     LH.norm(gold)
     LV.norm(gold)
+    D.restrict(bot=.7, top=.9, left=0, right=1)
+    LH.restrict(bot=.55, top=.85, left=0, right=1)
+    LV.restrict(bot=.55, top=.85, left=0, right=1)
 #    D.bkg(norm=True)
 #    LH.bkg(norm=True)
 #    LV.bkg(norm=True)
@@ -2226,8 +2226,8 @@ def CSROfig6(colmap=cm.ocean_r, print_fig=True, load=True):
     xx = np.arange(-.4, .25, .01) #helper variable for plotting
     for j in range(n_spec): 
         D = ARPES.Bessy(files[j], mat, year, sample) #Load Bessy data
-        D.restrict(bot=.7, top=.9, left=.31, right=.6) #restrict data set
         D.norm(gold) #noramlized
+        D.restrict(bot=.7, top=.9, left=.31, right=.6) #restrict data set
         D.bkg(norm=True) #subtract background
         if j == 0:
             D.ang2k(D.ang, Ekin=40 - 4.5, lat_unit=False, a=5.5, b=5.5, c=11, 
@@ -3281,8 +3281,8 @@ def CSROfig18(print_fig=True):
     year = 2017
     sample = 'S13'
     D = ARPES.DLS(file, mat, year, sample)
-    D.restrict(bot=0, top=1, left=.12, right=.9)
     D.norm(gold)
+    D.restrict(bot=0, top=1, left=.12, right=.9)
     D.ang2kFS(D.ang, Ekin=22-4.5, lat_unit=True, a=5.33, b=5.55, c=11, 
               V0=0, thdg=-9, tidg=9, phidg=-90)
     D.FS(e=0.005, ew=.02, norm=True)

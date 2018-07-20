@@ -154,13 +154,18 @@ def restrict(self, bot, top, left, right):
         ens_restr = self.ens[_left:_right, _bot:_top]
         ang_restr = self.ang[_left:_right]
         angs_restr = self.angs[_left:_right, _bot:_top]
-#        en_norm_restr = self.en_norm[_left:_right, _bot:_top]
         int_restr = self.int[_left:_right, _bot:_top]
         eint_restr = self.eint[_left:_right, _bot:_top]
-#        int_norm_restr = self.int_norm[_left:_right, _bot:_top]
-#        eint_norm_restr = self.eint_norm[_left:_right, _bot:_top]
         pol_restr = 0
         pols_restr = 0
+        try:
+            en_norm_restr = self.en_norm[_left:_right, _bot:_top]
+            int_norm_restr = self.int_norm[_left:_right, _bot:_top]
+            eint_norm_restr = self.eint_norm[_left:_right, _bot:_top]
+        except AttributeError:
+            en_norm_restr = self.ens[_left:_right, _bot:_top]
+            int_norm_restr = self.int[_left:_right, _bot:_top]
+            eint_norm_restr = self.eint[_left:_right, _bot:_top]
     elif self.int.ndim == 3:
         d1, d2 = self.int.shape[1], self.int.shape[0]
         val, _bot = find(range(d2), bot * d2)
@@ -173,17 +178,22 @@ def restrict(self, bot, top, left, right):
         ens_restr = self.ens[_bot:_top, _left:_right]
         ang_restr = self.ang[_left:_right]
         angs_restr = self.angs[_bot:_top, _left:_right, :]
-#        en_norm_restr = self.en_norm[_bot:_top, _left:_right, :]
         int_restr = self.int[_bot:_top, _left:_right, :]
         eint_restr = self.int[_bot:_top, _left:_right, :]
-#        int_norm_restr = self.int[_bot:_top, _left:_right, :]
-#        eint_norm_restr = self.int[_bot:_top, _left:_right, :]
-    return (en_restr, ens_restr, ang_restr, 
-            angs_restr, pol_restr, pols_restr,
-            int_restr, eint_restr)
-#    return (en_restr, ens_restr, en_norm_restr, ang_restr, 
+        try:
+            en_norm_restr = self.en_norm[_bot:_top, _left:_right, :]
+            int_norm_restr = self.int[_bot:_top, _left:_right, :]
+            eint_norm_restr = self.int[_bot:_top, _left:_right, :]
+        except AttributeError:
+            en_norm_restr = self.ens[_bot:_top, _left:_right, :]
+            int_norm_restr = self.int[_bot:_top, _left:_right, :]
+            eint_norm_restr = self.int[_bot:_top, _left:_right, :]
+#    return (en_restr, ens_restr, ang_restr, 
 #            angs_restr, pol_restr, pols_restr,
-#            int_restr, eint_restr, int_norm_restr, eint_norm_restr)
+#            int_restr, eint_restr)
+    return (en_restr, ens_restr, en_norm_restr, ang_restr, 
+            angs_restr, pol_restr, pols_restr,
+            int_restr, eint_restr, int_norm_restr, eint_norm_restr)
 
 def FS_restrict(self, bot, top, left, right):
     d1, d2 = self.map.shape
@@ -193,13 +203,14 @@ def FS_restrict(self, bot, top, left, right):
     val, _right = find(range(d2), right * d2)
     pol_restr = self.pol[_bot:_top]
     pols_restr = self.pols[_bot:_top, _left:_right, :]
-#        en_restr = self.en
-#        ens_restr = self.ens[_bot:_top, _left:_right]
+    en_restr = self.en
+    ens_restr = self.ens[_bot:_top, _left:_right]
     ang_restr = self.ang[_left:_right]
     angs_restr = self.angs[_bot:_top, _left:_right, :]
-#        en_norm_restr = self.en_norm[_bot:_top, _left:_right, :]
+    en_norm_restr = self.en_norm[_bot:_top, _left:_right, :]
     map_restr = self.int[_bot:_top, _left:_right, :]
-    return (ang_restr, angs_restr, pol_restr, pols_restr, map_restr)
+    return (ang_restr, angs_restr, pol_restr, pols_restr,
+            en_restr, ens_restr, en_norm_restr, map_restr)
 
 def ang2k(self, angdg, Ekin, lat_unit, a, b, c, V0, thdg, tidg, phidg):     
     """
