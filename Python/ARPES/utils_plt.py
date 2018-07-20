@@ -14,10 +14,9 @@ Created on Wed Jun 20 11:30:51 2018
 .. note::
         To-Do:
             -
-
 """
+
 import os
-os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 import ARPES
 import utils
 import utils_math
@@ -31,6 +30,9 @@ from scipy.stats import exponnorm
 from scipy.optimize import curve_fit
 from scipy import integrate
 
+
+os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+
 plt.rcParams['mathtext.fontset'] = 'cm'
 plt.rcParams['font.serif']=['Computer Modern Roman']
 plt.rc('font', **{'family': 'serif', 'serif': ['STIXGeneral']})
@@ -42,7 +44,7 @@ font = {'family': 'serif',
         }
 
 def rainbow_light():
-    filepath = '/Users/denyssutter/Documents/library/Python/ARPES/cmap/rainbow_light.dat'
+    filepath = '/Users/denyssutter/Documents/PhD/data/rainbow_light.dat'
     data = np.loadtxt(filepath)
     colors = np.array([(i[0], i[1], i[2]) for i in data])
     # Normalize the colors
@@ -53,7 +55,7 @@ def rainbow_light():
     return rainbow_light
 
 def rainbow_light_2():
-    filepath = '/Users/denyssutter/Documents/library/Python/ARPES/cmap/rainbow_light_2.dat'
+    filepath = '/Users/denyssutter/Documents/PhD/data/rainbow_light_2.dat'
     data = np.loadtxt(filepath)
     colors = np.array([(i[0], i[1], i[2]) for i in data])
     # Normalize the colors

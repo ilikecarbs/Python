@@ -129,8 +129,8 @@ file = 'S3_FSM_fine_hv90_T230'
 mode = 'FSM'
 D = ARPES.CASS(file, mat, year, mode)
 D.norm(gold='S30005')
-D.ang2kFS(D.ang, Ekin=90-4.5, lat_unit=False, a=1., b=1., c=1., 
-          V0=0., thdg=-6., tidg=24.5, phidg=-0.)
+D.ang2kFS(D.ang, Ekin=90-4.5, lat_unit=False, a=1, b=1, c=1, 
+          V0=0, thdg=-6., tidg=24.5, phidg=-0)
 D.plt_FS_all(coord=True, norm=True)
 plt.savefig((path + str(D.file) + '.png'), 
                 dpi = 600,bbox_inches="tight")

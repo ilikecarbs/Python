@@ -141,12 +141,51 @@ class Analysis:
         plt.show()
 
     def norm(self, gold):
-        """Normalizes data
+        """returns self.en_norm, self.int_norm, self.eint_norm, self.gold
 
-        .. seealso:: - in utils.py
+        **Normalizes data intensity and shifts to Fermi level**
+
+        Args
+        ----------
+        :gold:      gold file used
+
+        Return
+        ------
+        :self.en_norm:      shifted energy
+        :self.int_norm:     normalized intensities
+        :self.eint_norm:    corresponding errors
+        :self.gold:         gold file used
         """
 
-        en_norm, int_norm, eint_norm = utils.norm(self, gold)
+        # Test if there is a gold file
+        try:
+            os.chdir(self.folder)
+            Ef = np.loadtxt(''.join(['Ef_', str(gold), '.dat']))
+            norm = np.loadtxt(''.join(['norm_', str(gold), '.dat']))
+            os.chdir('/Users/denyssutter/Documents/library/Python')
+
+            # Placeholders
+            en_norm = np.ones(self.ens.shape)
+            int_norm = np.ones(self.int.shape)
+            eint_norm = np.ones(self.eint.shape)
+
+            # Take dimensionality of data file into consideration
+            if np.size(self.int.shape) == 2:
+                for i in range(self.angs.shape[0]):
+                    en_norm[i, :] = self.en - Ef[i]
+                    int_norm[i, :] = np.divide(self.int[i, :], norm[i])
+                    eint_norm[i, :] = np.divide(self.eint[i, :], norm[i])
+            elif np.size(self.int.shape) == 3:
+                for i in range(self.angs.shape[1]):
+                    en_norm[:, i, :] = self.en - Ef[i]
+                    int_norm[:, i, :] = np.divide(self.int[:, i, :], norm[i])
+                    eint_norm[:, i, :] = np.divide(self.eint[:, i, :], norm[i])
+
+        except OSError:
+            os.chdir('/Users/denyssutter/Documents/library/Python')
+            print('- No gold files: {}'.format(self.gold), '\n')
+
+        self.gold = gold
         self.en_norm = en_norm
         self.int_norm = int_norm
         self.eint_norm = eint_norm
@@ -154,28 +193,79 @@ class Analysis:
               '\n', '==========================================')
 
     def shift(self, gold):
-        """Shifts the energy to Fermi level, but no intensity normalization
+        """returns self.en_norm, self.gold
 
-        .. seealso:: - in utils.py
+        **Shifts energy with by the Fermi level**
+
+        Args
+        ----------
+        :gold:      gold file used
+
+        Return
+        ------
+        :self.en_norm:  shifted energy
+        :self.gold:     gold file used
         """
 
-        en_shift, int_shift = utils.shift(self, gold)
+        # Test if there is a gold file in the folder
+        try:
+            os.chdir(self.folder)
+            Ef = np.loadtxt(''.join(['Ef_', str(gold), '.dat']))
+            os.chdir('/Users/denyssutter/Documents/library/Python')
+
+            # Placeholder
+            en_shift = np.ones(self.ens.shape)
+
+            # Take dimensionality of data file into consideration
+            if np.size(self.int.shape) == 2:
+                for i in range(self.angs.shape[0]):
+                    en_shift[i, :] = self.en - Ef[i]
+            elif np.size(self.int.shape) == 3:
+                for i in range(self.angs.shape[1]):
+                    en_shift[:, i, :] = self.en - Ef[i]
+
+        except OSError:
+            os.chdir('/Users/denyssutter/Documents/library/Python')
+            print('- No gold files: {}'.format(self.gold), '\n')
+
+        self.gold = gold
         self.en_norm = en_shift
-        self.int_norm = int_shift
-        print('\n ~ Only energy normalized',
+        print('\n ~ Energies shifted',
               '\n', '==========================================')
 
     def flatten(self, norm=False):
-        """Flatten the spectra (Divide EDC by its sum per channel)
+        """returns self.int, self.eint, self.int_norm, self.eint_norm
 
-        .. seealso:: - in utils.py
+        **For every angle, the signal is divided by its total intensity**
+
+        Args
+        ----------
+        :norm:      'True': flattens self.int_norm, 'False': self.int
+
+        Return
+        ------
+        :self.int:          flattened intensity
+        :self.eint:         corresponding error
+        :self.int_norm:     flattened normalized intensity
+        :self.eint_rnom:    corresponding error
         """
 
-        int_flat = utils.flatten(self, norm)
+        # Flattenes either self.int or self.int_norm
         if norm:
-            self.int_norm = int_flat
+            for i in range(self.int_norm.shape[1]):
+                self.int_norm[:, i, :] = np.divide(
+                                            self.int_norm[:, i, :],
+                                            np.sum(self.int_norm[:, i, :]))
+                self.eint_norm[:, i, :] = np.divide(
+                                            self.eint_norm[:, i, :],
+                                            np.sum(self.eint_norm[:, i, :]))
         else:
-            self.int = int_flat
+            for i in range(self.int.shape[0]):
+                self.int[i, :] = np.divide(
+                                    self.int[i, :], np.sum(self.int[i, :]))
+                self.eint[i, :] = np.divide(
+                                    self.eint[i, :], np.sum(self.eint[i, :]))
+
         print('\n ~ Spectra flattened',
               '\n', '==========================================')
 
@@ -194,18 +284,16 @@ class Analysis:
         :self.map:  Flattened Fermi surface map
         """
 
-        map_flat = np.zeros(self.map.shape)
         if ang:
             for i in range(self.ang.size):
-                map_flat[:, i] = np.divide(self.map[:, i], np.sum(
+                self.map[:, i] = np.divide(self.map[:, i], np.sum(
                         self.map[:, i]))
         else:
             for i in range(self.pol.size):
-                map_flat[i, :] = np.divide(self.map[i, :], np.sum(
+                self.map[i, :] = np.divide(self.map[i, :], np.sum(
                         self.map[i, :]))
 
-        self.map = map_flat
-        print('\n ~ FS flattened',
+        print('\n ~ Fermi surface flattened',
               '\n', '==========================================')
 
     def bkg(self, norm=False):
@@ -688,15 +776,16 @@ class SIS(Analysis):
 
         # Read meta data
         f = h5py.File(path, 'r')
-        data = np.array((f['Electron Analyzer/Image Data']))
+        data_meta = f['Electron Analyzer/Image Data']
+        data = np.array(data_meta)
         if data.ndim == 3:
             self.int = np.transpose(data, (2, 1, 0))
             d1, d2, d3 = data.shape
         elif data.ndim == 2:
             self.int = np.transpose(data)
             d1, d2 = data.shape
-        e_i, de = data.attrs['Axis0.Scale']  # initial energy, energy step
-        a_i, da = data.attrs['Axis1.Scale']  # initial angle, angle step
+        e_i, de = data_meta.attrs['Axis0.Scale']  # initial energy, energy step
+        a_i, da = data_meta.attrs['Axis1.Scale']  # initial angle, angle step
 
         # Build up data
         en = np.arange(e_i, e_i + d1 * de, de)
