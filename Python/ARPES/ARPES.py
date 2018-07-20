@@ -45,8 +45,8 @@ Methods (self.*)
         - 3-dimensional (pol*, ang*, en*)
         - 3-dimensional (hv*, ang*, en*)
         - 2-dimensional (ang*, en*)
-
 """
+
 import os
 import h5py
 import numpy as np
@@ -84,7 +84,6 @@ class Analysis:
 
         :Ef_file.dat:       array with fitted Fermi energies
         :norm_file.dat:     total intensity per channel for normalization
-
         """
 
         # Change these parameters to tune fitting
@@ -181,18 +180,36 @@ class Analysis:
               '\n', '==========================================')
 
     def FS_flatten(self, ang=True):
-        """Flattens Fermi surface (Divide for every angle by its sum)
+        """returns self.map
 
-        .. seealso:: - in utils.py
+        **For every angle, the signal in the other angular channel is
+        divided by its sum. Data get flattened in this fashion.**
+
+        Args
+        ----------
+        :ang:      'True': iterates through self.ang, 'False': self.pol
+
+        Return
+        ------
+        :self.map:  Flattened Fermi surface map
         """
 
-        map_flat = utils.FS_flatten(self, ang)
+        map_flat = np.zeros(self.map.shape)
+        if ang:
+            for i in range(self.ang.size):
+                map_flat[:, i] = np.divide(self.map[:, i], np.sum(
+                        self.map[:, i]))
+        else:
+            for i in range(self.pol.size):
+                map_flat[i, :] = np.divide(self.map[i, :], np.sum(
+                        self.map[i, :]))
+
         self.map = map_flat
         print('\n ~ FS flattened',
               '\n', '==========================================')
 
     def bkg(self, norm=False):
-        """returns background subtracted intensities
+        """returns self.int, self.int_norm, self.eint, self.eint_norm
 
         **For every energy, the minimum signal is subtracted for all angles**
 
@@ -202,28 +219,36 @@ class Analysis:
 
         Return
         ------
-        :kx:        reciprocal space vector in x
-        :ky:        reciprocal space vector in y
-            
-
+        :self.int:          intensity background subtracted
+        :self.int_norm:     normalized intensity background subtracted
+        :self.eint:         errors on new intensity
+        :self.eint_norm:    errors on new normalized intensity
         """
 
         if norm:
             int_bkg = self.int_norm
+            eint_bkg = self.eint_norm
         else:
             int_bkg = self.int
+            eint_bkg = self.eint
+
+        # Subtract background
         for i in range(self.en.size):
             int_bkg[:, i] = int_bkg[:, i] - np.min(int_bkg[:, i])
+            eint_bkg[:, i] = eint_bkg[:, i] - np.min(eint_bkg[:, i])
 
         if norm:
             self.int_norm = int_bkg
+            self._norm = eint_bkg
         else:
             self.int = int_bkg
+            self.eint = eint_bkg
         print('\n ~ Background subtracted',
               '\n', '==========================================')
 
     def restrict(self, bot=0, top=1, left=0, right=1):
-        """returns new data variables
+        """returns self.ang, self.angs, self.pol, self.pols, self.en, self.ens,
+        self.en_norm, self.int, self.int_norm, self.eint, self.eint_norm
 
         **If files are too large or if it is convenient to do so,
         cropt the data files to a smaller size.**
@@ -249,7 +274,6 @@ class Analysis:
             - self.int_norm (if available)
             - self.eint
             - self.eint_norm (if available)
-
         """
 
         # For 2-dimensional spectra
@@ -306,8 +330,8 @@ class Analysis:
 
     def ang2k(self, angdg, Ekin, lat_unit=False, a=5.33, b=5.33, c=11,
               V0=0, thdg=0, tidg=0, phidg=0):
-        """returns self.k, self.k_V0, self.lat_unit, self.kxs, self.kx_V0s,
-        self.kys, self.ky_V0s
+        """returns self.k, self.k_V0, self.kxs, self.kx_V0s,
+        self.kys, self.ky_V0s, self.lat_unit
 
         **Converts detector angles into k-space**
 
@@ -325,11 +349,13 @@ class Analysis:
         Return
         ------
 
-        :self.kx:        reciprocal space vector in x
-        :self.ky:        reciprocal space vector in y
-        :self.kx_V0:     reciprocal space vector in x (with inner potential)
-        :self.ky_V0:     reciprocal space vector in y (with inner potential)
-
+        :self.k:        k-vector
+        :self.k_V0:     k-vector (with inner potential)
+        :self.kxs:      kx-vector broadcasted
+        :self.kx_V0s:   kx-vector broadcasted (with inner potential)
+        :self.kys:      ky-vector broadcasted
+        :self.ky_V0s:   ky-vector broadcasted (with inner potential)
+        :self.lat_unit: reciprocal lattice units (boolean)
         """
 
         hbar = 6.58212e-16  # eV * s
@@ -391,7 +417,7 @@ class Analysis:
 
     def ang2kFS(self, angdg, Ekin, lat_unit=False, a=5.33, b=5.33, c=11,
                 V0=0, thdg=0, tidg=0, phidg=0):
-        """returns kx, ky, kx_V0, ky_V0
+        """returns self.kx, self.ky, self.kx_V0, self.ky_V0
 
         **Converts detector angles into k-space for a FS map**
 
@@ -413,7 +439,6 @@ class Analysis:
         :self.ky:        reciprocal space vector in y
         :self.kx_V0:     reciprocal space vector in x (with inner potential)
         :self.ky_V0:     reciprocal space vector in y (with inner potential)
-
         """
 
         # Placeholders
@@ -440,7 +465,7 @@ class Analysis:
               '\n', '==========================================')
 
     def FS(self, e=0, ew=0.05, norm=False):
-        """Extract Fermi surface map
+        """returns self.map
 
         **For a given energy e, extract a Fermi surface map,
         integrated to e-ew**
@@ -454,7 +479,6 @@ class Analysis:
         ------
 
         :self.map: Fermi surface map
-
         """
 
         FSmap = np.zeros((self.pol.size, self.ang.size))

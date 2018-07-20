@@ -143,16 +143,3 @@ def FS_flatten(self, ang):
             map_flat[i, :] = np.divide(self.map[i, :],
                                 np.sum(self.map[i, :]))    
     return map_flat
-
-def bkg(self, norm):
-    """
-    Subtract background
-    """
-    if norm == True:
-        int_bkg = self.int_norm
-    elif norm == False:
-        int_bkg = self.int
-    for i in range(self.en.size):
-        int_bkg[:, i] = int_bkg[:, i] - np.min(int_bkg[:, i])
-    return int_bkg
-
