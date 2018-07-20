@@ -4,21 +4,20 @@
 
 Created on Tue Jun 19 15:14:29 2018
 
-@author: denyssutter
+@author: ilikecarbs
 
 %%%%%%%%%%%%%%%%%%%%
         main
 %%%%%%%%%%%%%%%%%%%%
 
-Content:
-1. Load all relevant modules
-2. Plot figures for thesis (uncomment relevant figure)
-3. Load current file in a running experiment
-4. Current projects
+**Development environment and plotting figures for dissertation**
+
+.. note::
+        To-Do:
+            -
 
 """
 import os
-os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 import utils_plt
 import utils_math 
 import utils
@@ -27,8 +26,10 @@ import ARPES
 import numpy as np
 import time
 import matplotlib.cm as cm
-#from scipy.stats import exponnorm
-#from scipy.optimize import curve_fit
+from scipy.stats import exponnorm
+from scipy.optimize import curve_fit
+
+os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 
 rainbow_light = utils_plt.rainbow_light
 cm.register_cmap(name='rainbow_light', cmap=rainbow_light)
@@ -44,7 +45,7 @@ font = {'family': 'serif',
         'size': 12,
         }
 
-#%%
+# %%
 """
 ---------  Ca2RuO4 Figures   ---------
 CROfig1:   DFT plot Ca2RuO4: figure 3 of Nature Comm.
@@ -73,64 +74,64 @@ CSROfig7:  Background subtraction
 CSROfig8:  Extraction LDA Fermi velocity
 CSROfig9:  ReSigma vs ImSigma (load=True)
 CSROfig10: Quasiparticle Z
-CSROfig11: Tight binding model CSRO
+CSROfig11: Tight binding model CSRO1
 CSROfig12: Tight binding model SRO
 CSROfig13: TB along high symmetry directions, orbitally resolved
 CSROfig14: (L): TB and density of states
 CSROfig15: DMFT FS
 CSROfig16: (L): DMFT bandstructure calculation
 CSROfig17: (L): LDA bandstructure calculation
+CSROfig18: CSRO30 Experimental band structure
+CSROfig19: CSRO30 Gamma - S cut epsilon pocket
 
 ---------  To-Do ---------
 
 CSRO: TB with cuts
 CSRO: Symmetrization
-CSRO: FS area counting 
+CSRO: FS area counting
 CSRO: kz dependence
-CSRO: CSRO30 vs CSRO20 (FS and cuts)
 CSRO: TB specific heat
 """
-#--------
-#utils_plt.CROfig1()
-#utils_plt.CROfig2()
-#utils_plt.CROfig3()
-#utils_plt.CROfig4()
-#utils_plt.CROfig5()
-#utils_plt.CROfig6()
-#utils_plt.CROfig7()
-#utils_plt.CROfig8()
-#utils_plt.CROfig9()
-#utils_plt.CROfig10()
-#utils_plt.CROfig11()
-#utils_plt.CROfig12()
-#utils_plt.CROfig13()
-#utils_plt.CROfig14()
-#--------
-#utils_plt.CSROfig1()
-#utils_plt.CSROfig2()
-#utils_plt.CSROfig3()
-#utils_plt.CSROfig4()
-#utils_plt.CSROfig5()
-#utils_plt.CSROfig6()
-#utils_plt.CSROfig7()
-#utils_plt.CSROfig8()
-#utils_plt.CSROfig9()
-#utils_plt.CSROfig10()
-#utils_plt.CSROfig11()
-#utils_plt.CSROfig12()
-#utils_plt.CSROfig13()
-#utils_plt.CSROfig14()
-#utils_plt.CSROfig15()
-#utils_plt.CSROfig16()
-#utils_plt.CSROfig17()
-#%%
+# --------
+# utils_plt.CROfig1()
+# utils_plt.CROfig2()
+# utils_plt.CROfig3()
+# utils_plt.CROfig4()
+# utils_plt.CROfig5()
+# utils_plt.CROfig6()
+# utils_plt.CROfig7()
+# utils_plt.CROfig8()
+# utils_plt.CROfig9()
+# utils_plt.CROfig10()
+# utils_plt.CROfig11()
+# utils_plt.CROfig12()
+# utils_plt.CROfig13()
+# utils_plt.CROfig14()
+# --------
+# utils_plt.CSROfig1()
+# utils_plt.CSROfig2()
+# utils_plt.CSROfig3()
+# utils_plt.CSROfig4()
+# utils_plt.CSROfig5()
+# utils_plt.CSROfig6()
+# utils_plt.CSROfig7()
+# utils_plt.CSROfig8()
+# utils_plt.CSROfig9()
+# utils_plt.CSROfig10()
+# utils_plt.CSROfig11()
+# utils_plt.CSROfig12()
+# utils_plt.CSROfig13()
+# utils_plt.CSROfig14()
+# utils_plt.CSROfig15()
+# utils_plt.CSROfig16()
+# utils_plt.CSROfig17()
+# utils_plt.CSROfig18()
+# utils_plt.CSROfig19()
+
+# %%
 """
 Project: Heat capacity
 """
-DOS = dos
-En = en
-EF = 0
-
 nbins = len(En);
 T = np.arange(.01, 12, .005)
 kB = 8.6173303e-5

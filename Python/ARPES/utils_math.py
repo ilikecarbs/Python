@@ -3,20 +3,23 @@
 """
 Created on Fri Jun 15 13:53:54 2018
 
-@author: denyssutter
+@author: ilikecarbs
 
 %%%%%%%%%%%%%%%%%%%%
-        ARPES
+      utils_math
 %%%%%%%%%%%%%%%%%%%%
 
-Content:
-Data Loader and data manipulation ARPES files
+**Math functions for fitting and Tight binding models**
+
+.. note::
+        To-Do:
+            -
 
 """
 
 import numpy as np
 from numpy import linalg as la
-import utils_plt as uplt 
+import utils_plt as uplt
 import utils
 from scipy.stats import exponnorm
 from scipy import special
@@ -26,14 +29,16 @@ import matplotlib.pyplot as plt
 from scipy.ndimage.filters import gaussian_filter
 import matplotlib.cm as cm
 
+
 def paramSRO():
     """
     Parameter set of TB model Sr2RuO4 arXiv:1212.3994v1
     """
     param = dict([('t1', .145), ('t2', .016), ('t3', .081), ('t4', .039),
-              ('t5', .005), ('t6', 0), ('mu', .122), ('l', .032)])
+                  ('t5', .005), ('t6', 0), ('mu', .122), ('l', .032)])
     return param
-        
+
+
 def paramCSRO20():
     """
     Parameter set of TB model D. Sutter et al. :-)
@@ -225,6 +230,7 @@ class TB:
         PBxy = np.array([[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],
                          [0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,1]])
         n = 0
+        plt.figure('CSRO TB', clear=True)
         for i in en:
             n += 1
             plt.subplot(2, 3, n)
@@ -480,6 +486,22 @@ def lor6(x, p0, p1, p2, p3, p4, p5,
             p16 / (1 + ((x - p4) / p10) ** 2) +
             p17 / (1 + ((x - p5) / p11) ** 2) +
             p18 + p19 * x + p20 * x ** 2)
+
+def lor7(x, p0, p1, p2, p3, p4, p5, p6,
+         p7, p8, p9, p10, p11, p12, p13, 
+         p14, p15, p16, p17, p18, p19, p20,
+         p21, p22, p23):
+    """
+    Seven lorentzians on a quadratic background
+    """
+    return (p14 / (1 + ((x - p0) / p7)  ** 2) + 
+            p15 / (1 + ((x - p1) / p8)  ** 2) +
+            p16 / (1 + ((x - p2) / p9)  ** 2) +
+            p17 / (1 + ((x - p3) / p10) ** 2) +
+            p18 / (1 + ((x - p4) / p11) ** 2) +
+            p19 / (1 + ((x - p5) / p12) ** 2) +
+            p20 / (1 + ((x - p6) / p13) ** 2) +
+            p21 + p22 * x + p23 * x ** 2)
     
 def lor8(x, p0, p1, p2, p3, p4, p5, p6, p7, 
          p8, p9, p10, p11, p12, p13, p14, p15, 

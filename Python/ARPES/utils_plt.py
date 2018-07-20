@@ -3,19 +3,19 @@
 """
 Created on Wed Jun 20 11:30:51 2018
 
-@author: denyssutter
+@author: ilikecarbs
 
 %%%%%%%%%%%%%%%%%%%%
-      utils.plt
+      utils_plt
 %%%%%%%%%%%%%%%%%%%%
 
-Content:
-1. Plot utilities for data analysis 
-   (called by ARPES.py or utils.py or utils_math.py) 
+**Plotting helper functions**
 
-2. Plot figures for thesis
+.. note::
+        To-Do:
+            -
 
-"""    
+"""
 import os
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 import ARPES
@@ -40,7 +40,6 @@ font = {'family': 'serif',
         'weight': 'ultralight',
         'size': 12,
         }
-
 
 def rainbow_light():
     filepath = '/Users/denyssutter/Documents/library/Python/ARPES/cmap/rainbow_light.dat'
@@ -85,7 +84,7 @@ orbitals = orbitals()
 cm.register_cmap(name='orbitals', cmap=orbitals)
 
 def plt_spec(self, norm, v_max):
-    plt.figure(('spec' + str(self.filename)), figsize=(10, 10), clear=True)
+    plt.figure(('spec_' + str(self.filename)), figsize=(5, 5), clear=True)
     plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
     if norm == True:
         k = self.angs
@@ -134,7 +133,7 @@ def plt_FS_polcut(self, norm, p, pw):
     plt.ylabel(r'$\omega$', fontdict=font)
     plt.show()
 
-def plt_hv(self, a, aw):
+def plt_hv(self, v_max):
     k = self.ang
     hv = self.hv
     en = self.en
@@ -145,19 +144,22 @@ def plt_hv(self, a, aw):
     plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
     for i in range(self.hv.size):
         plt.subplot(n, n, i+1)
-        plt.contourf(k, en, np.transpose(dat[i, :, :]), 100, cmap = cm.ocean_r)
-        plt.xticks((0, 0), ('', ''))
-        plt.title(str(np.round(hv[i], 0))+" eV")
+        plt.contourf(k, en, np.transpose(dat[i, :, :]), 100, 
+                     cmap=cm.ocean_r, vmax=v_max * np.max(dat[i, :, :]))
+        plt.xticks([])
+        plt.yticks([])
+        plt.title('hv = ' + str(np.round(hv[i], 0)) + ' eV')
     plt.show()
     
-def plt_FS(self, coord):
+def plt_FS(self, coord, v_max):
     plt.figure(('FS' + str(self.file)), figsize=(8, 8), clear=True)
     plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
     if coord == True:
         kx = self.kx
         ky = self.ky
         dat = self.map
-        plt.contourf(kx, ky, dat, 150, cmap = cm.ocean_r)
+        plt.contourf(kx, ky, dat, 150, cmap=cm.ocean_r, 
+                     vmin=0, vmax=v_max * np.max(dat))
         if self.lat_unit == True:
             plt.xlabel(r'$k_x \, (\pi / a)$', fontdict=font)
             plt.ylabel(r'$k_y \, (\pi / y)$', fontdict=font)
@@ -168,6 +170,10 @@ def plt_FS(self, coord):
         kx = self.ang
         ky = self.pol
         dat = self.map
+        plt.contourf(kx, ky, dat, 150, cmap=cm.ocean_r, 
+                     vmin=0, vmax=v_max * np.max(dat))
+        plt.xlabel('Ang.', fontdict=font)
+        plt.ylabel('Pol.', fontdict=font)
     plt.grid(alpha=.5)
     plt.axis('equal')
     plt.colorbar()
@@ -197,7 +203,7 @@ def plt_FS_all(self, coord, norm):
                     plt.yticks(np.arange(-10, 10, 1))
                 else:
                     plt.yticks(np.arange(-10, 10, 1), [])
-                if n > n_maps ** 2 - n_maps:
+                if n > n_maps ** 2 - n_maps - (n_maps ** 2 - len(en_range)):
                     plt.xlabel(r'$k_x \, (\pi / a)$', fontdict=font)
                     plt.xticks(np.arange(-10, 10, 1))
                 else:
@@ -208,7 +214,7 @@ def plt_FS_all(self, coord, norm):
                     plt.yticks(np.arange(-10, 10, 1))
                 else:
                     plt.yticks(np.arange(-10, 10, 1), [])
-                if n > n_maps ** 2 - n_maps:
+                if n > n_maps ** 2 - n_maps - (n_maps ** 2 - len(en_range)):
                     plt.xlabel(r'$k_x \, (\mathrm{\AA}^{-1})$', fontdict=font)
                     plt.xticks(np.arange(-10, 10, 1))
                 else:
@@ -859,8 +865,8 @@ def CROfig8(colmap=cm.ocean_r, print_fig=True):
     sample = 'T10'
     D1 = ARPES.DLS(file1, mat, year, sample)
     D2 = ARPES.DLS(file2, mat, year, sample)
-    D1.norm(48000)
-    D2.norm(48000)
+    D1.norm(gold=48000)
+    D2.norm(gold=48000)
     D1.restrict(bot=.6, top=1, left=0, right=1)
     D2.restrict(bot=.6, top=1, left=0, right=1)
     D1.flatten(norm=True)
@@ -1248,7 +1254,7 @@ def CSROfig1(colmap=cm.ocean_r, print_fig=True):
         ax = plt.subplot(1, 3, 1) 
         ax.set_position([.08, .3, .28, .35])
         plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
-        plt.contourf(A1.en_norm, A1.kys, A1.int_norm, 100, cmap=colmap,
+        plt.contourf(A1.en_norm, A1.kys, A1.int_norm, 300, cmap=colmap,
                      vmin=.1 * np.max(A1.int_norm), vmax=.8 * np.max(A1.int_norm))
         plt.plot([0, 0], [np.min(A1.kys), np.max(A1.kys)], 'k:')
         plt.plot([-.005, -.005], [np.min(A1.kys), np.max(A1.kys)], linestyle='-.',
@@ -1283,7 +1289,7 @@ def CSROfig1(colmap=cm.ocean_r, print_fig=True):
         ax.set_position([.66, .3, .217, .35])
         plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
         plt.contourf(-np.transpose(np.fliplr(A2.en_norm)), np.transpose(A2.kys), 
-                     np.transpose(np.fliplr(A2.int_norm)), 100, cmap=colmap,
+                     np.transpose(np.fliplr(A2.int_norm)), 300, cmap=colmap,
                      vmin=.1 * np.max(A2.int_norm), vmax=.8 * np.max(A2.int_norm))
         plt.plot([0, 0], [np.min(A2.kys), np.max(A2.kys)], 'k:')
         plt.xlim(xmin=-.01, xmax=.06)
@@ -1328,6 +1334,7 @@ def CSROfig1(colmap=cm.ocean_r, print_fig=True):
         tb = utils_math.TB(a = np.pi, kbnd = 2, kpoints = 200)#Initialize 
         param = utils_math.paramCSRO20()  #Load parameters
         tb.CSRO(param)  #Calculate bandstructure
+        plt.figure(2001)
         bndstr = tb.bndstr  #Load bandstructure
         coord = tb.coord  #Load coordinates
         X = coord['X']; Y = coord['Y']   
@@ -1604,13 +1611,12 @@ def CSROfig3(colmap=cm.ocean_r, print_fig=True):
     D.norm(gold)
     LH.norm(gold)
     LV.norm(gold)
-#    D.bkg(norm=True)
-#    LH.bkg(norm=True)
-#    LV.bkg(norm=True)
     D.restrict(bot=.7, top=.9, left=0, right=1)
     LH.restrict(bot=.55, top=.85, left=0, right=1)
     LV.restrict(bot=.55, top=.85, left=0, right=1)
-    
+#    D.bkg(norm=True)
+#    LH.bkg(norm=True)
+#    LV.bkg(norm=True)
     D.ang2k(D.ang, Ekin=40, lat_unit=True, a=5.5, b=5.5, c=11, 
               V0=0, thdg=2.7, tidg=0, phidg=42)
     LH.ang2k(LH.ang, Ekin=40, lat_unit=True, a=5.5, b=5.5, c=11, 
@@ -1621,7 +1627,7 @@ def CSROfig3(colmap=cm.ocean_r, print_fig=True):
     
     data = (D.int_norm, LH.int_norm, LV.int_norm)
     en = (D.en_norm - .008, LH.en_norm, LV.en_norm)
-    ks = (D.ks, LH.ks, LV.ks)
+    ks = (D.kxs, LH.kxs, LV.kxs)
     k = (D.k[0], LH.k[0], LV.k[0])
     b_par = (np.array([0, .0037, .0002, .002]),
              np.array([0, .0037, .0002, .002]),
@@ -1793,18 +1799,18 @@ def CSROfig4(colmap=cm.ocean_r, print_fig=True):
             eint_norm = D.eint_norm
             
         en_norm = D.en_norm - .008
-        val, _edc_e = utils.find(D.ks[:, 0], edc_e_val)
-        val, _edcw_e = utils.find(D.ks[:, 0], edc_e_val - edcw_e_val)
-        val, _edc_b = utils.find(D.ks[:, 0], edc_b_val)
-        val, _edcw_b = utils.find(D.ks[:, 0], edc_b_val - edcw_b_val)
+        val, _edc_e = utils.find(D.kxs[:, 0], edc_e_val)
+        val, _edcw_e = utils.find(D.kxs[:, 0], edc_e_val - edcw_e_val)
+        val, _edc_b = utils.find(D.kxs[:, 0], edc_b_val)
+        val, _edcw_b = utils.find(D.kxs[:, 0], edc_b_val - edcw_b_val)
         val, _top_e = utils.find(en_norm[0, :], top_e)
         val, _top_b = utils.find(en_norm[0, :], top_b)
         val, _bot_e = utils.find(en_norm[0, :], bot_e)
         val, _bot_b = utils.find(en_norm[0, :], bot_b)
-        val, _left_e = utils.find(D.ks[:, 0], left_e)
-        val, _left_b = utils.find(D.ks[:, 0], left_b)
-        val, _right_e = utils.find(D.ks[:, 0], right_e)
-        val, _right_b = utils.find(D.ks[:, 0], right_b)
+        val, _left_e = utils.find(D.kxs[:, 0], left_e)
+        val, _left_b = utils.find(D.kxs[:, 0], left_b)
+        val, _right_e = utils.find(D.kxs[:, 0], right_e)
+        val, _right_b = utils.find(D.kxs[:, 0], right_b)
         
         edc_e = np.sum(int_norm[_edcw_e:_edc_e, :], axis=0) / (_edc_e - _edcw_e + 1)
         eedc_e = np.sum(eint_norm[_edcw_e:_edc_e, :], axis=0) / (_edc_e - _edcw_e + 1)
@@ -1818,7 +1824,7 @@ def CSROfig4(colmap=cm.ocean_r, print_fig=True):
         eint_b[j] = np.sum(eint_norm[_left_b:_right_b, _bot_b:_top_b])
         spec = spec + (int_norm,)
         en = en + (en_norm,)
-        k = k + (D.ks,)
+        k = k + (D.kxs,)
         EDC_e = EDC_e + (edc_e,)
         EDC_b = EDC_b + (edc_b,)
         eEDC_e = eEDC_e + (eedc_e,)
@@ -2241,7 +2247,7 @@ def CSROfig6(colmap=cm.ocean_r, print_fig=True, load=True):
         spec = spec + (int_norm,)
         espec = espec + (eint_norm,)
         en = en + (en_norm,)
-        k = k + (D.ks * np.sqrt(2),) #D.ks is only kx -> but we analyze along diagonal
+        k = k + (D.kxs * np.sqrt(2),) #D.kxs is only kx -> but we analyze along diagonal
         
     plt.figure('2006', figsize=(10, 10), clear=True)
     titles = [r'$T=1.3\,$K', r'$T=10\,$K', r'$T=20\,$K', r'$T=30\,$K']
@@ -2485,9 +2491,9 @@ def CSROfig7(colmap=cm.ocean_r, print_fig=True):
         ax = plt.subplot(1, 3, i + 1) 
         ax.set_position([.08 + i * .26, .3, .25, .5])
         plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
-        plt.contourf(D.ks, en_norm, int_norm, 100, cmap=colmap,
+        plt.contourf(D.kxs, en_norm, int_norm, 100, cmap=colmap,
                          vmin=.0, vmax=.05)
-        plt.plot([np.min(D.ks), np.max(D.ks)], [0, 0], 'k:')
+        plt.plot([np.min(D.kxs), np.max(D.kxs)], [0, 0], 'k:')
         if i == 0:
             plt.ylabel('$\omega\,(\mathrm{meV})$', fontdict=font)
             plt.yticks(np.arange(-.8, .2, .2))
@@ -3266,3 +3272,183 @@ def CSROfig17(print_fig=True):
         plt.savefig(
                 '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig17.png', 
                 dpi = 600,bbox_inches="tight")
+        
+def CSROfig18(print_fig=True):
+    """
+    CSRO30 experimental band structure
+    """     
+    colmap = cm.ocean_r
+    os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+    file = 62421
+    gold = 62440
+    mat = 'CSRO30'
+    year = 2017
+    sample = 'S13'
+    D = ARPES.DLS(file, mat, year, sample)
+    D.norm(gold)
+    D.restrict(bot=0, top=1, left=.12, right=.9)
+    D.ang2kFS(D.ang, Ekin=22-4.5, lat_unit=True, a=5.33, b=5.55, c=11, 
+              V0=0, thdg=-9, tidg=9, phidg=-90)
+    D.FS(e=0.005, ew=.02, norm=True)
+    D.FS_flatten(ang=True)
+    file = 62444
+    gold = 62455
+    A1 = ARPES.DLS(file, mat, year, sample)
+    A1.norm(gold)
+    A1.ang2k(A1.ang, Ekin=22-4.5, lat_unit=True, a=5.33, b=5.55, c=11, 
+              V0=0, thdg=-8.3, tidg=0, phidg=-90)
+    file = 62449
+    gold = 62455
+    A2 = ARPES.DLS(file, mat, year, sample)
+    A2.norm(gold)
+    A2.ang2k(A1.ang, Ekin=22-4.5, lat_unit=True, a=5.33, b=5.55, c=11, 
+              V0=0, thdg=-9, tidg=16, phidg=-90)
+    c = (0, 238 / 256, 118 / 256)
+    def CSROfig18a():
+        ax = plt.subplot(4, 4, 1) 
+        ax.set_position([.08, .3, .2, .35])
+        plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+        plt.contourf(A1.en_norm, A1.kys, A1.int_norm, 300, cmap=colmap,
+                     vmin=0 * np.max(A1.int_norm), vmax=.8 * np.max(A1.int_norm))
+        plt.plot([0, 0], [np.min(A1.kys), np.max(A1.kys)], 'k:')
+        plt.plot([-.005, -.005], [np.min(A1.kys), np.max(A1.kys)], linestyle='-.',
+                 color=c, linewidth=.5) 
+        plt.xticks(np.arange(-.08, .0, .02), ('-80', '-60', '-40', '-20', '0'))
+        plt.yticks(np.arange(-5, 5, .5))
+        plt.xlim(xmax=.005, xmin=-.08)
+        plt.ylim(ymax=np.max(D.ky), ymin=np.min(D.ky))  
+        plt.xlabel('$\omega\,(\mathrm{meV})$', fontdict = font)
+        plt.ylabel('$k_x \,(\pi/a)$', fontdict = font)
+        plt.text(-.075, .48, r'(a)', fontsize=12, color='C1')
+        plt.text(-.002, -.03, r'$\Gamma$', fontsize=12, color='r')
+        plt.text(-.002, -1.03, r'Y', fontsize=12, color='r')
+    
+    def CSROfig18c():
+        ax = plt.subplot(4, 4, 15) 
+        ax.set_position([.3 + .35 * (np.max(D.kx) - np.min(D.kx)) / (np.max(D.ky) - np.min(D.ky)), .3, .2, .35])
+        plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+        plt.contourf(-np.transpose(np.fliplr(A2.en_norm))-.002, np.transpose(A2.kys), 
+                     np.transpose(np.fliplr(A2.int_norm)), 300, cmap=colmap,
+                     vmin=0 * np.max(A2.int_norm), vmax=.8 * np.max(A2.int_norm))
+        plt.plot([0, 0], [np.min(A2.kys), np.max(A2.kys)], 'k:')
+        plt.xticks(np.arange(0, .1, .02), ('0', '-20', '-40', '-60', '-80'))
+        plt.yticks(np.arange(-5, 5, .5), [])
+        plt.xlim(xmin=-.005, xmax=.08)
+        plt.ylim(ymax=np.max(D.ky), ymin=np.min(D.ky))  
+        plt.xlabel('$\omega\,(\mathrm{meV})$', fontdict = font)
+        plt.text(0.0, .48, r'(c)', fontdict = font)
+        plt.text(-.002, -.03, r'X', fontsize=12, color='r')
+        plt.text(-.002, -1.03, r'S', fontsize=12, color='r')
+        pos = ax.get_position()
+        cax = plt.axes([pos.x0+pos.width+0.01 ,
+                            pos.y0, 0.01, pos.height])
+        cbar = plt.colorbar(cax = cax, ticks = None)
+        cbar.set_ticks([])
+        cbar.set_clim(np.min(A2.int_norm), np.max(A2.int_norm))
+    
+    def CSROfig18b():
+        ax = plt.subplot(4, 4, 2) 
+        ax.set_position([.29, .3,
+                         .35 * (np.max(D.kx) - np.min(D.kx)) / (np.max(D.ky) - np.min(D.ky)), .35])
+        plt.tick_params(direction='in', length=1.2, width=.5, colors='k')  
+        plt.contourf(D.kx, D.ky, np.flipud(D.map), 300, 
+                     vmax=.9 * np.max(D.map), vmin=.1 * np.max(D.map), cmap=colmap)
+        plt.xlabel('$k_y \,(\pi/a)$', fontdict = font)
+        plt.text(-1.8, .48, r'(b)', fontdict=font)
+        plt.text(-.05, -.03, r'$\Gamma$', fontsize=12, color='r')
+        plt.text(-.05, -1.03, r'Y', fontsize=12, color='r')
+        plt.text(.95, -.03, r'X', fontsize=12, color='r')
+        plt.text(.95, -1.03, r'S', fontsize=12, color='r')
+        plt.plot(A1.k[0], A1.k[1], linestyle='-.', color=c, linewidth=1)
+        plt.plot(A2.k[0], A2.k[1], linestyle='-.', color=c, linewidth=1)
+        plt.xticks(np.arange(-5, 5, .5))
+        plt.yticks(np.arange(-5, 5, .5), [])
+        plt.xlim(xmax=np.max(D.kx), xmin=np.min(D.kx))
+        plt.ylim(ymax=np.max(D.ky), ymin=np.min(D.ky))     
+        
+    plt.figure(2018, figsize=(8, 8), clear=True)
+    CSROfig18a()
+    CSROfig18b()
+    CSROfig18c()
+    plt.show()
+    if print_fig == True:
+        plt.savefig(
+                '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig18.png', 
+                dpi = 400,bbox_inches="tight")
+        
+def CSROfig19(print_fig=True):
+    """
+    CSRO30 Gamma - S cut epsilon pocket
+    """    
+    os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+    mat = 'CSRO30'
+    year = 2017
+    sample = 'S13'
+    file = 62488
+    gold = 62492
+    
+    D = ARPES.DLS(file, mat, year, sample)
+    D.norm(gold)
+    D.bkg(norm=True)
+    D.ang2k(D.ang, Ekin=72-4.5, lat_unit=True, a=5.33, b=5.55, c=11, 
+                  V0=0, thdg=-10, tidg=0, phidg=45)
+    mdc_val = .00
+    mdcw_val = .005
+    mdc = np.zeros(D.ang.shape)
+    for i in range(len(D.ang)):
+        val, _mdc = utils.find(D.en_norm[i, :], mdc_val)
+        val, _mdcw = utils.find(D.en_norm[i, :], mdc_val - mdcw_val)
+        mdc[i] = np.sum(D.int_norm[i, _mdcw:_mdc])
+    mdc = mdc / np.max(mdc)
+    plt.figure(20019, figsize=(7, 5), clear=True)
+    ###Fit MDC###
+    delta = 1e5
+    p_mdc_i = np.array(
+                [-.4, .4, .65, .9, 1.25, 1.4, 1.7,
+                 .05, .05, .05, .1, .1, .05, .05,
+                 .4, .8, .3, .4, .5, .5, 1,
+                 .06, -0.02, .02])
+    bounds_bot = np.concatenate((p_mdc_i[0:-3] - np.inf, p_mdc_i[-3:] - delta))
+    bounds_top = np.concatenate((p_mdc_i[0:-3] + np.inf, p_mdc_i[-3:] + delta))
+    p_mdc_bounds = (bounds_bot, bounds_top)
+    p_mdc, cov_mdc = curve_fit(
+            utils_math.lor7, D.k[1], mdc, p_mdc_i, bounds=p_mdc_bounds)
+    b_mdc = utils_math.poly2(D.k[1], 0, p_mdc[-3], p_mdc[-2], p_mdc[-1])
+    f_mdc = utils_math.lor7(D.k[1], *p_mdc) - b_mdc
+    f_mdc[0] = -.05
+    f_mdc[-1] = -.05
+    plt.plot(D.k[1], mdc, 'bo')
+    plt.plot(D.k[1], f_mdc)
+    plt.plot(D.k[1], b_mdc, 'k--')
+    c = (0, 238 / 256, 118 / 256)
+    plt.figure(2019, figsize=(6, 6), clear=True)
+    ax = plt.subplot(1, 2, 1) 
+    ax.set_position([.2, .3, .5, .5])
+    plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
+    plt.contourf(D.kxs, D.en_norm+.002, D.int_norm, 300, cmap=cm.ocean_r,
+                 vmin=0 * np.max(D.int_norm), vmax=.8 * np.max(D.int_norm))
+    plt.plot([np.min(D.kxs), np.max(D.kxs)], [0, 0], 'k:')
+    plt.plot(D.k[1], (mdc - b_mdc) / 25 + .005, 'o', markersize=1.5, color='C9')
+    plt.fill(D.k[1], (f_mdc) / 25 + .005, alpha=.2, color='C9')
+    plt.plot(D.k[1], (f_mdc) / 25 + .005, color=c, linewidth=.5)
+    cols = ['m', 'm', 'k', 'r', 'r', 'k', 'm', 'C1']
+    alphas = [0.5, 0.5, .5, 1, 1, .5, 0.5, 0.5, 0.5]
+    lws = [0.5, 0.5, .5, 1, 1, .5, 0.5, 0.5, 0.5]
+    p_mdc[6 + 16] *= 1.5
+    for i in range(7):
+        plt.plot(D.k[1], (utils_math.lor(D.k[1], p_mdc[i], p_mdc[i + 7], p_mdc[i + 14], 
+                 p_mdc[-3]*0, p_mdc[-2]*0, p_mdc[-1]*0) - 0*b_mdc) / 25 + .002, 
+                 lw=lws[i], color=cols[i], alpha=alphas[i])
+    plt.yticks(np.arange(-.15, .1, .05), ('-150', '-100', '-50', '0', '50'))
+    plt.xticks(np.arange(0, 3, 1), (r'$\Gamma$', 'S', r'$\Gamma$'))
+    plt.ylim(ymax=.05, ymin=-.15)
+    plt.xlim(xmax=np.max(D.kxs), xmin=np.min(D.kxs))  
+    plt.ylabel('$\omega\,(\mathrm{meV})$', fontdict=font)
+    plt.xlabel('$k_x \,(\pi/a)$', fontdict=font)
+    plt.text(.87, .027, r'$\bar{\epsilon}$', fontsize=12, color='r')
+    plt.text(1.2, .032, r'$\bar{\epsilon}$', fontsize=12, color='r')
+    plt.show()
+    if print_fig == True:
+        plt.savefig(
+                '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig19.png', 
+                dpi = 400,bbox_inches="tight")

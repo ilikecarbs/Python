@@ -3,13 +3,24 @@
 """
 Created on Thu Jul 19 15:10:01 2018
 
-@author: denyssutter
+@author: ilikecarbs
+
+%%%%%%%%%%%%%%%%%%%%%
+ CASSIOPEE July 2018
+%%%%%%%%%%%%%%%%%%%%%
+
+**ARPES experiment**
+
+.. note::
+        To-Do:
+            -
+
 """
 import os
-os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 import ARPES
 import matplotlib.pyplot as plt
 
+os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 path = '/Users/denyssutter/Documents/PhD/data/Experiments/CASSIOPEE_July_2018/'
 
 """
@@ -17,11 +28,11 @@ path = '/Users/denyssutter/Documents/PhD/data/Experiments/CASSIOPEE_July_2018/'
       CaMn2Sb2
 %%%%%%%%%%%%%%%%%%%%
 """
-#%%
+# %%
 """
 Gold
 """
-###file S30001-S30007 are .ibw files! -> mode='cut_ibw'
+# file S30001-S30007 are .ibw files! -> mode='cut_ibw'
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 mat = 'CaMn2Sb2'
 year = 2018
@@ -88,6 +99,24 @@ for i in range(len(files)):
     plt.savefig((path + str(D.file) + '_bkg_norm.png'), 
                 dpi = 300,bbox_inches="tight")
 #%%
+###T=90K###
+###90eV###
+os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+mat = 'CaMn2Sb2'
+year = 2018
+files = ['S30032', 'S30034', 'S30033'] #CR, LH, LV
+golds = ['S30023', 'S30024', 'S30025']
+mode = 'cut_txt'
+
+for i in range(len(files)):
+    D = ARPES.CASS(files[i], mat, year, mode)
+    D.norm(golds[i])
+    D.flatten(norm=True)
+    D.bkg(norm=True)
+    D.plt_spec(norm=True, v_max=.5)
+    plt.savefig((path + str(D.file) + '_bkg_norm.png'), 
+                dpi = 300,bbox_inches="tight")
+#%%
 """
 Fermi Surface maps
 """
@@ -100,8 +129,8 @@ file = 'S3_FSM_fine_hv90_T230'
 mode = 'FSM'
 D = ARPES.CASS(file, mat, year, mode)
 D.norm(gold='S30005')
-D.ang2kFS(D.ang, Ekin=90-4.5, lat_unit=False, a=1, b=1, c=1, 
-          V0=0, thdg=-6, tidg=24.5, phidg=-0)
+D.ang2kFS(D.ang, Ekin=90-4.5, lat_unit=False, a=1., b=1., c=1., 
+          V0=0., thdg=-6., tidg=24.5, phidg=-0.)
 D.plt_FS_all(coord=True, norm=True)
 plt.savefig((path + str(D.file) + '.png'), 
                 dpi = 600,bbox_inches="tight")
@@ -135,3 +164,44 @@ D.ang2kFS(D.ang, Ekin=90-4.5, lat_unit=False, a=1, b=1, c=1,
 D.plt_FS_all(coord=True, norm=True)
 plt.savefig((path + str(D.file) + '.png'), 
                 dpi = 600,bbox_inches="tight")
+#%%
+###Intermediate temperature T=90###
+###90eV###
+os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+mat = 'CaMn2Sb2'
+year = 2018
+file = 'S3_FSM_fine_hv90_T90'
+mode = 'FSM'
+D = ARPES.CASS(file, mat, year, mode)
+D.norm(gold='S30023')
+D.ang2kFS(D.ang, Ekin=90-4.5, lat_unit=False, a=1, b=1, c=1, 
+          V0=0, thdg=-6, tidg=24.5, phidg=-0)
+D.plt_FS_all(coord=True, norm=True)
+plt.savefig((path + str(D.file) + '.png'), 
+                dpi = 600,bbox_inches="tight")
+#%%
+"""
+Photon Energy Scans
+"""
+###High temperature T=230K###
+os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+mat = 'CaMn2Sb2'
+year = 2018
+file = 'S3_hv50_hv100_T230'
+mode = 'hv'
+D = ARPES.CASS(file, mat, year, mode)
+D.plt_hv()
+plt.savefig((path + str(D.file) + '.png'), 
+                dpi = 600,bbox_inches="tight")
+#%%
+###Low temperature T=65###
+os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+mat = 'CaMn2Sb2'
+year = 2018
+file = 'S3_hv50_hv100_T65'
+mode = 'hv'
+D = ARPES.CASS(file, mat, year, mode)
+D.plt_hv(v_max=.5)
+plt.savefig((path + str(D.file) + '.png'), 
+                dpi = 600,bbox_inches="tight")
+#
