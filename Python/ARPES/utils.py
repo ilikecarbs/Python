@@ -30,7 +30,6 @@ from scipy.ndimage.filters import gaussian_filter
 import matplotlib.cm as cm
 
 
-
 def find(array, val):
     """returns array[_val], _val
 
@@ -87,36 +86,66 @@ def Shirley(EDC):
 
     return shirley
 
+
 def paramSRO():
+    """returns param
+
+    **Parameter set of TB model Sr2RuO4 arXiv:1212.3994v1**
+
+    Args
+    ----------
+
+    Return
+    ------
+    :param:   parameter dictionary
     """
-    Parameter set of TB model Sr2RuO4 arXiv:1212.3994v1
-    """
+
     param = dict([('t1', .145), ('t2', .016), ('t3', .081), ('t4', .039),
                   ('t5', .005), ('t6', 0), ('mu', .122), ('l', .032)])
     return param
 
 
 def paramCSRO20():
+    """returns param
+
+    **parameter set of TB model D. Sutter et al. :-)**
+
+    Args
+    ----------
+
+    Return
+    ------
+    :param:   parameter dictionary
     """
-    Parameter set of TB model D. Sutter et al. :-)
-    """
+
     param = dict([('t1', .115), ('t2', .002), ('t3', .071), ('t4', .039),
-              ('t5', .012), ('t6', 0), ('mu', .084), ('l', .037)])
+                  ('t5', .012), ('t6', 0), ('mu', .084), ('l', .037)])
     return param
 
+
 def paramCSRO30():
+    """returns param
+
+    **Parameter test set CSRO30**
+
+    Args
+    ----------
+
+    Return
+    ------
+    :param:   parameter dictionary
     """
-    Parameter test set CSRO30
-    """
+
     param = dict([('t1', .1), ('t2', .005), ('t3', .081), ('t4', .04),
-              ('t5', .01), ('t6', 0), ('mu', .08), ('l', .04)])
+                  ('t5', .01), ('t6', 0), ('mu', .08), ('l', .04)])
     return param
+
 
 class TB:
     """
     Tight binding models
     """
-    def __init__(self, a = np.pi, kbnd = 1, kpoints = 100):
+    def __init__(self, a=np.pi, kbnd=1, kpoints=100):
         self.a = a
         x = np.linspace(-kbnd, kbnd, kpoints)
         y = np.linspace(-kbnd, kbnd, kpoints)
