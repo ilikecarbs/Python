@@ -50,10 +50,14 @@ Methods (self.*)
 import os
 import h5py
 import numpy as np
-import utils
-import utils_plt
 from astropy.io import fits
 from igor import binarywave
+import matplotlib.pyplot as plt
+from scipy.optimize import curve_fit
+
+import utils
+import utils_plt
+import utils_math
 
 
 class Analysis:
@@ -64,13 +68,78 @@ class Analysis:
     from different beamlines and are called from utils.py.
 
     """
+
     def gold(self, Ef_ini):
         """Generates gold file
 
-        .. seealso:: - in utils.py
+        **Fits and generates gold file for normalization.**
+
+        Args
+        ----------
+        :Ef_ini: initial guess of Fermi level
+
+        Return
+        ------
+        Saves data files into the current sample folder
+
+        :Ef_file.dat:       array with fitted Fermi energies
+        :norm_file.dat:     total intensity per channel for normalization
+
         """
 
-        utils.gold(self, Ef_ini)
+        # Change these parameters to tune fitting
+        # anchor points for poly fit of Fermi energies
+        bnd = 50
+        # Takes initial fit parameters for Fermi function until this value.
+        # From there on, the initial parameters are the ones from last fit.
+        ch = 300
+
+        plt.figure('gold')
+        plt.subplot(211)
+        enval, inden = utils.find(self.en, Ef_ini-0.12)
+        plt.plot(self.en[inden:], self.int[ch, inden:], 'bo', markersize=3)
+
+        # initial guess
+        p_ini_FDsl = [.001, Ef_ini, np.max(self.int[ch, :]), 20, 0]
+
+        # Placeholders
+        Ef = np.zeros(len(self.ang))
+        norm = np.zeros(len(self.ang))
+
+        # Fit loop
+        for i in range(0, len(self.ang)):
+            try:
+                p_FDsl, c_FDsl = curve_fit(utils_math.FDsl, self.en[inden:],
+                                           self.int[i, inden:], p_ini_FDsl)
+            except RuntimeError:
+                print("Error - convergence not reached")
+
+            # Plots data at this particular channel
+            if i == ch:
+                plt.plot(self.en[inden:], utils_math.FDsl(self.en[inden:],
+                         *p_FDsl), 'r-')
+            Ef[i] = p_FDsl[1]  # Fit parameter
+            norm[i] = sum(self.int[i, :])  # Fit parameters
+
+        # Fit Fermi level fits with a polynomial
+        p_ini_poly2 = [Ef[ch], 0, 0, 0]
+        p_poly2, c_poly2 = curve_fit(utils_math.poly2, self.ang[bnd:-bnd],
+                                     Ef[bnd:-bnd], p_ini_poly2)
+        Ef_fit = utils_math.poly2(self.ang, *p_poly2)
+
+        # Save data
+        os.chdir(self.folder)
+        np.savetxt(''.join(['Ef_', str(self.file), '.dat']), Ef_fit)
+        np.savetxt(''.join(['norm_', str(self.file), '.dat']), norm)
+        os.chdir('/Users/denyssutter/Documents/library/Python')
+
+        # Plot data
+        plt.subplot(212)
+        plt.plot(self.ang, Ef, 'bo')
+        plt.plot(self.ang, Ef_fit, 'r-')
+        plt.ylim(Ef[ch]-5, Ef[ch]+5)
+        self.plt_spec()
+        plt.show()
 
     def norm(self, gold):
         """Normalizes data
@@ -123,13 +192,29 @@ class Analysis:
               '\n', '==========================================')
 
     def bkg(self, norm=False):
-        """Subtracts a background EDC. Takes minimum of every MDC
-        and appends it to the background EDC.
+        """returns background subtracted intensities
 
-        .. seealso:: - in utils.py
+        **For every energy, the minimum signal is subtracted for all angles**
+
+        Args
+        ----------
+        :norm:      'True': self.int_norm is manipulated, 'False': self.int
+
+        Return
+        ------
+        :kx:        reciprocal space vector in x
+        :ky:        reciprocal space vector in y
+            
+
         """
 
-        int_bkg = utils.bkg(self, norm)
+        if norm:
+            int_bkg = self.int_norm
+        else:
+            int_bkg = self.int
+        for i in range(self.en.size):
+            int_bkg[:, i] = int_bkg[:, i] - np.min(int_bkg[:, i])
+
         if norm:
             self.int_norm = int_bkg
         else:
@@ -138,38 +223,158 @@ class Analysis:
               '\n', '==========================================')
 
     def restrict(self, bot=0, top=1, left=0, right=1):
-        """Crop file to reduce size.
+        """returns new data variables
 
-        .. seealso:: - in utils.py
+        **If files are too large or if it is convenient to do so,
+        cropt the data files to a smaller size.**
+
+        Args
+        ----------
+        :bot:       set bottom crop boundary from 0..1
+        :top:       set top crop boundary from 0..1
+        :left:      set left crop boundary from 0..1
+        :right:     set right crop boundary from 0..1
+
+        Return
+        ------
+        New data variables:
+            - self.ang
+            - self.angs
+            - self.pol (if available)
+            - self.pols (if available)
+            - self.en
+            - self.ens
+            - self.en_norm (if available)
+            - self.int
+            - self.int_norm (if available)
+            - self.eint
+            - self.eint_norm (if available)
+
         """
 
-        (en_restr, ens_restr, en_norm_restr, ang_restr, angs_restr,
-         pol_restr, pols_restr, int_restr, eint_restr, int_norm_restr,
-         eint_norm_restr) = utils.restrict(self, bot, top, left, right)
+        # For 2-dimensional spectra
+        if self.int.ndim == 2:
+            d1, d2 = self.int.shape
 
-        self.ang = ang_restr
-        self.angs = angs_restr
-        self.pol = pol_restr
-        self.pols = pols_restr
-        self.en = en_restr
-        self.ens = ens_restr
-        self.en_norm = en_norm_restr
-        self.int = int_restr
-        self.eint = eint_restr
-        self.int_norm = int_norm_restr
-        self.eint_norm = eint_norm_restr
+            # Get indices
+            val, _bot = utils.find(range(d2), bot * d2)
+            val, _top = utils.find(range(d2), top * d2)
+            val, _left = utils.find(range(d1), left * d1)
+            val, _right = utils.find(range(d1), right * d1)
+
+            # Restrict spectra
+            self.en = self.en[_bot:_top]
+            self.ens = self.ens[_left:_right, _bot:_top]
+            self.ang = self.ang[_left:_right]
+            self.angs = self.angs[_left:_right, _bot:_top]
+            self.int = self.int[_left:_right, _bot:_top]
+            self.eint = self.eint[_left:_right, _bot:_top]
+            try:
+                self.en_norm = self.en_norm[_left:_right, _bot:_top]
+                self.int_norm = self.int_norm[_left:_right, _bot:_top]
+                self.eint_norm = self.eint_norm[_left:_right, _bot:_top]
+            except AttributeError:
+                pass
+
+        # For 3-dimensional data
+        elif self.int.ndim == 3:
+            d1, d2 = self.int.shape[1], self.int.shape[0]
+
+            # Get indices
+            val, _bot = utils.find(range(d2), bot * d2)
+            val, _top = utils.find(range(d2), top * d2)
+            val, _left = utils.find(range(d1), left * d1)
+            val, _right = utils.find(range(d1), right * d1)
+
+            # Restrict spectra
+            self.pol = self.pol[_bot:_top]
+            self.pols = self.pols[_bot:_top, _left:_right, :]
+            self.ens = self.ens[_bot:_top, _left:_right, :]
+            self.ang = self.ang[_left:_right]
+            self.angs = self.angs[_bot:_top, _left:_right, :]
+            self.int = self.int[_bot:_top, _left:_right, :]
+            self.int = self.int[_bot:_top, _left:_right, :]
+            try:
+                self.en_norm = self.en_norm[_bot:_top, _left:_right, :]
+                self.int_norm = self.int_norm[_bot:_top, _left:_right, :]
+                self.eint_norm = self.eint_norm[_bot:_top, _left:_right, :]
+            except AttributeError:
+                pass
+
         print('\n ~ Spectra restricted',
               '\n', '==========================================')
 
     def ang2k(self, angdg, Ekin, lat_unit=False, a=5.33, b=5.33, c=11,
               V0=0, thdg=0, tidg=0, phidg=0):
-        """Conversion angle to reciprocal space.
+        """returns self.k, self.k_V0, self.lat_unit, self.kxs, self.kx_V0s,
+        self.kys, self.ky_V0s
 
-        .. seealso:: - in utils.py
+        **Converts detector angles into k-space**
+
+        Args
+        ----------
+        :angdg:     detector angles in degrees
+        :Ekin:      photon kinetic energy
+        :lat_unit:  lattice units used (Boolean)
+        :a, b, c:   lattice parameters
+        :V0:        inner potential
+        :thdg:      manipulator angle theta in degrees
+        :tidg:      manipulator angle tilt in degrees
+        :phidg:     manipulator angle phi in degrees
+
+        Return
+        ------
+
+        :self.kx:        reciprocal space vector in x
+        :self.ky:        reciprocal space vector in y
+        :self.kx_V0:     reciprocal space vector in x (with inner potential)
+        :self.ky_V0:     reciprocal space vector in y (with inner potential)
+
         """
 
-        k, k_V0 = utils.ang2k(self, angdg, Ekin, lat_unit, a, b, c,
-                              V0, thdg, tidg, phidg)
+        hbar = 6.58212e-16  # eV * s
+        me = 5.68563e-32  # eV * s^2 / Angstrom^2
+        ang = np.pi * angdg / 180
+        th = np.pi * thdg / 180
+        ti = np.pi * tidg / 180
+        phi = np.pi * phidg / 180
+
+        # Rotation matrices
+        Ti = np.array([
+                [1, 0, 0],
+                [0, np.cos(ti), np.sin(ti)],
+                [0, -np.sin(ti), np.cos(ti)]
+                ])
+        Phi = np.array([
+                [np.cos(phi), -np.sin(phi), 0],
+                [np.sin(phi), np.cos(phi), 0],
+                [0, 0, 1]
+                ])
+        Th = np.array([
+                [np.cos(th), 0, -np.sin(th)],
+                [0, 1, 0],
+                [np.sin(th), 0, np.cos(th)]
+                ])
+
+        # Norm of k-vector
+        k_norm = np.sqrt(2 * me * Ekin) / hbar
+        k_norm_V0 = np.sqrt(2 * me * (Ekin + V0)) / hbar
+
+        # Placeholders
+        kv = np.ones((3, len(ang)))
+        kv_V0 = np.ones((3, len(ang)))
+
+        # Build k-vector
+        kv = np.array([k_norm * np.sin(ang), 0 * ang, k_norm * np.cos(ang)])
+        kv_V0 = np.array([k_norm * np.sin(ang), 0 * ang,
+                          np.sqrt(k_norm_V0**2 - (k_norm * np.sin(ang)**2))])
+        k = np.matmul(Phi, np.matmul(Ti, np.matmul(Th, kv)))
+        k_V0 = np.matmul(Phi, np.matmul(Ti, np.matmul(Th, kv_V0)))
+
+        if lat_unit:  # lattice units
+            k *= np.array([[a / np.pi], [b / np.pi], [c / np.pi]])
+            k_V0 *= np.array([[a / np.pi], [b / np.pi], [c / np.pi]])
+
         self.k = k
         self.k_V0 = k_V0
         self.lat_unit = lat_unit
@@ -186,13 +391,46 @@ class Analysis:
 
     def ang2kFS(self, angdg, Ekin, lat_unit=False, a=5.33, b=5.33, c=11,
                 V0=0, thdg=0, tidg=0, phidg=0):
-        """Conversion angle to reciprocal space for Fermi surface.
+        """returns kx, ky, kx_V0, ky_V0
 
-        .. seealso:: - in utils.py
+        **Converts detector angles into k-space for a FS map**
+
+        Args
+        ----------
+        :angdg:     detector angles in degrees
+        :Ekin:      photon kinetic energy
+        :lat_unit:  lattice units used (Boolean)
+        :a, b, c:   lattice parameters
+        :V0:        inner potential
+        :thdg:      manipulator angle theta in degrees
+        :tidg:      manipulator angle tilt in degrees
+        :phidg:     manipulator angle phi in degrees
+
+        Return
+        ------
+
+        :self.kx:        reciprocal space vector in x
+        :self.ky:        reciprocal space vector in y
+        :self.kx_V0:     reciprocal space vector in x (with inner potential)
+        :self.ky_V0:     reciprocal space vector in y (with inner potential)
+
         """
 
-        kx, ky, kx_V0, ky_V0 = utils.ang2kFS(self, angdg, Ekin, lat_unit,
-                                             a, b, c, V0, thdg, tidg, phidg)
+        # Placeholders
+        kx = np.ones((self.pol.size, self.ang.size))
+        ky = np.ones((self.pol.size, self.ang.size))
+        kx_V0 = np.ones((self.pol.size, self.ang.size))
+        ky_V0 = np.ones((self.pol.size, self.ang.size))
+
+        # Loop over tilt angles and build up kx, ky
+        for i in range(self.pol.size):
+            self.ang2k(angdg, Ekin, lat_unit, a, b, c, V0, thdg,
+                       self.pol[i]-tidg, phidg)
+            kx[i, :] = self.k[0, :]
+            ky[i, :] = self.k[1, :]
+            kx_V0[i, :] = self.k_V0[0, :]
+            ky_V0[i, :] = self.k_V0[1, :]
+
         self.kx = kx
         self.ky = ky
         self.kx_V0 = kx_V0
@@ -202,12 +440,34 @@ class Analysis:
               '\n', '==========================================')
 
     def FS(self, e=0, ew=0.05, norm=False):
-        """Extract Fermi surface map.
+        """Extract Fermi surface map
 
-        .. seealso:: - in utils.py
+        **For a given energy e, extract a Fermi surface map,
+        integrated to e-ew**
+
+        Args
+        ----------
+        :e:     energy at which to cut the data
+        :ew:    energy window from e downwards
+
+        Return
+        ------
+
+        :self.map: Fermi surface map
+
         """
 
-        FSmap = utils.FS(self, e, ew, norm)
+        FSmap = np.zeros((self.pol.size, self.ang.size))
+        if norm:
+            for i in range(self.ang.size):
+                e_val, e_ind = utils.find(self.en_norm[0, i, :], e)
+                ew_val, ew_ind = utils.find(self.en_norm[0, i, :], e-ew)
+                FSmap[:, i] = np.sum(self.int_norm[:, i, ew_ind:e_ind], axis=1)
+        else:
+            e_val, e_ind = utils.find(self.en, e)
+            ew_val, ew_ind = utils.find(self.en, e-ew)
+            FSmap = np.sum(self.int[:, :, ew_ind:e_ind], axis=2)
+
         self.map = FSmap
         print('\n ~ Constant energy map extracted',
               '\n', '==========================================')
