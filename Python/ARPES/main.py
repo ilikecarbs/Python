@@ -6,20 +6,19 @@ Created on Tue Jun 19 15:14:29 2018
 
 @author: ilikecarbs
 
-%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%
         main
-%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%
 
 **Development environment and plotting figures for dissertation**
 
 .. note::
         To-Do:
             -
-
 """
+
 import os
 import utils_plt
-import utils_math 
 import utils
 import matplotlib.pyplot as plt
 import ARPES
@@ -31,7 +30,7 @@ from scipy.optimize import curve_fit
 
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 
-rainbow_light = utils_plt.rainbow_light
+rainbow_light = utils.rainbow_light
 cm.register_cmap(name='rainbow_light', cmap=rainbow_light)
 plt.rcParams['mathtext.fontset'] = 'cm'
 plt.rcParams['font.serif']=['Computer Modern Roman']
@@ -74,7 +73,7 @@ CSROfig7:  Background subtraction
 CSROfig8:  Extraction LDA Fermi velocity
 CSROfig9:  ReSigma vs ImSigma (load=True)
 CSROfig10: Quasiparticle Z
-CSROfig11: Tight binding model CSRO1
+CSROfig11: Tight binding model CSRO
 CSROfig12: Tight binding model SRO
 CSROfig13: TB along high symmetry directions, orbitally resolved
 CSROfig14: (L): TB and density of states
@@ -108,7 +107,7 @@ CSRO: TB specific heat
 # utils_plt.CROfig13()
 # utils_plt.CROfig14()
 # --------
-# utils_plt.CSROfig1()
+utils_plt.CSROfig1()
 # utils_plt.CSROfig2()
 # utils_plt.CSROfig3()
 # utils_plt.CSROfig4()
@@ -127,6 +126,43 @@ CSRO: TB specific heat
 # utils_plt.CSROfig17()
 # utils_plt.CSROfig18()
 # utils_plt.CSROfig19()
+# %%
+
+
+def func(x, n, *p):
+    y = n + p[0] * x + p[1]
+    return y
+
+
+def wrapper(x, *p):
+    n = 3
+    return func(x, n, *p)
+
+n=1
+p = np.array([1, -1])
+x = np.linspace(0, 1, 100)
+#y = func(x, n, *p)
+y = wrapper(x, *p)
+
+
+plt.plot(x, y)
+
+# %%
+
+
+def get_text(name):
+    return "lorem ipsum, {0} dolor sit amet".format(name)
+
+
+def p_decorate(func):
+    def func_wrapper(name):
+        return "<p>{0}</p>".format(func(name))
+    return func_wrapper
+
+
+my_get_text = p_decorate(get_text)
+
+print(my_get_text("John"))
 
 # %%
 """
@@ -281,3 +317,138 @@ show_Y_lm(l=6,m=6)
         
 plt.show()
 
+#%%
+"""
+Project: GUI
+"""
+from pyqtgraph.Qt import QtGui, QtCore, QtWidgets
+import pyqtgraph as pg 
+
+#def FS_GUI(D): 
+    # Interpret image data as row-major instead of col-major
+pg.setConfigOptions(imageAxisOrder='row-major')
+
+app = QtCore.QCoreApplication.instance()
+if app is None:
+    app = QtWidgets.QApplication(sys.argv)
+    
+## Create window with two ImageView widgets
+mw = QtGui.QMainWindow()
+mw.resize(1500,800)
+mw.setWindowTitle('pyqtgraph example: DataSlicing')
+cw = QtGui.QWidget()
+mw.setCentralWidget(cw)
+l = QtGui.QGridLayout()
+cw.setLayout(l)
+
+imv1 = pg.ImageView()
+imv2 = pg.ImageView()
+l.addWidget(imv1, 0, 0, 0, 1)
+l.addWidget(imv2, 0, 1, 0, 1)
+mw.show()
+data = np.transpose(D.int_norm,(2,0,1))
+roi = pg.LineSegmentROI([[10, 64], [120,64]], pen='r')
+imv1.addItem(roi)
+
+def update():
+    global data, imv1, imv2
+    d = roi.getArrayRegion(data, imv1.imageItem, axes=(0,1))
+    imv2.setImage(d)
+    
+roi.sigRegionChanged.connect(update)
+
+## Display the data
+imv1.setImage(data, scale = (1, 6))
+imv1.setHistogramRange(-0.01, 0.01)
+imv1.setLevels(-0.003, 0.003)
+
+#imv1.scale(0.2, 0.2)
+
+update()
+
+## Start Qt event loop unless running in interactive mode.
+if __name__ == '__main__':
+    import sys
+    if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
+        QtGui.QApplication.instance().exec_()
+    
+#%%
+        #def lor2(x, p0, p1, 
+#         p2, p3, 
+#         p4, p5, 
+#         p6, p7, p8):
+#    """
+#    Two lorentzians on a quadratic background
+#    """
+#    return (p4 / (1 + ((x - p0) / p2) ** 2) + 
+#            p5 / (1 + ((x - p1) / p3) ** 2) +
+#            p6 + p7 * x + p8 * x ** 2)
+#
+#def lor4(x, p0, p1, p2, p3, 
+#         p4, p5, p6, p7, 
+#         p8, p9, p10, p11, 
+#         p12, p13, p14):
+#    """
+#    Four lorentzians on a quadratic background
+#    """
+#    return (p8 / (1 + ((x - p0) / p4)  ** 2) + 
+#            p9 / (1 + ((x - p1) / p5)  ** 2) +
+#            p10 / (1 + ((x - p2) / p6)  ** 2) +
+#            p11 / (1 + ((x - p3) / p7)  ** 2) +
+#            p12 + p13 * x + p14 * x ** 2)
+#    
+#def lor6(x, p0, p1, p2, p3, p4, p5, 
+#         p6, p7, p8, p9, p10, p11, 
+#         p12, p13, p14, p15, p16, p17, 
+#         p18, p19, p20):
+#    """
+#    Six lorentzians on a quadratic background
+#    """
+#    return (p12 / (1 + ((x - p0) / p6)  ** 2) + 
+#            p13 / (1 + ((x - p1) / p7)  ** 2) +
+#            p14 / (1 + ((x - p2) / p8)  ** 2) +
+#            p15 / (1 + ((x - p3) / p9)  ** 2) +
+#            p16 / (1 + ((x - p4) / p10) ** 2) +
+#            p17 / (1 + ((x - p5) / p11) ** 2) +
+#            p18 + p19 * x + p20 * x ** 2)
+#
+#def lor7(x, p0, p1, p2, p3, p4, p5, p6,
+#         p7, p8, p9, p10, p11, p12, p13, 
+#         p14, p15, p16, p17, p18, p19, p20,
+#         p21, p22, p23):
+#    """
+#    Seven lorentzians on a quadratic background
+#    """
+#    return (p14 / (1 + ((x - p0) / p7)  ** 2) + 
+#            p15 / (1 + ((x - p1) / p8)  ** 2) +
+#            p16 / (1 + ((x - p2) / p9)  ** 2) +
+#            p17 / (1 + ((x - p3) / p10) ** 2) +
+#            p18 / (1 + ((x - p4) / p11) ** 2) +
+#            p19 / (1 + ((x - p5) / p12) ** 2) +
+#            p20 / (1 + ((x - p6) / p13) ** 2) +
+#            p21 + p22 * x + p23 * x ** 2)
+#    
+#def lor8(x, p0, p1, p2, p3, p4, p5, p6, p7, 
+#         p8, p9, p10, p11, p12, p13, p14, p15, 
+#         p16, p17, p18, p19, p20, p21, p22, p23, 
+#         p24, p25, p26):
+#    """
+#    Eight lorentzians on a quadratic background
+#    """
+#    return (p16 / (1 + ((x - p0) / p8)  ** 2) + 
+#            p17 / (1 + ((x - p1) / p9)  ** 2) +
+#            p18 / (1 + ((x - p2) / p10) ** 2) +
+#            p19 / (1 + ((x - p3) / p11) ** 2) +
+#            p20 / (1 + ((x - p4) / p12) ** 2) +
+#            p21 / (1 + ((x - p5) / p13) ** 2) +
+#            p22 / (1 + ((x - p6) / p14) ** 2) +
+#            p23 / (1 + ((x - p7) / p15) ** 2) +
+#            p24 + p25 * x + p26 * x ** 2)
+#        
+#def gauss2(x, p0, p1, p2, p3, p4, p5, p6, p7, p8):
+#    """
+#    Two gaussians on a quadratic background
+#    """
+#    return (p4 * np.exp(-(x - p0) ** 2 / (2 * p2 ** 2)) + 
+#            p5 * np.exp(-(x - p1) ** 2 / (2 * p3 ** 2)) +
+#            p6 + p7 * x + p8 * x ** 2)    
