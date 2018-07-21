@@ -126,6 +126,43 @@ CSRO: TB specific heat
 # utils_plt.CSROfig17()
 # utils_plt.CSROfig18()
 # utils_plt.CSROfig19()
+# %%
+
+
+def func(x, n, *p):
+    y = n + p[0] * x + p[1]
+    return y
+
+
+def wrapper(x, *p):
+    n = 3
+    return func(x, n, *p)
+
+n=1
+p = np.array([1, -1])
+x = np.linspace(0, 1, 100)
+#y = func(x, n, *p)
+y = wrapper(x, *p)
+
+
+plt.plot(x, y)
+
+# %%
+
+
+def get_text(name):
+    return "lorem ipsum, {0} dolor sit amet".format(name)
+
+
+def p_decorate(func):
+    def func_wrapper(name):
+        return "<p>{0}</p>".format(func(name))
+    return func_wrapper
+
+
+my_get_text = p_decorate(get_text)
+
+print(my_get_text("John"))
 
 # %%
 """
@@ -334,4 +371,84 @@ if __name__ == '__main__':
     import sys
     if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
         QtGui.QApplication.instance().exec_()
-        
+    
+#%%
+        #def lor2(x, p0, p1, 
+#         p2, p3, 
+#         p4, p5, 
+#         p6, p7, p8):
+#    """
+#    Two lorentzians on a quadratic background
+#    """
+#    return (p4 / (1 + ((x - p0) / p2) ** 2) + 
+#            p5 / (1 + ((x - p1) / p3) ** 2) +
+#            p6 + p7 * x + p8 * x ** 2)
+#
+#def lor4(x, p0, p1, p2, p3, 
+#         p4, p5, p6, p7, 
+#         p8, p9, p10, p11, 
+#         p12, p13, p14):
+#    """
+#    Four lorentzians on a quadratic background
+#    """
+#    return (p8 / (1 + ((x - p0) / p4)  ** 2) + 
+#            p9 / (1 + ((x - p1) / p5)  ** 2) +
+#            p10 / (1 + ((x - p2) / p6)  ** 2) +
+#            p11 / (1 + ((x - p3) / p7)  ** 2) +
+#            p12 + p13 * x + p14 * x ** 2)
+#    
+#def lor6(x, p0, p1, p2, p3, p4, p5, 
+#         p6, p7, p8, p9, p10, p11, 
+#         p12, p13, p14, p15, p16, p17, 
+#         p18, p19, p20):
+#    """
+#    Six lorentzians on a quadratic background
+#    """
+#    return (p12 / (1 + ((x - p0) / p6)  ** 2) + 
+#            p13 / (1 + ((x - p1) / p7)  ** 2) +
+#            p14 / (1 + ((x - p2) / p8)  ** 2) +
+#            p15 / (1 + ((x - p3) / p9)  ** 2) +
+#            p16 / (1 + ((x - p4) / p10) ** 2) +
+#            p17 / (1 + ((x - p5) / p11) ** 2) +
+#            p18 + p19 * x + p20 * x ** 2)
+#
+#def lor7(x, p0, p1, p2, p3, p4, p5, p6,
+#         p7, p8, p9, p10, p11, p12, p13, 
+#         p14, p15, p16, p17, p18, p19, p20,
+#         p21, p22, p23):
+#    """
+#    Seven lorentzians on a quadratic background
+#    """
+#    return (p14 / (1 + ((x - p0) / p7)  ** 2) + 
+#            p15 / (1 + ((x - p1) / p8)  ** 2) +
+#            p16 / (1 + ((x - p2) / p9)  ** 2) +
+#            p17 / (1 + ((x - p3) / p10) ** 2) +
+#            p18 / (1 + ((x - p4) / p11) ** 2) +
+#            p19 / (1 + ((x - p5) / p12) ** 2) +
+#            p20 / (1 + ((x - p6) / p13) ** 2) +
+#            p21 + p22 * x + p23 * x ** 2)
+#    
+#def lor8(x, p0, p1, p2, p3, p4, p5, p6, p7, 
+#         p8, p9, p10, p11, p12, p13, p14, p15, 
+#         p16, p17, p18, p19, p20, p21, p22, p23, 
+#         p24, p25, p26):
+#    """
+#    Eight lorentzians on a quadratic background
+#    """
+#    return (p16 / (1 + ((x - p0) / p8)  ** 2) + 
+#            p17 / (1 + ((x - p1) / p9)  ** 2) +
+#            p18 / (1 + ((x - p2) / p10) ** 2) +
+#            p19 / (1 + ((x - p3) / p11) ** 2) +
+#            p20 / (1 + ((x - p4) / p12) ** 2) +
+#            p21 / (1 + ((x - p5) / p13) ** 2) +
+#            p22 / (1 + ((x - p6) / p14) ** 2) +
+#            p23 / (1 + ((x - p7) / p15) ** 2) +
+#            p24 + p25 * x + p26 * x ** 2)
+#        
+#def gauss2(x, p0, p1, p2, p3, p4, p5, p6, p7, p8):
+#    """
+#    Two gaussians on a quadratic background
+#    """
+#    return (p4 * np.exp(-(x - p0) ** 2 / (2 * p2 ** 2)) + 
+#            p5 * np.exp(-(x - p1) ** 2 / (2 * p3 ** 2)) +
+#            p6 + p7 * x + p8 * x ** 2)    

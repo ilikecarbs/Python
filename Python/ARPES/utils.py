@@ -13,14 +13,14 @@ Created on Mon Jun 11 09:57:01 2018
 
 .. note::
         To-Do:
-            -
+            - Unify polynomial functions
+            - Unify multiple Lorentzian functions
 """
 
 import numpy as np
 import matplotlib.pyplot as plt
 from numpy import linalg as la
 import utils
-from scipy.stats import exponnorm
 from scipy import special
 from scipy.ndimage.filters import gaussian_filter
 
@@ -274,6 +274,7 @@ class TB:
 
         # Generate contours C
         n = 0
+        plt.figure('SRO_TB', clear=True)
         for bnd in bndstr:
             n += 1
             plt.subplot(1, 3, n)
@@ -295,7 +296,7 @@ class TB:
             for n_bnd in range(len(bndstr)):
                 p = C[n_bnd].collections[0].get_paths()
                 p = np.asarray(p)
-                plt.figure('SRO_vertices')
+                plt.figure('SRO_vertices', clear=True)
 
                 # Placeholders vertices
                 V_x = ()
@@ -318,9 +319,9 @@ class TB:
                         for i in range(len(V_x[j])):  # Loop over k-points
 
                             #  Find values and diagonalize
-                            val_x, ind_x = utils.find(x, V_x[j][i])
-                            val_y, ind_y = utils.find(y, V_y[j][i])
-                            val_proj, vec_proj = la.eigh(H(ind_x, ind_y))
+                            x_val, x_idx = utils.find(x, V_x[j][i])
+                            y_val, y_idx = utils.find(y, V_y[j][i])
+                            val_proj, vec_proj = la.eigh(H(x_idx, y_idx))
                             val_proj = np.real(val_proj)
 
                             # orbital weights
@@ -344,10 +345,11 @@ class TB:
                             w = wz - wxy
 
                             # Build Fermi surface
-                            xval, _xval = utils.find(kx, V_x[j][i])
-                            yval, _yval = utils.find(ky, V_y[j][i])
-                            FS[_xval, _yval] = w
+                            kx_val, kx_idx = utils.find(kx, V_x[j][i])
+                            ky_val, ky_idx = utils.find(ky, V_y[j][i])
+                            FS[kx_idx, ky_idx] = w
 
+            # Blur for visual effect
             FS = gaussian_filter(FS, sigma=10, mode='constant')
             self.kx = kx
             self.ky = ky
@@ -468,6 +470,7 @@ class TB:
 
         # Generate contours C
         n = 0
+        plt.figure('CSRO_TB', clear=True)
         for bnd in bndstr:
             n += 1
             plt.subplot(2, 3, n)
@@ -489,7 +492,7 @@ class TB:
             for n_bnd in range(len(bndstr)):
                 p = C[n_bnd].collections[0].get_paths()
                 p = np.asarray(p)
-                plt.figure('CSRO_vertices')
+                plt.figure('CSRO_vertices', clear=True)
 
                 # Placeholders vertices
                 V_x = ()
@@ -512,36 +515,36 @@ class TB:
                         for i in range(len(V_x[j])):  # Loop over k-points
 
                             # Find values and diagonalize
-                            val_x, ind_x = utils.find(x, V_x[j][i])
-                            val_y, ind_y = utils.find(y, V_y[j][i])
-                            eval_proj, evec_proj = la.eigh(H(ind_x, ind_y))
-                            eval_proj = np.real(eval_proj)
+                            x_val, x_idx = utils.find(x, V_x[j][i])
+                            y_val, y_idx = utils.find(y, V_y[j][i])
+                            val_proj, vec_proj = la.eigh(H(x_idx, y_idx))
+                            val_proj = np.real(val_proj)
 
                             # orbital weights
                             wAyz = np.real(
                                     np.sum(
-                                            np.conj(evec_proj[:, n_bnd]) *
-                                            (PAyz * evec_proj[:, n_bnd])))
+                                            np.conj(vec_proj[:, n_bnd]) *
+                                            (PAyz * vec_proj[:, n_bnd])))
                             wAxz = np.real(
                                     np.sum(
-                                            np.conj(evec_proj[:, n_bnd]) *
-                                            (PAxz * evec_proj[:, n_bnd])))
+                                            np.conj(vec_proj[:, n_bnd]) *
+                                            (PAxz * vec_proj[:, n_bnd])))
                             wAxy = np.real(
                                     np.sum(
-                                            np.conj(evec_proj[:, n_bnd]) *
-                                            (PAxy * evec_proj[:, n_bnd])))
+                                            np.conj(vec_proj[:, n_bnd]) *
+                                            (PAxy * vec_proj[:, n_bnd])))
                             wByz = np.real(
                                     np.sum(
-                                            np.conj(evec_proj[:, n_bnd]) *
-                                            (PByz * evec_proj[:, n_bnd])))
+                                            np.conj(vec_proj[:, n_bnd]) *
+                                            (PByz * vec_proj[:, n_bnd])))
                             wBxz = np.real(
                                     np.sum(
-                                            np.conj(evec_proj[:, n_bnd]) *
-                                            (PBxz * evec_proj[:, n_bnd])))
+                                            np.conj(vec_proj[:, n_bnd]) *
+                                            (PBxz * vec_proj[:, n_bnd])))
                             wBxy = np.real(
                                     np.sum(
-                                            np.conj(evec_proj[:, n_bnd]) *
-                                            (PBxy * evec_proj[:, n_bnd])))
+                                            np.conj(vec_proj[:, n_bnd]) *
+                                            (PBxy * vec_proj[:, n_bnd])))
 
                             # Total out-of-plane weight
                             wz = wAyz + wAxz + wByz + wBxz
@@ -553,10 +556,11 @@ class TB:
                             w = wz - wxy
 
                             # Build Fermi surface
-                            xval, _xval = utils.find(kx, V_x[j][i])
-                            yval, _yval = utils.find(ky, V_y[j][i])
-                            FS[_xval, _yval] = w + 0
+                            kx_val, kx_idx = utils.find(kx, V_x[j][i])
+                            ky_val, ky_idx = utils.find(ky, V_y[j][i])
+                            FS[kx_idx, ky_idx] = w + 0
 
+            # Blur for visual effect
             FS = gaussian_filter(FS, sigma=10, mode='constant')
             self.kx = kx
             self.ky = ky
@@ -604,234 +608,565 @@ class TB:
         self.bndstr = dict([('bndstr', bndstr)])
 
 
-def CSRO_eval(x, y):
+def CSRO_eval(x, y, param=paramCSRO20()):
+    """returns en_tb, int_tb, bndstr
+
+    **Calculates band structure along kx, ky, orbitally projected**
+
+    Args
+    ----------
+    :param:     TB parameters
+    :x:         kx array
+    :y:         ky array
+
+    Return
+    ------
+    :en_tb:     binding energy of tight binding model
+    :int_tb:    intensities of tight binding model
+    :bndstr:    eigenenergies band structure
+    """
+
     a = np.pi
-    #Load TB parameters
-    param = paramCSRO20()  
-    t1 = param['t1']; t2 = param['t2']; t3 = param['t3']
-    t4 = param['t4']; t5 = param['t5']; t6 = param['t6']
-    mu = param['mu']; l = param['l']
-    en = np.linspace(-.65, .3, 500)
-    spec = np.zeros((len(en), len(x)))
-    #Hopping terms
+
+    # Load TB parameters
+    t1 = param['t1']  # Nearest neighbour for out-of-plane orbitals large
+    t2 = param['t2']  # Nearest neighbour for out-of-plane orbitals small
+    t3 = param['t3']  # Nearest neighbour for dxy orbitals
+    t4 = param['t4']  # Next nearest neighbour for dxy orbitals
+    t5 = param['t5']  # Next next nearest neighbour for dxy orbitals
+    t6 = param['t6']  # Off diagonal matrix element
+    mu = param['mu']  # Chemical potential
+    so = param['so']  # spin orbit coupling
+
+    # Hopping terms
     fx = -2 * np.cos((x + y) / 2 * a)
     fy = -2 * np.cos((x - y) / 2 * a)
     f4 = -2 * t4 * (np.cos(x * a) + np.cos(y * a))
     f5 = -2 * t5 * (np.cos((x + y) * a) + np.cos((x - y) * a))
     f6 = -2 * t6 * (np.cos(x * a) - np.cos(y * a))
-    #Placeholders energy eigenvalues
-    Ayz = np.ones(len(x)); Axz = np.ones(len(x))
-    Axy = np.ones(len(x)); Byz = np.ones(len(x)) 
-    Bxz = np.ones(len(x)); Bxy = np.ones(len(x))
-    wAyz = np.ones((len(x), 6)); wAxz = np.ones((len(x), 6))
-    wAxy = np.ones((len(x), 6)); wByz = np.ones((len(x), 6))
-    wBxz = np.ones((len(x), 6)); wBxy = np.ones((len(x), 6))
-    
-    ###Projectors###
-    PAyz = np.array([[1,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],
-                     [0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]])
-    PAxz = np.array([[0,0,0,0,0,0],[0,1,0,0,0,0],[0,0,0,0,0,0],
-                     [0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]])
-    PAxy = np.array([[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,1,0,0,0],
-                     [0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]])
-    PByz = np.array([[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],
-                     [0,0,0,1,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]])
-    PBxz = np.array([[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],
-                     [0,0,0,0,0,0],[0,0,0,0,1,0],[0,0,0,0,0,0]])
-    PBxy = np.array([[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],
-                     [0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,1]])
-    #TB submatrix
+
+    # Placeholders energy eigenvalues
+    Ayz = np.ones(len(x))
+    Axz = np.ones(len(x))
+    Axy = np.ones(len(x))
+    Byz = np.ones(len(x))
+    Bxz = np.ones(len(x))
+    Bxy = np.ones(len(x))
+    wAyz = np.ones((len(x), 6))
+    wAxz = np.ones((len(x), 6))
+    wAxy = np.ones((len(x), 6))
+    wByz = np.ones((len(x), 6))
+    wBxz = np.ones((len(x), 6))
+    wBxy = np.ones((len(x), 6))
+
+    # Projectors
+    PAyz = np.array([[1, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0],
+                     [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0],
+                     [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]])
+    PAxz = np.array([[0, 0, 0, 0, 0, 0], [0, 1, 0, 0, 0, 0],
+                     [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0],
+                     [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]])
+    PAxy = np.array([[0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0],
+                     [0, 0, 1, 0, 0, 0], [0, 0, 0, 0, 0, 0],
+                     [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]])
+    PByz = np.array([[0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0],
+                     [0, 0, 0, 0, 0, 0], [0, 0, 0, 1, 0, 0],
+                     [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]])
+    PBxz = np.array([[0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0],
+                     [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0],
+                     [0, 0, 0, 0, 1, 0], [0, 0, 0, 0, 0, 0]])
+    PBxy = np.array([[0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0],
+                     [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0],
+                     [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 1]])
+
+    # TB submatrix
     def A(i):
-        A = np.array([[-mu, complex(0,l) + f6[i], -l],
-                      [-complex(0,l) + f6[i], -mu, complex(0,l)],
-                      [-l, -complex(0,l), -mu + f4[i] + f5[i]]])
+        A = np.array([[-mu, complex(0, so) + f6[i], -so],
+                      [-complex(0, so) + f6[i], -mu, complex(0, so)],
+                      [-so, -complex(0, so), -mu + f4[i] + f5[i]]])
         return A
-    #TB submatrix
-    def B(i): 
+
+    # TB submatrix
+    def B(i):
         B = np.array([[t2 * fx[i] + t1 * fy[i], 0, 0],
                       [0, t1 * fx[i] + t2 * fy[i], 0],
                       [0, 0, t3 * (fx[i] + fy[i])]])
         return B
-    #Tight binding Hamiltonian
+
+    # Tight binding Hamiltonian
     def H(i):
         C1 = np.concatenate((A(i), B(i)), 1)
         C2 = np.concatenate((B(i), A(i)), 1)
-        H  = np.concatenate((C1, C2), 0)
+        H = np.concatenate((C1, C2), 0)
         return H
-    #Diagonalization of symmetric Hermitian matrix on k-mesh
+
+    # Placeholders energy, spectra
+    en_tb = np.linspace(-.65, .3, 500)
+    int_tb = np.zeros((len(en_tb), len(x)))
+
+    # Diagonalization of symmetric Hermitian matrix on k-mesh
     for i in range(len(x)):
-        eval, evec = la.eigh(H(i))
-        eval = np.real(eval)
-        Ayz[i] = eval[0]; Axz[i] = eval[1]; Axy[i] = eval[2]
-        Byz[i] = eval[3]; Bxz[i] = eval[4]; Bxy[i] = eval[5]
-        en_values = (Ayz[i], Axz[i], Axy[i], Byz[i], Bxz[i], Bxy[i])
+        val, vec = la.eigh(H(i))
+        val = np.real(val)
+        Ayz[i] = val[0]
+        Axz[i] = val[1]
+        Axy[i] = val[2]
+        Byz[i] = val[3]
+        Bxz[i] = val[4]
+        Bxy[i] = val[5]
+        en_vals = (Ayz[i], Axz[i], Axy[i], Byz[i], Bxz[i], Bxy[i])
+
+        # Project on orbitals
         n = 0
-        for en_value in en_values:
-            wAyz[i, n] = np.real(np.sum(np.conj(evec[:, n]) * (PAyz * evec[:, n]))) 
-            wAxz[i, n] = np.real(np.sum(np.conj(evec[:, n]) * (PAxz * evec[:, n]))) 
-            wAxy[i, n] = np.real(np.sum(np.conj(evec[:, n]) * (PAxy * evec[:, n]))) 
-            wByz[i, n] = np.real(np.sum(np.conj(evec[:, n]) * (PByz * evec[:, n]))) 
-            wBxz[i, n] = np.real(np.sum(np.conj(evec[:, n]) * (PBxz * evec[:, n]))) 
-            wBxy[i, n] = np.real(np.sum(np.conj(evec[:, n]) * (PBxy * evec[:, n]))) 
-    #        plt.plot(x[i], en_value, 'o', ms=1,
-    #                 color=[wAxz[i, n] + wBxz[i, n] + wAyz[i, n] + wByz[i, n], 0, wAxy[i, n] + wBxy[i, n]])
+        for en_val in en_vals:
+
+            # orbital weights
+            wAyz[i, n] = np.real(np.sum(np.conj(vec[:, n]) *
+                                        (PAyz * vec[:, n])))
+            wAxz[i, n] = np.real(np.sum(np.conj(vec[:, n]) *
+                                        (PAxz * vec[:, n])))
+            wAxy[i, n] = np.real(np.sum(np.conj(vec[:, n]) *
+                                        (PAxy * vec[:, n])))
+            wByz[i, n] = np.real(np.sum(np.conj(vec[:, n]) *
+                                        (PByz * vec[:, n])))
+            wBxz[i, n] = np.real(np.sum(np.conj(vec[:, n]) *
+                                        (PBxz * vec[:, n])))
+            wBxy[i, n] = np.real(np.sum(np.conj(vec[:, n]) *
+                                        (PBxy * vec[:, n])))
+
+            # Total out-of-plane weight
             wz = wAyz[i, n] + wAxz[i, n] + wByz[i, n] + wBxz[i, n]
+
+            # Total in-plane weight
             wxy = wAxy[i, n] + wBxy[i, n]
+
+            # Weight for divergence colorscale
             w = wz - wxy
-            val, _val = utils.find(en, en_value)
-            spec[_val, i] = w
+
+            # Build band structure
+            en_tb_val, en_tb_idx = utils.find(en_tb, en_val)
+            int_tb[en_tb_idx, i] = w
             n += 1
+
     bndstr = (Ayz, Axz, Axy, Byz, Bxz, Bxy)
-    spec = gaussian_filter(spec, sigma=3, mode='constant')
-    return en, spec, bndstr   
 
-def FDsl(x, p0, p1, p2, p3, p4):
-    """
-    Fermi Dirac Function sloped
-    p3 + (p2 + p4 * x) * (np.exp((x - p1) / p0) + 1) ** -1
-    """
-    return p3 + (p2 + p4 * x) * (np.exp((x - p1) / p0) + 1) ** -1
+    # Blur for visual effect
+    int_tb = gaussian_filter(int_tb, sigma=3, mode='constant')
 
-def poly1(x, p0, p1):
-    """
-    Polynomial first order
-    p0 + p1 * x
-    """
-    return p0 + p1 * x
+    return en_tb, int_tb, bndstr
 
-def poly2(x, p0, p1, p2, p3):
-    """
-    Polynomial second order
-    p1 + p2 * (x - p0) + p3 * (x - p0)**2 
-    """
-    return p1 + p2 * (x - p0) + p3 * (x - p0)**2 
 
-def lor(x, p0, p1, p2, 
-        p3, p4, p5):
-    """
-    Single lorentzians on a quadratic background
-    """
-    return (p2 / (1 + ((x - p0) / p1) ** 2) + 
-            p3 + p4 * x + p5 * x ** 2)
+def FDsl(x, *p):
+    """returns FDsl
 
-def lorHWHM(x, p0, p1, p2, 
-        p3, p4, p5):
-    """
-    Single lorentzians on a quadratic background HWHM version
-    """
-    return (p2 / (np.pi * p1 * (1 + ((x - p0) / p1) ** 2)) +
-            p3 + p4 * x + p5 ** 2)
-    
-def lor2(x, p0, p1, 
-         p2, p3, 
-         p4, p5, 
-         p6, p7, p8):
-    """
-    Two lorentzians on a quadratic background
-    """
-    return (p4 / (1 + ((x - p0) / p2) ** 2) + 
-            p5 / (1 + ((x - p1) / p3) ** 2) +
-            p6 + p7 * x + p8 * x ** 2)
+    **Fermi Dirac function on a sloped**
 
-def lor4(x, p0, p1, p2, p3, 
-         p4, p5, p6, p7, 
-         p8, p9, p10, p11, 
-         p12, p13, p14):
-    """
-    Four lorentzians on a quadratic background
-    """
-    return (p8 / (1 + ((x - p0) / p4)  ** 2) + 
-            p9 / (1 + ((x - p1) / p5)  ** 2) +
-            p10 / (1 + ((x - p2) / p6)  ** 2) +
-            p11 / (1 + ((x - p3) / p7)  ** 2) +
-            p12 + p13 * x + p14 * x ** 2)
-    
-def lor6(x, p0, p1, p2, p3, p4, p5, 
-         p6, p7, p8, p9, p10, p11, 
-         p12, p13, p14, p15, p16, p17, 
-         p18, p19, p20):
-    """
-    Six lorentzians on a quadratic background
-    """
-    return (p12 / (1 + ((x - p0) / p6)  ** 2) + 
-            p13 / (1 + ((x - p1) / p7)  ** 2) +
-            p14 / (1 + ((x - p2) / p8)  ** 2) +
-            p15 / (1 + ((x - p3) / p9)  ** 2) +
-            p16 / (1 + ((x - p4) / p10) ** 2) +
-            p17 / (1 + ((x - p5) / p11) ** 2) +
-            p18 + p19 * x + p20 * x ** 2)
+    Args
+    ----------
+    :x:     energy axis
+    :p0:    kB * T
+    :p1:    EF
+    :p2:    Amplitude
+    :p3:    Constant background
+    :p4:    Slope
 
-def lor7(x, p0, p1, p2, p3, p4, p5, p6,
-         p7, p8, p9, p10, p11, p12, p13, 
-         p14, p15, p16, p17, p18, p19, p20,
-         p21, p22, p23):
+    Return
+    ------
+    :FDsl:  Fermi Dirac function on a sloped background
     """
-    Seven lorentzians on a quadratic background
-    """
-    return (p14 / (1 + ((x - p0) / p7)  ** 2) + 
-            p15 / (1 + ((x - p1) / p8)  ** 2) +
-            p16 / (1 + ((x - p2) / p9)  ** 2) +
-            p17 / (1 + ((x - p3) / p10) ** 2) +
-            p18 / (1 + ((x - p4) / p11) ** 2) +
-            p19 / (1 + ((x - p5) / p12) ** 2) +
-            p20 / (1 + ((x - p6) / p13) ** 2) +
-            p21 + p22 * x + p23 * x ** 2)
-    
-def lor8(x, p0, p1, p2, p3, p4, p5, p6, p7, 
-         p8, p9, p10, p11, p12, p13, p14, p15, 
-         p16, p17, p18, p19, p20, p21, p22, p23, 
-         p24, p25, p26):
-    """
-    Eight lorentzians on a quadratic background
-    """
-    return (p16 / (1 + ((x - p0) / p8)  ** 2) + 
-            p17 / (1 + ((x - p1) / p9)  ** 2) +
-            p18 / (1 + ((x - p2) / p10) ** 2) +
-            p19 / (1 + ((x - p3) / p11) ** 2) +
-            p20 / (1 + ((x - p4) / p12) ** 2) +
-            p21 / (1 + ((x - p5) / p13) ** 2) +
-            p22 / (1 + ((x - p6) / p14) ** 2) +
-            p23 / (1 + ((x - p7) / p15) ** 2) +
-            p24 + p25 * x + p26 * x ** 2)
-    
-def gauss2(x, p0, p1, p2, p3, p4, p5, p6, p7, p8):
-    """
-    Two gaussians on a quadratic background
-    """
-    return (p4 * np.exp(-(x - p0) ** 2 / (2 * p2 ** 2)) + 
-            p5 * np.exp(-(x - p1) ** 2 / (2 * p3 ** 2)) +
-            p6 + p7 * x + p8 * x ** 2)    
-    
-def FL_simple(x, p0, p1, p2, p3, p4, p5):
-    """
-    Fermi liquid quasiparticle with simple self energy
-    """
-    ReS = p0 * x
-    ImS = p1 + p2 * x ** 2;
 
-    return (p4 * 1 / np.pi * ImS / ((x - ReS - p3) ** 2 + ImS ** 2) * 
-            (np.exp((x - 0) / p5) + 1) ** -1)
+    FDsl = p[3] + (p[2] + p[4] * x) * (np.exp((x - p[1]) / p[0]) + 1) ** -1
 
-    
-def gauss_mod(x, p0, p1, p2, p3, p4, p5):
-    """
-    Modified Gaussian
-    """
-    return (p0 * np.exp(-.5 * ((-x + p1) / p2) ** 2) * 
-            (p3 * special.erf((-x + p4) / p5) + 1))
+    return FDsl
 
-def Full_simple(x, p0, p1, p2, p3, p4, p5, p6, p7, p8, p9):
-    """
-    Spectral function simple FL + incoherent weight as exp. mod. Gaussian
-    """
-    return (FL_simple(x, p0, p1, p2, p3, p4, p5) +
-            p9 * exponnorm.pdf(-x, K=p6, loc=p7, scale = p8) *
-            FDsl(x, p0=1e-3, p1=0, p2=1, p3=0, p4=0))
-    
-def Full_mod(x, p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11):
-    """
-    Spectral function simple FL + incoherent weight as exp. mod. Gaussian
-    """
-    return (FL_simple(x, p0, p1, p2, p3, p4, p5) +
-            gauss_mod(x, p6, p7, p8, p9, p10, p11))
 
+def poly_n(x, n, *p):
+    """returns poly_n
+
+    **Polynomial n-th order**
+
+    Args
+    ----------
+    :x:       x
+    :n:       order
+    :p[n]:    coefficients
+
+    Return
+    ------
+    :poly_n:  polynomial n-th order
+    """
+
+    poly_n = 0
+
+    # Loop over orders
+    for i in range(n):
+        poly_n += p[i] * x ** i
+
+    return lor_n
+
+
+def lor_n(x, n, *p):
+    """returns lor_n
+
+    **n Lorentzians on a quadratic background**
+
+    Args
+    ----------
+    :x:          momentum
+    :n:          number of Lorentzians
+    :p[0:n-1]:   center
+    :p[n:2*n-1]: HWHM
+    :p[2*n:-4]:  amplitudes
+
+    :p[-3]:      constant
+    :p[-2]:      slope
+    :p[-1]:      quadratic
+
+    Return
+    ------
+    lor_n        n Lorentzians
+    """
+
+    lor_n = 0
+
+    # Loop over Lorentzians
+    for i in range(n):
+        lor_n += (p[i+2*n] / (np.pi * p[i+n] *
+                  (1 + ((x - p[i]) / p[i+n]) ** 2)))
+    lor_n += p[-3] + p[-2] * x + p[-1] * x ** 2
+
+    return lor_n
+
+
+def gauss_n(x, n, *p):
+    """returns gauss_n
+
+    **n Gaussians on a quadratic background**
+
+    Args
+    ----------
+    :x:          momentum axis
+    :n:          number of Gaussians
+    :p[0:n-1]:   center
+    :p[n:2*n-1]: width
+    :p[2*n:-4]:  amplitudes
+
+    :p[-3]:      constant
+    :p[-2]:      slope
+    :p[-1]:      quadratic
+
+    Return
+    ------
+    gauss_n      n Gaussians
+    """
+
+    gauss_n = 0
+
+    # Loop over Gaussians
+    for i in range(n):
+        gauss_n += p[i+2*n] * np.exp(-(x - p[i]) ** 2 / (2 * p[i+n] ** 2))
+
+    gauss_n += p[-3] + p[-2] * x + p[-1] * x ** 2
+
+    return gauss_n
+
+
+def FL_spectral_func(x, *p):
+    """returns FL_spectral_func
+
+    **Saturated Fermi liquid quasiparticle with Fermi Dirac function**
+
+    Args
+    ----------
+    :x:         energy axis
+    :p[0]:      slope coefficient for real part of self energy
+    :p[1]:      constant coefficient for imaginary part of self energy
+    :p[2]:      quadratic coefficient for imaginary part of self energy
+    :p[3]:      excitation energy
+    :p[4]:      amplitude
+    :p[5]:      kB * T
+
+    Return
+    ------
+    FL_spectral_func    Saturated Fermi liquid model
+    """
+
+    ReS = p[0] * x
+    ImS = p[1] + p[2] * x ** 2
+
+    FL_spectral_func = (p[4] * 1 / np.pi * ImS /
+                        ((x - ReS - p[3]) ** 2 + ImS ** 2) *
+                        (np.exp((x - 0) / p[5]) + 1) ** -1)
+
+    return FL_spectral_func
+
+
+def gauss_mod(x, *p):
+    """returns gauss_mod
+
+    **Exponentially modified Gaussian**
+
+    Args
+    ----------
+    :x:         energy axis
+    :p[0]:      amplitude Gaussian
+    :p[1]:      center Gaussian
+    :p[2]:      width Gaussian
+    :p[3]:      amplitude error function
+    :p[4]:      center error function
+    :p[5]:      width error function
+
+    Return
+    ------
+    gauss_mod   Exponentially modified Gaussian
+    """
+
+    gauss_mod = (p[0] * np.exp(-.5 * ((-x + p[1]) / p[2]) ** 2) *
+                 (p[3] * special.erf((-x + p[4]) / p[5]) + 1))
+
+    return gauss_mod
+
+
+def Full_spectral_func(x, *p):
+    """returns Full_spectral_func
+
+    **Spectral function simple FL + incoherent weight as exp. mod. Gaussian**
+
+    Args
+    ----------
+    :x:         energy axis
+    :p[0]:      slope coefficient for real part of self energy
+    :p[1]:      constant coefficient for imaginary part of self energy
+    :p[2]:      quadratic coefficient for imaginary part of self energy
+    :p[3]:      excitation energy
+    :p[4]:      amplitude
+    :p[5]:      kB * T
+    :p[6]:      amplitude Gaussian
+    :p[7]:      center Gaussian
+    :p[8]:      width Gaussian
+    :p[9]:      amplitude error function
+    :p[10]:     center error function
+    :p[511:     width error function
+
+    Return
+    ------
+    Full_spectral_func   Fermi liquid spectral function + modified Gaussian
+    """
+
+    Full_spectral_func = (FL_spectral_func(x, *p[0:5]) +
+                          gauss_mod(x, *p[6:11]))
+
+    return Full_spectral_func
+
+
+"""
+%%%%%%%%%%%%%%%%%%%%%
+  Wrapper functions
+%%%%%%%%%%%%%%%%%%%%%
+"""
+
+
+def poly_1(x, *p):
+    """returns poly_1
+
+    **wrapper function of poly_n with n=1**
+
+    Args
+    ----------
+    :x:          momentum axis
+    :p[0]:       constant
+    :p[1]:       slope
+
+    Return
+    ------
+    poly_1       polynomial first order
+    """
+
+    poly_1 = poly_n(x, 1, *p)
+
+    return poly_1
+
+
+def poly_2(x, *p):
+    """returns poly_2
+
+    **wrapper function of poly_n with n=2**
+
+    Args
+    ----------
+    :x:          momentum axis
+    :p[0]:       constant
+    :p[1]:       slope
+    :p[2]:       quadratic part
+
+    Return
+    ------
+    poly_2       polynomial second order
+    """
+
+    poly_2 = poly_n(x, 2, *p)
+
+    return poly_2
+
+
+def lor(x, *p):
+    """returns lor
+
+    **wrapper function of lor_n with n=1**
+
+    Args
+    ----------
+    :x:      momentum
+    :n:      number of Lorentzians
+    :p[0]:   center
+    :p[1]:   HWHM
+    :p[2]:   amplitudes
+
+    :p[3]:   constant
+    :p[4]:   slope
+    :p[5]:   quadratic
+
+    Return
+    ------
+    lor      single Lorentzian
+    """
+
+    lor = lor_n(x, 1, *p)
+
+    return lor
+
+
+def lor_4(x, *p):
+    """returns lor_4
+
+    **wrapper function of lor_n with n=4**
+
+    Args
+    ----------
+    :x:          momentum
+    :n:          number of Lorentzians
+    :p[0:3]:     center
+    :p[4:7]:     HWHM
+    :p[8:-4]:    amplitudes
+
+    :p[-3]:      constant
+    :p[-2]:      slope
+    :p[-1]:      quadratic
+
+    Return
+    ------
+    lor_4       4 Lorentzians
+    """
+
+    lor_4 = lor_n(x, 4, *p)
+
+    return lor_4
+
+
+def lor_6(x, *p):
+    """returns lor_6
+
+    **wrapper function of lor_n with n=6**
+
+    Args
+    ----------
+    :x:          momentum
+    :n:          number of Lorentzians
+    :p[0:5]:     center
+    :p[6:11]:    HWHM
+    :p[12:-4]:   amplitudes
+
+    :p[-3]:      constant
+    :p[-2]:      slope
+    :p[-1]:      quadratic
+
+    Return
+    ------
+    lor_6       6 Lorentzians
+    """
+
+    lor_6 = lor_n(x, 6, *p)
+
+    return lor_6
+
+
+def lor_7(x, *p):
+    """returns lor_7
+
+    **wrapper function of lor_n with n=7**
+
+    Args
+    ----------
+    :x:          momentum
+    :n:          number of Lorentzians
+    :p[0:6]:     center
+    :p[7:12]:    HWHM
+    :p[13:-4]:   amplitudes
+
+    :p[-3]:      constant
+    :p[-2]:      slope
+    :p[-1]:      quadratic
+
+    Return
+    ------
+    lor_7       7 Lorentzians
+    """
+
+    lor_7 = lor_n(x, 7, *p)
+
+    return lor_7
+
+
+
+def lor_8(x, *p):
+    """returns lor_8
+
+    **wrapper function of lor_n with n=8**
+
+    Args
+    ----------
+    :x:          momentum
+    :n:          number of Lorentzians
+    :p[0:7]:     center
+    :p[8:15]:    HWHM
+    :p[16:-4]:   amplitudes
+
+    :p[-3]:      constant
+    :p[-2]:      slope
+    :p[-1]:      quadratic
+
+    Return
+    ------
+    lor_8       8 Lorentzians
+    """
+
+    lor_8 = lor_n(x, 8, *p)
+
+    return lor_8
+
+
+def gauss_2(x, *p):
+    """returns gauss_2
+
+    **wrapper function of gauss_n with n=2**
+
+    Args
+    ----------
+    :x:          momentum axis
+    :n:          number of Gaussians
+    :p[0:2]:     center
+    :p[3:5]:     width
+    :p[6:8]:     amplitudes
+
+    :p[-3]:      constant
+    :p[-2]:      slope
+    :p[-1]:      quadratic
+
+    Return
+    ------
+    gauss_2      2 Gaussians
+    """
+
+    gauss_2 = gauss_n(x, 2, *p)
+
+    return gauss_2
