@@ -13,7 +13,7 @@ Created on Fri Jul 20 22:44:11 2018
 
 .. note::
         To-Do:
-            -
+            - Method to cut through Fermi surfaces
 """
 
 import os
@@ -23,23 +23,20 @@ from scipy.optimize import curve_fit
 import matplotlib.cm as cm
 
 import utils
-import utils_plt
 
 
+# Set standard fonts
 rainbow_light = utils.rainbow_light
 cm.register_cmap(name='rainbow_light', cmap=rainbow_light)
 plt.rcParams['mathtext.fontset'] = 'cm'
 plt.rcParams['font.serif'] = ['Computer Modern Roman']
 plt.rc('font', **{'family': 'serif', 'serif': ['STIXGeneral']})
-plt.rcParams['xtick.top'] = plt.rcParams['xtick.bottom'] = True
-plt.rcParams['ytick.right'] = plt.rcParams['ytick.left'] = True
-
 font = {'family': 'serif',
         'style': 'normal',
         'color':  [0, 0, 0],
         'weight': 'ultralight',
-        'size': 12}
-
+        'size': 12,
+        }
 kwargs_spec = {'cmap': cm.ocean_r}
 
 
