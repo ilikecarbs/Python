@@ -26,12 +26,14 @@ import utils_plt
 
 
 class Methods:
-    """**Methods superclass**
+    """
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+             Methods superclass
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    Class with all methods for basic data analysis.
+    **Class with all methods for basic data analysis.
     These methods will be passed by to the base data loaders
-    from different beamlines and are called from utils.py.
-
+    from different beamlines and are called from utils.py.**
     """
 
     def gold(self, Ef_ini):

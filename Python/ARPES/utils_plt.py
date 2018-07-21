@@ -5,9 +5,9 @@ Created on Wed Jun 20 11:30:51 2018
 
 @author: ilikecarbs
 
-%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%
       utils_plt
-%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%
 
 **Plotting helper functions**
 
@@ -2767,14 +2767,14 @@ def CSROfig11(print_fig=True):
     kbnd = 2
     tb = utils.TB(a = np.pi, kbnd = kbnd, kpoints = 500)  #Initialize tight binding model
     param = utils.paramCSRO20()  
-    kx, ky, FS = tb.CSRO(param, e0=0, vertices=True, proj=True) 
+    tb.CSRO(param=param, e0=0, vert=True, proj=True) 
     bndstr = tb.bndstr
     coord = tb.coord   
     X = coord['X']; Y = coord['Y']   
     Axz = bndstr['Axz']; Ayz = bndstr['Ayz']; Axy = bndstr['Axy']
     Bxz = bndstr['Bxz']; Byz = bndstr['Byz']; Bxy = bndstr['Bxy']
     en = (Axz, Ayz, Axy, Bxz, Byz, Bxy)
-    v_bnd = np.max(FS)
+    v_bnd = np.max(tb.FS)
     plt.figure(2011, figsize=(8, 8), clear=True)
     ax = plt.subplot(122)
     ax.set_position([.1, .3, .4 , .4])
@@ -2782,7 +2782,7 @@ def CSROfig11(print_fig=True):
     for i in en:
         plt.contour(X, Y, i, colors = 'black', linestyles = '-', levels = 0,
                     alpha=.2)
-    plt.contourf(kx, ky, FS, 200, cmap='PuOr', vmin=-v_bnd, vmax=v_bnd)
+    plt.contourf(tb.kx, tb.ky, tb.FS, 200, cmap='PuOr', vmin=-v_bnd, vmax=v_bnd)
     plt.text(-.1, -.1, r'$\Gamma$', fontsize=18, color='r')
     plt.text(.9, .9, 'S', fontsize=18, color='r')
     plt.text(-.1, .9, 'X', fontsize=18, color='r')
@@ -2801,7 +2801,7 @@ def CSROfig11(print_fig=True):
                         pos.y0, 0.01, pos.height])
     cbar = plt.colorbar(cax = cax, ticks = None)
     cbar.set_ticks([])
-    cbar.set_clim(np.min(FS), np.max(FS))
+    cbar.set_clim(np.min(tb.FS), np.max(tb.FS))
     if print_fig == True:
         plt.savefig(
                 '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig11.png', 
@@ -2815,13 +2815,13 @@ def CSROfig12(print_fig=True):
     kbnd = 2
     tb = utils.TB(a = np.pi, kbnd = kbnd, kpoints = 500)  #Initialize tight binding model
     param = utils.paramSRO()  
-    kx, ky, FS = tb.SRO(param, e0=0, vertices=True, proj=True) 
+    tb.SRO(param=param, e0=0, vert=True, proj=True) 
     bndstr = tb.bndstr
     coord = tb.coord   
     X = coord['X']; Y = coord['Y']   
     xz = bndstr['xz']; yz = bndstr['yz']; xy = bndstr['xy']
     en = (xz, yz, xy)
-    v_bnd = np.max(FS)
+    v_bnd = np.max(tb.FS)
     plt.figure(2012, figsize=(8, 8), clear=True)
     ax = plt.subplot(122)
     ax.set_position([.1, .3, .4 , .4])
@@ -2829,7 +2829,7 @@ def CSROfig12(print_fig=True):
     for i in en:
         plt.contour(X, Y, i, colors = 'black', linestyles = '-', levels = 0,
                     alpha=.2)
-    plt.contourf(kx, ky, FS, 200, cmap='PuOr', vmin=-v_bnd, vmax=v_bnd)
+    plt.contourf(tb.kx, tb.ky, tb.FS, 200, cmap='PuOr', vmin=-v_bnd, vmax=v_bnd)
     plt.plot([-1, 1], [1, 1], 'k-', lw=2)
     plt.plot([-1, 1], [-1, -1], 'k-', lw=2)
     plt.plot([1, 1], [-1, 1], 'k-', lw=2)
@@ -2849,7 +2849,7 @@ def CSROfig12(print_fig=True):
                         pos.y0, 0.01, pos.height])
     cbar = plt.colorbar(cax = cax, ticks = None)
     cbar.set_ticks([])
-    cbar.set_clim(np.min(FS), np.max(FS))
+    cbar.set_clim(np.min(tb.FS), np.max(tb.FS))
     if print_fig == True:
         plt.savefig(
                 '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig12.png', 

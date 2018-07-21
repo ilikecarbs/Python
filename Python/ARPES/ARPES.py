@@ -5,9 +5,9 @@ Created on Sun Jun 10 13:20:31 2018
 
 @author: ilikecarbs
 
-%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%
         ARPES
-%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%
 
 **Data Loader ARPES data files.**
 

@@ -5,9 +5,9 @@ Created on Mon Jun 11 09:57:01 2018
 
 @author: ilikecarbs
 
-%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%
         utils
-%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%
 
 **Useful helper functions, mainly used for ARPES.py**
 
@@ -18,16 +18,11 @@ Created on Mon Jun 11 09:57:01 2018
 
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.optimize import curve_fit
 from numpy import linalg as la
-import utils_plt as uplt
 import utils
 from scipy.stats import exponnorm
 from scipy import special
-from uncertainties import ufloat
-import uncertainties.umath as umath
 from scipy.ndimage.filters import gaussian_filter
-import matplotlib.cm as cm
 
 
 def find(array, val):
@@ -98,10 +93,19 @@ def paramSRO():
     Return
     ------
     :param:   parameter dictionary
+
+    - t1:   Nearest neighbour for out-of-plane orbitals large
+    - t2:   Nearest neighbour for out-of-plane orbitals small
+    - t3:   Nearest neighbour for dxy orbitals
+    - t4:   Next nearest neighbour for dxy orbitals
+    - t5:   Next next nearest neighbour for dxy orbitals
+    - t6:   Off diagonal matrix element
+    - mu:   Chemical potential
+    - so:   spin orbit coupling
     """
 
     param = dict([('t1', .145), ('t2', .016), ('t3', .081), ('t4', .039),
-                  ('t5', .005), ('t6', 0), ('mu', .122), ('l', .032)])
+                  ('t5', .005), ('t6', 0), ('mu', .122), ('so', .032)])
     return param
 
 
@@ -116,10 +120,19 @@ def paramCSRO20():
     Return
     ------
     :param:   parameter dictionary
+
+    - t1:   Nearest neighbour for out-of-plane orbitals large
+    - t2:   Nearest neighbour for out-of-plane orbitals small
+    - t3:   Nearest neighbour for dxy orbitals
+    - t4:   Next nearest neighbour for dxy orbitals
+    - t5:   Next next nearest neighbour for dxy orbitals
+    - t6:   Off diagonal matrix element
+    - mu:   Chemical potential
+    - so:   spin orbit coupling
     """
 
     param = dict([('t1', .115), ('t2', .002), ('t3', .071), ('t4', .039),
-                  ('t5', .012), ('t6', 0), ('mu', .084), ('l', .037)])
+                  ('t5', .012), ('t6', 0), ('mu', .084), ('so', .037)])
     return param
 
 
@@ -134,81 +147,161 @@ def paramCSRO30():
     Return
     ------
     :param:   parameter dictionary
+
+    - t1:   Nearest neighbour for out-of-plane orbitals large
+    - t2:   Nearest neighbour for out-of-plane orbitals small
+    - t3:   Nearest neighbour for dxy orbitals
+    - t4:   Next nearest neighbour for dxy orbitals
+    - t5:   Next next nearest neighbour for dxy orbitals
+    - t6:   Off diagonal matrix element
+    - mu:   Chemical potential
+    - so:   spin orbit coupling
     """
 
     param = dict([('t1', .1), ('t2', .005), ('t3', .081), ('t4', .04),
-                  ('t5', .01), ('t6', 0), ('mu', .08), ('l', .04)])
+                  ('t5', .01), ('t6', 0), ('mu', .08), ('so', .04)])
     return param
 
 
 class TB:
     """
-    Tight binding models
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+             Tight binding class
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    **Tight binding models for Sr2RuO4 and Ca1.8Sr0.2RuO4**
     """
     def __init__(self, a=np.pi, kbnd=1, kpoints=100):
-        self.a = a
+        """returns self.a, self.coord
+
+        **Initializing tight binding class**
+
+        Args
+        ----------
+        :a:         TB lattice constant in units pi/a
+        :kbnd:      boundary of model in units pi/a
+        :kpoints:   k-mesh granularity
+
+        Return
+        ------
+        :self.a:        lattice constant
+        :self.coord:    k-mesh
+        """
+
         x = np.linspace(-kbnd, kbnd, kpoints)
         y = np.linspace(-kbnd, kbnd, kpoints)
-        [X, Y] = np.meshgrid(x,y)
+        [X, Y] = np.meshgrid(x, y)
+        self.a = a
         self.coord = dict([('x', x), ('y', y), ('X', X), ('Y', Y)])
-  
-    def SRO(self, param, e0=0, vertices=False, proj=False):
-        #Load TB parameters
-        t1 = param['t1']; t2 = param['t2']; t3 = param['t3']
-        t4 = param['t4']; t5 = param['t5']; t6 = param['t6']
-        mu = param['mu']; l = param['l']
-#        l = 0
+
+    def SRO(self, param=paramSRO(), e0=0, vert=False, proj=False):
+        """returns self.bndstr, self.kx, self.ky, self.FS
+
+        **Calculates band structure from 3 band tight binding model**
+
+        Args
+        ----------
+        :param:     TB parameters
+        :e0:        chemical potential shift
+        :vert:      'True': plots useful numeration of vertices for figures
+        :proj:      'True': projects onto orbitals
+
+        Return
+        ------
+        :self.bndstr:   band structure dictionary: yz, xz and xy
+        :self.kx:       kx coordinates (vert=True and proj=True)
+        :self.ky:       ky coordinates (vert=True and proj=True)
+        :self.FS:       FS coordinates (vert=True and proj=True)
+        """
+
+        # Load TB parameters
+        t1 = param['t1']  # Nearest neighbour for out-of-plane orbitals large
+        t2 = param['t2']  # Nearest neighbour for out-of-plane orbitals small
+        t3 = param['t3']  # Nearest neighbour for dxy orbitals
+        t4 = param['t4']  # Next nearest neighbour for dxy orbitals
+        t5 = param['t5']  # Next next nearest neighbour for dxy orbitals
+        t6 = param['t6']  # Off diagonal matrix element
+        mu = param['mu']  # Chemical potential
+        so = param['so']  # spin orbit coupling
+
         coord = self.coord
         a = self.a
-        x = coord['x']; y = coord['y']; X = coord['X']; Y = coord['Y']
-        #Hopping terms
+        x = coord['x']
+        y = coord['y']
+        X = coord['X']
+        Y = coord['Y']
+
+        # Hopping terms
         fyz = - 2 * t2 * np.cos(X * a) - 2 * t1 * np.cos(Y * a)
         fxz = - 2 * t1 * np.cos(X * a) - 2 * t2 * np.cos(Y * a)
         fxy = - 2 * t3 * (np.cos(X * a) + np.cos(Y * a)) - \
-                4 * t4 * (np.cos(X * a) * np.cos(Y * a)) - \
-                2 * t5 * (np.cos(2 * X * a) + np.cos(2 * Y * a))
+            4 * t4 * (np.cos(X * a) * np.cos(Y * a)) - \
+            2 * t5 * (np.cos(2 * X * a) + np.cos(2 * Y * a))
         off = - 4 * t6 * (np.sin(X * a) * np.sin(Y * a))
-        #Placeholders energy eigenvalues
-        yz = np.ones((len(x), len(y))); xz = np.ones((len(x), len(y)))
+
+        # Placeholders energy eigenvalues
+        yz = np.ones((len(x), len(y)))
+        xz = np.ones((len(x), len(y)))
         xy = np.ones((len(x), len(y)))
-        #Tight binding Hamiltonian
-        def H(i,j):
-            H = np.array([[fyz[i,j] - mu, off[i,j] + complex(0,l), -l],
-                          [off[i,j] - complex(0,l), fxz[i,j] - mu, complex(0,l)],
-                          [-l, -complex(0,l), fxy[i,j] - mu]])
+
+        # Tight binding Hamiltonian
+        def H(i, j):
+            H = np.array([[fyz[i, j] - mu, off[i, j] + complex(0, so), -so],
+                          [off[i, j] - complex(0, so), fxz[i, j] - mu,
+                           complex(0, so)],
+                          [-so, -complex(0, so), fxy[i, j] - mu]])
             return H
-        #Diagonalization of symmetric Hermitian matrix on k-mesh
+
+        # Diagonalization of symmetric Hermitian matrix on k-mesh
         for i in range(len(x)):
             for j in range(len(y)):
-                eval = la.eigvalsh(H(i,j))
-                eval = np.real(eval)
-                yz[i,j] = eval[0]; xz[i,j] = eval[1]; xy[i,j] = eval[2]
-        bndstr = dict([('yz', yz), ('xz', xz), ('xy', xy)])
-        self.bndstr = bndstr
-        en = (yz, xz, xy)
+                val = la.eigvalsh(H(i, j))
+                val = np.real(val)
+                yz[i, j] = val[0]
+                xz[i, j] = val[1]
+                xy[i, j] = val[2]
+
+        # Band structure
+        bndstr = (yz, xz, xy)
+
+        # Placeholder for contours
         C = ()
+
+        # Projectors
         Pyz = np.array([[1, 0, 0], [0, 0, 0], [0, 0, 0]])
         Pxz = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]])
         Pxy = np.array([[0, 0, 0], [0, 0, 0], [0, 0, 1]])
+
+        # Generate contours C
         n = 0
-        for i in en:
+        for bnd in bndstr:
             n += 1
             plt.subplot(1, 3, n)
-            c = plt.contour(X, Y, i, colors = 'black', 
-                            linestyles = ':', levels = e0)
+            c = plt.contour(X, Y, bnd, colors='black',
+                            linestyles='-', levels=e0)
             C = C + (c,)
             plt.axis('equal')
-        if vertices == True:
-            if proj == True:
+
+        # Get vertices and label them, useful for plotting separate
+        # parts of the Fermi surface pockets with different colors
+        if vert:
+            if proj:  # Also project eigenbasis onto orbitals from here
+
+                # Placeholders for projected FS
                 kx = np.linspace(np.min(x), np.max(x), 1000)
                 ky = np.linspace(np.min(y), np.max(y), 1000)
                 FS = np.zeros((len(kx), len(ky)))
-            for j in range(3):
-                p = C[j].collections[0].get_paths()
-                p = np.asarray(p)  
+
+            for n_bnd in range(len(bndstr)):
+                p = C[n_bnd].collections[0].get_paths()
+                p = np.asarray(p)
                 plt.figure('SRO_vertices')
+
+                # Placeholders vertices
                 V_x = ()
-                V_y = ()    
+                V_y = ()
+
+                # Get vertices and plot them
                 for i in range(len(p)):
                     v = p[i].vertices
                     v_x = v[:, 0]
@@ -219,122 +312,190 @@ class TB:
                     plt.axis('equal')
                     plt.text(v_x[0], v_y[0], str(i))
                     plt.show()
-                if proj == True:
-                    for N in range(len(V_x)):
-                        for i in range(len(V_x[N])):
-                            val_x, ind_x = utils.find(x, V_x[N][i])
-                            val_y, ind_y = utils.find(y, V_y[N][i])
-                            eval_proj, evec_proj = la.eigh(H(ind_x, ind_y))
-                            eval_proj = np.real(eval_proj)
+
+                if proj:  # Do projection for all vertices
+                    for j in range(len(V_x)):  # Loop over all vertices
+                        for i in range(len(V_x[j])):  # Loop over k-points
+
+                            #  Find values and diagonalize
+                            val_x, ind_x = utils.find(x, V_x[j][i])
+                            val_y, ind_y = utils.find(y, V_y[j][i])
+                            val_proj, vec_proj = la.eigh(H(ind_x, ind_y))
+                            val_proj = np.real(val_proj)
+
+                            # orbital weights
                             wyz = np.real(
                                     np.sum(
-                                            np.conj(evec_proj[:, j]) * \
-                                            (Pyz * evec_proj[:, j]))) 
+                                            np.conj(vec_proj[:, n_bnd]) *
+                                            (Pyz * vec_proj[:, n_bnd])))
                             wxz = np.real(
                                     np.sum(
-                                            np.conj(evec_proj[:, j]) * \
-                                            (Pxz * evec_proj[:, j]))) 
+                                            np.conj(vec_proj[:, n_bnd]) *
+                                            (Pxz * vec_proj[:, n_bnd])))
                             wxy = np.real(
                                     np.sum(
-                                            np.conj(evec_proj[:, j]) * \
-                                            (Pxy * evec_proj[:, j]))) 
-                            
+                                            np.conj(vec_proj[:, n_bnd]) *
+                                            (Pxy * vec_proj[:, n_bnd])))
+
+                            # Total out-of-plane weight
                             wz = wyz + wxz
+
+                            # Weight for divergence colorscale
                             w = wz - wxy
-                            xval, _xval = utils.find(kx, V_x[N][i])
-                            yval, _yval = utils.find(ky, V_y[N][i])
-                            FS[_xval, _yval] = w + 0
-                            n += 1
-#                            plt.plot(V_x[N][i], V_y[N][i], 'o', ms=2,
-#                                     color=[min(1, wAyz + wByz + wAxz + wBxz),
-#                                            0, min(1, wAxy + wBxy)])
+
+                            # Build Fermi surface
+                            xval, _xval = utils.find(kx, V_x[j][i])
+                            yval, _yval = utils.find(ky, V_y[j][i])
+                            FS[_xval, _yval] = w
+
             FS = gaussian_filter(FS, sigma=10, mode='constant')
-            return kx, ky, FS
-        
-    def CSRO(self, param, e0=0, vertices=False, proj=True):
+            self.kx = kx
+            self.ky = ky
+            self.FS = FS
+
+        self.bndstr = dict([('yz', yz), ('xz', xz), ('xy', xy)])
+
+    def CSRO(self, param=paramCSRO20(), e0=0, vert=False, proj=True):
+        """returns self.bndstr, self.kx, self.ky, self.FS
+
+        **Calculates band structure from 6 band tight binding model**
+
+        Args
+        ----------
+        :param:     TB parameters
+        :e0:        chemical potential shift
+        :vert:      'True': plots useful numeration of vertices for figures
+        :proj:      'True': projects onto orbitals
+
+        Return
+        ------
+        :self.bndstr:   band structure dictionary: yz, xz and xy
+        :self.kx:       kx coordinates (vert=True and proj=True)
+        :self.ky:       ky coordinates (vert=True and proj=True)
+        :self.FS:       FS coordinates (vert=True and proj=True)
         """
-        TB model for Ca1.8Sr0.2RuO4
-        
-        """
-        #Load TB parameters
-        t1 = param['t1']; t2 = param['t2']; t3 = param['t3']
-        t4 = param['t4']; t5 = param['t5']; t6 = param['t6']
-        mu = param['mu']; l = param['l'] 
+
+        # Load TB parameters
+        t1 = param['t1']  # Nearest neighbour for out-of-plane orbitals large
+        t2 = param['t2']  # Nearest neighbour for out-of-plane orbitals small
+        t3 = param['t3']  # Nearest neighbour for dxy orbitals
+        t4 = param['t4']  # Next nearest neighbour for dxy orbitals
+        t5 = param['t5']  # Next next nearest neighbour for dxy orbitals
+        t6 = param['t6']  # Off diagonal matrix element
+        mu = param['mu']  # Chemical potential
+        so = param['so']  # spin orbit coupling
+
         coord = self.coord
         a = self.a
-        x = coord['x']; y = coord['y']; X = coord['X']; Y = coord['Y']
-        #Hopping terms
+        x = coord['x']
+        y = coord['y']
+        X = coord['X']
+        Y = coord['Y']
+
+        # Hopping terms
         fx = -2 * np.cos((X + Y) / 2 * a)
         fy = -2 * np.cos((X - Y) / 2 * a)
         f4 = -2 * t4 * (np.cos(X * a) + np.cos(Y * a))
         f5 = -2 * t5 * (np.cos((X + Y) * a) + np.cos((X - Y) * a))
         f6 = -2 * t6 * (np.cos(X * a) - np.cos(Y * a))
-        #Placeholders energy eigenvalues
-        Ayz = np.ones((len(x), len(y))); Axz = np.ones((len(x), len(y)))
-        Axy = np.ones((len(x), len(y))); Byz = np.ones((len(x), len(y))) 
-        Bxz = np.ones((len(x), len(y))); Bxy = np.ones((len(x), len(y)))
-        #TB submatrix
-        def A(i,j):
-            A = np.array([[-mu, complex(0,l) + f6[i,j], -l],
-                          [-complex(0,l) + f6[i,j], -mu, complex(0,l)],
-                          [-l, -complex(0,l), -mu + f4[i,j] + f5[i,j]]])
+
+        # Placeholders energy eigenvalues
+        Ayz = np.ones((len(x), len(y)))
+        Axz = np.ones((len(x), len(y)))
+        Axy = np.ones((len(x), len(y)))
+        Byz = np.ones((len(x), len(y)))
+        Bxz = np.ones((len(x), len(y)))
+        Bxy = np.ones((len(x), len(y)))
+
+        # TB submatrix
+        def A(i, j):
+            A = np.array([[-mu, complex(0, so) + f6[i, j], -so],
+                          [-complex(0, so) + f6[i, j], -mu, complex(0, so)],
+                          [-so, -complex(0, so), -mu + f4[i, j] + f5[i, j]]])
             return A
-        #TB submatrix
-        def B(i,j): 
-            B = np.array([[t2 * fx[i,j] + t1 * fy[i,j], 0, 0],
-                          [0, t1 * fx[i,j] + t2 * fy[i,j], 0],
-                          [0, 0, t3 * (fx[i,j] + fy[i,j])]])
+
+        # TB submatrix
+        def B(i, j):
+            B = np.array([[t2 * fx[i, j] + t1 * fy[i, j], 0, 0],
+                          [0, t1 * fx[i, j] + t2 * fy[i, j], 0],
+                          [0, 0, t3 * (fx[i, j] + fy[i, j])]])
             return B
-        #Tight binding Hamiltonian
-        def H(i,j):
-            C1 = np.concatenate((A(i,j), B(i,j)), 1)
-            C2 = np.concatenate((B(i,j), A(i,j)), 1)
-            H  = np.concatenate((C1, C2), 0)
+
+        # Tight binding Hamiltonian
+        def H(i, j):
+            C1 = np.concatenate((A(i, j), B(i, j)), 1)
+            C2 = np.concatenate((B(i, j), A(i, j)), 1)
+            H = np.concatenate((C1, C2), 0)
             return H
-        #Diagonalization of symmetric Hermitian matrix on k-mesh
+
+        # Diagonalization of symmetric Hermitian matrix on k-mesh
         for i in range(len(x)):
             for j in range(len(y)):
-                eval = la.eigvalsh(H(i,j))
-                eval = np.real(eval)
-                Ayz[i,j] = eval[0]; Axz[i,j] = eval[1]; Axy[i,j] = eval[2]
-                Byz[i,j] = eval[3]; Bxz[i,j] = eval[4]; Bxy[i,j] = eval[5]
-        bndstr = dict([('Ayz', Ayz), ('Axz', Axz), ('Axy', Axy),
-                       ('Byz', Byz), ('Bxz', Bxz), ('Bxy', Bxy)])
-        self.bndstr = bndstr
-        en = (Ayz, Axz, Axy, Byz, Bxz, Bxy)
+                val = la.eigvalsh(H(i, j))
+                val = np.real(val)
+                Ayz[i, j] = val[0]
+                Axz[i, j] = val[1]
+                Axy[i, j] = val[2]
+                Byz[i, j] = val[3]
+                Bxz[i, j] = val[4]
+                Bxy[i, j] = val[5]
+
+        # Band structure
+        bndstr = (Ayz, Axz, Axy, Byz, Bxz, Bxy)
+
+        # Placeholder for contours
         C = ()
-        PAyz = np.array([[1,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],
-                         [0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]])
-        PAxz = np.array([[0,0,0,0,0,0],[0,1,0,0,0,0],[0,0,0,0,0,0],
-                         [0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]])
-        PAxy = np.array([[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,1,0,0,0],
-                         [0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]])
-        PByz = np.array([[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],
-                         [0,0,0,1,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]])
-        PBxz = np.array([[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],
-                         [0,0,0,0,0,0],[0,0,0,0,1,0],[0,0,0,0,0,0]])
-        PBxy = np.array([[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],
-                         [0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,1]])
+
+        # Projectors
+        PAyz = np.array([[1, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]])
+        PAxz = np.array([[0, 0, 0, 0, 0, 0], [0, 1, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]])
+        PAxy = np.array([[0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0],
+                         [0, 0, 1, 0, 0, 0], [0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]])
+        PByz = np.array([[0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0], [0, 0, 0, 1, 0, 0],
+                         [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]])
+        PBxz = np.array([[0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 1, 0], [0, 0, 0, 0, 0, 0]])
+        PBxy = np.array([[0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 1]])
+
+        # Generate contours C
         n = 0
-        plt.figure('CSRO TB', clear=True)
-        for i in en:
+        for bnd in bndstr:
             n += 1
             plt.subplot(2, 3, n)
-            c = plt.contour(X, Y, i, colors = 'black', 
-                            linestyles = ':', levels = e0)
+            c = plt.contour(X, Y, bnd, colors='black',
+                            linestyles='-', levels=e0)
             C = C + (c,)
             plt.axis('equal')
-        if vertices == True:
-            if proj == True:
+
+        # Get vertices and label them, useful for plotting separate
+        # parts of the Fermi surface pockets with different colors
+        if vert:
+            if proj:  # Also project eigenbasis onto orbitals from here
+
+                # Placeholders for projected FS
                 kx = np.linspace(np.min(x), np.max(x), 1000)
                 ky = np.linspace(np.min(y), np.max(y), 1000)
                 FS = np.zeros((len(kx), len(ky)))
-            for j in range(6):
-                p = C[j].collections[0].get_paths()
-                p = np.asarray(p)  
+
+            for n_bnd in range(len(bndstr)):
+                p = C[n_bnd].collections[0].get_paths()
+                p = np.asarray(p)
                 plt.figure('CSRO_vertices')
+
+                # Placeholders vertices
                 V_x = ()
-                V_y = ()    
+                V_y = ()
+
+                # Get vertices and plot them
                 for i in range(len(p)):
                     v = p[i].vertices
                     v_x = v[:, 0]
@@ -345,77 +506,104 @@ class TB:
                     plt.axis('equal')
                     plt.text(v_x[0], v_y[0], str(i))
                     plt.show()
-                if proj == True:
-                    for N in range(len(V_x)):
-                        for i in range(len(V_x[N])):
-                            val_x, ind_x = utils.find(x, V_x[N][i])
-                            val_y, ind_y = utils.find(y, V_y[N][i])
+
+                if proj:  # Do projection for all vertices
+                    for j in range(len(V_x)):  # Loop over all vertices
+                        for i in range(len(V_x[j])):  # Loop over k-points
+
+                            # Find values and diagonalize
+                            val_x, ind_x = utils.find(x, V_x[j][i])
+                            val_y, ind_y = utils.find(y, V_y[j][i])
                             eval_proj, evec_proj = la.eigh(H(ind_x, ind_y))
                             eval_proj = np.real(eval_proj)
+
+                            # orbital weights
                             wAyz = np.real(
                                     np.sum(
-                                            np.conj(evec_proj[:, j]) * \
-                                            (PAyz * evec_proj[:, j]))) 
+                                            np.conj(evec_proj[:, n_bnd]) *
+                                            (PAyz * evec_proj[:, n_bnd])))
                             wAxz = np.real(
                                     np.sum(
-                                            np.conj(evec_proj[:, j]) * \
-                                            (PAxz * evec_proj[:, j]))) 
+                                            np.conj(evec_proj[:, n_bnd]) *
+                                            (PAxz * evec_proj[:, n_bnd])))
                             wAxy = np.real(
                                     np.sum(
-                                            np.conj(evec_proj[:, j]) * \
-                                            (PAxy * evec_proj[:, j]))) 
+                                            np.conj(evec_proj[:, n_bnd]) *
+                                            (PAxy * evec_proj[:, n_bnd])))
                             wByz = np.real(
                                     np.sum(
-                                            np.conj(evec_proj[:, j]) * \
-                                            (PByz * evec_proj[:, j]))) 
+                                            np.conj(evec_proj[:, n_bnd]) *
+                                            (PByz * evec_proj[:, n_bnd])))
                             wBxz = np.real(
                                     np.sum(
-                                            np.conj(evec_proj[:, j]) * \
-                                            (PBxz * evec_proj[:, j]))) 
+                                            np.conj(evec_proj[:, n_bnd]) *
+                                            (PBxz * evec_proj[:, n_bnd])))
                             wBxy = np.real(
                                     np.sum(
-                                            np.conj(evec_proj[:, j]) * \
-                                            (PBxy * evec_proj[:, j]))) 
-                            wz = wAyz + wAxz + wByz + wBxz
-                            wxy = wAxy + wBxy
-                            w = wz - wxy
-                            xval, _xval = utils.find(kx, V_x[N][i])
-                            yval, _yval = utils.find(ky, V_y[N][i])
-                            FS[_xval, _yval] = w + 0
-                            n += 1
-#                            plt.plot(V_x[N][i], V_y[N][i], 'o', ms=2,
-#                                     color=[min(1, wAyz + wByz + wAxz + wBxz),
-#                                            0, min(1, wAxy + wBxy)])
-            FS = gaussian_filter(FS, sigma=10, mode='constant')
-            return kx, ky, FS
+                                            np.conj(evec_proj[:, n_bnd]) *
+                                            (PBxy * evec_proj[:, n_bnd])))
 
-    def simple(self, param):
-        t1 = param['t1']; t2 = param['t2']; t3 = param['t3']
-        t4 = param['t4']; t5 = param['t5']; mu = param['mu']   
+                            # Total out-of-plane weight
+                            wz = wAyz + wAxz + wByz + wBxz
+
+                            # Total in-plane weight
+                            wxy = wAxy + wBxy
+
+                            # Weight for divergence colorscale
+                            w = wz - wxy
+
+                            # Build Fermi surface
+                            xval, _xval = utils.find(kx, V_x[j][i])
+                            yval, _yval = utils.find(ky, V_y[j][i])
+                            FS[_xval, _yval] = w + 0
+
+            FS = gaussian_filter(FS, sigma=10, mode='constant')
+            self.kx = kx
+            self.ky = ky
+            self.FS = FS
+
+        self.bndstr = dict([('Ayz', Ayz), ('Axz', Axz), ('Axy', Axy),
+                            ('Byz', Byz), ('Bxz', Bxz), ('Bxy', Bxy)])
+
+    def single(self, param):
+        """returns self.bndstr, self.kx, self.ky, self.FS
+
+        **Calculates single band tight binding band structure**
+
+        Args
+        ----------
+        :param:     TB parameters
+
+        Return
+        ------
+        :self.bndstr:   band structure dictionary: yz, xz and xy
+        """
+
+        # Load TB parameters
+        t1 = param['t1']  # Nearest neighbour hopping
+        t2 = param['t2']  # Next nearest neighbour hopping
+        t3 = param['t3']  # NNN neighbour hopping
+        t4 = param['t4']  # NNNN hopping
+        t5 = param['t5']  # NNNNN hopping
+        mu = param['mu']  # Chemical potential
+
         coord = self.coord
         a = self.a
-        X = coord['X']; Y = coord['Y']
-        
-        en = - mu - \
-            2 * t1 * (np.cos(X * a) + np.cos(Y * a)) - \
-            4 * t2 * (np.cos(X * a) * np.cos(Y * a)) - \
-            2 * t3 * (np.cos(2 * X * a) + np.cos(2 * Y * a)) - \
-            4 * t4 * (np.cos(2 * X * a) * np.cos(Y * a) + \
-                      np.cos(X * a) * np.cos(2 * Y * a)) - \
-            4 * t5 * (np.cos(2 * X * a) * np.cos(2 * Y * a))
-            
-        bndstr = dict([('en', en)])
-        self.bndstr = bndstr
-  
-    def plt_cont_TB_SRO(self, e0=0):
-        uplt.plt_cont_TB_SRO(self, e0)
-        
-    def plt_cont_TB_CSRO20(self, e0=0): 
-        uplt.plt_cont_TB_CSRO20(self, e0)
-        
-    def plt_cont_TB_simple(self, e0=0):
-        uplt.plt_cont_TB_simple(self, e0)
-        
+
+        X = coord['X']
+        Y = coord['Y']
+
+        bndstr = (- mu -
+                  2 * t1 * (np.cos(X * a) + np.cos(Y * a)) -
+                  4 * t2 * (np.cos(X * a) * np.cos(Y * a)) -
+                  2 * t3 * (np.cos(2 * X * a) + np.cos(2 * Y * a)) -
+                  4 * t4 * (np.cos(2 * X * a) * np.cos(Y * a) +
+                            np.cos(X * a) * np.cos(2 * Y * a)) -
+                  4 * t5 * (np.cos(2 * X * a) * np.cos(2 * Y * a)))
+
+        self.bndstr = dict([('bndstr', bndstr)])
+
+
 def CSRO_eval(x, y):
     a = np.pi
     #Load TB parameters
@@ -623,18 +811,7 @@ def FL_simple(x, p0, p1, p2, p3, p4, p5):
 
     return (p4 * 1 / np.pi * ImS / ((x - ReS - p3) ** 2 + ImS ** 2) * 
             (np.exp((x - 0) / p5) + 1) ** -1)
-    
-def uFL_simple(x, p0, p1, p2, p3, p4, p5,
-               ep0, ep1, ep2, ep3, ep4, ep5):
-    """
-    Fermi liquid quasiparticle with simple self energy
-    """
-    ReS = ufloat(p0, ep0) * x
-    ImS = ufloat(p1, ep1) + ufloat(p2, ep2) * x ** 2;
 
-    return (ufloat(p4, ep4) * 1 / np.pi * 
-            ImS / ((x - ReS - ufloat(p3, ep3)) ** 2 + ImS ** 2) * 
-            (umath.exp((x - 0) / ufloat(p5, ep5)) + 1) ** -1)
     
 def gauss_mod(x, p0, p1, p2, p3, p4, p5):
     """

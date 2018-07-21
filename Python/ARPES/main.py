@@ -6,9 +6,9 @@ Created on Tue Jun 19 15:14:29 2018
 
 @author: ilikecarbs
 
-%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%
         main
-%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%
 
 **Development environment and plotting figures for dissertation**
 
@@ -73,7 +73,7 @@ CSROfig7:  Background subtraction
 CSROfig8:  Extraction LDA Fermi velocity
 CSROfig9:  ReSigma vs ImSigma (load=True)
 CSROfig10: Quasiparticle Z
-CSROfig11: Tight binding model CSRO1
+CSROfig11: Tight binding model CSRO
 CSROfig12: Tight binding model SRO
 CSROfig13: TB along high symmetry directions, orbitally resolved
 CSROfig14: (L): TB and density of states
