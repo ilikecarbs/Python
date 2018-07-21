@@ -30,7 +30,7 @@ from scipy.optimize import curve_fit
 
 os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
 
-rainbow_light = utils_plt.rainbow_light
+rainbow_light = utils.rainbow_light
 cm.register_cmap(name='rainbow_light', cmap=rainbow_light)
 plt.rcParams['mathtext.fontset'] = 'cm'
 plt.rcParams['font.serif']=['Computer Modern Roman']
@@ -107,7 +107,7 @@ CSRO: TB specific heat
 # utils_plt.CROfig13()
 # utils_plt.CROfig14()
 # --------
-# utils_plt.CSROfig1()
+utils_plt.CSROfig1()
 # utils_plt.CSROfig2()
 # utils_plt.CSROfig3()
 # utils_plt.CSROfig4()

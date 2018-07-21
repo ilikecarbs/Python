@@ -9,12 +9,11 @@ Created on Mon Jun 11 09:57:01 2018
         utils
 %%%%%%%%%%%%%%%%%%%%%
 
-**Useful helper functions, mainly used for ARPES.py**
+**Useful helper functions**
 
 .. note::
         To-Do:
-            - Unify polynomial functions
-            - Unify multiple Lorentzian functions
+            -
 """
 
 import numpy as np
@@ -23,6 +22,8 @@ from numpy import linalg as la
 import utils
 from scipy import special
 from scipy.ndimage.filters import gaussian_filter
+from matplotlib.colors import LinearSegmentedColormap
+import matplotlib.cm as cm
 
 
 def find(array, val):
@@ -31,7 +32,7 @@ def find(array, val):
     **Searches entry in array closest to val.**
 
     Args
-    ----------
+    ----
     :array:     entry value in array
     :_val:      index of entry
 
@@ -53,7 +54,7 @@ def Shirley(EDC):
     **Generates a Shirley background from given edc**
 
     Args
-    ----------
+    ----
     :array:     entry value in array
     :_val:      index of entry
 
@@ -82,13 +83,79 @@ def Shirley(EDC):
     return shirley
 
 
+"""
+%%%%%%%%%%%%%%%%%%%%%
+     Colormaps
+%%%%%%%%%%%%%%%%%%%%%
+"""
+
+
+def rainbow_light():
+    filepath = '/Users/denyssutter/Documents/PhD/data/rainbow_light.dat'
+    data = np.loadtxt(filepath)
+    colors = np.array([(i[0], i[1], i[2]) for i in data])
+
+    # Normalize the colors
+    colors /= colors.max()
+
+    # Build the colormap
+    rainbow_light = LinearSegmentedColormap.from_list('rainbow_light', colors,
+                                                      N=len(colors))
+    return rainbow_light
+
+
+def rainbow_light_2():
+    filepath = '/Users/denyssutter/Documents/PhD/data/rainbow_light_2.dat'
+    data = np.loadtxt(filepath)
+    colors = np.array([(i[0], i[1], i[2]) for i in data])
+
+    # Normalize the colors
+    colors /= colors.max()
+
+    # Build the colormap
+    rainbow_light_2 = LinearSegmentedColormap.from_list('rainbow_light',
+                                                        colors, N=len(colors))
+    return rainbow_light_2
+
+
+def orbitals():
+    colors = np.zeros((100, 3))
+    for i in range(100):
+        colors[i, :] = [i/100, 0, 1-i/100]
+
+    # Normalize the colors
+    colors /= colors.max()
+
+    # Build the colormap
+    orbitals = LinearSegmentedColormap.from_list('orbitals', colors,
+                                                 N=len(colors))
+    return orbitals
+
+
+rainbow_light = rainbow_light()
+cm.register_cmap(name='rainbow_light', cmap=rainbow_light)
+
+rainbow_light_2 = rainbow_light_2()
+cm.register_cmap(name='rainbow_light_2', cmap=rainbow_light_2)
+
+orbitals = orbitals()
+cm.register_cmap(name='orbitals', cmap=orbitals)
+
+
+"""
+%%%%%%%%%%%%%%%%%%%%%
+   Tight Binding
+%%%%%%%%%%%%%%%%%%%%%
+"""
+
+
 def paramSRO():
     """returns param
 
     **Parameter set of TB model Sr2RuO4 arXiv:1212.3994v1**
 
     Args
-    ----------
+    ----
 
     Return
     ------
@@ -115,7 +182,7 @@ def paramCSRO20():
     **parameter set of TB model D. Sutter et al. :-)**
 
     Args
-    ----------
+    ----
 
     Return
     ------
@@ -142,7 +209,7 @@ def paramCSRO30():
     **Parameter test set CSRO30**
 
     Args
-    ----------
+    ----
 
     Return
     ------
@@ -200,7 +267,7 @@ class TB:
         **Calculates band structure from 3 band tight binding model**
 
         Args
-        ----------
+        ----
         :param:     TB parameters
         :e0:        chemical potential shift
         :vert:      'True': plots useful numeration of vertices for figures
@@ -363,7 +430,7 @@ class TB:
         **Calculates band structure from 6 band tight binding model**
 
         Args
-        ----------
+        ----
         :param:     TB parameters
         :e0:        chemical potential shift
         :vert:      'True': plots useful numeration of vertices for figures
@@ -575,7 +642,7 @@ class TB:
         **Calculates single band tight binding band structure**
 
         Args
-        ----------
+        ----
         :param:     TB parameters
 
         Return
@@ -614,7 +681,7 @@ def CSRO_eval(x, y, param=paramCSRO20()):
     **Calculates band structure along kx, ky, orbitally projected**
 
     Args
-    ----------
+    ----
     :param:     TB parameters
     :x:         kx array
     :y:         ky array
@@ -756,13 +823,20 @@ def CSRO_eval(x, y, param=paramCSRO20()):
     return en_tb, int_tb, bndstr
 
 
+"""
+%%%%%%%%%%%%%%%%%%%%%
+  Useful functions
+%%%%%%%%%%%%%%%%%%%%%
+"""
+
+
 def FDsl(x, *p):
     """returns FDsl
 
     **Fermi Dirac function on a sloped**
 
     Args
-    ----------
+    ----
     :x:     energy axis
     :p0:    kB * T
     :p1:    EF
@@ -786,7 +860,7 @@ def poly_n(x, n, *p):
     **Polynomial n-th order**
 
     Args
-    ----------
+    ----
     :x:       x
     :n:       order
     :p[n]:    coefficients
@@ -811,7 +885,7 @@ def lor_n(x, n, *p):
     **n Lorentzians on a quadratic background**
 
     Args
-    ----------
+    ----
     :x:          momentum
     :n:          number of Lorentzians
     :p[0:n-1]:   center
@@ -824,7 +898,7 @@ def lor_n(x, n, *p):
 
     Return
     ------
-    lor_n        n Lorentzians
+    :lor_n:        n Lorentzians
     """
 
     lor_n = 0
@@ -844,7 +918,7 @@ def gauss_n(x, n, *p):
     **n Gaussians on a quadratic background**
 
     Args
-    ----------
+    ----
     :x:          momentum axis
     :n:          number of Gaussians
     :p[0:n-1]:   center
@@ -857,7 +931,7 @@ def gauss_n(x, n, *p):
 
     Return
     ------
-    gauss_n      n Gaussians
+    :gauss_n:      n Gaussians
     """
 
     gauss_n = 0
@@ -877,7 +951,7 @@ def FL_spectral_func(x, *p):
     **Saturated Fermi liquid quasiparticle with Fermi Dirac function**
 
     Args
-    ----------
+    ----
     :x:         energy axis
     :p[0]:      slope coefficient for real part of self energy
     :p[1]:      constant coefficient for imaginary part of self energy
@@ -888,7 +962,7 @@ def FL_spectral_func(x, *p):
 
     Return
     ------
-    FL_spectral_func    Saturated Fermi liquid model
+    :FL_spectral_func:    Saturated Fermi liquid model
     """
 
     ReS = p[0] * x
@@ -907,7 +981,7 @@ def gauss_mod(x, *p):
     **Exponentially modified Gaussian**
 
     Args
-    ----------
+    ----
     :x:         energy axis
     :p[0]:      amplitude Gaussian
     :p[1]:      center Gaussian
@@ -918,7 +992,7 @@ def gauss_mod(x, *p):
 
     Return
     ------
-    gauss_mod   Exponentially modified Gaussian
+    :gauss_mod:   Exponentially modified Gaussian
     """
 
     gauss_mod = (p[0] * np.exp(-.5 * ((-x + p[1]) / p[2]) ** 2) *
@@ -933,7 +1007,7 @@ def Full_spectral_func(x, *p):
     **Spectral function simple FL + incoherent weight as exp. mod. Gaussian**
 
     Args
-    ----------
+    ----
     :x:         energy axis
     :p[0]:      slope coefficient for real part of self energy
     :p[1]:      constant coefficient for imaginary part of self energy
@@ -950,7 +1024,7 @@ def Full_spectral_func(x, *p):
 
     Return
     ------
-    Full_spectral_func   Fermi liquid spectral function + modified Gaussian
+    :Full_spectral_func:   Fermi liquid spectral function + modified Gaussian
     """
 
     Full_spectral_func = (FL_spectral_func(x, *p[0:5]) +
@@ -972,7 +1046,7 @@ def poly_1(x, *p):
     **wrapper function of poly_n with n=1**
 
     Args
-    ----------
+    ----
     :x:          momentum axis
     :p[0]:       constant
     :p[1]:       slope
@@ -993,7 +1067,7 @@ def poly_2(x, *p):
     **wrapper function of poly_n with n=2**
 
     Args
-    ----------
+    ----
     :x:          momentum axis
     :p[0]:       constant
     :p[1]:       slope
@@ -1001,7 +1075,7 @@ def poly_2(x, *p):
 
     Return
     ------
-    poly_2       polynomial second order
+    :poly_2:       polynomial second order
     """
 
     poly_2 = poly_n(x, 2, *p)
@@ -1015,7 +1089,7 @@ def lor(x, *p):
     **wrapper function of lor_n with n=1**
 
     Args
-    ----------
+    ----
     :x:      momentum
     :n:      number of Lorentzians
     :p[0]:   center
@@ -1028,7 +1102,7 @@ def lor(x, *p):
 
     Return
     ------
-    lor      single Lorentzian
+    :lor:      single Lorentzian
     """
 
     lor = lor_n(x, 1, *p)
@@ -1042,7 +1116,7 @@ def lor_4(x, *p):
     **wrapper function of lor_n with n=4**
 
     Args
-    ----------
+    ----
     :x:          momentum
     :n:          number of Lorentzians
     :p[0:3]:     center
@@ -1055,7 +1129,7 @@ def lor_4(x, *p):
 
     Return
     ------
-    lor_4       4 Lorentzians
+    :lor_4:      4 Lorentzians
     """
 
     lor_4 = lor_n(x, 4, *p)
@@ -1069,7 +1143,7 @@ def lor_6(x, *p):
     **wrapper function of lor_n with n=6**
 
     Args
-    ----------
+    ----
     :x:          momentum
     :n:          number of Lorentzians
     :p[0:5]:     center
@@ -1082,7 +1156,7 @@ def lor_6(x, *p):
 
     Return
     ------
-    lor_6       6 Lorentzians
+    :lor_6:      6 Lorentzians
     """
 
     lor_6 = lor_n(x, 6, *p)
@@ -1096,7 +1170,7 @@ def lor_7(x, *p):
     **wrapper function of lor_n with n=7**
 
     Args
-    ----------
+    ----
     :x:          momentum
     :n:          number of Lorentzians
     :p[0:6]:     center
@@ -1109,13 +1183,12 @@ def lor_7(x, *p):
 
     Return
     ------
-    lor_7       7 Lorentzians
+    :lor_7:      7 Lorentzians
     """
 
     lor_7 = lor_n(x, 7, *p)
 
     return lor_7
-
 
 
 def lor_8(x, *p):
@@ -1124,7 +1197,7 @@ def lor_8(x, *p):
     **wrapper function of lor_n with n=8**
 
     Args
-    ----------
+    ----
     :x:          momentum
     :n:          number of Lorentzians
     :p[0:7]:     center
@@ -1137,7 +1210,7 @@ def lor_8(x, *p):
 
     Return
     ------
-    lor_8       8 Lorentzians
+    :lor_8:      8 Lorentzians
     """
 
     lor_8 = lor_n(x, 8, *p)
@@ -1151,7 +1224,7 @@ def gauss_2(x, *p):
     **wrapper function of gauss_n with n=2**
 
     Args
-    ----------
+    ----
     :x:          momentum axis
     :n:          number of Gaussians
     :p[0:2]:     center
@@ -1164,7 +1237,7 @@ def gauss_2(x, *p):
 
     Return
     ------
-    gauss_2      2 Gaussians
+    :gauss_2:    2 Gaussians
     """
 
     gauss_2 = gauss_n(x, 2, *p)

@@ -57,9 +57,9 @@ mode = 'cut_txt'
 for i in range(len(files)):
     D = ARPES.CASS(files[i], mat, year, mode)
     D.norm(golds[i])
-    D.flatten(norm=True)
-    D.bkg(norm=True)
-    D.plt_spec(norm=True, v_max=.5)
+    D.flatten()
+    D.bkg()
+    D.plt_spec(v_max=.5)
     plt.savefig((path + str(D.file) + '_bkg_norm.png'), 
                 dpi = 300,bbox_inches="tight")
 #%%
@@ -111,9 +111,9 @@ mode = 'cut_txt'
 for i in range(len(files)):
     D = ARPES.CASS(files[i], mat, year, mode)
     D.norm(golds[i])
-    D.flatten(norm=True)
-    D.bkg(norm=True)
-    D.plt_spec(norm=True, v_max=.5)
+    D.flatten()
+    D.bkg()
+    D.plt_spec(v_max=.5)
     plt.savefig((path + str(D.file) + '_bkg_norm.png'), 
                 dpi = 300,bbox_inches="tight")
 #%%
@@ -131,7 +131,7 @@ D = ARPES.CASS(file, mat, year, mode)
 D.norm(gold='S30005')
 D.ang2kFS(D.ang, Ekin=90-4.5, lat_unit=False, a=1, b=1, c=1, 
           V0=0, thdg=-6., tidg=24.5, phidg=-0)
-D.plt_FS_all(coord=True, norm=True)
+D.plt_FS_all()
 plt.savefig((path + str(D.file) + '.png'), 
                 dpi = 600,bbox_inches="tight")
 #%%

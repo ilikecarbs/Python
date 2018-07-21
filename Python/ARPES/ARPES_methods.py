@@ -20,9 +20,27 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
+import matplotlib.cm as cm
 
 import utils
 import utils_plt
+
+
+rainbow_light = utils.rainbow_light
+cm.register_cmap(name='rainbow_light', cmap=rainbow_light)
+plt.rcParams['mathtext.fontset'] = 'cm'
+plt.rcParams['font.serif'] = ['Computer Modern Roman']
+plt.rc('font', **{'family': 'serif', 'serif': ['STIXGeneral']})
+plt.rcParams['xtick.top'] = plt.rcParams['xtick.bottom'] = True
+plt.rcParams['ytick.right'] = plt.rcParams['ytick.left'] = True
+
+font = {'family': 'serif',
+        'style': 'normal',
+        'color':  [0, 0, 0],
+        'weight': 'ultralight',
+        'size': 12}
+
+kwargs_spec = {'cmap': cm.ocean_r}
 
 
 class Methods:
@@ -42,7 +60,7 @@ class Methods:
         **Fits and generates gold file for normalization.**
 
         Args
-        ----------
+        ----
         :Ef_ini: initial guess of Fermi level
 
         Return
@@ -113,7 +131,7 @@ class Methods:
         **Normalizes data intensity and shifts to Fermi level**
 
         Args
-        ----------
+        ----
         :gold:      gold file used
 
         Return
@@ -165,7 +183,7 @@ class Methods:
         **Shifts energy with by the Fermi level**
 
         Args
-        ----------
+        ----
         :gold:      gold file used
 
         Return
@@ -200,14 +218,13 @@ class Methods:
         print('\n ~ Energies shifted',
               '\n', '==========================================')
 
-    def flatten(self, norm=False):
+    def flatten(self):
         """returns self.int, self.eint, self.int_norm, self.eint_norm
 
         **For every angle, the signal is divided by its total intensity**
 
         Args
-        ----------
-        :norm:      'True': flattens self.int_norm, 'False': self.int
+        ----
 
         Return
         ------
@@ -217,21 +234,25 @@ class Methods:
         :self.eint_rnom:    corresponding error
         """
 
-        # Flattenes either self.int or self.int_norm
-        if norm:
-            for i in range(self.int_norm.shape[1]):
-                self.int_norm[:, i, :] = np.divide(
-                                            self.int_norm[:, i, :],
-                                            np.sum(self.int_norm[:, i, :]))
-                self.eint_norm[:, i, :] = np.divide(
-                                            self.eint_norm[:, i, :],
-                                            np.sum(self.eint_norm[:, i, :]))
-        else:
-            for i in range(self.int.shape[0]):
+        for i in range(self.ang.size):
                 self.int[i, :] = np.divide(
-                                    self.int[i, :], np.sum(self.int[i, :]))
+                                            self.int[i, :],
+                                            np.sum(self.int[i, :]))
                 self.eint[i, :] = np.divide(
-                                    self.eint[i, :], np.sum(self.eint[i, :]))
+                                            self.eint[i, :],
+                                            np.sum(self.eint[i, :]))
+
+        # Tests if it can flatten self.int_norm
+        try:
+            for i in range(self.ang.size):
+                self.int_norm[i, :] = np.divide(
+                                            self.int_norm[i, :],
+                                            np.sum(self.int_norm[i, :]))
+                self.eint_norm[i, :] = np.divide(
+                                            self.eint_norm[i, :],
+                                            np.sum(self.eint_norm[i, :]))
+        except AttributeError:
+            pass
 
         print('\n ~ Spectra flattened',
               '\n', '==========================================')
@@ -240,10 +261,10 @@ class Methods:
         """returns self.map
 
         **For every angle, the signal in the other angular channel is
-        divided by its sum. Data get flattened in this fashion.**
+        divided by its sum. Data gets flattened in this fashion.**
 
         Args
-        ----------
+        ----
         :ang:      'True': iterates through self.ang, 'False': self.pol
 
         Return
@@ -263,13 +284,13 @@ class Methods:
         print('\n ~ Fermi surface flattened',
               '\n', '==========================================')
 
-    def bkg(self, norm=False):
+    def bkg(self):
         """returns self.int, self.int_norm, self.eint, self.eint_norm
 
         **For every energy, the minimum signal is subtracted for all angles**
 
         Args
-        ----------
+        ----
         :norm:      'True': self.int_norm is manipulated, 'False': self.int
 
         Return
@@ -280,24 +301,19 @@ class Methods:
         :self.eint_norm:    errors on new normalized intensity
         """
 
-        if norm:
-            int_bkg = self.int_norm
-            eint_bkg = self.eint_norm
-        else:
-            int_bkg = self.int
-            eint_bkg = self.eint
+        try:
+            for i in range(self.en.size):
+                self.int_norm[:, i] = (self.int_norm[:, i] -
+                                       np.min(self.int_norm[:, i]))
+                self.eint_norm[:, i] = (self.eint_norm[:, i] -
+                                        np.min(self.eint_norm[:, i]))
+        except AttributeError:
+            pass
 
-        # Subtract background
         for i in range(self.en.size):
-            int_bkg[:, i] = int_bkg[:, i] - np.min(int_bkg[:, i])
-            eint_bkg[:, i] = eint_bkg[:, i] - np.min(eint_bkg[:, i])
+            self.int[:, i] = (self.int[:, i] - np.min(self.int[:, i]))
+            self.eint[:, i] = (self.eint[:, i] - np.min(self.eint[:, i]))
 
-        if norm:
-            self.int_norm = int_bkg
-            self._norm = eint_bkg
-        else:
-            self.int = int_bkg
-            self.eint = eint_bkg
         print('\n ~ Background subtracted',
               '\n', '==========================================')
 
@@ -309,7 +325,7 @@ class Methods:
         cropt the data files to a smaller size.**
 
         Args
-        ----------
+        ----
         :bot:       set bottom crop boundary from 0..1
         :top:       set top crop boundary from 0..1
         :left:      set left crop boundary from 0..1
@@ -391,7 +407,7 @@ class Methods:
         **Converts detector angles into k-space**
 
         Args
-        ----------
+        ----
         :angdg:     detector angles in degrees
         :Ekin:      photon kinetic energy
         :lat_unit:  lattice units used (Boolean)
@@ -403,7 +419,6 @@ class Methods:
 
         Return
         ------
-
         :self.k:        k-vector
         :self.k_V0:     k-vector (with inner potential)
         :self.kxs:      kx-vector broadcasted
@@ -477,7 +492,7 @@ class Methods:
         **Converts detector angles into k-space for a FS map**
 
         Args
-        ----------
+        ----
         :angdg:     detector angles in degrees
         :Ekin:      photon kinetic energy
         :lat_unit:  lattice units used (Boolean)
@@ -489,7 +504,6 @@ class Methods:
 
         Return
         ------
-
         :self.kx:        reciprocal space vector in x
         :self.ky:        reciprocal space vector in y
         :self.kx_V0:     reciprocal space vector in x (with inner potential)
@@ -519,7 +533,7 @@ class Methods:
         print('\n ~ Angles converted into k-space for Fermi surface',
               '\n', '==========================================')
 
-    def FS(self, e=0, ew=0.05, norm=False):
+    def FS(self, e=0, ew=0.05):
         """returns self.map
 
         **For a given energy e, extract a Fermi surface map,
@@ -532,17 +546,16 @@ class Methods:
 
         Return
         ------
-
         :self.map: Fermi surface map
         """
 
         FSmap = np.zeros((self.pol.size, self.ang.size))
-        if norm:
+        try:
             for i in range(self.ang.size):
                 e_val, e_ind = utils.find(self.en_norm[0, i, :], e)
                 ew_val, ew_ind = utils.find(self.en_norm[0, i, :], e-ew)
                 FSmap[:, i] = np.sum(self.int_norm[:, i, ew_ind:e_ind], axis=1)
-        else:
+        except AttributeError:
             e_val, e_ind = utils.find(self.en, e)
             ew_val, ew_ind = utils.find(self.en, e-ew)
             FSmap = np.sum(self.int[:, :, ew_ind:e_ind], axis=2)
@@ -551,42 +564,225 @@ class Methods:
         print('\n ~ Constant energy map extracted',
               '\n', '==========================================')
 
-    def plt_spec(self, norm=False, v_max=1):
-        """Plot ARPES spectrum
+    def plt_spec(self, v_max=1):
+        """returns ARPES plot
 
-        .. seealso:: - in utils.py
+        **Plots ARPES spectrum**
+
+        Args
+        ----
+        :v_max:    contrast of plot: 0..1
+
+        Return
+        ------
+        - ARPES spectrum plot (normalized if available)
         """
 
-        utils_plt.plt_spec(self, norm, v_max)
+        # Create figure
+        fig = plt.figure(('spec_' + str(self.filename)), figsize=(5, 5),
+                         clear=True)
+        ax = fig.add_axes([0.2, 0.2, 0.6, 0.6])
+        ax.tick_params(direction='in', length=1.5, width=.5, colors='k')
 
-    def plt_FS_polcut(self, norm=False, p=0, pw=0.1):
-        """Spectral cut through Fermi surface
+        # Plot normalized data if available
+        try:
+            c0 = ax.contourf(self.angs, self.en_norm, self.int_norm, 150,
+                             **kwargs_spec,
+                             vmax=v_max*np.max(self.int_norm))
+            ax.plot([np.min(self.angs), np.max(self.angs)], [0, 0], 'k:')
 
-        .. seealso:: - in utils.py
+        except AttributeError:
+            c0 = ax.contourf(self.angs, self.ens, self.int, 150, **kwargs_spec,
+                             vmax=v_max*np.max(self.int))
+
+        # Labels and other stuff
+        ax.set_xlabel('Angles', fontdict=font)
+        ax.set_ylabel(r'$\omega$', fontdict=font)
+        pos = ax.get_position()
+        cax = plt.axes([pos.x0+pos.width+0.01, pos.y0, 0.03, pos.height])
+        cbar = plt.colorbar(c0, cax=cax, ticks=None)
+        cbar.set_ticks([])
+        fig.show()
+        print('\n ~ Plot ARPES spectrum',
+              '\n', '==========================================')
+
+    def plt_FS(self, v_max=1):
+        """returns FS plot
+
+        **Plots Fermi surface**
+
+        Args
+        ----
+        :v_max:    contrast of plot: 0..1
+
+        Return
+        ------
+        - Fermi surface plot (with appropriate coordinate transformation)
         """
 
-        utils_plt.plt_FS_polcut(self, norm, p, pw)
+        # Plot FS only if D.map exists
+        try:
+            print('D.map exists with shape {}'.format(self.map.shape))
 
-    def plt_FS(self, coord=False, v_max=1):
-        """Plot Fermi surface
+            # Create figure
+            fig = plt.figure(('FS' + str(self.file)), figsize=(8, 8),
+                             clear=True)
+            ax = fig.add_axes([0.2, 0.2, 0.6, 0.6])
+            ax.tick_params(direction='in', length=1.5, width=.5, colors='k')
 
-        .. seealso:: - in utils.py
+            # Plots in kx and ky if available
+            try:
+                c0 = ax.contourf(self.kx, self.ky, self.map, 150,
+                                 **kwargs_spec, vmax=v_max*np.max(self.map))
+
+                # Plot in appropriate units
+                if self.lat_unit:
+                    ax.set_xlabel(r'$k_x \, (\pi / a)$', fontdict=font)
+                    ax.set_ylabel(r'$k_y \, (\pi / y)$', fontdict=font)
+                else:
+                    ax.set_xlabel(r'$k_x \, (\mathrm{\AA}^{-1})$',
+                                  fontdict=font)
+                    ax.set_ylabel(r'$k_y \, (\mathrm{\AA}^{-1})$',
+                                  fontdict=font)
+
+            except AttributeError:
+                c0 = ax.contourf(self.ang, self.pol, self.map,
+                                 150, **kwargs_spec,
+                                 vmax=v_max*np.max(self.map))
+                ax.set_xlabel('Detector angles', fontdict=font)
+                ax.set_ylabel('Polar angles', fontdict=font)
+
+            # Some other stuff
+            ax.grid(alpha=.5)
+            ax.axis('equal')
+            pos = ax.get_position()
+            cax = plt.axes([pos.x0+pos.width+0.01, pos.y0, 0.03, pos.height])
+            cbar = plt.colorbar(c0, cax=cax, ticks=None)
+            cbar.set_ticks([])
+            cbar.set_clim(np.min(self.map), np.max(self.map))
+            fig.show()
+
+        except AttributeError:
+            print('No FS available. Use .FS method before using .plt_FS!')
+
+        print('\n ~ Plot Fermi surface',
+              '\n', '==========================================')
+
+    def plt_FS_all(self):
+        """returns plot of all FS
+
+        **Plots constant energy maps at all energies**
+
+        Args
+        ----
+        :v_max:    contrast of plot: 0..1
+
+        Return
+        ------
+        - Fermi surface plot (with appropriate coordinate transformation)
         """
-        utils_plt.plt_FS(self, coord, v_max=1)
 
-    def plt_FS_all(self, coord=False, norm=False):
-        """Plot constant energy maps from top energy to bottom energy
-        in 0.1 eV binding energy steps.
+        # Define energy range for all the maps
+        try:
+            en_range = np.arange(
+                    np.min(self.en_norm) + .2, np.max(self.en_norm), .1)
 
-        .. seealso:: - in utils.py
-        """
+        except AttributeError:
+            en_range = np.arange(np.min(self.en) + .2, np.max(self.en), .1)
 
-        utils_plt.plt_FS_all(self, coord, norm)
+        # Create figure
+        fig = plt.figure(('FS_all' + str(self.file)), figsize=(8, 8),
+                         clear=True)
+
+        # number of maps
+        n_maps = np.ceil(np.sqrt(len(en_range)))
+        n = 0
+        for en in en_range:
+            n += 1
+            self.FS(e=en, ew=.1)
+            ax = fig.add_subplot(n_maps, n_maps, n)
+            ax.tick_params(direction='in', length=1.5, width=.5, colors='k')
+
+            # Try to plot in k-space
+            try:
+                ax.contourf(self.kx, self.ky, self.map, 150, **kwargs_spec)
+
+                # set appropriate labels for lattice units
+                # also only label the border subplots
+                if self.lat_unit:
+                    if np.mod(n - 1 + n_maps, n_maps) == 0:
+                        ax.set_ylabel(r'$k_y \, (\pi / b)$', fontdict=font)
+                        ax.set_yticks(np.arange(-10, 10, 1))
+                    else:
+                        ax.set_yticks(np.arange(-10, 10, 1), [])
+                    if n > n_maps ** 2 - n_maps - (n_maps ** 2 -
+                                                   len(en_range)):
+                        ax.set_xlabel(r'$k_x \, (\pi / a)$', fontdict=font)
+                        ax.set_xticks(np.arange(-10, 10, 1))
+                    else:
+                        ax.set_xticks(np.arange(-10, 10, 1), [])
+                else:
+                    if np.mod(n - 1 + n_maps, n_maps) == 0:
+                        ax.set_ylabel(r'$k_y \, (\mathrm{\AA}^{-1})$',
+                                      fontdict=font)
+                        ax.set_yticks(np.arange(-10, 10, 1))
+                    else:
+                        ax.set_yticks(np.arange(-10, 10, 1), [])
+                    if n > n_maps ** 2 - n_maps - (n_maps ** 2 -
+                                                   len(en_range)):
+                        ax.set_xlabel(r'$k_x \, (\mathrm{\AA}^{-1})$',
+                                      fontdict=font)
+                        ax.set_xticks(np.arange(-10, 10, 1))
+                    else:
+                        ax.set_xticks(np.arange(-10, 10, 1), [])
+
+                ax.set_xlim(np.max(self.kx), np.min(self.kx))
+                ax.set_ylim(np.max(self.ky), np.min(self.ky))
+
+            except AttributeError:
+                ax.contourf(self.ang, self.pol, self.map, 150, **kwargs_spec)
+                ax.set_xlim(np.max(self.ang), np.min(self.ang))
+                ax.set_ylim(np.max(self.pol), np.min(self.pol))
+
+            # Titles and stuff
+            ax.set_title('energy = ' + str(np.round(en, 2)) + 'eV')
+            ax.grid(alpha=.5)
+            ax.axis('equal')
+        fig.show()
+        print('\n ~ Plot all constant energy maps',
+              '\n', '==========================================')
 
     def plt_hv(self, v_max=1):
-        """Plot all spectra of hv scan
+        """returns plot of hv scan
 
-        .. seealso:: - in utils.py
+        **Plots ARPES spectra at all photon energies at hv scan**
+
+        Args
+        ----
+        :v_max:    contrast of plot: 0..1
+
+        Return
+        ------
+        - hv scan plot
         """
 
-        utils_plt.plt_hv(self, v_max)
+        # number of spectra
+        n = np.ceil(np.sqrt(self.hv.size))
+
+        # Create figure
+        fig = plt.figure(('hv scan' + str(self.filename)),
+                         figsize=(10, 10), clear=True)
+
+        # Loops over all spectra
+        for i in range(self.hv.size):
+            ax = fig.add_subplot(n, n, i+1)
+            ax.tick_params(direction='in', length=1.5, width=.5, colors='k')
+            ax.contourf(self.ang, self.en, np.transpose(self.int[i, :, :]),
+                        150, **kwargs_spec,
+                        vmax=v_max*np.max(self.int[i, :, :]))
+            ax.set_xticks([])
+            ax.set_yticks([])
+            ax.set_title('hv = ' + str(np.round(self.hv[i], 0)) + ' eV')
+        fig.show()
+        print('\n ~ Plot photon energy scan',
+              '\n', '==========================================')

@@ -389,10 +389,12 @@ class CASS(Methods):
                              nDim[0])
             ang = np.linspace(starts[1], starts[1] + nDim[1] * steps[1],
                               nDim[1])
+
             # Convert `note`, which is a bytestring of ASCII characters that
             # contains some metadata, to a list of strings
             note = wave['note']
             note = note.decode('ASCII').split('\r')
+
             # Now the extraction fun begins. Most lines are of the form
             # `Some-kind-of-name=some-value`
             metadata = dict()
