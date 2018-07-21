@@ -1,1 +1,1 @@
-# This is the ilikecarbs-library, enjoy!
+# This is the library of ilikecarbs, enjoy!
