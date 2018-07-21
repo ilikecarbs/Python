@@ -549,13 +549,13 @@ class Methods:
         FSmap = np.zeros((self.pol.size, self.ang.size))
         try:
             for i in range(self.ang.size):
-                e_val, e_ind = utils.find(self.en_norm[0, i, :], e)
-                ew_val, ew_ind = utils.find(self.en_norm[0, i, :], e-ew)
-                FSmap[:, i] = np.sum(self.int_norm[:, i, ew_ind:e_ind], axis=1)
+                e_val, e_idx = utils.find(self.en_norm[0, i, :], e)
+                ew_val, ew_idx = utils.find(self.en_norm[0, i, :], e-ew)
+                FSmap[:, i] = np.sum(self.int_norm[:, i, ew_idx:e_idx], axis=1)
         except AttributeError:
-            e_val, e_ind = utils.find(self.en, e)
-            ew_val, ew_ind = utils.find(self.en, e-ew)
-            FSmap = np.sum(self.int[:, :, ew_ind:e_ind], axis=2)
+            e_val, e_idx = utils.find(self.en, e)
+            ew_val, ew_idx = utils.find(self.en, e-ew)
+            FSmap = np.sum(self.int[:, :, ew_idx:e_idx], axis=2)
 
         self.map = FSmap
         print('\n ~ Constant energy map extracted',

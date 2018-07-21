@@ -94,7 +94,7 @@ CSRO: TB specific heat
 """
 
 
-CRO.fig1()
+CRO.fig12()
 
 
 # %%

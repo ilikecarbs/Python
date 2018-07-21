@@ -38,199 +38,276 @@ font = {'family': 'serif',
         'weight': 'ultralight',
         'size': 12,
         }
+
 kwargs_ex = {'cmap': cm.ocean_r}
 kwargs_th = {'cmap': cm.bone_r}
+kwargs_ticks = {'bottom': True,
+                'top': True,
+                'left': True,
+                'right': True,
+                'direction': 'in',
+                'length': 1.5,
+                'width': .5,
+                'colors': 'black'}
+
+save_dir = '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/'
+data_dir = '/Users/denyssutter/Documents/PhD/data/'
+home_dir = '/Users/denyssutter/Documents/library/Python/ARPES'
 
 
-def CRO_theory_plot(k_pts, data_en, data, colmap, v_max, fignr):
-    c = len(data)
-    scale = .02
-    plt.figure(fignr, figsize=(10, 10), clear = True)
-    for k in range(len(data)): #looping over segments of k-path
+def CRO_theory_plot(k_pts, data_en, data, v_max, fignr):
+    """Plots theory data for figs 1-4
+
+    **Used to plot DFT data with different self energies**
+
+    Args
+    ----
+    :kpts:      k points as tuples
+    :data_en:   energy axis of data
+    :data:      DFT data
+    :v_max:     contrast 0..1 of contourf
+    :fignr:     figure number
+
+    Return
+    ------
+    Plots DFT data
+
+    """
+    scale = .02  # to scale k-axis
+
+    fig = plt.figure(fignr, figsize=(10, 10), clear=True)
+
+    # labels
+    lbls = (['S', r'$\Gamma$', 'S'], ['', 'X', 'S'], ['', r'$\Gamma$'],
+            ['', 'X', r'$\Gamma$', 'X'])
+    # looping over segments of k-path
+    for k in range(len(data)):
         c = len(data[k])
         m, n = data[k][0].shape
-        data_kpath = np.zeros((1, c * n)) #Placeholders
-        data_spec  = np.zeros((m, c * n)) #Placeholders
-        k_seg = [0] #Used to mark k-points along in k-path 
+
+        # Placeholders
+        data_kpath = np.zeros((1, c * n))
+        data_spec = np.zeros((m, c * n))
+
+        # Used to mark k-points along in k-path
+        k_seg = [0]
         for i in range(c):
-            diff = abs(np.subtract(k_pts[k][i], k_pts[k][i+1])) #distances in k-space
-            k_seg.append(k_seg[i] + la.norm(diff)) #extending list cummulative
-            data_spec[:, n * i : n * (i+1)] = data[k][i] #Feeding in data
-        data_kpath = np.linspace(0, k_seg[-1], c * n) #Full k-path for plotting
-        
-        ###Plotting###
-        #Setting which axes should be ticked and labelled
-        plt.rcParams['xtick.labelbottom'] = True
-        plt.rcParams['xtick.labeltop'] = False
-        
-        #Subplot sensitive formatting
-        if k==0:
-            plt.rcParams['ytick.labelright'] = False
-            plt.rcParams['ytick.labelleft'] = True
-            ax = plt.subplot(1, len(data), k+1) 
-            ax.set_position([.1, .3, k_seg[-1] * scale, .3])
-            pos = ax.get_position()
-            k_prev = k_seg[-1] 
-            
-        else:
-            plt.rcParams['ytick.labelright'] = False
-            plt.rcParams['ytick.labelleft'] = False
-            ax = plt.subplot(1, len(data), k+1)
-            ax.set_position([pos.x0 + k_prev * scale, pos.y0, 
-                             k_seg[-1] * scale, pos.height])
-        k_prev = k_seg[-1] #For formatting subplot axis
-        pos = ax.get_position()
-        
-        #Labels
+            # Distances in k-space
+            diff = abs(np.subtract(k_pts[k][i], k_pts[k][i+1]))
+
+            # extending list cummulative and building data
+            k_seg.append(k_seg[i] + la.norm(diff))
+            data_spec[:, n*i:n*(i+1)] = data[k][i]
+
+        # Full k-path for plotting
+        data_kpath = np.linspace(0, k_seg[-1], c * n)
+
+        # Subplot sensitive formatting
         if k == 0:
-            plt.ylabel('$\omega$ (eV)', fontdict = font)
-            plt.xticks(k_seg, ('S', '$\Gamma$', 'S'))
-        elif k == 1:
-            plt.xticks(k_seg, ('', 'X', 'S'))
-        elif k == 2:
-            plt.xticks(k_seg, ('', '$\Gamma$'))
-        elif k == 3:
-            plt.xticks(k_seg, ('', 'X', '$\Gamma$', 'X'))
-        plt.tick_params(direction='in', length=1.5, width=.5, colors='k')    
-        plt.contourf(data_kpath, data_en, data_spec, 300, cmap = colmap,
-                       vmin=0, vmax=v_max*np.max(data_spec))
-        plt.ylim(ymax = 0, ymin = -2.5)
+            ax = fig.add_subplot(1, len(data), k+1)
+            ax.set_position([.1, .3, k_seg[-1] * scale, .3])
+
+            # Position for next iteration
+            pos = ax.get_position()
+            k_prev = k_seg[-1]
+
+        else:
+            ax = fig.add_subplot(1, len(data), k+1)
+            ax.set_position([pos.x0 + k_prev * scale, pos.y0,
+                             k_seg[-1] * scale, pos.height])
+
+        # Plot data
+        ax.tick_params(**kwargs_ticks)
+        c0 = ax.contourf(data_kpath, data_en, data_spec, 300, **kwargs_th,
+                         vmin=0, vmax=v_max*np.max(data_spec))
+
+        # For formatting subplot axis
+        k_prev = k_seg[-1]
+        pos = ax.get_position()
+
+        # Labels
+        ax.set_xticks(k_seg)
+        ax.set_xticklabels(lbls[k], fontdict=font)
+        if k == 0:
+            ax.set_ylabel(r'$\omega$ (eV)', fontdict=font)
+        else:
+            ax.set_yticklabels([])
+
+    # colorbar
     cax = plt.axes([pos.x0 + k_prev * scale + 0.01,
                     pos.y0, 0.01, pos.height])
-    cbar = plt.colorbar(cax = cax, ticks = None)
+    cbar = plt.colorbar(c0, cax=cax, ticks=None)
     cbar.set_ticks([])
     cbar.set_clim(np.min(data_spec), np.max(data_spec))
-    ax.set_position([pos.x0, pos.y0, k_prev * scale, pos.height])
-    
-def CRO_FS_plot(colmap, e, v_min, fignr):
+
+
+def CRO_FS_plot(e, v_min, figname):
+    """Plots constant energy maps for figs. 12-14
+
+    **Used to plot DFT data with different self energies**
+
+    Args
+    ----
+    :e:         energy for constant energy map
+    :v_min:     change contrast 0..1
+    :figname:   figure name
+
+    Return
+    ------
+    Plots constant energy maps
+
     """
-    Constant energy maps Oxygen bands
-    """
+
+    # data files used
     p65 = '0618_00113'
     s65 = '0618_00114'
     p120 = '0618_00115'
     s120 = '0618_00116'
     mat = 'Ca2RuO4'
-    year = 2016
+    year = '2016'
     sample = 'data'
     files = [p120, s120, p65, s65]
+
+    # labels
     lbls1 = ['(a)', '(b)', '(c)', '(d)']
-    lbls2 = [r'$120\,\mathrm{eV}$', r'$120\,\mathrm{eV}$', r'$65\,\mathrm{eV}$', r'$65\,\mathrm{eV}$']
-    lbls3 = [r'$\bar{\pi}$-pol.', r'$\bar{\sigma}$-pol.', r'$\bar{\pi}$-pol.', r'$\bar{\sigma}$-pol.']
-    th = 25
-    ti = -.5
-    phi = -25.
-    c = (0, 238 / 256, 118 / 256)
-    ###Plotting###
-    plt.figure(fignr, figsize=(10, 10), clear=True)
+    lbls2 = [r'$120\,\mathrm{eV}$', r'$120\,\mathrm{eV}$',
+             r'$65\,\mathrm{eV}$', r'$65\,\mathrm{eV}$']
+    lbls3 = [r'$\bar{\pi}$-pol.', r'$\bar{\sigma}$-pol.',
+             r'$\bar{\pi}$-pol.', r'$\bar{\sigma}$-pol.']
+
+    # Creating figure
+    fig = plt.figure(figname, figsize=(10, 10), clear=True)
     for i in range(4):
-        D = ARPES.ALS(files[i], mat, year, sample) #frist scan
-        D.ang2kFS(D.ang, Ekin=D.hv - 4.5 + e, lat_unit=True, a=4.8, b=5.7, c=11, 
-                        V0=0, thdg=th, tidg=ti, phidg=phi)
-        en = D.en - 2.1 #energy off set (Fermi level not specified)
-        ew = 0.1
-        e_val, e_ind = utils.find(en, e)
-        ew_val, ew_ind = utils.find(en, e-ew)
-        FSmap = np.sum(D.int[:, :, ew_ind:e_ind], axis=2) #creating FS map
-        ax = plt.subplot(1, 5, i + 2) 
-        ax.set_position([.06 + (i * .23), .3, .22, .3])
+        D = ARPES.ALS(files[i], mat, year, sample)
+        D.ang2kFS(D.ang, Ekin=D.hv-4.5+e, lat_unit=True, a=4.8, b=5.7, c=11,
+                  V0=0, thdg=25, tidg=-.5, phidg=-25)
+
+        # generate FS map, energy off set (Fermi level not specified)
+        D.FS(e=e+2.1, ew=0.1)
+        FSmap = D.map
+
+        # set subplots
+        ax = fig.add_subplot(1, 5, i+2)
+        ax.set_position([.06+(i*.23), .3, .22, .3])
         if i == 2:
             ax.set_position([.06 + (i * .23), .3, .16, .3])
         elif i == 3:
             ax.set_position([.06 + (2 * .23) + .17, .3, .16, .3])
-        plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
-        plt.contourf(D.kx, D.ky, FSmap, 300, cmap = colmap,
-                       vmin = v_min * np.max(FSmap), vmax = .95 * np.max(FSmap))
-        plt.grid(alpha=0.5)
-        plt.xticks(np.arange(-10, 10, 2))
-        plt.xlabel('$k_x$ ($\pi/a$)', fontdict = font)
-        plt.plot([-1, -1], [-1, 1], 'k-')
-        plt.plot([1, 1], [-1, 1], 'k-')
-        plt.plot([-1, 1], [1, 1], 'k-')
-        plt.plot([-1, 1], [-1, -1], 'k-')
-        plt.plot([-2, 0], [0, 2], 'k--', linewidth=.5)
-        plt.plot([-2, 0], [0, -2], 'k--', linewidth=.5)
-        plt.plot([2, 0], [0, 2], 'k--', linewidth=.5)
-        plt.plot([2, 0], [0, -2], 'k--', linewidth=.5)
+        plt.tick_params(**kwargs_ticks)
+
+        # Plot constant energy map
+        plt.contourf(D.kx, D.ky, D.map, 300, **kwargs_ex,
+                     vmin=v_min * np.max(D.map),
+                     vmax=.95 * np.max(D.map))
+        ax.grid(alpha=0.5)
+        ax.set_xticks(np.arange(-10, 10, 2))
+        ax.set_xlabel(r'$k_x$ ($\pi/a$)', fontdict=font)
+
+        # kwarg dictionaries
+        ortho = {'linestyle': '-', 'color': 'black', 'lw': 1}
+        tetra = {'linestyle': '--', 'color': 'black', 'lw': .5}
+        path = {'linestyle': ':', 'color': 'turquoise', 'lw': 1}
+
+        # Plot Brillouin zones
+        ax.plot([-1, -1], [-1, 1], **ortho)
+        ax.plot([1, 1], [-1, 1], **ortho)
+        ax.plot([-1, 1], [1, 1], **ortho)
+        ax.plot([-1, 1], [-1, -1], **ortho)
+        ax.plot([-2, 0], [0, 2], **tetra)
+        ax.plot([-2, 0], [0, -2], **tetra)
+        ax.plot([2, 0], [0, 2], **tetra)
+        ax.plot([2, 0], [0, -2], **tetra)
+
+        # labels and plot ARPES cut path
         if i == 0:
-            plt.ylabel('$k_y$ ($\pi/a$)', fontdict = font)
-            plt.yticks(np.arange(-10, 10, 2))
-            plt.plot([-1, 1], [-1, 1], linestyle=':', color=c, linewidth=1)
-            plt.plot([-1, 1], [1, 1], linestyle=':', color=c, linewidth=1)
-            plt.plot([-1, 0], [1, 2], linestyle=':', color=c, linewidth=1)
-            plt.plot([0, 0], [2, -1], linestyle=':', color=c, linewidth=1)
-            ax.arrow(-1, -1, .3, .3, head_width=0.3, head_length=0.3, fc=c, ec='k')
-            ax.arrow(0, -.4, 0, -.3, head_width=0.3, head_length=0.3, fc=c, ec='k')
+            ax.set_ylabel(r'$k_y$ ($\pi/a$)', fontdict=font)
+            ax.set_yticks(np.arange(-10, 10, 2))
+            ax.plot([-1, 1], [-1, 1], **path)
+            ax.plot([-1, 1], [1, 1], **path)
+            ax.plot([-1, 0], [1, 2], **path)
+            ax.plot([0, 0], [2, -1], **path)
+            ax.arrow(-1, -1, .3, .3, head_width=0.3, head_length=0.3,
+                     fc='turquoise', ec='k')
+            ax.arrow(0, -.4, 0, -.3, head_width=0.3, head_length=0.3,
+                     fc='turquoise', ec='k')
         else:
-            plt.yticks(np.arange(-10, 10, 2), [])
-        if any(x==i for x in [0, 1]):
+            ax.set_yticks(np.arange(-10, 10, 2), [])
+
+        # some additional text
+        if any(x == i for x in [0, 1]):
             x_pos = -2.7
         else:
             x_pos = -1.9
-        plt.text(x_pos, 5.6, lbls1[i], fontsize=12)
-        plt.text(x_pos, 5.0, lbls2[i], fontsize=10)
-        plt.text(x_pos, 4.4, lbls3[i], fontsize=10) 
-        plt.text(-0.2, -0.15, r'$\Gamma$',
-                 fontsize=12, color='r')
-        plt.text(-0.2, 1.85, r'$\Gamma$',
-                 fontsize=12, color='r')
-        plt.text(.85, .85, r'S',
-                 fontsize=12, color='r')
-        plt.text(-0.2, .9, r'X',
-                 fontsize=12, color='r')
-        plt.xlim(xmin=-3, xmax=4)
-        if any(x==i for x in [2, 3]):
-            plt.xlim(xmin=-2.2, xmax=2.9)
-        plt.ylim(ymin=-3.3, ymax=6.2)
-        
+        ax.text(x_pos, 5.6, lbls1[i], fontsize=12)
+        ax.text(x_pos, 5.0, lbls2[i], fontsize=10)
+        ax.text(x_pos, 4.4, lbls3[i], fontsize=10)
+        ax.text(-0.2, -0.15, r'$\Gamma$',
+                fontsize=12, color='r')
+        ax.text(-0.2, 1.85, r'$\Gamma$',
+                fontsize=12, color='r')
+        ax.text(.85, .85, r'S',
+                fontsize=12, color='r')
+        ax.text(-0.2, .9, r'X',
+                fontsize=12, color='r')
+        ax.set_xlim(xmin=-3, xmax=4)
+        if any(x == i for x in [2, 3]):
+            ax.set_xlim(xmin=-2.2, xmax=2.9)
+        ax.set_ylim(ymin=-3.3, ymax=6.2)
+
+    # colorbar
     pos = ax.get_position()
-    cax = plt.axes([pos.x0+pos.width+0.01 ,
-                        pos.y0, 0.01, pos.height])
-    cbar = plt.colorbar(cax = cax, ticks = None)
+    cax = plt.axes([pos.x0+pos.width+0.01,
+                    pos.y0, 0.01, pos.height])
+    cbar = plt.colorbar(cax=cax, ticks=None)
     cbar.set_ticks([])
     cbar.set_clim(np.min(FSmap), np.max(FSmap))
-"""
-Figures Dissertation Ca2RuO4 (CRO)
-"""
 
-def fig1(colmap=cm.bone_r, print_fig=True):
+
+def fig1(print_fig=True):
+    """figure 1
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    DFT plot: figure 3 of Nature Comm.
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     """
-    Prepare and plot DFT data of Ca2RuO4 (final)
-    """
-    os.chdir('/Users/denyssutter/Documents/PhD/data')
+
+    os.chdir(data_dir)
     GS = pd.read_csv('DFT_CRO_GS_final.dat').values
     SG = np.fliplr(GS)
     GX = pd.read_csv('DFT_CRO_GX_final.dat').values
     XG = np.fliplr(GX)
     XS = pd.read_csv('DFT_CRO_YS_final.dat').values
     SX = np.fliplr(XS)
-    os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
-    
-    ###k-points
+    os.chdir(home_dir)
+
+    # k-points
     G = (0, 0)
     X = (np.pi, 0)
     S = (np.pi, np.pi)
-    
-    ###Data along path in k-space
+
+    # Data along path in k-space
     k_pts = np.array([[S, G, S], [S, X, S], [S, G], [G, X, G, X]])
     DFT = np.array([[SG, GS], [SX, XS], [SG], [GX, XG, GX]])
-    DFT_en = np.linspace(-2.5,0,500)
-    CRO_theory_plot(k_pts, DFT_en, DFT, colmap, v_max = 1, fignr=1001) #Plot data
-    if print_fig == True:
-        plt.savefig(
-                '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CROfig1.png', 
-                dpi = 300,bbox_inches="tight")
+    DFT_en = np.linspace(-2.5, 0, 500)
+
+    # Plot data
+    CRO_theory_plot(k_pts, DFT_en, DFT, v_max=1, fignr=1001)
     plt.show()
-    
+
+    # Save data
+    if print_fig:
+        plt.savefig(save_dir + 'CROfig1.png', dpi=600, bbox_inches="tight")
+
+
 def CROfig2(colmap=cm.bone_r, print_fig=True):
     """
     Prepare and plot DMFT data of Ca2RuO4 
     """
-    os.chdir('/Users/denyssutter/Documents/PhD/data')
+    os.chdir(data_dir)
     xz_data = np.loadtxt('DMFT_CRO_xz.dat')
     yz_data = np.loadtxt('DMFT_CRO_yz.dat')
     xy_data = np.loadtxt('DMFT_CRO_xy.dat')
-    os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+    os.chdir(home_dir)
     m, n = 8000, 351 #dimensions energy, full k-path
     bot, top = 2500, 5000 #restrict energy window
     DMFT_data = np.array([xz_data, yz_data, xy_data]) #combine data
@@ -925,11 +1002,11 @@ def CROfig11(print_fig=True):
                     dpi = 600,bbox_inches="tight")
     plt.show()
     
-def CROfig12(colmap=cm.ocean_r, print_fig=True):
+def fig12(colmap=cm.ocean_r, print_fig=True):
     """
     Constant energy maps oxygen band 
     """
-    CRO_FS_plot(colmap, e=-5.2, v_min=.25, fignr=1012)
+    CRO_FS_plot(e=-5.2, v_min=.25, fignr='fig.12')
     if print_fig == True:
         plt.savefig(
                     '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CROfig12.png', 
