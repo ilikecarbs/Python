@@ -40,16 +40,16 @@ font = {'family': 'serif',
 # %%
 """
 ---------  Ca2RuO4 Figures   ---------
-CROfig1:   DFT plot Ca2RuO4: figure 3 of Nature Comm.
-CROfig2:   (L): DMFT pot Ca2RuO4: figure 3 of Nature Comm.
-CROfig3:   DFT plot orbitally selective Mott scenario
-CROfig4:   DFT plot uniform gap scnenario
+CROfig1:   DFT plot: figure 3 of Nature Comm.
+CROfig2:   (L): DMFT plot: figure 3 of Nature Comm.
+CROfig3:   DFT plot: orbitally selective Mott scenario
+CROfig4:   DFT plot: uniform gap scnenario
 CROfig5:   Experimental Data of Nature Comm.
 CROfig6:   Constant energy map CaRuO4 of alpha branch
 CROfig7:   Photon energy dependence Ca2RuO4: figure 2 of Nature Comm.
 CROfig8:   Polarization dependence Ca2RuO4: figure 2 of Nature Comm.
-CROfig9:   (L): DMFT plot Ca2RuO4 dxy/dxz,yz: figure 4 of Nature Comm.
-CROfig10:  (L): DFT plot Ca2RuO4: spaghetti and spectral representation
+CROfig9:   (L): DMFT plot dxy/dxz,yz: figure 4 of Nature Comm.
+CROfig10:  (L): DFT plot: spaghetti and spectral representation
 CROfig11:  Multiplet analysis Ca2RuO4
 CROfig12:  Constant energy maps oxygen band -5.2eV
 CROfig13:  Constant energy maps alpha band -0.5eV
@@ -86,19 +86,17 @@ CSRO: TB specific heat
 
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     Which figure do you desire?
             enter below:
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 """
 
 
-CRO.fig12()
+CRO.fig9()
 
 
 # %%
 
 CSRO.fig1()
-
-

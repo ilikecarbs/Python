@@ -876,7 +876,7 @@ def poly_n(x, n, *p):
     for i in range(n):
         poly_n += p[i] * x ** i
 
-    return lor_n
+    return poly_n
 
 
 def lor_n(x, n, *p):
@@ -1108,6 +1108,33 @@ def lor(x, *p):
     lor = lor_n(x, 1, *p)
 
     return lor
+
+
+def lor_2(x, *p):
+    """returns lor_2
+
+    **wrapper function of lor_n with n=2**
+
+    Args
+    ----
+    :x:          momentum
+    :n:          number of Lorentzians
+    :p[0:1]:     center
+    :p[2:3]:     HWHM
+    :p[4:5]:     amplitudes
+
+    :p[-3]:      constant
+    :p[-2]:      slope
+    :p[-1]:      quadratic
+
+    Return
+    ------
+    :lor_2:      2 Lorentzians
+    """
+
+    lor_2 = lor_n(x, 2, *p)
+
+    return lor_2
 
 
 def lor_4(x, *p):
