@@ -102,7 +102,7 @@ CRO.fig1()
 # %%
 
 
-CSRO.fig2()
+CSRO.fig12()
 
 
 # %%

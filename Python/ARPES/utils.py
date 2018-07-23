@@ -873,7 +873,7 @@ def poly_n(x, n, *p):
     poly_n = 0
 
     # Loop over orders
-    for i in range(n):
+    for i in range(n+1):
         poly_n += p[i] * x ** i
 
     return poly_n
@@ -1020,15 +1020,15 @@ def Full_spectral_func(x, *p):
     :p[8]:      width Gaussian
     :p[9]:      amplitude error function
     :p[10]:     center error function
-    :p[511:     width error function
+    :p[11]:     width error function
 
     Return
     ------
     :Full_spectral_func:   Fermi liquid spectral function + modified Gaussian
     """
 
-    Full_spectral_func = (FL_spectral_func(x, *p[0:5]) +
-                          gauss_mod(x, *p[6:11]))
+    Full_spectral_func = (FL_spectral_func(x, *p[:6]) +
+                          gauss_mod(x, *p[-6:]))
 
     return Full_spectral_func
 
@@ -1082,6 +1082,37 @@ def poly_2(x, *p):
 
     return poly_2
 
+# %%
+
+from scipy.optimize import curve_fit
+import numpy as np
+
+
+p = [0, 0, 1]
+x = np.linspace(0, 2, 100)
+y = utils.poly_2(x, *p)
+
+D = 10
+d = .0001
+
+
+def f_1(x, p0, p1, p2):
+    return p0 + p1 * x + p2 * x ** 2
+
+
+def f_2(x, *p):
+    return p[0] + p[1] * x + p[2] * x ** 2
+
+
+# initial parameters
+p_im_i = np.array([0, 0, 0])
+
+# fit data
+p_im, c_im = curve_fit(utils.poly_2, x, y, p_im_i)
+
+plt.plot(x,y)
+plt.show()
+#%%
 
 def lor(x, *p):
     """returns lor
