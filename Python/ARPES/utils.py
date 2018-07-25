@@ -873,7 +873,7 @@ def poly_n(x, n, *p):
     poly_n = 0
 
     # Loop over orders
-    for i in range(n):
+    for i in range(n+1):
         poly_n += p[i] * x ** i
 
     return poly_n
@@ -1020,15 +1020,15 @@ def Full_spectral_func(x, *p):
     :p[8]:      width Gaussian
     :p[9]:      amplitude error function
     :p[10]:     center error function
-    :p[511:     width error function
+    :p[11]:     width error function
 
     Return
     ------
     :Full_spectral_func:   Fermi liquid spectral function + modified Gaussian
     """
 
-    Full_spectral_func = (FL_spectral_func(x, *p[0:5]) +
-                          gauss_mod(x, *p[6:11]))
+    Full_spectral_func = (FL_spectral_func(x, *p[:6]) +
+                          gauss_mod(x, *p[-6:]))
 
     return Full_spectral_func
 

@@ -17,25 +17,9 @@ Created on Tue Jun 19 15:14:29 2018
             -
 """
 
-import matplotlib.pyplot as plt
-import matplotlib.cm as cm
-
-import utils
 import PhD_chapter_CRO as CRO
 import PhD_chapter_CSRO as CSRO
 
-
-rainbow_light = utils.rainbow_light
-cm.register_cmap(name='rainbow_light', cmap=rainbow_light)
-plt.rcParams['mathtext.fontset'] = 'cm'
-plt.rcParams['font.serif'] = ['Computer Modern Roman']
-plt.rc('font', **{'family': 'serif', 'serif': ['STIXGeneral']})
-font = {'family': 'serif',
-        'style': 'normal',
-        'color':  [0, 0, 0],
-        'weight': 'ultralight',
-        'size': 12,
-        }
 
 # %%
 """
@@ -70,7 +54,7 @@ CSROfig11: Tight binding model CSRO
 CSROfig12: Tight binding model SRO
 CSROfig13: TB along high symmetry directions, orbitally resolved
 CSROfig14: (L): TB and density of states
-CSROfig15: DMFT FS
+CSROfig15: DMFT Fermi surface
 CSROfig16: (L): DMFT bandstructure calculation
 CSROfig17: (L): LDA bandstructure calculation
 CSROfig18: CSRO30 Experimental band structure
@@ -93,10 +77,16 @@ CSRO: TB specific heat
 
 """
 
+# %%
 
-CRO.fig9()
+
+CRO.fig1()
 
 
 # %%
 
-CSRO.fig1()
+
+CSRO.fig19()
+
+
+# %%
