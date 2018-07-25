@@ -2330,10 +2330,17 @@ def fig12(print_fig=True):
         plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
 
 
-def CSROfig13(print_fig=True):
-    """
+def fig13(print_fig=True):
+    """figure 13
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     TB along high symmetry directions, orbitally resolved
-    """    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    """
+
+    figname = 'CSROfig13'
+
+    # kpoints
     k_pts = 300
     x_GS = np.linspace(0, 1, k_pts)
     y_GS = np.linspace(0, 1, k_pts)
@@ -2341,103 +2348,148 @@ def CSROfig13(print_fig=True):
     y_SX = np.ones(k_pts)
     x_XG = np.zeros(k_pts)
     y_XG = np.linspace(1, 0, k_pts)
-    
+
+    # full kpath
     x = (x_GS, x_SX, x_XG)
     y = (y_GS, y_SX, y_XG)
-    plt.figure('TB_eval', figsize=(6, 6), clear=True)
+
+    # create figure
+    fig = plt.figure('TB_eval', figsize=(6, 6), clear=True)
     for i in range(len(x)):
+
+        # calculate bandstructure
         en, spec, bndstr = utils.CSRO_eval(x[i], y[i])
-        k = np.sqrt(x[i] ** 2 + y[i] ** 2)
-        v_bnd = .1
+        k = np.sqrt(x[i] ** 2 + y[i] ** 2)  # norm
+        v_bnd = .1  # set point of coloscale
         if i != 0:
-            ax = plt.subplot(2, 3, i + 1)
-            ax.set_position([.1 + i * .15 + .15 * (np.sqrt(2)-1), .2, .15 , .4])
-            plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
+            ax = fig.add_subplot(2, 3, i+1)
+            ax.set_position([.1+i*.15+.15*(np.sqrt(2)-1),
+                             .2, .15, .4])
             k = -k
         else:
-            ax = plt.subplot(2, 3, i + 1)
-            ax.set_position([.1 + i * .15 , .2, .15 * np.sqrt(2) , .4])
-            plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
-        plt.contourf(k, en, spec, 200, 
-                     cmap='PuOr', vmin=-v_bnd, vmax=v_bnd)
+            ax = fig.add_subplot(2, 3, i+1)
+            ax.set_position([.1+i*.15, .2, .15*np.sqrt(2), .4])
+        ax.tick_params(**kwargs_ticks)
+
+        # plot data
+        c0 = ax.contourf(k, en, spec, 300,
+                         cmap='PuOr', vmin=-v_bnd, vmax=v_bnd)
+        ax.plot([k[0], k[-1]], [0, 0], **kwargs_ef)
         for j in range(len(bndstr)):
-            plt.plot(k, bndstr[j], 'k-', alpha=.2)
+            ax.plot(k, bndstr[j], 'k-', alpha=.2)
+
+        # decorate axes
         if i == 0:
-            plt.xticks([0, np.sqrt(2)], ('$\Gamma$', 'S'))
-            plt.yticks(np.arange(-1, 1, .2))
-        elif i==1:
-            plt.xticks([-np.sqrt(2), -1], ('', 'X'))
-            plt.yticks(np.arange(-1, 1, .2), [])
-        elif i==2:
-            plt.xticks([-1, 0], ('', '$\Gamma$'))
-            plt.yticks(np.arange(-1, 1, .2), [])
-        plt.plot([k[0], k[-1]], [0, 0], 'k:')    
-        plt.ylim(ymax=np.max(en), ymin=np.min(en))
+            ax.set_xticks([0, np.sqrt(2)])
+            ax.set_xticklabels([r'$\Gamma$', 'S'])
+            ax.set_yticks(np.arange(-1, 1, .2))
+        elif i == 1:
+            ax.set_xticks([-np.sqrt(2), -1])
+            ax.set_xticklabels(['', 'X'])
+            ax.set_yticks(np.arange(-1, 1, .2))
+            ax.set_yticklabels([])
+        elif i == 2:
+            ax.set_xticks([-1, 0])
+            ax.set_xticklabels(['', r'$\Gamma$'])
+            ax.set_yticks(np.arange(-1, 1, .2))
+            ax.set_yticklabels([])
+        ax.set_ylim(np.min(en), np.max(en))
+
+    # colorbar
     pos = ax.get_position()
-    cax = plt.axes([pos.x0+pos.width+0.01 ,
-                            pos.y0, 0.01, pos.height])
-    cbar = plt.colorbar(cax = cax, ticks = None)
+    cax = plt.axes([pos.x0+pos.width+0.01, pos.y0, 0.01, pos.height])
+    cbar = plt.colorbar(c0, cax=cax, ticks=None)
     cbar.set_ticks([])
     cbar.set_clim(np.min(spec), np.max(spec))
-    plt.show()
-    if print_fig == True:
-        plt.savefig(
-                '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig13.png', 
-                dpi = 600,bbox_inches="tight")
 
-def CSROfig14(print_fig=True):
-    """
+    plt.show()
+
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+
+
+def fig14(print_fig=True):
+    """figure 14
+
+    %%%%%%%%%%%%%%%%%%%%%%%%
     TB and density of states
-    """    
-    os.chdir('/Users/denyssutter/Documents/PhD/data')
+    %%%%%%%%%%%%%%%%%%%%%%%%
+    """
+
+    figname = 'CSROfig14'
+
+    # load data
+    os.chdir(data_dir)
     Axz_dos = np.loadtxt('Data_Axz_kpts_5000.dat')
     Ayz_dos = np.loadtxt('Data_Ayz_kpts_5000.dat')
     Axy_dos = np.loadtxt('Data_Axy_kpts_5000.dat')
     Bxz_dos = np.loadtxt('Data_Bxz_kpts_5000.dat')
     Byz_dos = np.loadtxt('Data_Byz_kpts_5000.dat')
     Bxy_dos = np.loadtxt('Data_Bxy_kpts_5000.dat')
-    os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+    os.chdir(home_dir)
+
+    # collect data
     bands = (Ayz_dos, Axz_dos, Axy_dos, Byz_dos, Bxz_dos, Bxy_dos)
-    
+
+    # Placeholders
     En = ()
     _EF = ()
     DOS = ()
     N_bands = ()
-    N_full= ()
-    plt.figure('DOS', figsize=(8, 8), clear=True)
-    n = 0
+    N_full = ()
+
+    # create figure
+    fig = plt.figure('DOS', figsize=(8, 8), clear=True)
+    n = 0  # counter
+
+    # calculate DOS
     for band in bands:
         n += 1
-        ax = plt.subplot(2, 3, n) 
-        plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
-        dos, bins, patches = plt.hist(np.ravel(band), bins=150, density=True,
-                                    alpha=.2, color='C8')
-        en = np.zeros((len(dos)))
+        ax = fig.add_subplot(2, 3, n)
+        ax.tick_params(**kwargs_ticks)
+
+        # histogram data, and normalize (density=true)
+        dos, bins, patches = ax.hist(np.ravel(band), bins=150,
+                                     density=True, alpha=.2, color='C8')
+        en = np.zeros((len(dos)))  # placeholder energy
         for i in range(len(dos)):
             en[i] = (bins[i] + bins[i + 1]) / 2
-        ef, _ef = utils.find(en, 0.003)
-        n_full = np.trapz(dos, x=en)
-        n_band = np.trapz(dos[:_ef], x=en[:_ef])
-        plt.plot(en, dos, color='k', lw=.5)
-        plt.fill_between(en[:_ef], dos[:_ef], 0, color='C1', alpha=.5)
+        ef, _ef = utils.find(en, 0.003)  # fermi energy
+
+        # integrate filling
+        n_full = np.trapz(dos, x=en)  # consistency check
+        n_band = np.trapz(dos[:_ef], x=en[:_ef])  # integrate up to EF
+
+        # plot data
+        ax.plot(en, dos, color='k', lw=.5)
+        ax.fill_between(en[:_ef], dos[:_ef], 0, color='C1', alpha=.5)
+
+        # decorate axes
         if n < 4:
-            ax.set_position([.1 + (n - 1) * .29, .5, .28 , .23])
-            plt.xticks(np.arange(-.6, .3, .1), [])
+            ax.set_position([.1+(n-1)*.29, .5, .28, .23])
+            ax.set_xticks(np.arange(-.6, .3, .1))
+            ax.set_xticklabels([])
         else:
-            ax.set_position([.1 + (n - 4) * .29, .26, .28 , .23])
-            plt.xticks(np.arange(-.6, .3, .1))
+            ax.set_position([.1+(n-4)*.29, .26, .28, .23])
+            ax.set_xticks(np.arange(-.6, .3, .1))
         if n == 5:
-            plt.xlabel(r'$\omega$ (eV)', fontdict=font)
-        if any(x==n for x in [1, 4]):
-            plt.ylabel('Intensity (a.u)', fontdict=font)
-        plt.yticks(np.arange(0, 40, 10), [])
-        plt.xlim(xmin=-.37, xmax=.21)
+            ax.set_xlabel(r'$\omega$ (eV)', fontdict=font)
+        if any(x == n for x in [1, 4]):
+            ax.set_ylabel('Intensity (a.u)', fontdict=font)
+        ax.set_yticks(np.arange(0, 40, 10))
+        ax.set_yticklabels([])
+        ax.set_xlim(.21, -.37)
+
+        # collect data
         N_full = N_full + (n_full,)
         N_bands = N_bands + (n_band,)
         En = En + (en,)
         _EF = _EF + (_ef,)
         DOS = DOS + (dos,)
     N = np.sum(N_bands)
+
+    # prepare plot band structure
     k_pts = 200
     x_GS = np.linspace(0, 1, k_pts)
     y_GS = np.linspace(0, 1, k_pts)
@@ -2445,110 +2497,151 @@ def CSROfig14(print_fig=True):
     y_SX = np.ones(k_pts)
     x_XG = np.zeros(k_pts)
     y_XG = np.linspace(1, 0, k_pts)
+
+    # full k-path
     x = (x_GS, x_SX, x_XG)
     y = (y_GS, y_SX, y_XG)
+
+    # colors
     cols = ['C1', 'C0', 'm', 'C8', 'C9', 'C3']
-    plt.figure('TB_eval', figsize=(8, 8), clear=True)
+    fig = plt.figure('TB_eval', figsize=(8, 8), clear=True)
     for i in range(len(x)):
         en, spec, bndstr = utils.CSRO_eval(x[i], y[i])
         k = np.sqrt(x[i] ** 2 + y[i] ** 2)
         if i != 0:
-            ax = plt.subplot(3, 3, i + 1)
-            ax.set_position([.1 + i * .15 + .15 * (np.sqrt(2) - 1), .2, .15 , .4])
-            plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
+            ax = fig.add_subplot(3, 3, i+1)
+            ax.set_position([.1 + i*.15+.15*(np.sqrt(2)-1), .2, .15, .4])
             k = -k
         else:
-            ax = plt.subplot(3, 3, i + 1)
-            ax.set_position([.1 + i * .15 , .2, .15 * np.sqrt(2) , .4])
-            plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
+            ax = plt.subplot(3, 3, i+1)
+            ax.set_position([.1+i*.15, .2, .15*np.sqrt(2), .4])
+        ax.tick_params(**kwargs_ticks)
+
+        # plot data
         for j in range(len(bndstr)):
-            plt.plot(k, bndstr[j], color=cols[j])
+            ax.plot(k, bndstr[j], color=cols[j])
+        ax.plot([k[0], k[-1]], [0, 0], **kwargs_ef)
         if i == 0:
-            plt.xticks([0, np.sqrt(2)], ('$\Gamma$', 'S'))
-            plt.yticks(np.arange(-1, 1, .2))
-            plt.text(.05, .25, '(a)', fontdict=font)
-            plt.ylabel(r'$\omega$ (eV)', fontdict=font)
-        elif i==1:
-            plt.xticks([-np.sqrt(2), -1], ('', 'X'))
-            plt.yticks(np.arange(-1, 1, .2), [])
-        elif i==2:
-            plt.xticks([-1, 0], ('', '$\Gamma$'))
-            plt.yticks(np.arange(-1, 1, .2), [])
-        plt.plot([k[0], k[-1]], [0, 0], 'k:')    
-        plt.xlim(xmin=k[0], xmax=k[-1])
-        plt.ylim(ymax=np.max(en), ymin=np.min(en))
-    n = 0
+            ax.set_xticks([0, np.sqrt(2)])
+            ax.set_xticklabels([r'$\Gamma$', 'S'])
+            ax.set_yticks(np.arange(-1, 1, .2))
+            ax.set_ylabel(r'$\omega$ (eV)', fontdict=font)
+
+            # add text
+            ax.text(.05, .25, '(a)', fontdict=font)
+        elif i == 1:
+            ax.set_xticks([-np.sqrt(2), -1])
+            ax.set_xticklabels(['', 'X'])
+            ax.set_yticks(np.arange(-1, 1, .2))
+            ax.set_yticklabels([])
+        elif i == 2:
+            ax.set_xticks([-1, 0])
+            ax.set_xticklabels(['', r'$\Gamma$'])
+            ax.set_yticks(np.arange(-1, 1, .2))
+            ax.set_yticklabels([])
+        ax.set_xlim(xmin=k[0], xmax=k[-1])
+        ax.set_ylim(ymax=np.max(en), ymin=np.min(en))
+
+    # plot DOS
+    n = 0   # counter
     for band in bands:
         dos = DOS[n]
         dos[0] = 0
         dos[-1] = 0
-        ax = plt.subplot(3, 3, 9)
-        ax.set_position([.1 + 3 * .15 + .01 + .15 * (np.sqrt(2) - 1), .2, .15 * np.sqrt(2) , .4])
-        plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
-        ef, _ef = utils.find(En[n], 0.00)
-        plt.plot(DOS[n], En[n], color = 'k', lw=.5)
-        plt.fill_betweenx(En[n][:_ef], 0, DOS[n][:_ef], color=cols[n], alpha=.7)
-        plt.yticks(np.arange(-1, 1, .2), [])
-        plt.xticks([])
-        plt.ylim(ymax=np.max(en), ymin=np.min(en))
-        plt.xlim(xmax=35, xmin=0)
+        ax = fig.add_subplot(339)
+        ax.set_position([.1+3*.15+.01+.15*(np.sqrt(2)-1), .2,
+                         .15 * np.sqrt(2), .4])
+        ax.tick_params(**kwargs_ticks)
+        ef, _ef = utils.find(En[n], 0.00)  # find Fermi level
+
+        # plot DOS
+        ax.plot(DOS[n], En[n], color='k', lw=.5)
+        ax.fill_betweenx(En[n][:_ef], 0, DOS[n][:_ef],
+                         color=cols[n], alpha=.7)
+
+        # decorate axes
+        ax.set_yticks(np.arange(-1, 1, .2))
+        ax.set_yticklabels([])
+        ax.set_xticks([])
+        ax.set_ylim(np.min(en), np.max(en))
+        ax.set_xlim(0, 35)
         n += 1
-    plt.text(1, .25, '(b)', fontdict=font)
-    plt.xlabel('DOS $\partial_\omega\Omega_2(\omega)$', fontdict=font)
-    print(N)
+
+    # add text
+    ax.text(1, .25, '(b)', fontdict=font)
+    ax.set_xlabel(r'DOS $\partial_\omega\Omega_2(\omega)$', fontdict=font)
+    print(N)  # consistency check
+
     plt.show()
-    if print_fig == True:
-        plt.savefig(
-                '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig14.png', 
-                dpi = 600,bbox_inches="tight")
-    os.chdir('/Users/denyssutter/Documents/PhD/data')
-    np.savetxt('Data_TB_DOS_Ayz.dat', DOS[0]);
-    np.savetxt('Data_TB_DOS_Axz.dat', DOS[1]);
-    np.savetxt('Data_TB_DOS_Axy.dat', DOS[2]);
-    np.savetxt('Data_TB_DOS_Byz.dat', DOS[3]);
-    np.savetxt('Data_TB_DOS_Bxz.dat', DOS[4]);
-    np.savetxt('Data_TB_DOS_Bxy.dat', DOS[5]);
-    np.savetxt('Data_TB_DOS_en_Ayz.dat', En[0]);
-    np.savetxt('Data_TB_DOS_en_Axz.dat', En[1]);
-    np.savetxt('Data_TB_DOS_en_Axy.dat', En[2]);
-    np.savetxt('Data_TB_DOS_en_Byz.dat', En[3]);
-    np.savetxt('Data_TB_DOS_en_Bxz.dat', En[4]);
-    np.savetxt('Data_TB_DOS_en_Bxy.dat', En[5]);
+
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+
+    # save data
+    os.chdir(data_dir)
+    np.savetxt('Data_TB_DOS_Ayz.dat', DOS[0])
+    np.savetxt('Data_TB_DOS_Axz.dat', DOS[1])
+    np.savetxt('Data_TB_DOS_Axy.dat', DOS[2])
+    np.savetxt('Data_TB_DOS_Byz.dat', DOS[3])
+    np.savetxt('Data_TB_DOS_Bxz.dat', DOS[4])
+    np.savetxt('Data_TB_DOS_Bxy.dat', DOS[5])
+    np.savetxt('Data_TB_DOS_en_Ayz.dat', En[0])
+    np.savetxt('Data_TB_DOS_en_Axz.dat', En[1])
+    np.savetxt('Data_TB_DOS_en_Axy.dat', En[2])
+    np.savetxt('Data_TB_DOS_en_Byz.dat', En[3])
+    np.savetxt('Data_TB_DOS_en_Bxz.dat', En[4])
+    np.savetxt('Data_TB_DOS_en_Bxy.dat', En[5])
     print('\n ~ Data saved Density of states',
-              '\n', '==========================================')  
-    os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
-    
-def CSROfig15(print_fig=True):
+          '\n', '==========================================')
+    os.chdir(home_dir)
+
+
+def fig15(print_fig=True):
+    """figure 15
+
+    %%%%%%%%%%%%%%%%%%
+    DMFT Fermi surface
+    %%%%%%%%%%%%%%%%%%
     """
-    DMFT FS
-    """   
-    os.chdir('/Users/denyssutter/Documents/PhD/data')
+
+    figname = 'CSROfig15'
+
+    # load data
+    os.chdir(data_dir)
     FS_DMFT_xy_data = np.loadtxt('FS_DMFT_xy.dat')
     FS_DMFT_xz_data = np.loadtxt('FS_DMFT_xz.dat')
     FS_DMFT_yz_data = np.loadtxt('FS_DMFT_yz.dat')
     FS_LDA_xy_data = np.loadtxt('FS_LDA_xy.dat')
     FS_LDA_xz_data = np.loadtxt('FS_LDA_xz.dat')
     FS_LDA_yz_data = np.loadtxt('FS_LDA_yz.dat')
-    os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+    os.chdir(home_dir)
+
     m = 51
-    ###Reshape###
+
+    # Reshape
     FS_DMFT_xy = np.reshape(FS_DMFT_xy_data, (m, m, 3))
     FS_DMFT_xz = np.reshape(FS_DMFT_xz_data, (m, m, 3))
     FS_DMFT_yz = np.reshape(FS_DMFT_yz_data, (m, m, 3))
     FS_LDA_xy = np.reshape(FS_LDA_xy_data, (m, m, 3))
     FS_LDA_xz = np.reshape(FS_LDA_xz_data, (m, m, 3))
     FS_LDA_yz = np.reshape(FS_LDA_yz_data, (m, m, 3))
-    ###Normalize###
+
+    # Normalize
     FS_DMFT_xy = FS_DMFT_xy / np.max(FS_DMFT_xy[:, :, 2])
     FS_DMFT_xz = FS_DMFT_xz / np.max(FS_DMFT_xz[:, :, 2])
     FS_DMFT_yz = FS_DMFT_yz / np.max(FS_DMFT_yz[:, :, 2])
     FS_LDA_xy = FS_LDA_xy / np.max(FS_LDA_xy[:, :, 2])
     FS_LDA_xz = FS_LDA_xz / np.max(FS_LDA_xz[:, :, 2])
     FS_LDA_yz = FS_LDA_yz / np.max(FS_LDA_yz[:, :, 2])
-    ###Weight distribution###
-    FS_DMFT = (FS_DMFT_xz[:, :, 2] + FS_DMFT_yz[:, :, 2]) / 2 - FS_DMFT_xy[:, :, 2]
-    FS_LDA = (FS_LDA_xz[:, :, 2] + FS_LDA_yz[:, :, 2]) / 2 - FS_LDA_xy[:, :, 2]
-    ###Flip data###
+
+    # Weight distribution
+    FS_DMFT = (FS_DMFT_xz[:, :, 2] +
+               FS_DMFT_yz[:, :, 2]) / 2 - FS_DMFT_xy[:, :, 2]
+    FS_LDA = (FS_LDA_xz[:, :, 2] +
+              FS_LDA_yz[:, :, 2]) / 2 - FS_LDA_xy[:, :, 2]
+
+    # Flip data
     d1 = FS_DMFT
     d2 = np.fliplr(d1)
     d3 = np.flipud(d2)
@@ -2557,13 +2650,14 @@ def CSROfig15(print_fig=True):
     l2 = np.fliplr(l1)
     l3 = np.flipud(l2)
     l4 = np.flipud(l1)
-    ####Placeholders
-    #DMFT = np.zeros((4 * m, 4 * m))
-    #LDA = np.zeros((4 * m, 4 * m))
-    #kx = np.linspace(-2, 2, 4 * m)
-    #ky = np.linspace(-2, 2, 4 * m)
-    ##Build data###
-    #for i in range(m):
+
+    # Extended Fermi Surface
+    # DMFT = np.zeros((4 * m, 4 * m))
+    # LDA = np.zeros((4 * m, 4 * m))
+    # kx = np.linspace(-2, 2, 4 * m)
+    # ky = np.linspace(-2, 2, 4 * m)
+    # #Build data###
+    # for i in range(m):
     #    for j in range(m):
     #        DMFT[i, j] = d1[i, j]
     #        DMFT[i, j + m] = d2[i, j]
@@ -2596,13 +2690,15 @@ def CSROfig15(print_fig=True):
     #        LDA[i + 3 * m, j] = l4[i, j]
     #        LDA[i + 3 * m, j + m] = l3[i, j]
     #        LDA[i + 3 * m, j + 2 * m] = l4[i, j]
-    #        LDA[i + 3 * m, j + 3 * m] = l3[i, j]    
-    ###Placeholders###
+    #        LDA[i + 3 * m, j + 3 * m] = l3[i, j]
+
+    # Placeholders
     DMFT = np.zeros((2 * m, 2 * m))
     LDA = np.zeros((2 * m, 2 * m))
     kx = np.linspace(-1, 1, 2 * m)
     ky = np.linspace(-1, 1, 2 * m)
-    ###Build data###
+
+    # Build data
     for i in range(m):
         for j in range(m):
             DMFT[i, j] = d3[i, j]
@@ -2613,44 +2709,65 @@ def CSROfig15(print_fig=True):
             LDA[i, j + m] = l4[i, j]
             LDA[i + m, j] = l2[i, j]
             LDA[i + m, j + m] = l1[i, j]
-    ###Plot data###
+
+    # Plot data
     v_d = np.max(DMFT)
-    plt.figure(2015, figsize=(8, 8), clear=True)
-    ax = plt.subplot(121)
+    fig = plt.figure(figname, figsize=(8, 8), clear=True)
+    ax = fig.add_subplot(121)
     ax.set_position([.1, .3, .4, .4])
-    plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
-    plt.contourf(kx, ky, DMFT, 300, cmap='PuOr', vmin=-v_d, vmax=v_d)
-    plt.text(-.05, -.05, r'$\Gamma$', fontsize=18, color='r')
-    plt.text(.95, .95, 'S', fontsize=18, color='r')
-    plt.text(-.06, .95, 'X', fontsize=18, color='r')
-    plt.xticks(np.arange(-2, 2, 1), [])
-    plt.yticks(np.arange(-2, 2, 1), [])
-    plt.ylim(ymax=1, ymin=-1)
-    plt.xlim(xmax=1, xmin=-1)
-    plt.xlabel(r'$k_x \, (\pi / a)$', fontdict=font)
-    plt.ylabel(r'$k_y \, (\pi / b)$', fontdict=font)
+    ax.tick_params(**kwargs_ticks)
+    c0 = ax.contourf(kx, ky, DMFT, 300, cmap='PuOr', vmin=-v_d, vmax=v_d)
+
+    # decorate axes
+    ax.set_xticks(np.arange(-2, 2, 1))
+    ax.set_xticklabels([])
+    ax.set_yticks(np.arange(-2, 2, 1))
+    ax.set_yticklabels([])
+    ax.set_ylim(-1, 1)
+    ax.set_xlim(-1, 1)
+    ax.set_xlabel(r'$k_x \, (\pi / a)$', fontdict=font)
+    ax.set_ylabel(r'$k_y \, (\pi / b)$', fontdict=font)
+
+    # add text
+    ax.text(-.05, -.05, r'$\Gamma$', fontsize=18, color='r')
+    ax.text(.95, .95, 'S', fontsize=18, color='r')
+    ax.text(-.06, .95, 'X', fontsize=18, color='r')
+
+    # colorbars
     pos = ax.get_position()
-    cax = plt.axes([pos.x0+pos.width + 0.01 ,
-                        pos.y0, 0.01, pos.height])
-    cbar = plt.colorbar(cax = cax, ticks = None)
+    cax = plt.axes([pos.x0+pos.width + 0.01, pos.y0, 0.01, pos.height])
+    cbar = plt.colorbar(c0, cax=cax, ticks=None)
     cbar.set_ticks([])
     cbar.set_clim(np.min(DMFT), np.max(DMFT))
+
     plt.show()
-    if print_fig == True:
-        plt.savefig(
-                '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig15.png', 
-                dpi = 600,bbox_inches="tight")
-        
-def CSROfig16(print_fig=True):
-    """
+
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+
+
+def fig16(print_fig=True):
+    """figure 16
+
+    %%%%%%%%%%%%%%%%%%
     DMFT bandstructure calculation
-    """    
-    os.chdir('/Users/denyssutter/Documents/PhD/data')
+    %%%%%%%%%%%%%%%%%%
+    """
+
+    figname = 'CSROfig16'
+
+    # load data
+    os.chdir(data_dir)
     xz_data = np.loadtxt('DMFT_CSRO_xz.dat')
     yz_data = np.loadtxt('DMFT_CSRO_yz.dat')
     xy_data = np.loadtxt('DMFT_CSRO_xy.dat')
-    os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
-    #[0, 56, 110, 187, 241, 266, 325, 350]  = [G,X,S,G,Y,T,G,Z]
+    os.chdir(home_dir)
+
+    # full k-path
+    # [0, 56, 110, 187, 241, 266, 325, 350]  = [G, X, S, G, Y, T, G, Z]
+
+    # prepare data
     xz = np.reshape(xz_data[:, 2], (351, 8000))
     yz = np.reshape(yz_data[:, 2], (351, 8000))
     xy = np.reshape(xy_data[:, 2], (351, 8000))
@@ -2665,46 +2782,78 @@ def CSROfig16(print_fig=True):
     k_SG = k[110:187]
     v_bnd = np.max(DMFT)
     k = (np.flipud(k_SG), np.flipud(k_XS), np.flipud(k_GX))
+
+    # collect data
     bndstr = (SG, XS, GX)
-    plt.figure('2016', figsize=(8, 8), clear=True)
+
+    # create figure
+    fig = plt.figure(figname, figsize=(8, 8), clear=True)
     for i in range(len(bndstr)):
         if i != 0:
-            ax = plt.subplot(3, 3, i + 1)
-            ax.set_position([.1 + i * .15 + .15 * (np.sqrt(2) - 1), .2, .15 , .4])
-            plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
+            ax = fig.add_subplot(3, 3, i+1)
+            ax.set_position([.1+i*.15+.15*(np.sqrt(2)-1), .2, .15, .4])
+            ax.tick_params(**kwargs_ticks)
         else:
-            ax = plt.subplot(3, 3, i + 1)
-            ax.set_position([.1 + i * .15 , .2, .15 * np.sqrt(2) , .4])
-            plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
-        plt.contourf(k[i], en, bndstr[i], 200, cmap='PuOr', vmax=v_bnd, vmin=-v_bnd)
+            ax = plt.subplot(3, 3, i+1)
+            ax.set_position([.1+i*.15, .2, .15*np.sqrt(2), .4])
+            ax.tick_params(**kwargs_ticks)
+
+        # plot data
+        c0 = ax.contourf(k[i], en, bndstr[i], 200, cmap='PuOr',
+                         vmax=v_bnd, vmin=-v_bnd)
+        ax.plot([k[i][0], k[i][-1]], [0, 0], 'k:')
+
+        # decorate axes
         if i == 0:
-            plt.xticks([110, 186], ('$\Gamma$', 'S')) 
-            plt.yticks(np.arange(-1, 1, .2))
-            plt.ylabel(r'$\omega$ (eV)', fontdict=font)
-        elif i==1:
-            plt.xticks([56, 109], ('', 'X'))
-            plt.yticks(np.arange(-1, 1, .2), [])
-        elif i==2:
-            plt.xticks([0, 55], ('', '$\Gamma$'))
-            plt.yticks(np.arange(-1, 1, .2), [])
-        plt.plot([k[i][0], k[i][-1]], [0, 0], 'k:')    
-        plt.ylim(ymax = .25, ymin=-.65)
+            ax.set_xticks([110, 186])
+            ax.set_xticklabels([r'$\Gamma$', 'S'])
+            ax.set_ylabel(r'$\omega$ (eV)', fontdict=font)
+        elif i == 1:
+            ax.set_xticks([56, 109])
+            ax.set_xticklabels(['', 'X'])
+            ax.set_yticklabels([])
+        elif i == 2:
+            ax.set_xticks([0, 55])
+            ax.set_xticklabels(['', r'$\Gamma$'])
+            ax.set_yticklabels([])
+        ax.set_yticks(np.arange(-1, 1, .2))
+        ax.set_ylim(-.65, .25)
+
+    # colorbars
+    pos = ax.get_position()
+    cax = plt.axes([pos.x0+pos.width+0.01, pos.y0, 0.01, pos.height])
+    cbar = plt.colorbar(c0, cax=cax, ticks=None)
+    cbar.set_ticks([])
+    cbar.set_clim(np.min(DMFT), np.max(DMFT))
+
     plt.show()
-    if print_fig == True:
-        plt.savefig(
-                '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig16.png', 
-                dpi = 600,bbox_inches="tight")
-        
-def CSROfig17(print_fig=True):
-    """
+
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+
+
+def fig17(print_fig=True):
+    """figure 17
+
+    %%%%%%%%%%%%%%%%%%
     LDA bandstructure calculation
-    """    
-    os.chdir('/Users/denyssutter/Documents/PhD/data')
+    %%%%%%%%%%%%%%%%%%
+    """
+
+    figname = 'CSROfig17'
+
+    # load data
+    os.chdir(data_dir)
     xz_data = np.loadtxt('LDA_CSRO_xz.dat')
     yz_data = np.loadtxt('LDA_CSRO_yz.dat')
     xy_data = np.loadtxt('LDA_CSRO_xy.dat')
-    os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
-    #[0, 56, 110, 187, 241, 266, 325, 350]  = [G,X,S,G,Y,T,G,Z]
+    os.chdir(home_dir)
+
+    # k-path
+    # [0, 56, 110, 187, 241, 266, 325, 350]  = [G, X, S, G, Y, T, G, Z]
+
+    # prepare data
     xz = np.reshape(xz_data[:, 2], (351, 8000))
     yz = np.reshape(yz_data[:, 2], (351, 8000))
     xy = np.reshape(xy_data[:, 2], (351, 8000))
@@ -2719,212 +2868,308 @@ def CSROfig17(print_fig=True):
     k_SG = k[110:187]
     v_bnd = np.max(LDA)
     k = (np.flipud(k_SG), np.flipud(k_XS), np.flipud(k_GX))
+
+    # collect data
     bndstr = (SG, XS, GX)
-    plt.figure(2017, figsize=(8, 8), clear=True)
+
+    # create figure
+    fig = plt.figure(figname, figsize=(8, 8), clear=True)
     for i in range(len(bndstr)):
         if i != 0:
-            ax = plt.subplot(3, 3, i + 1)
-            ax.set_position([.1 + i * .15 + .15 * (np.sqrt(2) - 1), .2, .15 , .4])
-            plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
+            ax = fig.add_subplot(3, 3, i+1)
+            ax.set_position([.1+i*.15+.15*(np.sqrt(2)-1), .2, .15, .4])
+            ax.tick_params(**kwargs_ticks)
         else:
-            ax = plt.subplot(3, 3, i + 1)
-            ax.set_position([.1 + i * .15 , .2, .15 * np.sqrt(2) , .4])
-            plt.tick_params(direction='in', length=1.5, width=.5, colors='k') 
-        plt.contourf(k[i], en, bndstr[i], 200, cmap='PuOr', vmax=v_bnd, vmin=-v_bnd)
+            ax = fig.add_subplot(3, 3, i+1)
+            ax.set_position([.1+i*.15, .2, .15*np.sqrt(2), .4])
+            ax.tick_params(**kwargs_ticks)
+
+        # plot data
+        c0 = ax.contourf(k[i], en, bndstr[i], 200, cmap='PuOr',
+                         vmax=v_bnd, vmin=-v_bnd)
+        ax.plot([k[i][0], k[i][-1]], [0, 0], 'k:')
+
         if i == 0:
-            plt.xticks([110, 186], ('$\Gamma$', 'S')) 
-            plt.yticks(np.arange(-5, 2, .5))
-            plt.ylabel(r'$\omega$ (eV)', fontdict=font)
-        elif i==1:
-            plt.xticks([56, 109], ('', 'X'))
-            plt.yticks(np.arange(-5, 2, .5), [])
-        elif i==2:
-            plt.xticks([0, 55], ('', '$\Gamma$'))
-            plt.yticks(np.arange(-5, 2, .5), [])
-        plt.plot([k[i][0], k[i][-1]], [0, 0], 'k:')    
-        plt.ylim(ymax = 1, ymin=-2.5)
+            ax.set_xticks([110, 186])
+            ax.set_xticklabels([r'$\Gamma$', 'S'])
+            ax.set_yticks(np.arange(-5, 2, .5))
+            ax.set_ylabel(r'$\omega$ (eV)', fontdict=font)
+        elif i == 1:
+            ax.set_xticks([56, 109])
+            ax.set_xticklabels(['', 'X'])
+            ax.set_yticks(np.arange(-5, 2, .5))
+            ax.set_yticklabels([])
+        elif i == 2:
+            ax.set_xticks([0, 55])
+            ax.set_xticklabels(['', r'$\Gamma$'])
+            ax.set_yticks(np.arange(-5, 2, .5))
+            ax.set_yticklabels([])
+        ax.set_ylim(-2.5, 1)
+
+    # colorbars
+    pos = ax.get_position()
+    cax = plt.axes([pos.x0+pos.width+0.01, pos.y0, 0.01, pos.height])
+    cbar = plt.colorbar(c0, cax=cax, ticks=None)
+    cbar.set_ticks([])
+    cbar.set_clim(np.min(LDA), np.max(LDA))
+
     plt.show()
-    if print_fig == True:
-        plt.savefig(
-                '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig17.png', 
-                dpi = 600,bbox_inches="tight")
-        
-def CSROfig18(print_fig=True):
+
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+
+
+def fig18(print_fig=True):
+    """figure 18
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    CSRO30 Experimental band structure
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     """
-    CSRO30 experimental band structure
-    """     
-    colmap = cm.ocean_r
-    os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
-    file = 62421
-    gold = 62440
+
+    figname = 'CSROfig18'
+
+    file = '62421'
+    gold = '62440'
     mat = 'CSRO30'
-    year = 2017
+    year = '2017'
     sample = 'S13'
+
+    # load FS
     D = ARPES.DLS(file, mat, year, sample)
-    D.norm(gold)
+    D.norm(gold=gold)
     D.restrict(bot=0, top=1, left=.12, right=.9)
-    D.ang2kFS(D.ang, Ekin=22-4.5, lat_unit=True, a=5.33, b=5.55, c=11, 
+    D.ang2kFS(D.ang, Ekin=22-4.5, lat_unit=True, a=5.33, b=5.55, c=11,
               V0=0, thdg=-9, tidg=9, phidg=-90)
-    D.FS(e=0.005, ew=.02, norm=True)
-    D.FS_flatten(ang=True)
-    file = 62444
-    gold = 62455
+    D.FS(e=0.005, ew=.02)
+    D.FS_flatten()
+
+    # load G-S cut
+    file = '62444'
+    gold = '62455'
     A1 = ARPES.DLS(file, mat, year, sample)
     A1.norm(gold)
-    A1.ang2k(A1.ang, Ekin=22-4.5, lat_unit=True, a=5.33, b=5.55, c=11, 
-              V0=0, thdg=-8.3, tidg=0, phidg=-90)
-    file = 62449
-    gold = 62455
+    A1.ang2k(A1.ang, Ekin=22-4.5, lat_unit=True, a=5.33, b=5.55, c=11,
+             V0=0, thdg=-8.3, tidg=0, phidg=-90)
+
+    # load X-S cut
+    file = '62449'
+    gold = '62455'
     A2 = ARPES.DLS(file, mat, year, sample)
-    A2.norm(gold)
-    A2.ang2k(A1.ang, Ekin=22-4.5, lat_unit=True, a=5.33, b=5.55, c=11, 
-              V0=0, thdg=-9, tidg=16, phidg=-90)
-    c = (0, 238 / 256, 118 / 256)
-    def CSROfig18a():
-        ax = plt.subplot(4, 4, 1) 
+    A2.norm(gold=gold)
+    A2.ang2k(A1.ang, Ekin=22-4.5, lat_unit=True, a=5.33, b=5.55, c=11,
+             V0=0, thdg=-9, tidg=16, phidg=-90)
+
+    def fig18a():
+        ax = fig.add_subplot(4, 4, 1)
         ax.set_position([.08, .3, .2, .35])
-        plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
-        plt.contourf(A1.en_norm, A1.kys, A1.int_norm, 300, cmap=colmap,
-                     vmin=0 * np.max(A1.int_norm), vmax=.8 * np.max(A1.int_norm))
-        plt.plot([0, 0], [np.min(A1.kys), np.max(A1.kys)], 'k:')
-        plt.plot([-.005, -.005], [np.min(A1.kys), np.max(A1.kys)], linestyle='-.',
-                 color=c, linewidth=.5) 
-        plt.xticks(np.arange(-.08, .0, .02), ('-80', '-60', '-40', '-20', '0'))
-        plt.yticks(np.arange(-5, 5, .5))
-        plt.xlim(xmax=.005, xmin=-.08)
-        plt.ylim(ymax=np.max(D.ky), ymin=np.min(D.ky))  
-        plt.xlabel('$\omega\,(\mathrm{meV})$', fontdict = font)
-        plt.ylabel('$k_x \,(\pi/a)$', fontdict = font)
-        plt.text(-.075, .48, r'(a)', fontsize=12, color='C1')
-        plt.text(-.002, -.03, r'$\Gamma$', fontsize=12, color='r')
-        plt.text(-.002, -1.03, r'Y', fontsize=12, color='r')
-    
-    def CSROfig18c():
-        ax = plt.subplot(4, 4, 15) 
-        ax.set_position([.3 + .35 * (np.max(D.kx) - np.min(D.kx)) / (np.max(D.ky) - np.min(D.ky)), .3, .2, .35])
-        plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
-        plt.contourf(-np.transpose(np.fliplr(A2.en_norm))-.002, np.transpose(A2.kys), 
-                     np.transpose(np.fliplr(A2.int_norm)), 300, cmap=colmap,
-                     vmin=0 * np.max(A2.int_norm), vmax=.8 * np.max(A2.int_norm))
-        plt.plot([0, 0], [np.min(A2.kys), np.max(A2.kys)], 'k:')
-        plt.xticks(np.arange(0, .1, .02), ('0', '-20', '-40', '-60', '-80'))
-        plt.yticks(np.arange(-5, 5, .5), [])
-        plt.xlim(xmin=-.005, xmax=.08)
-        plt.ylim(ymax=np.max(D.ky), ymin=np.min(D.ky))  
-        plt.xlabel('$\omega\,(\mathrm{meV})$', fontdict = font)
-        plt.text(0.0, .48, r'(c)', fontdict = font)
-        plt.text(-.002, -.03, r'X', fontsize=12, color='r')
-        plt.text(-.002, -1.03, r'S', fontsize=12, color='r')
+        ax.tick_params(**kwargs_ticks)
+        ax.contourf(A1.en_norm, A1.kys, A1.int_norm, 300, **kwargs_ex,
+                    vmin=0, vmax=.8 * np.max(A1.int_norm))
+        ax.plot([0, 0], [np.min(A1.kys), np.max(A1.kys)], **kwargs_ef)
+        ax.plot([-.005, -.005], [np.min(A1.kys), np.max(A1.kys)],
+                **kwargs_cut)
+
+        # decorate axes
+        ax.set_xticks(np.arange(-.08, .0, .02))
+        ax.set_xticklabels(['-80', '-60', '-40', '-20', '0'])
+        ax.set_yticks(np.arange(-5, 5, .5))
+        ax.set_xlim(-.08, .005)
+        ax.set_ylim(np.min(D.ky), np.max(D.ky))
+        ax.set_xlabel(r'$\omega\,(\mathrm{meV})$', fontdict=font)
+        ax.set_ylabel(r'$k_x \,(\pi/a)$', fontdict=font)
+
+        # add text
+        ax.text(-.075, .48, r'(a)', fontsize=12, color='C1')
+        ax.text(-.002, -.03, r'$\Gamma$', fontsize=12, color='r')
+        ax.text(-.002, -1.03, r'Y', fontsize=12, color='r')
+
+    def fig18c():
+        ax = fig.add_subplot(4, 4, 15)
+        panel_c_scale = ((np.max(D.kx) - np.min(D.kx)) /
+                         (np.max(D.ky) - np.min(D.ky)))
+        ax.set_position([.3+.35*panel_c_scale, .3, .2, .35])
+        ax.tick_params(**kwargs_ticks)
+
+        # plot data
+        c0 = ax.contourf(-np.transpose(np.fliplr(A2.en_norm))-.002,
+                         np.transpose(A2.kys),
+                         np.transpose(np.fliplr(A2.int_norm)), 300,
+                         **kwargs_ex,
+                         vmin=0, vmax=.8 * np.max(A2.int_norm))
+        ax.plot([0, 0], [np.min(A2.kys), np.max(A2.kys)], **kwargs_ef)
+
+        # decorate axes
+        ax.set_xticks(np.arange(0, .1, .02))
+        ax.set_xticklabels(['0', '-20', '-40', '-60', '-80'])
+        ax.set_yticks(np.arange(-5, 5, .5))
+        ax.set_yticklabels([])
+        ax.set_xlim(-.005, .08)
+        ax.set_ylim(np.min(D.ky), np.max(D.ky))
+        ax.set_xlabel(r'$\omega\,(\mathrm{meV})$', fontdict=font)
+
+        # add text
+        ax.text(0.0, .48, '(c)', fontdict=font)
+        ax.text(-.002, -.03, 'X', fontsize=12, color='r')
+        ax.text(-.002, -1.03, 'S', fontsize=12, color='r')
+
+        # colorbar
         pos = ax.get_position()
-        cax = plt.axes([pos.x0+pos.width+0.01 ,
-                            pos.y0, 0.01, pos.height])
-        cbar = plt.colorbar(cax = cax, ticks = None)
+        cax = plt.axes([pos.x0+pos.width+0.01, pos.y0, 0.01, pos.height])
+        cbar = plt.colorbar(c0, cax=cax, ticks=None)
         cbar.set_ticks([])
         cbar.set_clim(np.min(A2.int_norm), np.max(A2.int_norm))
-    
-    def CSROfig18b():
-        ax = plt.subplot(4, 4, 2) 
-        ax.set_position([.29, .3,
-                         .35 * (np.max(D.kx) - np.min(D.kx)) / (np.max(D.ky) - np.min(D.ky)), .35])
-        plt.tick_params(direction='in', length=1.2, width=.5, colors='k')  
-        plt.contourf(D.kx, D.ky, np.flipud(D.map), 300, 
-                     vmax=.9 * np.max(D.map), vmin=.1 * np.max(D.map), cmap=colmap)
-        plt.xlabel('$k_y \,(\pi/a)$', fontdict = font)
-        plt.text(-1.8, .48, r'(b)', fontdict=font)
-        plt.text(-.05, -.03, r'$\Gamma$', fontsize=12, color='r')
-        plt.text(-.05, -1.03, r'Y', fontsize=12, color='r')
-        plt.text(.95, -.03, r'X', fontsize=12, color='r')
-        plt.text(.95, -1.03, r'S', fontsize=12, color='r')
-        plt.plot(A1.k[0], A1.k[1], linestyle='-.', color=c, linewidth=1)
-        plt.plot(A2.k[0], A2.k[1], linestyle='-.', color=c, linewidth=1)
-        plt.xticks(np.arange(-5, 5, .5))
-        plt.yticks(np.arange(-5, 5, .5), [])
-        plt.xlim(xmax=np.max(D.kx), xmin=np.min(D.kx))
-        plt.ylim(ymax=np.max(D.ky), ymin=np.min(D.ky))     
-        
-    plt.figure(2018, figsize=(8, 8), clear=True)
-    CSROfig18a()
-    CSROfig18b()
-    CSROfig18c()
+
+    def fig18b():
+        ax = fig.add_subplot(4, 4, 2)
+        panel_c_scale = ((np.max(D.kx) - np.min(D.kx)) /
+                         (np.max(D.ky) - np.min(D.ky)))
+        ax.set_position([.29, .3, .35 * panel_c_scale, .35])
+        ax.tick_params(**kwargs_ticks)
+
+        # plot data
+        ax.contourf(D.kx, D.ky, np.flipud(D.map), 300, **kwargs_ex,
+                    vmax=.9 * np.max(D.map),
+                    vmin=.1 * np.max(D.map))
+        ax.plot(A1.k[0], A1.k[1], **kwargs_cut)
+        ax.plot(A2.k[0], A2.k[1], **kwargs_cut)
+
+        # decorate axes
+        ax.set_xlabel(r'$k_y \,(\pi/a)$', fontdict=font)
+        ax.set_xticks(np.arange(-5, 5, .5))
+        ax.set_yticks(np.arange(-5, 5, .5))
+        ax.set_yticklabels([])
+        ax.set_xlim(np.min(D.kx), np.max(D.kx))
+        ax.set_ylim(np.min(D.ky), np.max(D.ky))
+
+        # add text
+        ax.text(-1.8, .48, '(b)', fontdict=font)
+        ax.text(-.05, -.03, r'$\Gamma$', fontsize=12, color='r')
+        ax.text(-.05, -1.03, 'Y', fontsize=12, color='r')
+        ax.text(.95, -.03, 'X', fontsize=12, color='r')
+        ax.text(.95, -1.03, 'S', fontsize=12, color='r')
+
+    # create figure
+    fig = plt.figure(figname, figsize=(8, 8), clear=True)
+    fig18a()
+    fig18b()
+    fig18c()
+
     plt.show()
-    if print_fig == True:
-        plt.savefig(
-                '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig18.png', 
-                dpi = 400,bbox_inches="tight")
-        
-def CSROfig19(print_fig=True):
-    """
+
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+
+
+def fig19(print_fig=True):
+    """figure 19
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     CSRO30 Gamma - S cut epsilon pocket
-    """    
-    os.chdir('/Users/denyssutter/Documents/library/Python/ARPES')
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    """
+
+    figname = 'CSROfig19'
+
     mat = 'CSRO30'
-    year = 2017
+    year = '2017'
     sample = 'S13'
-    file = 62488
-    gold = 62492
-    
+    file = '62488'
+    gold = '62492'
+
+    # load data
     D = ARPES.DLS(file, mat, year, sample)
-    D.norm(gold)
-    D.bkg(norm=True)
-    D.ang2k(D.ang, Ekin=72-4.5, lat_unit=True, a=5.33, b=5.55, c=11, 
-                  V0=0, thdg=-10, tidg=0, phidg=45)
+    D.norm(gold=gold)
+    D.bkg()
+    D.ang2k(D.ang, Ekin=72-4.5, lat_unit=True, a=5.33, b=5.55, c=11,
+            V0=0, thdg=-10, tidg=0, phidg=45)
+
+    # MDC
     mdc_val = .00
     mdcw_val = .005
     mdc = np.zeros(D.ang.shape)
     for i in range(len(D.ang)):
-        val, _mdc = utils.find(D.en_norm[i, :], mdc_val)
-        val, _mdcw = utils.find(D.en_norm[i, :], mdc_val - mdcw_val)
-        mdc[i] = np.sum(D.int_norm[i, _mdcw:_mdc])
-    mdc = mdc / np.max(mdc)
-    plt.figure(20019, figsize=(7, 5), clear=True)
-    ###Fit MDC###
+        val, mdc_idx = utils.find(D.en_norm[i, :], mdc_val)
+        val, mdcw_idx = utils.find(D.en_norm[i, :], mdc_val - mdcw_val)
+        mdc[i] = np.sum(D.int_norm[i, mdcw_idx:mdc_idx])
+    mdc = mdc / np.max(mdc)  # normalize
+
+    plt.figure('MDC', figsize=(7, 5), clear=True)
+
+    # start fitting MDC
     d = 1e5
+
+    # initial parameters
     p_mdc_i = np.array(
                 [-.4, .4, .65, .9, 1.25, 1.4, 1.7,
                  .05, .05, .05, .1, .1, .05, .05,
                  .4, .8, .3, .4, .5, .5, 1,
                  .06, -0.02, .02])
+
+    # boundaries
     bounds_bot = np.concatenate((p_mdc_i[0:-3] - np.inf, p_mdc_i[-3:] - d))
     bounds_top = np.concatenate((p_mdc_i[0:-3] + np.inf, p_mdc_i[-3:] + d))
     p_mdc_bounds = (bounds_bot, bounds_top)
+
+    # MDC fit
     p_mdc, cov_mdc = curve_fit(
             utils.lor_7, D.k[1], mdc, p_mdc_i, bounds=p_mdc_bounds)
-    b_mdc = utils.poly_2(D.k[1], p_mdc[-3], p_mdc[-2], p_mdc[-1])
-    f_mdc = utils.lor_7(D.k[1], *p_mdc) - b_mdc
+    b_mdc = utils.poly_2(D.k[1], *p_mdc[-3:])  # background
+    f_mdc = utils.lor_7(D.k[1], *p_mdc) - b_mdc  # fit
     f_mdc[0] = -.05
     f_mdc[-1] = -.05
     plt.plot(D.k[1], mdc, 'bo')
     plt.plot(D.k[1], f_mdc)
     plt.plot(D.k[1], b_mdc, 'k--')
-    c = (0, 238 / 256, 118 / 256)
-    plt.figure(2019, figsize=(6, 6), clear=True)
-    ax = plt.subplot(1, 2, 1) 
+
+    # create figure
+    fig = plt.figure(figname, figsize=(6, 6), clear=True)
+    ax = fig.add_subplot(121)
     ax.set_position([.2, .3, .5, .5])
-    plt.tick_params(direction='in', length=1.5, width=.5, colors='k')
-    plt.contourf(D.kxs, D.en_norm+.002, D.int_norm, 300, cmap=cm.ocean_r,
-                 vmin=0 * np.max(D.int_norm), vmax=.8 * np.max(D.int_norm))
-    plt.plot([np.min(D.kxs), np.max(D.kxs)], [0, 0], 'k:')
-    plt.plot(D.k[1], (mdc - b_mdc) / 25 + .005, 'o', markersize=1.5, color='C9')
-    plt.fill(D.k[1], (f_mdc) / 25 + .005, alpha=.2, color='C9')
-    plt.plot(D.k[1], (f_mdc) / 25 + .005, color=c, linewidth=.5)
+    ax.tick_params(**kwargs_ticks)
+
+    # plot data
+    c0 = ax.contourf(D.kxs, D.en_norm+.002, D.int_norm, 300, **kwargs_ex,
+                     vmin=0, vmax=.8 * np.max(D.int_norm))
+    ax.plot([np.min(D.kxs), np.max(D.kxs)], [0, 0], **kwargs_ef)
+
+    # plot MDC
+    ax.plot(D.k[1], (mdc - b_mdc) / 25 + .005, 'o',
+            markersize=1.5, color='C9')
+    ax.fill(D.k[1], (f_mdc) / 25 + .005, alpha=.2, color='C9')
+    ax.plot(D.k[1], (f_mdc) / 25 + .005, color='b', linewidth=.5)
+
+    # label colors and positions
     cols = ['m', 'm', 'k', 'r', 'r', 'k', 'm', 'C1']
     alphas = [0.5, 0.5, .5, 1, 1, .5, 0.5, 0.5, 0.5]
     lws = [0.5, 0.5, .5, 1, 1, .5, 0.5, 0.5, 0.5]
     p_mdc[6 + 16] *= 1.5
+
+    # plot Lorentzians
     for i in range(7):
-        plt.plot(D.k[1], (utils.lor(D.k[1], p_mdc[i], p_mdc[i + 7], p_mdc[i + 14], 
-                 p_mdc[-3]*0, p_mdc[-2]*0, p_mdc[-1]*0) - 0*b_mdc) / 25 + .002, 
-                 lw=lws[i], color=cols[i], alpha=alphas[i])
-    plt.yticks(np.arange(-.15, .1, .05), ('-150', '-100', '-50', '0', '50'))
-    plt.xticks(np.arange(0, 3, 1), (r'$\Gamma$', 'S', r'$\Gamma$'))
-    plt.ylim(ymax=.05, ymin=-.15)
-    plt.xlim(xmax=np.max(D.kxs), xmin=np.min(D.kxs))  
-    plt.ylabel('$\omega\,(\mathrm{meV})$', fontdict=font)
-    plt.xlabel('$k_x \,(\pi/a)$', fontdict=font)
-    plt.text(.87, .027, r'$\bar{\epsilon}$', fontsize=12, color='r')
-    plt.text(1.2, .032, r'$\bar{\epsilon}$', fontsize=12, color='r')
+        ax.plot(D.k[1], (utils.lor(D.k[1], p_mdc[i], p_mdc[i + 7],
+                p_mdc[i + 14],
+                p_mdc[-3]*0, p_mdc[-2]*0, p_mdc[-1]*0))/25+.002,
+                lw=lws[i], color=cols[i], alpha=alphas[i])
+
+    # decorate axes
+    ax.set_yticks(np.arange(-.15, .1, .05))
+    ax.set_yticklabels(['-150', '-100', '-50', '0', '50'])
+    ax.set_xticks(np.arange(0, 3, 1))
+    ax.set_xticklabels([r'$\Gamma$', 'S', r'$\Gamma$'])
+    ax.set_ylim(-.15, .05)
+    ax.set_xlim(np.min(D.kxs), np.max(D.kxs))
+    ax.set_ylabel(r'$\omega\,(\mathrm{meV})$', fontdict=font)
+    ax.set_xlabel(r'$k_x \,(\pi/a)$', fontdict=font)
+
+    # add text
+    ax.text(.87, .027, r'$\bar{\epsilon}$', fontsize=12, color='r')
+    ax.text(1.2, .032, r'$\bar{\epsilon}$', fontsize=12, color='r')
+
     plt.show()
-    if print_fig == True:
-        plt.savefig(
-                '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/CSROfig19.png', 
-                dpi = 400,bbox_inches="tight")
+
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")

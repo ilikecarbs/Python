@@ -1082,37 +1082,6 @@ def poly_2(x, *p):
 
     return poly_2
 
-# %%
-
-from scipy.optimize import curve_fit
-import numpy as np
-
-
-p = [0, 0, 1]
-x = np.linspace(0, 2, 100)
-y = utils.poly_2(x, *p)
-
-D = 10
-d = .0001
-
-
-def f_1(x, p0, p1, p2):
-    return p0 + p1 * x + p2 * x ** 2
-
-
-def f_2(x, *p):
-    return p[0] + p[1] * x + p[2] * x ** 2
-
-
-# initial parameters
-p_im_i = np.array([0, 0, 0])
-
-# fit data
-p_im, c_im = curve_fit(utils.poly_2, x, y, p_im_i)
-
-plt.plot(x,y)
-plt.show()
-#%%
 
 def lor(x, *p):
     """returns lor
