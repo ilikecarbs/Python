@@ -10,22 +10,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="ARPES.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/ARPES.py">
-          <provider selected="true" editor-type-id="text-editor" />
-        </entry>
-      </file>
-      <file leaf-file-name="main.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/main.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="225">
-              <caret line="15" column="18" lean-forward="true" selection-start-line="8" selection-end-line="33" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-    </leaf>
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300" />
   </component>
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
@@ -35,9 +20,9 @@
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="3059" />
-    <option name="y" value="218" />
-    <option name="width" value="1400" />
+    <option name="x" value="175" />
+    <option name="y" value="77" />
+    <option name="width" value="1647" />
     <option name="height" value="1000" />
   </component>
   <component name="ProjectView">
@@ -61,7 +46,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PythonContentEntriesConfigurable" />
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -115,9 +100,9 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="3059" y="218" width="1400" height="1000" extended-state="0" />
+    <frame x="175" y="77" width="1647" height="1000" extended-state="0" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.24945612" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.21156211" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" />
       <window_info anchor="bottom" id="Run" order="2" weight="0.32954547" />
@@ -151,6 +136,19 @@
     <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="225">
+          <caret line="15" column="18" lean-forward="true" selection-start-line="8" selection-end-line="33" />
+          <folding>
+            <element signature="e#251#280#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ARPES.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="225">
           <caret line="15" column="18" selection-start-line="15" selection-start-column="18" selection-end-line="15" selection-end-column="18" />
         </state>
       </provider>
@@ -175,9 +173,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ARPES.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/_pydev_bundle/pydev_import_hook.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="188">
@@ -185,12 +180,25 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/main.py">
+    <entry file="file://$PROJECT_DIR$/PhD_chapter_CRO.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="225">
-          <caret line="15" column="18" lean-forward="true" selection-start-line="8" selection-end-line="33" />
+        <state relative-caret-position="639">
+          <caret line="1175" lean-forward="true" selection-start-line="1175" selection-end-line="1175" />
         </state>
       </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="780">
+          <caret line="52" column="35" lean-forward="true" selection-start-line="52" selection-start-column="35" selection-end-line="52" selection-end-column="35" />
+          <folding>
+            <element signature="e#251#280#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ARPES.py">
+      <provider selected="true" editor-type-id="text-editor" />
     </entry>
   </component>
 </project>

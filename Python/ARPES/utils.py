@@ -230,6 +230,35 @@ def paramCSRO30():
     return param
 
 
+def paramCSRO_fit():
+    """returns param
+
+    **Parameter of fit**
+
+    Args
+    ----
+
+    Return
+    ------
+    :param:   parameter dictionary
+
+    - t1:   Nearest neighbour for out-of-plane orbitals large
+    - t2:   Nearest neighbour for out-of-plane orbitals small
+    - t3:   Nearest neighbour for dxy orbitals
+    - t4:   Next nearest neighbour for dxy orbitals
+    - t5:   Next next nearest neighbour for dxy orbitals
+    - t6:   Off diagonal matrix element
+    - mu:   Chemical potential
+    - so:   spin orbit coupling
+    """
+
+    param = dict([('t1', .09808298470627133), ('t2', .010146713085601996),
+                  ('t3', .06684636812826165), ('t4', .0402293580251278),
+                  ('t5', .009420658131743522), ('t6', 0),
+                  ('mu', .07271000000344856), ('so', .04)])
+    return param
+
+
 class TB:
     """
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -821,6 +850,214 @@ def CSRO_eval(x, y, param=paramCSRO20()):
     int_tb = gaussian_filter(int_tb, sigma=3, mode='constant')
 
     return en_tb, int_tb, bndstr
+
+
+def ang2k(angdg, Ekin, lat_unit=False, a=5.33, b=5.33, c=11,
+          V0=0, thdg=0, tidg=0, phidg=0):
+        """returns k, k_V0
+
+        **Converts detector angles into k-space**
+
+        Args
+        ----
+        :angdg:     detector angles in degrees
+        :Ekin:      photon kinetic energy
+        :lat_unit:  lattice units used (Boolean)
+        :a, b, c:   lattice parameters
+        :V0:        inner potential
+        :thdg:      manipulator angle theta in degrees
+        :tidg:      manipulator angle tilt in degrees
+        :phidg:     manipulator angle phi in degrees
+
+        Return
+        ------
+        :k:        k-vector
+        :k_V0:     k-vector (with inner potential)
+        """
+
+        hbar = 6.58212e-16  # eV * s
+        me = 5.68563e-32  # eV * s^2 / Angstrom^2
+        ang = np.pi * angdg / 180
+        th = np.pi * thdg / 180
+        ti = np.pi * tidg / 180
+        phi = np.pi * phidg / 180
+
+        # Rotation matrices
+        Ti = np.array([
+                [1, 0, 0],
+                [0, np.cos(ti), np.sin(ti)],
+                [0, -np.sin(ti), np.cos(ti)]
+                ])
+        Phi = np.array([
+                [np.cos(phi), -np.sin(phi), 0],
+                [np.sin(phi), np.cos(phi), 0],
+                [0, 0, 1]
+                ])
+        Th = np.array([
+                [np.cos(th), 0, -np.sin(th)],
+                [0, 1, 0],
+                [np.sin(th), 0, np.cos(th)]
+                ])
+
+        # Norm of k-vector
+        k_norm = np.sqrt(2 * me * Ekin) / hbar
+        k_norm_V0 = np.sqrt(2 * me * (Ekin + V0)) / hbar
+
+        # Placeholders
+        kv = np.ones((3, 1))
+        kv_V0 = np.ones((3, 1))
+
+        # Build k-vector
+        kv = np.array([k_norm * np.sin(ang), 0 * ang, k_norm * np.cos(ang)])
+        kv_V0 = np.array([k_norm * np.sin(ang), 0 * ang,
+                          np.sqrt(k_norm_V0**2 - (k_norm * np.sin(ang)**2))])
+        k = np.matmul(Phi, np.matmul(Ti, np.matmul(Th, kv)))
+        k_V0 = np.matmul(Phi, np.matmul(Ti, np.matmul(Th, kv_V0)))
+
+        if lat_unit:  # lattice units
+            k *= np.array([a / np.pi, b / np.pi, c / np.pi])
+            k_V0 *= np.array([a / np.pi, b / np.pi, c / np.pi])
+
+        return k, k_V0
+
+        print('\n ~ Angles converted into k-space',
+              '\n', '==========================================')
+
+
+def partial_deriv(x, y, f):
+    """returns F
+
+    **Derivatives of 2-dimensional data**
+
+    Args
+    ----
+    :x:     x-axis
+    :y:     y-axis
+    :f:     data (2-dim)
+
+    Return
+    ------
+    :F:     Dictionary of derivatives
+    """
+
+    # Placeholders
+    fx = np.empty_like(f)
+    fxx = np.empty_like(f)
+    fxy = np.empty_like(f)
+    fy = np.empty_like(f)
+    fyy = np.empty_like(f)
+    fyx = np.empty_like(f)
+
+    # calculate derivatives
+    for i in range(len(y)):
+        fx[0:-1, i] = np.diff(f[:, i]) / np.diff(x)
+        fx[-1, i] = (f[-1, i] - f[-2, i]) / (x[-1] - x[-2])
+    for i in range(len(y)):
+        fxx[0:-1, i] = np.diff(fx[:, i]) / np.diff(x)
+        fxx[-1, i] = (fx[-1, i] - fx[-2, i]) / (x[-1] - x[-2])
+    for i in range(len(x)):
+        fy[i, 0:-1] = np.diff(f[i, :]) / np.diff(y)
+        fy[i, -1] = (f[i, -1] - f[i, -2]) / (y[-1] - y[-2])
+    for i in range(len(x)):
+        fyy[i, 0:-1] = np.diff(fy[i, :]) / np.diff(y)
+        fyy[i, -1] = (fy[i, -1] - fy[i, -2]) / (y[-1] - y[-2])
+    for i in range(len(y)):
+        fyx[0:-1, i] = np.diff(fy[:, i]) / np.diff(x)
+        fyx[-1, i] = (fy[-1, i] - fy[-2, i]) / (x[-1] - x[-2])
+    for i in range(len(x)):
+        fxy[i, 0:-1] = np.diff(fx[i, :]) / np.diff(y)
+        fxy[i, -1] = (fx[i, -1] - fx[i, -2]) / (y[-1] - y[-2])
+    for i in range(len(y)):
+        fyx[:, i] = np.gradient(fy[:, i])
+
+    # build up dictionary
+    F = {'fx': fx, 'fxx': fxx, 'fxy': fxy,
+         'fy': fy, 'fyy': fyy, 'fyx': fyx}
+
+    return F
+
+
+def curvature_equiv(x, y, f, C0):
+    """returns C
+
+    **Curvature with two equivalent axes**
+
+    Args
+    ----
+    :x:     x-axis
+    :y:     y-axis
+    :f:     data (2-dim)
+    :C0:    curvature parameter
+
+    Return
+    ------
+    :C:     Curvature map
+    """
+
+    # derivatives
+    F = partial_deriv(x, y, f)
+
+    # unpack partial derivaatives
+    fx = F['fx']
+    fxx = F['fxx']
+    fxy = F['fxy']
+    fy = F['fy']
+    fyy = F['fyy']
+#    fyx = F['fyx']  # not needed
+
+    # nominator terms
+    nom_1 = (C0 + fx ** 2) * fyy
+    nom_2 = 2 * fx * fy * fxy
+    nom_3 = (C0 + fy ** 2) * fxx
+
+    # denominator term
+    denom = (C0 + fx ** 2 + fyy ** 2) ** (3 / 2)
+
+    C = (nom_1 - nom_2 + nom_3) / denom
+
+    return C
+
+
+def curvature_inequiv(x, y, f, Cx, Cy):
+    """returns C
+
+    **Curvature with two inequivalent axes**
+
+    Args
+    ----
+    :x:     x-axis
+    :y:     y-axis
+    :f:     data (2-dim)
+    :Cx:    curvature parameter for x-direction
+    :Cy:    curvature parameter for y-direction
+
+    Return
+    ------
+    :C:     Curvature map
+    """
+
+    # derivatives
+    F = partial_deriv(x, y, f)
+
+    # unpack partial derivaatives
+    fx = F['fx']
+    fxx = F['fxx']
+    fxy = F['fxy']
+    fy = F['fy']
+    fyy = F['fyy']
+#    fyx = F['fyx']  # not needed
+
+    # nominator terms
+    nom_1 = (1 + Cx * fx ** 2) * Cy * fyy
+    nom_2 = 2 * Cx * Cy * fx * fy * fxy
+    nom_3 = (1 + Cy * fy ** 2) * Cx * fxx
+
+    # denominator term
+    denom = (1 + Cx * fx ** 2 + Cy * fyy ** 2) ** (3 / 2)
+
+    C = (nom_1 - nom_2 + nom_3) / denom
+
+    return C
 
 
 """
