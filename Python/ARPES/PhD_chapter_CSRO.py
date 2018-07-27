@@ -266,7 +266,7 @@ def fig1(print_fig=True):
 
         # Tight Binding Model
         tb = utils.TB(a=np.pi, kbnd=2, kpoints=200)  # Initialize
-        param = utils.paramCSRO20()  # Load parameters
+        param = utils.paramCSRO_fit()  # Load parameters
         tb.CSRO(param)  # Calculate bandstructure
 
         plt.figure(figname)
@@ -2421,12 +2421,12 @@ def fig14(print_fig=True):
 
     # load data
     os.chdir(data_dir)
-    Axz_dos = np.loadtxt('Data_Axz_kpts_5000.dat')
-    Ayz_dos = np.loadtxt('Data_Ayz_kpts_5000.dat')
-    Axy_dos = np.loadtxt('Data_Axy_kpts_5000.dat')
-    Bxz_dos = np.loadtxt('Data_Bxz_kpts_5000.dat')
-    Byz_dos = np.loadtxt('Data_Byz_kpts_5000.dat')
-    Bxy_dos = np.loadtxt('Data_Bxy_kpts_5000.dat')
+    Axz_dos = np.loadtxt('Data_Axz_kpts_5000_fit.dat')
+    Ayz_dos = np.loadtxt('Data_Ayz_kpts_5000_fit.dat')
+    Axy_dos = np.loadtxt('Data_Axy_kpts_5000_fit.dat')
+    Bxz_dos = np.loadtxt('Data_Bxz_kpts_5000_fit.dat')
+    Byz_dos = np.loadtxt('Data_Byz_kpts_5000_fit.dat')
+    Bxy_dos = np.loadtxt('Data_Bxy_kpts_5000_fit.dat')
     os.chdir(home_dir)
 
     # collect data
@@ -3132,7 +3132,7 @@ def fig19(print_fig=True):
 
     # plot data
     c0 = ax.contourf(D.kxs, D.en_norm+.002, D.int_norm, 300, **kwargs_ex,
-                     vmin=0, vmax=.8 * np.max(D.int_norm))
+                     vmin=0, vmax=.7 * np.max(D.int_norm))
     ax.plot([np.min(D.kxs), np.max(D.kxs)], [0, 0], **kwargs_ef)
 
     # plot MDC
@@ -3167,6 +3167,13 @@ def fig19(print_fig=True):
     # add text
     ax.text(.87, .027, r'$\bar{\epsilon}$', fontsize=12, color='r')
     ax.text(1.2, .032, r'$\bar{\epsilon}$', fontsize=12, color='r')
+
+    # colorbars
+    pos = ax.get_position()
+    cax = plt.axes([pos.x0+pos.width+0.01, pos.y0, 0.01, pos.height])
+    cbar = plt.colorbar(c0, cax=cax, ticks=None)
+    cbar.set_ticks([])
+    cbar.set_clim(np.min(D.int_norm), np.max(D.int_norm))
 
     plt.show()
 

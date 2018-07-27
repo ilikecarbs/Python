@@ -23,50 +23,42 @@ import PhD_chapter_CSRO as CSRO
 
 # %%
 """
----------  Ca2RuO4 Figures   ---------
-CROfig1:   DFT plot: figure 3 of Nature Comm.
-CROfig2:   (L): DMFT plot: figure 3 of Nature Comm.
-CROfig3:   DFT plot: orbitally selective Mott scenario
-CROfig4:   DFT plot: uniform gap scnenario
-CROfig5:   Experimental Data of Nature Comm.
-CROfig6:   Constant energy map CaRuO4 of alpha branch
-CROfig7:   Photon energy dependence Ca2RuO4: figure 2 of Nature Comm.
-CROfig8:   Polarization dependence Ca2RuO4: figure 2 of Nature Comm.
-CROfig9:   (L): DMFT plot dxy/dxz,yz: figure 4 of Nature Comm.
-CROfig10:  (L): DFT plot: spaghetti and spectral representation
-CROfig11:  Multiplet analysis Ca2RuO4
-CROfig12:  Constant energy maps oxygen band -5.2eV
-CROfig13:  Constant energy maps alpha band -0.5eV
-CROfig14:  Constant energy maps gamma band -2.4eV
+----------  Ca2RuO4 Figures   ----------
+CRO.fig1:   DFT plot: figure 3 of Nature Comm.
+CRO.fig2:   (L): DMFT plot: figure 3 of Nature Comm.
+CRO.fig3:   DFT plot: orbitally selective Mott scenario
+CRO.fig4:   DFT plot: uniform gap scnenario
+CRO.fig5:   Experimental Data of Nature Comm.
+CRO.fig6:   Constant energy map CaRuO4 of alpha branch
+CRO.fig7:   Photon energy dependence Ca2RuO4: figure 2 of Nature Comm.
+CRO.fig8:   Polarization dependence Ca2RuO4: figure 2 of Nature Comm.
+CRO.fig9:   (L): DMFT plot dxy/dxz,yz: figure 4 of Nature Comm.
+CRO.fig10:  (L): DFT plot: spaghetti and spectral representation
+CRO.fig11:  Multiplet analysis Ca2RuO4
+CRO.fig12:  Constant energy maps oxygen band -5.2eV
+CRO.fig13:  Constant energy maps alpha band -0.5eV
+CRO.fig14:  Constant energy maps gamma band -2.4eV
 
----------  Ca1.8Sr0.2RuO4 Figures ---------
-CSROfig1:  Experimental data: Figure 1 CSRO20 paper
-CSROfig2:  Experimental PSI data: Figure 2 CSCRO20 paper
-CSROfig3:  (L): Polarization and orbital characters. Figure 3 in paper
-CSROfig4:  (L): Temperature dependence. Figure 4 in paper
-CSROfig5:  (L): Analysis Z epsilon band (load=True)
-CSROfig6:  Analysis MDC's beta band (load=True)
-CSROfig7:  Background subtraction
-CSROfig8:  Extraction LDA Fermi velocity
-CSROfig9:  ReSigma vs ImSigma (load=True)
-CSROfig10: Quasiparticle Z
-CSROfig11: Tight binding model CSRO
-CSROfig12: Tight binding model SRO
-CSROfig13: TB along high symmetry directions, orbitally resolved
-CSROfig14: (L): TB and density of states
-CSROfig15: DMFT Fermi surface
-CSROfig16: (L): DMFT bandstructure calculation
-CSROfig17: (L): LDA bandstructure calculation
-CSROfig18: CSRO30 Experimental band structure
-CSROfig19: CSRO30 Gamma - S cut epsilon pocket
-
----------  To-Do ---------
-
-CSRO: TB with cuts
-CSRO: Symmetrization
-CSRO: FS area counting
-CSRO: kz dependence
-CSRO: TB specific heat
+----------  Ca1.8Sr0.2RuO4 Figures ----------
+CSRO.fig1:  Experimental data: Figure 1 CSRO20 paper
+CSRO.fig2:  Experimental PSI data: Figure 2 CSCRO20 paper
+CSRO.fig3:  (L): Polarization and orbital characters. Figure 3 in paper
+CSRO.fig4:  (L): Temperature dependence. Figure 4 in paper
+CSRO.fig5:  (L): Analysis Z epsilon band (load=True)
+CSRO.fig6:  Analysis MDC's beta band (load=True)
+CSRO.fig7:  Background subtraction
+CSRO.fig8:  Extraction LDA Fermi velocity
+CSRO.fig9:  ReSigma vs ImSigma (load=True)
+CSRO.fig10: Quasiparticle Z
+CSRO.fig11: Tight binding model CSRO
+CSRO.fig12: Tight binding model SRO
+CSRO.fig13: TB along high symmetry directions, orbitally resolved
+CSRO.fig14: (L): TB and density of states
+CSRO.fig15: DMFT Fermi surface
+CSRO.fig16: (L): DMFT bandstructure calculation
+CSRO.fig17: (L): LDA bandstructure calculation
+CSRO.fig18: CSRO30 Experimental band structure
+CSRO.fig19: CSRO30 Gamma - S cut epsilon pocket
 
 
 
@@ -86,7 +78,7 @@ CRO.fig1()
 # %%
 
 
-CSRO.fig19()
+CSRO.fig1()
 
 
 # %%

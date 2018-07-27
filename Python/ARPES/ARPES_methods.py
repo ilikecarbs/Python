@@ -13,7 +13,8 @@ Created on Fri Jul 20 22:44:11 2018
 
 .. note::
         To-Do:
-            - Method to cut through Fermi surfaces
+            - Method to cut through Fermi surfacestm
+            - Generalize MDC and EDC to use of units in k-space (not angles)
 """
 
 import os
@@ -37,7 +38,21 @@ font = {'family': 'serif',
         'weight': 'ultralight',
         'size': 12,
         }
+kwargs_ticks = {'bottom': True,
+                'top': True,
+                'left': True,
+                'right': True,
+                'direction': 'in',
+                'length': 1.5,
+                'width': .5,
+                'colors': 'black'}
 kwargs_spec = {'cmap': cm.ocean_r}
+kwargs_cut = {'linestyle': '-.',
+              'color': 'turquoise',
+              'lw': .5}
+kwargs_ef = {'linestyle': ':',
+             'color': 'k',
+             'lw': 1}
 
 
 class Methods:
@@ -561,8 +576,136 @@ class Methods:
         print('\n ~ Constant energy map extracted',
               '\n', '==========================================')
 
+    def mdc(self, mdc_=0, mdcw_=.01):
+        """returns self.mdc and ax
+
+        **Plots and returns Momentum Distribution Curve (MDC)**
+
+        Args
+        ----
+        :mdc_:    energy for MDC
+        :mdcw_:   integration window
+
+        Return
+        ------
+        :self.mdc:  MDC and plot
+        :ax:        handles of MDC
+        """
+
+        # Create figure
+        fig = plt.figure(('MDC_' + str(self.filename)), figsize=(5, 5),
+                         clear=True)
+        ax = fig.add_axes([0.2, 0.2, 0.6, 0.6])
+        ax.tick_params(**kwargs_ticks)
+
+        # placeholder
+        mdc = np.zeros(self.ang.size)
+
+        # build MDC
+        try:
+            for i in range(self.ang.size):
+                mdc_val, mdc_idx = utils.find(self.en_norm[0, :], mdc_)
+                mdc_val, mdcw_idx = utils.find(self.en_norm[0, :],
+                                               mdc_ - mdcw_)
+                mdc[i] = np.sum(self.int_norm[i, mdcw_idx:mdc_idx], axis=0)
+
+                if mdcw_idx == mdc_idx:
+                    mdc[i] = self.int_norm[i, mdcw_idx]
+        except AttributeError:
+            mdc_val, mdc_idx = utils.find(self.en, mdc_)
+            mdc_val, mdcw_idx = utils.find(self.en, mdc_ - mdcw_)
+            mdc = np.sum(self.int[:, mdcw_idx:mdc_idx], axis=1)
+
+            if mdcw_idx == mdc_idx:
+                mdc = self.int[:, mdc_idx]
+
+        # plot MDC
+        ax.plot(self.ang, mdc)
+        ax.set_ylim(0, 1.1 * np.max(mdc))
+        ax.set_xlim(self.ang[0], self.ang[-1])
+
+        # decorate axes
+        ax.set_ylabel('Intensity', fontdict=font)
+        ax.set_xlabel('Detector angles', fontdict=font)
+
+        # indicate MDC in ARPES plot
+        ax_spec = self.plt_spec()
+        ax_spec.plot([self.ang[0], self.ang[-1]], [mdc_, mdc_], **kwargs_cut)
+        ax_spec.plot([self.ang[0], self.ang[-1]], [mdc_-mdcw_, mdc_-mdcw_],
+                     **kwargs_cut)
+
+        self.mdc = mdc
+
+        return ax
+
+    def edc(self, edc_=0, edcw_=1):
+        """returns self.edc and ax
+
+        **Plots and returns Energy Distribution Curve (EDC)**
+
+        Args
+        ----
+        :edc_:    angle for EDC
+        :edcw_:   integration window
+
+        Return
+        ------
+        :self.edc:  EDC and plot
+        :ax:        handles of EDC
+        """
+
+        # Create figure
+        fig = plt.figure(('EDC_' + str(self.filename)), figsize=(5, 5),
+                         clear=True)
+        ax = fig.add_axes([0.2, 0.2, 0.6, 0.6])
+        ax.tick_params(**kwargs_ticks)
+
+        # placeholder
+        edc = np.zeros(self.en.size)
+
+        # build EDC
+        edc_val, edc_idx = utils.find(self.ang, edc_)
+        edc_val, edcw_idx = utils.find(self.ang, edc_ - edcw_)
+        edc = np.sum(self.int[edcw_idx:edc_idx, :], axis=0)
+
+        if edcw_idx == edc_idx:
+            edc = self.int[edc_idx, :]
+
+        # try if en_norm is available
+        try:
+            ax.plot(edc, self.en_norm[edc_idx])
+            ax.plot([0, 2 * np.max(edc)], [0, 0],
+                    **kwargs_ef)
+            ax.set_ylim(np.min(self.en_norm[edc_idx]),
+                        np.max(self.en_norm[edc_idx]))
+
+            # indicate EDC in ARPES plot
+            ax_spec = self.plt_spec()
+            ax_spec.plot([edc_, edc_], [self.en_norm[edc_idx, 0],
+                         self.en_norm[edc_idx, -1]], **kwargs_cut)
+            ax_spec.plot([edcw_, edcw_], [self.en_norm[edcw_idx, 0],
+                         self.en_norm[edcw_idx, -1]], **kwargs_cut)
+
+        except AttributeError:
+            ax.plot(edc, self.en)
+            ax.set_ylim(np.min(self.en), np.max(self.en))
+
+            # indicate EDC in ARPES plot
+            ax_spec = self.plt_spec()
+            ax_spec.plot([edc_, edc_], [self.en[0], self.en[-1]],
+                         **kwargs_cut)
+            ax_spec.plot([edcw_, edcw_], [self.en[0], self.en[-1]],
+                         **kwargs_cut)
+
+        ax.set_xlim(0, 1.1 * np.max(edc))
+        ax.set_xlabel('Intensity', fontdict=font)
+        ax.set_ylabel(r'$\omega$ (eV)', fontdict=font)
+        self.edc = edc
+
+        return ax
+
     def plt_spec(self, v_max=1):
-        """returns ARPES plot
+        """returns ax of ARPES plot
 
         **Plots ARPES spectrum**
 
@@ -572,21 +715,22 @@ class Methods:
 
         Return
         ------
-        - ARPES spectrum plot (normalized if available)
+        :ax:       handles of ARPES spectrum plot (normalized if available)
         """
 
         # Create figure
         fig = plt.figure(('spec_' + str(self.filename)), figsize=(5, 5),
                          clear=True)
         ax = fig.add_axes([0.2, 0.2, 0.6, 0.6])
-        ax.tick_params(direction='in', length=1.5, width=.5, colors='k')
+        ax.tick_params(**kwargs_ticks)
 
         # Plot normalized data if available
         try:
             c0 = ax.contourf(self.angs, self.en_norm, self.int_norm, 150,
                              **kwargs_spec,
                              vmax=v_max*np.max(self.int_norm))
-            ax.plot([np.min(self.angs), np.max(self.angs)], [0, 0], 'k:')
+            ax.plot([np.min(self.angs), np.max(self.angs)], [0, 0],
+                    **kwargs_ef)
 
         except AttributeError:
             c0 = ax.contourf(self.angs, self.ens, self.int, 150, **kwargs_spec,
@@ -600,11 +744,14 @@ class Methods:
         cbar = plt.colorbar(c0, cax=cax, ticks=None)
         cbar.set_ticks([])
         fig.show()
+
+        return ax
+
         print('\n ~ Plot ARPES spectrum',
               '\n', '==========================================')
 
     def plt_FS(self, v_max=1):
-        """returns FS plot
+        """returns ax of FS plot
 
         **Plots Fermi surface**
 
@@ -625,7 +772,7 @@ class Methods:
             fig = plt.figure(('FS' + str(self.file)), figsize=(8, 8),
                              clear=True)
             ax = fig.add_axes([0.2, 0.2, 0.6, 0.6])
-            ax.tick_params(direction='in', length=1.5, width=.5, colors='k')
+            ax.tick_params(**kwargs_ticks)
 
             # Plots in kx and ky if available
             try:
@@ -658,6 +805,8 @@ class Methods:
             cbar.set_ticks([])
             cbar.set_clim(np.min(self.map), np.max(self.map))
             fig.show()
+
+            return ax
 
         except AttributeError:
             print('No FS available. Use .FS method before using .plt_FS!')
@@ -698,7 +847,7 @@ class Methods:
             n += 1
             self.FS(e=en, ew=.1)
             ax = fig.add_subplot(n_maps, n_maps, n)
-            ax.tick_params(direction='in', length=1.5, width=.5, colors='k')
+            ax.tick_params(**kwargs_ticks)
 
             # Try to plot in k-space
             try:
@@ -773,7 +922,7 @@ class Methods:
         # Loops over all spectra
         for i in range(self.hv.size):
             ax = fig.add_subplot(n, n, i+1)
-            ax.tick_params(direction='in', length=1.5, width=.5, colors='k')
+            ax.tick_params(**kwargs_ticks)
             ax.contourf(self.ang, self.en, np.transpose(self.int[i, :, :]),
                         150, **kwargs_spec,
                         vmax=v_max*np.max(self.int[i, :, :]))
