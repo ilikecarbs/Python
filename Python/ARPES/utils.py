@@ -233,7 +233,7 @@ def paramCSRO30():
 def paramCSRO_fit():
     """returns param
 
-    **Parameter of fit**
+    **Parameter from fit**
 
     Args
     ----
@@ -257,10 +257,10 @@ def paramCSRO_fit():
 #                  ('t5', .009420658131743522), ('t6', 0),
 #                  ('mu', .07271000000344856), ('so', .04)])
 
-    param = dict([('t1', .0993493365428131), ('t2', .011454077102499372),
-                  ('t3', .06147730036539622), ('t4', .036601749913777265),
-                  ('t5', .009259864188029222), ('t6', 0),
-                  ('mu', .0702961656368866), ('so', .04)])
+    param = dict([('t1', .09201014030810643), ('t2', .009137525184112176),
+                  ('t3', .06603581170322954), ('t4', .03799015007581358),
+                  ('t5', .009849118844563806), ('t6', 0),
+                  ('mu', .07022563473932757), ('so', .03937185929648241)])
     return param
 
 
@@ -1035,7 +1035,7 @@ def optimize_TB(Kx, Ky, it_max, P):
     tb.CSRO(param=param, e0=0, vert=False, proj=False)
     plt.show()
 
-    return it, J, param
+    return it, J, P
 
 
 def ang2k(angdg, Ekin, lat_unit=False, a=5.33, b=5.33, c=11,

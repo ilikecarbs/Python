@@ -53,7 +53,7 @@ CSRO.fig10: Quasiparticle Z
 CSRO.fig11: Tight binding model CSRO
 CSRO.fig12: Tight binding model SRO
 CSRO.fig13: TB along high symmetry directions, orbitally resolved
-CSRO.fig14: (L): TB and density of states (N=3.73)
+CSRO.fig14: (L): TB and density of states (N=3.7)
 CSRO.fig15: DMFT Fermi surface
 CSRO.fig16: (L): DMFT bandstructure calculation
 CSRO.fig17: (L): LDA bandstructure calculation
@@ -76,42 +76,46 @@ CRO.fig1()
 
 
 # %%
-
-CSRO.fig1()
-#%%
 import os
 import utils
 import numpy as np
+
 save_dir = '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/'
 data_dir = '/Users/denyssutter/Documents/PhD/data/'
 home_dir = '/Users/denyssutter/Documents/library/Python/ARPES'
 
 
-kbnd = 1  # boundaries
-tb = utils.TB(a=np.pi, kbnd=kbnd, kpoints=5000)
-param = utils.paramCSRO_fit()
-tb.CSRO(param=param, e0=0, vert=False, proj=False)
+versions = ('SRO', 'CSRO20', 'CSRO30', 'fit')
 
-# load data
-bndstr = tb.bndstr
-coord = tb.coord
-X = coord['X']
-Y = coord['Y']
-Axz = bndstr['Axz']
-Ayz = bndstr['Ayz']
-Axy = bndstr['Axy']
-Bxz = bndstr['Bxz']
-Byz = bndstr['Byz']
-Bxy = bndstr['Bxy']
+for version in versions:
+    it, J, P = CSRO.fig20(print_fig=True, load=False, version=version)
 
-os.chdir(data_dir)
-Axz_dos = np.savetxt('Data_CSRO20_Axz_kpts_5000_2.dat', Axz)
-Ayz_dos = np.savetxt('Data_CSRO20_Ayz_kpts_5000_2.dat', Ayz)
-Axy_dos = np.savetxt('Data_CSRO20_Axy_kpts_5000_2.dat', Axy)
-Bxz_dos = np.savetxt('Data_CSRO20_Bxz_kpts_5000_2.dat', Bxz)
-Byz_dos = np.savetxt('Data_CSRO20_Byz_kpts_5000_2.dat', Byz)
-Bxy_dos = np.savetxt('Data_CSRO20_Bxy_kpts_5000_2.dat', Bxy)
-os.chdir(home_dir)
+    # build up dictionary
+    param = dict([('t1', P[0]), ('t2', P[1]), ('t3', P[2]), ('t4', P[3]),
+                  ('t5', P[4]), ('t6', P[5]), ('mu', P[6]), ('so', P[7])])
 
+    kbnd = 1  # boundaries
+    tb = utils.TB(a=np.pi, kbnd=kbnd, kpoints=5000)
+    tb.CSRO(param=param, e0=0, vert=False, proj=False)
 
+    # load data
+    bndstr = tb.bndstr
+    coord = tb.coord
+    X = coord['X']
+    Y = coord['Y']
+    Axz = bndstr['Axz']
+    Ayz = bndstr['Ayz']
+    Axy = bndstr['Axy']
+    Bxz = bndstr['Bxz']
+    Byz = bndstr['Byz']
+    Bxy = bndstr['Bxy']
+
+    os.chdir(data_dir)
+    Axz_dos = np.savetxt('Data_CSRO20_Axz_kpts_5000_' + str(version) + '.dat', Axz)
+    Ayz_dos = np.savetxt('Data_CSRO20_Ayz_kpts_5000_' + str(version) + '.dat', Ayz)
+    Axy_dos = np.savetxt('Data_CSRO20_Axy_kpts_5000_' + str(version) + '.dat', Axy)
+    Bxz_dos = np.savetxt('Data_CSRO20_Bxz_kpts_5000_' + str(version) + '.dat', Bxz)
+    Byz_dos = np.savetxt('Data_CSRO20_Byz_kpts_5000_' + str(version) + '.dat', Byz)
+    Bxy_dos = np.savetxt('Data_CSRO20_Bxy_kpts_5000_' + str(version) + '.dat', Bxy)
+    os.chdir(home_dir)
 # %%

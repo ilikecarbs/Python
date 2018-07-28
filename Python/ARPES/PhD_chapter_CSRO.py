@@ -2816,7 +2816,7 @@ def fig16(print_fig=True):
             ax.set_xticks([0, 55])
             ax.set_xticklabels(['', r'$\Gamma$'])
             ax.set_yticklabels([])
-        ax.set_yticks(np.arange(-1, 1, .2))
+        ax.set_yticks(np.arange(-5, 5, .5))
         ax.set_ylim(-.65, .25)
 
     # colorbars
@@ -3182,7 +3182,7 @@ def fig19(print_fig=True):
         plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
 
 
-def fig20(print_fig=True, load=True):
+def fig20(print_fig=True, load=True, version='CSRO30'):
     """figure 20
 
     %%%%%%%%%%%%%%%%%
@@ -3238,7 +3238,15 @@ def fig20(print_fig=True, load=True):
     it_max = 3000
 
     # initial parameters
-    p = utils.paramCSRO30()
+    if version == 'SRO':
+        p = utils.paramSRO()
+    elif version == 'CSRO30':
+        p = utils.paramCSRO30()
+    elif version == 'CSRO20':
+        p = utils.paramCSRO20()
+    elif version == 'fit':
+        p = utils.paramCSRO_fit()
+
     t1 = p['t1']
     t2 = p['t2']
     t3 = p['t3']
@@ -3255,11 +3263,12 @@ def fig20(print_fig=True, load=True):
         os.chdir(data_dir)
         it = np.loadtxt('Data_CSROfig20_it.dat')
         J = np.loadtxt('Data_CSROfig20_J.dat')
+        P = np.loadtxt('Data_CSROfig20_P.dat')
         os.chdir(home_dir)
     else:
         # optimize parameters
-        it, J, param = utils.optimize_TB(Kx, Ky, it_max, P)
-        print(param)
+        it, J, P = utils.optimize_TB(Kx, Ky, it_max, P)
+        print(P)
 
     fig = plt.figure(figname, clear=True, figsize=(7, 7))
     ax = fig.add_axes([.25, .25, .5, .5])
@@ -3274,16 +3283,20 @@ def fig20(print_fig=True, load=True):
     ax.set_xlabel('iterations', fontdict=font)
     ax.set_ylabel(r'Cost $J$', fontdict=font)
 
-    return it, J, param
+    plt.show()
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+        plt.savefig(save_dir + figname + str(version) + '.png',
+                    dpi=600, bbox_inches="tight")
 
     # save data
     os.chdir(data_dir)
-    np.savetxt('Data_CSROfig20_it.dat', np.ravel(it))
-    np.savetxt('Data_CSROfig20_J.dat', np.ravel(J))
+    np.savetxt('Data_CSROfig20_it_' + str(version) + '.dat', np.ravel(it))
+    np.savetxt('Data_CSROfig20_J_' + str(version) + '.dat', np.ravel(J))
+    np.savetxt('Data_CSROfig20_P_' + str(version) + '.dat', np.ravel(P))
     print('\n ~ Data saved (iterations, cost)',
           '\n', '==========================================')
     os.chdir(home_dir)
+
+    return it, J, P
