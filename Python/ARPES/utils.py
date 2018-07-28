@@ -252,10 +252,15 @@ def paramCSRO_fit():
     - so:   spin orbit coupling
     """
 
-    param = dict([('t1', .09808298470627133), ('t2', .010146713085601996),
-                  ('t3', .06684636812826165), ('t4', .0402293580251278),
-                  ('t5', .009420658131743522), ('t6', 0),
-                  ('mu', .07271000000344856), ('so', .04)])
+#    param = dict([('t1', .09808298470627133), ('t2', .010146713085601996),
+#                  ('t3', .06684636812826165), ('t4', .0402293580251278),
+#                  ('t5', .009420658131743522), ('t6', 0),
+#                  ('mu', .07271000000344856), ('so', .04)])
+
+    param = dict([('t1', .0993493365428131), ('t2', .011454077102499372),
+                  ('t3', .06147730036539622), ('t4', .036601749913777265),
+                  ('t5', .009259864188029222), ('t6', 0),
+                  ('mu', .0702961656368866), ('so', .04)])
     return param
 
 
@@ -704,7 +709,7 @@ class TB:
         self.bndstr = dict([('bndstr', bndstr)])
 
 
-def CSRO_eval(x, y, param=paramCSRO20()):
+def CSRO_eval(x, y, param=paramCSRO_fit()):
     """returns en_tb, int_tb, bndstr
 
     **Calculates band structure along kx, ky, orbitally projected**
@@ -850,6 +855,187 @@ def CSRO_eval(x, y, param=paramCSRO20()):
     int_tb = gaussian_filter(int_tb, sigma=3, mode='constant')
 
     return en_tb, int_tb, bndstr
+
+
+def cost(Kx, Ky, t1, t2, t3, t4, t5, t6, mu, so):
+    """returns J
+
+    **Calculates the cost of the model**
+
+    Args
+    ----
+    :Kx:    kx of all sheets
+    :Ky:    ky of all sheets
+    - t1:   Nearest neighbour for out-of-plane orbitals large
+    - t2:   Nearest neighbour for out-of-plane orbitals small
+    - t3:   Nearest neighbour for dxy orbitals
+    - t4:   Next nearest neighbour for dxy orbitals
+    - t5:   Next next nearest neighbour for dxy orbitals
+    - t6:   Off diagonal matrix element
+    - mu:   Chemical potential
+    - so:   spin orbit coupling
+
+    Return
+    ------
+    :J:     cost
+    """
+
+    J = 0.
+
+    a = np.pi
+
+    for k in range(len(Kx)):
+        # extract k's
+        kx = Kx[k]
+        ky = Ky[k]
+
+        # hopping terms
+        fx = -2 * np.cos((kx + ky) / 2 * a)
+        fy = -2 * np.cos((kx - ky) / 2 * a)
+        f4 = -2 * t4 * (np.cos(kx * a) + np.cos(ky * a))
+        f5 = -2 * t5 * (np.cos((kx + ky) * a) + np.cos((kx - ky) * a))
+        f6 = -2 * t6 * (np.cos(kx * a) - np.cos(ky * a))
+
+        # TB submatrix
+        def A(i):
+            A = np.array([[-mu, complex(0, so) + f6[i], -so],
+                          [-complex(0, so) + f6[i], -mu, complex(0, so)],
+                          [-so, -complex(0, so), -mu + f4[i] + f5[i]]])
+            return A
+
+        # TB submatrix
+        def B(i):
+            B = np.array([[t2 * fx[i] + t1 * fy[i], 0, 0],
+                          [0, t1 * fx[i] + t2 * fy[i], 0],
+                          [0, 0, t3 * (fx[i] + fy[i])]])
+            return B
+
+        # Tight binding Hamiltonian
+        def H(i):
+            C1 = np.concatenate((A(i), B(i)), 1)
+            C2 = np.concatenate((B(i), A(i)), 1)
+            H = np.concatenate((C1, C2), 0)
+            return H
+
+        # calculate eigenvalues and cost J
+        for j in range(len(kx)):
+            val = la.eigvalsh(H(j))
+            val = np.real(val)
+            j = min(abs(val))
+
+            # regularization
+            if any(x == k for x in [0, 1, 7]):
+                j *= 1  # 1: no reg.
+            J += j
+
+    return J
+
+
+def cost_deriv(Kx, Ky, t1, t2, t3, t4, t5, t6, mu, so):
+    """returns dJ
+
+    **Calculates the cost gradients of the model**
+
+    Args
+    ----
+    :Kx:    kx of all sheets
+    :Ky:    ky of all sheets
+    - t1:   Nearest neighbour for out-of-plane orbitals large
+    - t2:   Nearest neighbour for out-of-plane orbitals small
+    - t3:   Nearest neighbour for dxy orbitals
+    - t4:   Next nearest neighbour for dxy orbitals
+    - t5:   Next next nearest neighbour for dxy orbitals
+    - t6:   Off diagonal matrix element
+    - mu:   Chemical potential
+    - so:   spin orbit coupling
+
+    Return
+    ------
+    :dJ:    gradient of cost w.r.t. parameters
+    """
+
+    eps = 1e-8
+
+    dJ_t1 = (cost(Kx, Ky, t1 + eps, t2, t3, t4, t5, t6, mu, so) -
+             cost(Kx, Ky, t1 - eps, t2, t3, t4, t5, t6, mu, so)) / (2 * eps)
+
+    dJ_t2 = (cost(Kx, Ky, t1, t2 + eps, t3, t4, t5, t6, mu, so) -
+             cost(Kx, Ky, t1, t2 - eps, t3, t4, t5, t6, mu, so)) / (2 * eps)
+
+    dJ_t3 = (cost(Kx, Ky, t1, t2, t3 + eps, t4, t5, t6, mu, so) -
+             cost(Kx, Ky, t1, t2, t3 - eps, t4, t5, t6, mu, so)) / (2 * eps)
+
+    dJ_t4 = (cost(Kx, Ky, t1, t2, t3, t4 + eps, t5, t6, mu, so) -
+             cost(Kx, Ky, t1, t2, t3, t4 - eps, t5, t6, mu, so)) / (2 * eps)
+
+    dJ_t5 = (cost(Kx, Ky, t1, t2, t3, t4, t5 + eps, t6, mu, so) -
+             cost(Kx, Ky, t1, t2, t3, t4, t5 - eps, t6, mu, so)) / (2 * eps)
+
+    dJ_t6 = (cost(Kx, Ky, t1, t2, t3, t4, t5, t6 + eps, mu, so) -
+             cost(Kx, Ky, t1, t2, t3, t4, t5, t6 - eps, mu, so)) / (2 * eps)
+
+    dJ_mu = (cost(Kx, Ky, t1, t2, t3, t4, t5, t6, mu + eps, so) -
+             cost(Kx, Ky, t1, t2, t3, t4, t5, t6, mu - eps, so)) / (2 * eps)
+
+    dJ_so = (cost(Kx, Ky, t1, t2, t3, t4, t5, t6, mu, so + eps) -
+             cost(Kx, Ky, t1, t2, t3, t4, t5, t6, mu, so + eps)) / (2 * eps)
+
+    dJ = np.array([dJ_t1, dJ_t2, dJ_t3, dJ_t4, dJ_t5, dJ_t6, dJ_mu, dJ_so])
+
+    return dJ
+
+
+def optimize_TB(Kx, Ky, it_max, P):
+    """returns it, J, param
+
+    **Optimizes the model and returns the cost and parameters**
+
+    Args
+    ----
+    :Kx:        kx of all sheets
+    :Ky:        ky of all sheets
+    :it_max:    maximum of iterations
+    :P:         TB initial parameters
+
+    Return
+    ------
+    :it:        iteratons
+    :J:         cost
+    :param:     optimized parameters
+    """
+
+    J = np.zeros(it_max)  # cost
+    it = np.arange(0, it_max, 1)  # iterations
+
+    m = np.zeros(P.size)  # initial parameter
+    v = np.zeros(P.size)  # initial parameter
+    beta1 = .9  # paramter Adam optimizer
+    beta2 = .999  # paramter Adam optimizer
+    epsilon = 1e-8  # preventing from dividing by zero
+    alpha = 1e-4  # external learning rate
+
+    # start optimizing
+    for i in range(it_max):
+        J[i] = cost(Kx, Ky, *P)  # cost
+        dJ = cost_deriv(Kx, Ky, *P)  # gradient
+
+        lr = alpha * np.sqrt((1 - beta2) / (1 - beta1))  # learning rate
+
+        # update parameters
+        m = beta1 * m + (1 - beta1) * dJ
+        v = beta2 * v + ((1 - beta2) * dJ) * dJ
+        P = P - lr * m / (np.sqrt(v) + epsilon)
+
+    # build up dictionary
+    param = dict([('t1', P[0]), ('t2', P[1]), ('t3', P[2]), ('t4', P[3]),
+                  ('t5', P[4]), ('t6', P[5]), ('mu', P[6]), ('so', P[7])])
+
+    # visualize result
+    tb = utils.TB(a=np.pi, kbnd=1, kpoints=100)  # Initialize
+    tb.CSRO(param=param, e0=0, vert=False, proj=False)
+    plt.show()
+
+    return it, J, param
 
 
 def ang2k(angdg, Ekin, lat_unit=False, a=5.33, b=5.33, c=11,

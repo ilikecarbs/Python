@@ -2197,7 +2197,7 @@ def fig11(print_fig=True):
     # Initialize tight binding model
     kbnd = 2  # boundaries
     tb = utils.TB(a=np.pi, kbnd=kbnd, kpoints=300)
-    param = utils.paramCSRO20()
+    param = utils.paramCSRO_fit()
     tb.CSRO(param=param, e0=0, vert=True, proj=True)
 
     # load data
@@ -2354,7 +2354,7 @@ def fig13(print_fig=True):
     y = (y_GS, y_SX, y_XG)
 
     # create figure
-    fig = plt.figure('TB_eval', figsize=(6, 6), clear=True)
+    fig = plt.figure(figname, figsize=(6, 6), clear=True)
     for i in range(len(x)):
 
         # calculate bandstructure
@@ -2421,12 +2421,12 @@ def fig14(print_fig=True):
 
     # load data
     os.chdir(data_dir)
-    Axz_dos = np.loadtxt('Data_Axz_kpts_5000_fit.dat')
-    Ayz_dos = np.loadtxt('Data_Ayz_kpts_5000_fit.dat')
-    Axy_dos = np.loadtxt('Data_Axy_kpts_5000_fit.dat')
-    Bxz_dos = np.loadtxt('Data_Bxz_kpts_5000_fit.dat')
-    Byz_dos = np.loadtxt('Data_Byz_kpts_5000_fit.dat')
-    Bxy_dos = np.loadtxt('Data_Bxy_kpts_5000_fit.dat')
+    Axz_dos = np.loadtxt('Data_CSRO20_Axz_kpts_5000.dat')
+    Ayz_dos = np.loadtxt('Data_CSRO20_Ayz_kpts_5000.dat')
+    Axy_dos = np.loadtxt('Data_CSRO20_Axy_kpts_5000.dat')
+    Bxz_dos = np.loadtxt('Data_CSRO20_Bxz_kpts_5000.dat')
+    Byz_dos = np.loadtxt('Data_CSRO20_Byz_kpts_5000.dat')
+    Bxy_dos = np.loadtxt('Data_CSRO20_Bxy_kpts_5000.dat')
     os.chdir(home_dir)
 
     # collect data
@@ -3180,3 +3180,110 @@ def fig19(print_fig=True):
     # Save figure
     if print_fig:
         plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+
+
+def fig20(print_fig=True, load=True):
+    """figure 20
+
+    %%%%%%%%%%%%%%%%%
+    Fit Fermi surface
+    %%%%%%%%%%%%%%%%%
+    """
+
+    figname = 'CSROfig20'
+
+    # load data
+    os.chdir(data_dir)
+    alpha_1 = np.loadtxt('coords_CSRO20_alpha_1.dat')
+    alpha_2 = np.loadtxt('coords_CSRO20_alpha_2.dat')
+    beta_1 = np.loadtxt('coords_CSRO20_beta_1.dat')
+    beta_2 = np.loadtxt('coords_CSRO20_beta_2.dat')
+    beta_3 = np.loadtxt('coords_CSRO20_beta_3.dat')
+    gamma_1 = np.loadtxt('coords_CSRO20_gamma_1.dat')
+    gamma_2 = np.loadtxt('coords_CSRO20_gamma_2.dat')
+    gamma_3 = np.loadtxt('coords_CSRO20_gamma_3.dat')
+    delta = np.loadtxt('coords_CSRO20_delta.dat')
+    os.chdir(home_dir)
+
+    coords = (alpha_1, alpha_2, beta_1, beta_2, beta_3, gamma_1, gamma_2,
+              gamma_3, delta)
+
+    # placeholders
+    Kx = ()
+    Ky = ()
+
+    # transform into k-space
+    for coord in coords:
+        x = np.zeros(len(coord))
+        y = np.zeros(len(coord))
+
+        for i in range(len(coord)):
+            x[i] = coord[i][0]
+            y[i] = coord[i][1]
+
+        kx = np.ones(x.size)
+        ky = np.ones(y.size)
+
+        for i in range(y.size):
+            k, k_V0 = utils.ang2k(x[i], Ekin=22-4.5, lat_unit=True,
+                                  a=5.33, b=5.55, c=11, V0=0, thdg=8.7,
+                                  tidg=y[i]-4, phidg=88)
+            kx[i] = k[0]
+            ky[i] = k[1]
+
+        Kx = Kx + (kx,)
+        Ky = Ky + (ky,)
+
+    # maximum iterations
+    it_max = 3000
+
+    # initial parameters
+    p = utils.paramCSRO30()
+    t1 = p['t1']
+    t2 = p['t2']
+    t3 = p['t3']
+    t4 = p['t4']
+    t5 = p['t5']
+    t6 = p['t6']
+    mu = p['mu']
+    so = p['so']
+
+    P = np.array([t1, t2, t3, t4, t5, t6, mu, so])
+
+    # load data
+    if load:
+        os.chdir(data_dir)
+        it = np.loadtxt('Data_CSROfig20_it.dat')
+        J = np.loadtxt('Data_CSROfig20_J.dat')
+        os.chdir(home_dir)
+    else:
+        # optimize parameters
+        it, J, param = utils.optimize_TB(Kx, Ky, it_max, P)
+        print(param)
+
+    fig = plt.figure(figname, clear=True, figsize=(7, 7))
+    ax = fig.add_axes([.25, .25, .5, .5])
+
+    # plot cost
+    ax.plot(it, J, 'C8o', ms=2)
+    ax.plot([0, it_max], [np.min(J), np.min(J)], **kwargs_ef)
+    ax.tick_params(**kwargs_ticks)
+
+    # decorate axes
+    ax.set_xlim(0, it_max)
+    ax.set_xlabel('iterations', fontdict=font)
+    ax.set_ylabel(r'Cost $J$', fontdict=font)
+
+    return it, J, param
+
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+
+    # save data
+    os.chdir(data_dir)
+    np.savetxt('Data_CSROfig20_it.dat', np.ravel(it))
+    np.savetxt('Data_CSROfig20_J.dat', np.ravel(J))
+    print('\n ~ Data saved (iterations, cost)',
+          '\n', '==========================================')
+    os.chdir(home_dir)

@@ -53,13 +53,13 @@ CSRO.fig10: Quasiparticle Z
 CSRO.fig11: Tight binding model CSRO
 CSRO.fig12: Tight binding model SRO
 CSRO.fig13: TB along high symmetry directions, orbitally resolved
-CSRO.fig14: (L): TB and density of states
+CSRO.fig14: (L): TB and density of states (N=3.73)
 CSRO.fig15: DMFT Fermi surface
 CSRO.fig16: (L): DMFT bandstructure calculation
 CSRO.fig17: (L): LDA bandstructure calculation
 CSRO.fig18: CSRO30 Experimental band structure
 CSRO.fig19: CSRO30 Gamma - S cut epsilon pocket
-
+CSRO.fig20: (L): Fit Fermi surface (it_max=3000 -> 70min, load=True)
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -77,8 +77,41 @@ CRO.fig1()
 
 # %%
 
-
 CSRO.fig1()
+#%%
+import os
+import utils
+import numpy as np
+save_dir = '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/'
+data_dir = '/Users/denyssutter/Documents/PhD/data/'
+home_dir = '/Users/denyssutter/Documents/library/Python/ARPES'
+
+
+kbnd = 1  # boundaries
+tb = utils.TB(a=np.pi, kbnd=kbnd, kpoints=5000)
+param = utils.paramCSRO_fit()
+tb.CSRO(param=param, e0=0, vert=False, proj=False)
+
+# load data
+bndstr = tb.bndstr
+coord = tb.coord
+X = coord['X']
+Y = coord['Y']
+Axz = bndstr['Axz']
+Ayz = bndstr['Ayz']
+Axy = bndstr['Axy']
+Bxz = bndstr['Bxz']
+Byz = bndstr['Byz']
+Bxy = bndstr['Bxy']
+
+os.chdir(data_dir)
+Axz_dos = np.savetxt('Data_CSRO20_Axz_kpts_5000_2.dat', Axz)
+Ayz_dos = np.savetxt('Data_CSRO20_Ayz_kpts_5000_2.dat', Ayz)
+Axy_dos = np.savetxt('Data_CSRO20_Axy_kpts_5000_2.dat', Axy)
+Bxz_dos = np.savetxt('Data_CSRO20_Bxz_kpts_5000_2.dat', Bxz)
+Byz_dos = np.savetxt('Data_CSRO20_Byz_kpts_5000_2.dat', Byz)
+Bxy_dos = np.savetxt('Data_CSRO20_Bxy_kpts_5000_2.dat', Bxy)
+os.chdir(home_dir)
 
 
 # %%
