@@ -176,6 +176,34 @@ def paramSRO():
     return param
 
 
+def paramSRO_opt():
+    """returns param
+
+    **Parameter set after optimization starting from paramSRO**
+
+    Args
+    ----
+
+    Return
+    ------
+    :param:   parameter dictionary
+
+    - t1:   Nearest neighbour for out-of-plane orbitals large
+    - t2:   Nearest neighbour for out-of-plane orbitals small
+    - t3:   Nearest neighbour for dxy orbitals
+    - t4:   Next nearest neighbour for dxy orbitals
+    - t5:   Next next nearest neighbour for dxy orbitals
+    - t6:   Off diagonal matrix element
+    - mu:   Chemical potential
+    - so:   spin orbit coupling
+    """
+
+    param = dict([('t1', .12898992), ('t2', .00046937), ('t3', .07199656),
+                  ('t4', .04071875), ('t5', .00886822), ('t6', 0),
+                  ('mu', .09534531), ('so', .032)])
+    return param
+
+
 def paramCSRO20():
     """returns param
 
@@ -200,6 +228,34 @@ def paramCSRO20():
 
     param = dict([('t1', .115), ('t2', .002), ('t3', .071), ('t4', .039),
                   ('t5', .012), ('t6', 0), ('mu', .084), ('so', .037)])
+    return param
+
+
+def paramCSRO20_opt():
+    """returns param
+
+    **parameter set after optimization starting from param CSRO20**
+
+    Args
+    ----
+
+    Return
+    ------
+    :param:   parameter dictionary
+
+    - t1:   Nearest neighbour for out-of-plane orbitals large
+    - t2:   Nearest neighbour for out-of-plane orbitals small
+    - t3:   Nearest neighbour for dxy orbitals
+    - t4:   Next nearest neighbour for dxy orbitals
+    - t5:   Next next nearest neighbour for dxy orbitals
+    - t6:   Off diagonal matrix element
+    - mu:   Chemical potential
+    - so:   spin orbit coupling
+    """
+
+    param = dict([('t1', .09335122), ('t2', .00889674), ('t3', .05688837),
+                  ('t4', .03258921), ('t5', .00754219), ('t6', 0),
+                  ('mu', .06510367), ('so', .03607035)])
     return param
 
 
@@ -252,15 +308,10 @@ def paramCSRO_fit():
     - so:   spin orbit coupling
     """
 
-#    param = dict([('t1', .09808298470627133), ('t2', .010146713085601996),
-#                  ('t3', .06684636812826165), ('t4', .0402293580251278),
-#                  ('t5', .009420658131743522), ('t6', 0),
-#                  ('mu', .07271000000344856), ('so', .04)])
+    param = dict([('t1', .09201014), ('t2', .00913753), ('t3', .06603581),
+                  ('t4', .03799015), ('t5', .00984912), ('t6', 0),
+                  ('mu', .07022563), ('so', .03937185)])
 
-    param = dict([('t1', .09201014030810643), ('t2', .009137525184112176),
-                  ('t3', .06603581170322954), ('t4', .03799015007581358),
-                  ('t5', .009849118844563806), ('t6', 0),
-                  ('mu', .07022563473932757), ('so', .03937185929648241)])
     return param
 
 
@@ -443,7 +494,7 @@ class TB:
                             wz = wyz + wxz
 
                             # Weight for divergence colorscale
-                            w = wz - wxy
+                            w = np.tanh(10 * (wz - wxy))
 
                             # Build Fermi surface
                             kx_val, kx_idx = utils.find(kx, V_x[j][i])
@@ -654,7 +705,7 @@ class TB:
                             wxy = wAxy + wBxy
 
                             # Weight for divergence colorscale
-                            w = wz - wxy
+                            w = np.tanh(10*(wz - wxy))
 
                             # Build Fermi surface
                             kx_val, kx_idx = utils.find(kx, V_x[j][i])
@@ -710,6 +761,86 @@ class TB:
 
 
 def CSRO_eval(x, y, param=paramCSRO_fit()):
+    """returns bndstr
+
+    **Calculates band structure along kx, ky**
+
+    Args
+    ----
+    :param:     TB parameters
+    :x:         kx array
+    :y:         ky array
+
+    Return
+    ------
+    :bndstr:    eigenenergies band structure
+    """
+
+    a = np.pi
+
+    # Load TB parameters
+    t1 = param['t1']  # Nearest neighbour for out-of-plane orbitals large
+    t2 = param['t2']  # Nearest neighbour for out-of-plane orbitals small
+    t3 = param['t3']  # Nearest neighbour for dxy orbitals
+    t4 = param['t4']  # Next nearest neighbour for dxy orbitals
+    t5 = param['t5']  # Next next nearest neighbour for dxy orbitals
+    t6 = param['t6']  # Off diagonal matrix element
+    mu = param['mu']  # Chemical potential
+    so = param['so']  # spin orbit coupling
+
+    # Hopping terms
+    fx = -2 * np.cos((x + y) / 2 * a)
+    fy = -2 * np.cos((x - y) / 2 * a)
+    f4 = -2 * t4 * (np.cos(x * a) + np.cos(y * a))
+    f5 = -2 * t5 * (np.cos((x + y) * a) + np.cos((x - y) * a))
+    f6 = -2 * t6 * (np.cos(x * a) - np.cos(y * a))
+
+    # Placeholders energy eigenvalues
+    Ayz = np.ones(len(x))
+    Axz = np.ones(len(x))
+    Axy = np.ones(len(x))
+    Byz = np.ones(len(x))
+    Bxz = np.ones(len(x))
+    Bxy = np.ones(len(x))
+
+    # TB submatrix
+    def A(i):
+        A = np.array([[-mu, complex(0, so) + f6[i], -so],
+                      [-complex(0, so) + f6[i], -mu, complex(0, so)],
+                      [-so, -complex(0, so), -mu + f4[i] + f5[i]]])
+        return A
+
+    # TB submatrix
+    def B(i):
+        B = np.array([[t2 * fx[i] + t1 * fy[i], 0, 0],
+                      [0, t1 * fx[i] + t2 * fy[i], 0],
+                      [0, 0, t3 * (fx[i] + fy[i])]])
+        return B
+
+    # Tight binding Hamiltonian
+    def H(i):
+        C1 = np.concatenate((A(i), B(i)), 1)
+        C2 = np.concatenate((B(i), A(i)), 1)
+        H = np.concatenate((C1, C2), 0)
+        return H
+
+    # Diagonalization of symmetric Hermitian matrix on k-mesh
+    for i in range(len(x)):
+        val, vec = la.eigh(H(i))
+        val = np.real(val)
+        Ayz[i] = val[0]
+        Axz[i] = val[1]
+        Axy[i] = val[2]
+        Byz[i] = val[3]
+        Bxz[i] = val[4]
+        Bxy[i] = val[5]
+
+    bndstr = (Ayz, Axz, Axy, Byz, Bxz, Bxy)
+
+    return bndstr
+
+
+def CSRO_eval_proj(x, y, param=paramCSRO_fit()):
     """returns en_tb, int_tb, bndstr
 
     **Calculates band structure along kx, ky, orbitally projected**
@@ -842,7 +973,7 @@ def CSRO_eval(x, y, param=paramCSRO_fit()):
             wxy = wAxy[i, n] + wBxy[i, n]
 
             # Weight for divergence colorscale
-            w = wz - wxy
+            w = np.tanh(10 * (wz - wxy))
 
             # Build band structure
             en_tb_val, en_tb_idx = utils.find(en_tb, en_val)

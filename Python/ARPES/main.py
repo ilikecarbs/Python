@@ -60,6 +60,7 @@ CSRO.fig17: (L): LDA bandstructure calculation
 CSRO.fig18: CSRO30 Experimental band structure
 CSRO.fig19: CSRO30 Gamma - S cut epsilon pocket
 CSRO.fig20: (L): Fit Fermi surface (it_max=3000 -> 70min, load=True)
+CSRO.fig21: Fermi surface extraction points
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -76,46 +77,8 @@ CRO.fig1()
 
 
 # %%
-import os
-import utils
-import numpy as np
 
-save_dir = '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/'
-data_dir = '/Users/denyssutter/Documents/PhD/data/'
-home_dir = '/Users/denyssutter/Documents/library/Python/ARPES'
+CSRO.fig21()
 
 
-versions = ('SRO', 'CSRO20', 'CSRO30', 'fit')
-
-for version in versions:
-    it, J, P = CSRO.fig20(print_fig=True, load=False, version=version)
-
-    # build up dictionary
-    param = dict([('t1', P[0]), ('t2', P[1]), ('t3', P[2]), ('t4', P[3]),
-                  ('t5', P[4]), ('t6', P[5]), ('mu', P[6]), ('so', P[7])])
-
-    kbnd = 1  # boundaries
-    tb = utils.TB(a=np.pi, kbnd=kbnd, kpoints=5000)
-    tb.CSRO(param=param, e0=0, vert=False, proj=False)
-
-    # load data
-    bndstr = tb.bndstr
-    coord = tb.coord
-    X = coord['X']
-    Y = coord['Y']
-    Axz = bndstr['Axz']
-    Ayz = bndstr['Ayz']
-    Axy = bndstr['Axy']
-    Bxz = bndstr['Bxz']
-    Byz = bndstr['Byz']
-    Bxy = bndstr['Bxy']
-
-    os.chdir(data_dir)
-    Axz_dos = np.savetxt('Data_CSRO20_Axz_kpts_5000_' + str(version) + '.dat', Axz)
-    Ayz_dos = np.savetxt('Data_CSRO20_Ayz_kpts_5000_' + str(version) + '.dat', Ayz)
-    Axy_dos = np.savetxt('Data_CSRO20_Axy_kpts_5000_' + str(version) + '.dat', Axy)
-    Bxz_dos = np.savetxt('Data_CSRO20_Bxz_kpts_5000_' + str(version) + '.dat', Bxz)
-    Byz_dos = np.savetxt('Data_CSRO20_Byz_kpts_5000_' + str(version) + '.dat', Byz)
-    Bxy_dos = np.savetxt('Data_CSRO20_Bxy_kpts_5000_' + str(version) + '.dat', Bxy)
-    os.chdir(home_dir)
 # %%

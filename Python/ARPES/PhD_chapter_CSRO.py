@@ -105,6 +105,10 @@ def fig1(print_fig=True):
     A2.ang2k(A1.ang, Ekin=22-4.5, lat_unit=True, a=5.33, b=5.55, c=11,
              V0=0, thdg=6.3, tidg=-16, phidg=90)
 
+    # TB
+    TB_A1 = utils.CSRO_eval(A1.k[0], A1.k[1])
+    TB_A2 = utils.CSRO_eval(A2.k[0], A2.k[1])
+
     # MDC
     mdc_ = -.004
     mdcw_ = .002
@@ -157,6 +161,9 @@ def fig1(print_fig=True):
         ax.plot([0, 0], [np.min(A1.kys), np.max(A1.kys)], **kwargs_ef)
         ax.plot([-.005, -.005], [np.min(A1.kys), np.max(A1.kys)],
                 **kwargs_cut)
+        for i in range(6):
+            TB_A1[i][TB_A1[i] > 0] = 10
+            ax.plot(TB_A1[i], A1.k[1], 'wo', ms=.5, alpha=.2)
 
         # decorate axes
         ax.set_xlim(-.06, .03)
@@ -206,6 +213,10 @@ def fig1(print_fig=True):
                          vmin=.1*np.max(A2.int_norm),
                          vmax=.8*np.max(A2.int_norm))
         ax.plot([0, 0], [np.min(A2.kys), np.max(A2.kys)], **kwargs_ef)
+        for i in range(6):
+            TB_A2[i][TB_A2[i] > 0] = 10
+            ax.plot(-TB_A2[i], A2.k[1],
+                    'wo', ms=.5, alpha=.2)
 
         # decorate axes
         ax.set_xticks(np.arange(0, .08, .02))
@@ -231,14 +242,14 @@ def fig1(print_fig=True):
     def fig1b():
         ax = fig.add_subplot(132)
         ax.set_position([.37, .3, .28, .35])
-        ax.tick_params(direction='in', length=1.5, width=.5, colors='k')
+        ax.tick_params(**kwargs_ticks)
 
         # plot data
         ax.contourf(D.kx, D.ky, np.flipud(D.map), 300, **kwargs_ex,
                     vmax=.9 * np.max(D.map), vmin=.3 * np.max(D.map))
 
         # decorate axes
-        ax.set_xlabel(r'$k_y \,(\pi/a)$', fontdict=font)
+        ax.set_xlabel(r'$k_y \,(\pi/b)$', fontdict=font)
 
         # add text
         ax.text(-.65, .56, r'(b)', fontsize=12, color='w')
@@ -624,6 +635,9 @@ def fig3(print_fig=True):
     LV.ang2k(LV.ang, Ekin=40, lat_unit=True, a=5.5, b=5.5, c=11,
              V0=0, thdg=2.7, tidg=0, phidg=42)
 
+    # TB
+    TB_D = utils.CSRO_eval(D.k[0], D.k[1])
+
     # Collect data
     data = (D.int_norm, LH.int_norm, LV.int_norm)
     en = (D.en_norm - .008, LH.en_norm, LV.en_norm)
@@ -648,7 +662,7 @@ def fig3(print_fig=True):
             mdc = np.zeros(k[j].shape)
             for i in range(len(k[j])):
                 mdc_val, mdc_idx = utils.find(en[j][i, :], mdc_)
-                mdc_val, mdcw_idx = utils.find(en[j][i, :], mdc_ - mdcw_)
+                mdcw_val, mdcw_idx = utils.find(en[j][i, :], mdc_ - mdcw_)
                 mdc[i] = np.sum(data[j][i, mdcw_idx:mdc_idx])
 
             # background
@@ -664,8 +678,11 @@ def fig3(print_fig=True):
 
             # plot data
             if j == 0:
-                ax.contourf(ks[j], en[j], data[j], 300, **kwargs_ex,
+                ax.contourf(ks[j]*1.1, en[j], data[j], 300, **kwargs_ex,
                             vmin=.05*np.max(data[j]), vmax=.35*np.max(data[j]))
+                for bands in range(6):
+                    TB_D[bands][TB_D[bands] > 0] = 10
+                    ax.plot(ks[j][:, 0], TB_D[bands], 'wo', ms=.5, alpha=.2)
                 mdc = mdc / np.max(mdc)
 
                 # decorate axes
@@ -2192,7 +2209,7 @@ def fig11(print_fig=True):
     %%%%%%%%%%%%%%%%%%%%%%%%
     """
 
-    figname = 'CSROfig10'
+    figname = 'CSROfig11'
 
     # Initialize tight binding model
     kbnd = 2  # boundaries
@@ -2226,8 +2243,8 @@ def fig11(print_fig=True):
     for band in bands:
         ax.contour(X, Y, band, colors='black', ls='-',
                    levels=0, alpha=.2)
-    c0 = ax.contourf(tb.kx, tb.ky, tb.FS, 300, cmap='PuOr',
-                     vmin=-v_bnd, vmax=v_bnd)
+    c0 = ax.contourf(tb.kx[250:750], tb.ky[250:750], tb.FS[250:750, 250:750],
+                     300, cmap='PuOr', vmin=-v_bnd, vmax=v_bnd)
     ax.plot([-1, 1], [1, 1], 'k-', lw=2)
     ax.plot([-1, 1], [-1, -1], 'k-', lw=2)
     ax.plot([1, 1], [-1, 1], 'k-', lw=2)
@@ -2298,8 +2315,8 @@ def fig12(print_fig=True):
     for band in bands:
         ax.contour(X, Y, band, colors='black', ls='-',
                    levels=0, alpha=.2)
-    c0 = ax.contourf(tb.kx, tb.ky, tb.FS, 300, cmap='PuOr',
-                     vmin=-v_bnd, vmax=v_bnd)
+    c0 = ax.contourf(tb.kx[250:750], tb.ky[250:750], tb.FS[250:750, 250:750],
+                     300, cmap='PuOr', vmin=-v_bnd, vmax=v_bnd)
     plt.plot([-1, 1], [1, 1], 'k-', lw=2)
     plt.plot([-1, 1], [-1, -1], 'k-', lw=2)
     plt.plot([1, 1], [-1, 1], 'k-', lw=2)
@@ -2358,9 +2375,9 @@ def fig13(print_fig=True):
     for i in range(len(x)):
 
         # calculate bandstructure
-        en, spec, bndstr = utils.CSRO_eval(x[i], y[i])
+        en, spec, bndstr = utils.CSRO_eval_proj(x[i], y[i])
         k = np.sqrt(x[i] ** 2 + y[i] ** 2)  # norm
-        v_bnd = .1  # set point of coloscale
+        v_bnd = .2  # set point of coloscale
         if i != 0:
             ax = fig.add_subplot(2, 3, i+1)
             ax.set_position([.1+i*.15+.15*(np.sqrt(2)-1),
@@ -2762,6 +2779,9 @@ def fig16(print_fig=True):
     xz_data = np.loadtxt('DMFT_CSRO_xz.dat')
     yz_data = np.loadtxt('DMFT_CSRO_yz.dat')
     xy_data = np.loadtxt('DMFT_CSRO_xy.dat')
+#    xz_data = np.loadtxt('DMFT_CSRO_MAX_xz.dat')  # max entropy
+#    yz_data = np.loadtxt('DMFT_CSRO_MAX_yz.dat')  # max entropy
+#    xy_data = np.loadtxt('DMFT_CSRO_MAX_xy.dat')  # max entropy
     os.chdir(home_dir)
 
     # full k-path
@@ -2780,7 +2800,7 @@ def fig16(print_fig=True):
     k_XS = k[56:110]
     SG = DMFT[:, 110:187]
     k_SG = k[110:187]
-    v_bnd = np.max(DMFT)
+    v_bnd = .6 * np.max(DMFT)
     k = (np.flipud(k_SG), np.flipud(k_XS), np.flipud(k_GX))
 
     # collect data
@@ -2816,15 +2836,15 @@ def fig16(print_fig=True):
             ax.set_xticks([0, 55])
             ax.set_xticklabels(['', r'$\Gamma$'])
             ax.set_yticklabels([])
-        ax.set_yticks(np.arange(-5, 5, .5))
-        ax.set_ylim(-.65, .25)
+        ax.set_yticks(np.arange(-5, 5, .1))
+        ax.set_ylim(-.85, .3)
 
     # colorbars
     pos = ax.get_position()
     cax = plt.axes([pos.x0+pos.width+0.01, pos.y0, 0.01, pos.height])
     cbar = plt.colorbar(c0, cax=cax, ticks=None)
     cbar.set_ticks([])
-    cbar.set_clim(np.min(DMFT), np.max(DMFT))
+    cbar.set_clim(-v_bnd, v_bnd)
 
     plt.show()
 
@@ -2866,7 +2886,7 @@ def fig17(print_fig=True):
     k_XS = k[56:110]
     SG = LDA[:, 110:187]
     k_SG = k[110:187]
-    v_bnd = np.max(LDA)
+    v_bnd = .7 * np.max(LDA)
     k = (np.flipud(k_SG), np.flipud(k_XS), np.flipud(k_GX))
 
     # collect data
@@ -2911,7 +2931,7 @@ def fig17(print_fig=True):
     cax = plt.axes([pos.x0+pos.width+0.01, pos.y0, 0.01, pos.height])
     cbar = plt.colorbar(c0, cax=cax, ticks=None)
     cbar.set_ticks([])
-    cbar.set_clim(np.min(LDA), np.max(LDA))
+    cbar.set_clim(-v_bnd, v_bnd)
 
     plt.show()
 
@@ -3182,7 +3202,7 @@ def fig19(print_fig=True):
         plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
 
 
-def fig20(print_fig=True, load=True, version='CSRO30'):
+def fig20(print_fig=True, load=True):
     """figure 20
 
     %%%%%%%%%%%%%%%%%
@@ -3238,14 +3258,7 @@ def fig20(print_fig=True, load=True, version='CSRO30'):
     it_max = 3000
 
     # initial parameters
-    if version == 'SRO':
-        p = utils.paramSRO()
-    elif version == 'CSRO30':
-        p = utils.paramCSRO30()
-    elif version == 'CSRO20':
-        p = utils.paramCSRO20()
-    elif version == 'fit':
-        p = utils.paramCSRO_fit()
+    p = utils.paramCSRO_fit()
 
     t1 = p['t1']
     t2 = p['t2']
@@ -3287,16 +3300,110 @@ def fig20(print_fig=True, load=True, version='CSRO30'):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + str(version) + '.png',
+        plt.savefig(save_dir + figname + '.png',
                     dpi=600, bbox_inches="tight")
 
     # save data
     os.chdir(data_dir)
-    np.savetxt('Data_CSROfig20_it_' + str(version) + '.dat', np.ravel(it))
-    np.savetxt('Data_CSROfig20_J_' + str(version) + '.dat', np.ravel(J))
-    np.savetxt('Data_CSROfig20_P_' + str(version) + '.dat', np.ravel(P))
+    np.savetxt('Data_CSROfig20_it.dat', np.ravel(it))
+    np.savetxt('Data_CSROfig20_J.dat', np.ravel(J))
+    np.savetxt('Data_CSROfig20_P.dat', np.ravel(P))
     print('\n ~ Data saved (iterations, cost)',
           '\n', '==========================================')
     os.chdir(home_dir)
 
     return it, J, P
+
+
+def fig21(print_fig=True):
+    """figure 21
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    Fermi surface extraction points
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    """
+
+    figname = 'CSROfig21'
+
+    # load data
+    os.chdir(data_dir)
+    alpha_1 = np.loadtxt('coords_CSRO20_alpha_1.dat')
+    alpha_2 = np.loadtxt('coords_CSRO20_alpha_2.dat')
+    beta_1 = np.loadtxt('coords_CSRO20_beta_1.dat')
+    beta_2 = np.loadtxt('coords_CSRO20_beta_2.dat')
+    beta_3 = np.loadtxt('coords_CSRO20_beta_3.dat')
+    gamma_1 = np.loadtxt('coords_CSRO20_gamma_1.dat')
+    gamma_2 = np.loadtxt('coords_CSRO20_gamma_2.dat')
+    gamma_3 = np.loadtxt('coords_CSRO20_gamma_3.dat')
+    delta = np.loadtxt('coords_CSRO20_delta.dat')
+    os.chdir(home_dir)
+
+    coords = (alpha_1, alpha_2, beta_1, beta_2, beta_3, gamma_1, gamma_2,
+              gamma_3, delta)
+
+    mat = 'CSRO20'
+    year = '2017'
+    sample = 'S6'
+
+    # load data for FS map
+    file = '62087'
+    gold = '62081'
+    D = ARPES.DLS(file, mat, year, sample)
+    D.norm(gold=gold)
+    D.restrict(bot=0, top=1, left=.12, right=.9)
+    D.FS(e=0.02, ew=.03)
+    D.FS_flatten()
+    D.ang2kFS(D.ang, Ekin=22-4.5, lat_unit=True, a=5.33, b=5.55, c=11,
+              V0=0, thdg=8.7, tidg=4, phidg=88)
+
+    # create figure
+    fig = plt.figure('read_out', figsize=(8, 8), clear=True)
+    ax = fig.add_subplot(132)
+    ax.set_position([.37, .3, .28, .35])
+    ax.tick_params(**kwargs_ticks)
+
+    # plot data
+    ax.contourf(D.kx, D.ky, np.flipud(D.map), 300, **kwargs_ex,
+                vmax=.9 * np.max(D.map), vmin=.3 * np.max(D.map))
+
+    # decorate axes
+    ax.set_xlabel(r'$k_y \,(\pi/b)$', fontdict=font)
+    ax.set_ylabel(r'$k_x \,(\pi/a)$', fontdict=font)
+    ax.set_xticks([-.5, 0, .5, 1])
+    ax.set_yticks([-1.5, -1, -.5, 0, .5])
+    ax.set_xlim(np.min(D.kx), np.max(D.kx))
+    ax.set_ylim(np.min(D.ky), np.max(D.ky))
+
+    # add text
+    ax.text(-.05, -.03, r'$\Gamma$', fontsize=12, color='r')
+    ax.text(-.05, -1.03, r'Y', fontsize=12, color='r')
+    ax.text(.95, -.03, r'X', fontsize=12, color='r')
+    ax.text(.95, -1.03, r'S', fontsize=12, color='r')
+
+    # transform extraction points into k-space
+    for coord in coords:
+        x = np.zeros(len(coord))
+        y = np.zeros(len(coord))
+
+        for i in range(len(coord)):
+            x[i] = coord[i][0]
+            y[i] = coord[i][1]
+
+        kx = np.ones(x.size)
+        ky = np.ones(y.size)
+
+        for i in range(y.size):
+            k, k_V0 = utils.ang2k(x[i], Ekin=22-4.5, lat_unit=True,
+                                  a=5.33, b=5.55, c=11, V0=0, thdg=8.7,
+                                  tidg=y[i]-4, phidg=88)
+            kx[i] = k[0]
+            ky[i] = k[1]
+
+            plt.plot(kx, ky, 'ro', ms=.2, alpha=.3)
+
+    plt.show()
+
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname + '.png',
+                    dpi=600, bbox_inches="tight")
