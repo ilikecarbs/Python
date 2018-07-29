@@ -628,12 +628,12 @@ def fig3(print_fig=True):
     LH.restrict(bot=.55, top=.85, left=0, right=1)
     LV.restrict(bot=.55, top=.85, left=0, right=1)
 
-    D.ang2k(D.ang, Ekin=40, lat_unit=True, a=5.5, b=5.5, c=11,
-            V0=0, thdg=2.7, tidg=0, phidg=42)
-    LH.ang2k(LH.ang, Ekin=40, lat_unit=True, a=5.5, b=5.5, c=11,
-             V0=0, thdg=2.7, tidg=0, phidg=42)
-    LV.ang2k(LV.ang, Ekin=40, lat_unit=True, a=5.5, b=5.5, c=11,
-             V0=0, thdg=2.7, tidg=0, phidg=42)
+    D.ang2k(D.ang, Ekin=50, lat_unit=True, a=5.5, b=5.5, c=11,
+            V0=0, thdg=2.4, tidg=0, phidg=42)
+    LH.ang2k(LH.ang, Ekin=50, lat_unit=True, a=5.5, b=5.5, c=11,
+             V0=0, thdg=2.4, tidg=0, phidg=42)
+    LV.ang2k(LV.ang, Ekin=50, lat_unit=True, a=5.5, b=5.5, c=11,
+             V0=0, thdg=2.4, tidg=0, phidg=42)
 
     # TB
     TB_D = utils.CSRO_eval(D.k[0], D.k[1])
@@ -678,7 +678,7 @@ def fig3(print_fig=True):
 
             # plot data
             if j == 0:
-                ax.contourf(ks[j]*1.1, en[j], data[j], 300, **kwargs_ex,
+                ax.contourf(ks[j], en[j], data[j], 300, **kwargs_ex,
                             vmin=.05*np.max(data[j]), vmax=.35*np.max(data[j]))
                 for bands in range(6):
                     TB_D[bands][TB_D[bands] > 0] = 10
@@ -717,7 +717,7 @@ def fig3(print_fig=True):
             ax.fill(k[j], mdc / 30 + .001, alpha=.2, color='C9')
 
             # add text
-            ax.text(-1.2, .038, lbls[j], fontsize=12)
+            ax.text(-1.35, .038, lbls[j], fontsize=12)
 
         # colorbar
         pos = ax.get_position()
@@ -759,7 +759,7 @@ def fig3(print_fig=True):
             ax.plot([np.min(spec_k), np.max(spec_k)], [0, 0], **kwargs_ef)
             ax.set_xlim(np.min(ks[0]), np.max(ks[0]))
             ax.set_ylim(-.1, .05)
-            ax.text(-1.2, .038, lbls[j], fontsize=12)
+            ax.text(-1.35, .038, lbls[j], fontsize=12)
 
         # colorbar
         pos = ax.get_position()
@@ -2243,6 +2243,8 @@ def fig11(print_fig=True):
     for band in bands:
         ax.contour(X, Y, band, colors='black', ls='-',
                    levels=0, alpha=.2)
+    ax.contourf(tb.kx, tb.ky, tb.FS, 300, cmap='PuOr',
+                vmin=-v_bnd, vmax=v_bnd, alpha=.05)
     c0 = ax.contourf(tb.kx[250:750], tb.ky[250:750], tb.FS[250:750, 250:750],
                      300, cmap='PuOr', vmin=-v_bnd, vmax=v_bnd)
     ax.plot([-1, 1], [1, 1], 'k-', lw=2)
@@ -2315,6 +2317,8 @@ def fig12(print_fig=True):
     for band in bands:
         ax.contour(X, Y, band, colors='black', ls='-',
                    levels=0, alpha=.2)
+    ax.contourf(tb.kx, tb.ky, tb.FS, 300, cmap='PuOr',
+                vmin=-v_bnd, vmax=v_bnd, alpha=.05)
     c0 = ax.contourf(tb.kx[250:750], tb.ky[250:750], tb.FS[250:750, 250:750],
                      300, cmap='PuOr', vmin=-v_bnd, vmax=v_bnd)
     plt.plot([-1, 1], [1, 1], 'k-', lw=2)
