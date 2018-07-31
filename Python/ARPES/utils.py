@@ -11,7 +11,7 @@ Created on Mon Jun 11 09:57:01 2018
 
 **Useful helper functions**
 
-.. note::
+.. note::n
         To-Do:
             -
 """
@@ -24,6 +24,9 @@ from scipy import special
 from scipy.ndimage.filters import gaussian_filter
 from matplotlib.colors import LinearSegmentedColormap
 import matplotlib.cm as cm
+import time
+from joblib import Parallel, delayed
+import multiprocessing
 
 
 def find(array, val):
@@ -311,7 +314,6 @@ def paramCSRO_fit():
     param = dict([('t1', .09201014), ('t2', .00913753), ('t3', .06603581),
                   ('t4', .03799015), ('t5', .00984912), ('t6', 0),
                   ('mu', .07022563), ('so', .03937185)])
-
     return param
 
 
@@ -438,6 +440,10 @@ class TB:
         # Get vertices and label them, useful for plotting separate
         # parts of the Fermi surface pockets with different colors
         if vert:
+            plt.figure('SRO_vertices', clear=True)
+            # Placeholders vertices
+            VX = ()
+            VY = ()
             if proj:  # Also project eigenbasis onto orbitals from here
 
                 # Placeholders for projected FS
@@ -448,7 +454,7 @@ class TB:
             for n_bnd in range(len(bndstr)):
                 p = C[n_bnd].collections[0].get_paths()
                 p = np.asarray(p)
-                plt.figure('SRO_vertices', clear=True)
+                plt.figure('SRO_vertices')
 
                 # Placeholders vertices
                 V_x = ()
@@ -461,10 +467,14 @@ class TB:
                     v_y = v[:, 1]
                     V_x = V_x + (v_x,)
                     V_y = V_y + (v_y,)
+                    plt.subplot(1, 3, n_bnd+1)
                     plt.plot(v_x, v_y)
                     plt.axis('equal')
                     plt.text(v_x[0], v_y[0], str(i))
                     plt.show()
+
+                VX = VX + (V_x,)
+                VY = VY + (V_y,)
 
                 if proj:  # Do projection for all vertices
                     for j in range(len(V_x)):  # Loop over all vertices
@@ -506,8 +516,215 @@ class TB:
             self.kx = kx
             self.ky = ky
             self.FS = FS
-
+            self.VX = VX
+            self.VY = VY
         self.bndstr = dict([('yz', yz), ('xz', xz), ('xy', xy)])
+
+    def SRO_folded(self, param=paramSRO(), e0=0, vert=False, proj=False):
+        """returns self.bndstr, self.kx, self.ky, self.FS
+
+        **Calculates folded band structure from 3 band tight binding model**
+
+        Args
+        ----
+        :param:     TB parameters
+        :e0:        chemical potential shift
+        :vert:      'True': plots useful numeration of vertices for figures
+        :proj:      'True': projects onto orbitals
+
+        Return
+        ------
+        :self.bndstr:   band structure dictionary: yz, xz and xy
+        :self.kx:       kx coordinates (vert=True and proj=True)
+        :self.ky:       ky coordinates (vert=True and proj=True)
+        :self.FS:       FS coordinates (vert=True and proj=True)
+        """
+
+        # Load TB parameters
+        t1 = param['t1']  # Nearest neighbour for out-of-plane orbitals large
+        t2 = param['t2']  # Nearest neighbour for out-of-plane orbitals small
+        t3 = param['t3']  # Nearest neighbour for dxy orbitals
+        t4 = param['t4']  # Next nearest neighbour for dxy orbitals
+        t5 = param['t5']  # Next next nearest neighbour for dxy orbitals
+        t6 = param['t6']  # Off diagonal matrix element
+        mu = param['mu']  # Chemical potential
+        so = param['so']  # spin orbit coupling
+
+        coord = self.coord
+        a = self.a
+        x = coord['x']
+        y = coord['y']
+        X = coord['X']
+        Y = coord['Y']
+
+        q = np.pi / a
+
+        # Hopping terms
+        fyz = (- 2 * t2 * np.cos((X + Y) * a) -
+               2 * t1 * np.cos((X - Y) * a))
+        fxz = (- 2 * t1 * np.cos((X + Y) * a) -
+               2 * t2 * np.cos((X - Y) * a))
+        fxy = (- 2 * t3 * (np.cos((X + Y) * a) + np.cos((X - Y) * a)) -
+               4 * t4 * (np.cos((X + Y) * a) * np.cos((X - Y) * a)) -
+               2 * t5 * (np.cos(2 * (X + Y) * a) +
+                         np.cos(2 * (X - Y) * a)))
+        off = - 4 * t6 * (np.sin((X + Y) * a) * np.sin((X - Y) * a))
+
+        fyz_q = (- 2 * t2 * np.cos((X + Y - q) * a) -
+                 2 * t1 * np.cos((X - Y - q) * a))
+        fxz_q = (- 2 * t1 * np.cos((X + Y - q) * a) -
+                 2 * t2 * np.cos((X - Y - q) * a))
+        fxy_q = (- 2 * t3 * (np.cos((X + Y - q) * a) +
+                             np.cos((X - Y - q) * a)) -
+                 4 * t4 * (np.cos((X + Y - q) * a) *
+                           np.cos((X - Y - q) * a)) -
+                 2 * t5 * (np.cos(2 * (X + Y - q) * a) +
+                           np.cos(2 * (X - Y - q) * a)))
+        off_q = - 4 * t6 * (np.sin((X + Y - q) * a) * np.sin((X - Y - q) * a))
+
+        # Placeholders energy eigenvalues
+        yz = np.ones((len(x), len(y)))
+        xz = np.ones((len(x), len(y)))
+        xy = np.ones((len(x), len(y)))
+        yz_q = np.ones((len(x), len(y)))
+        xz_q = np.ones((len(x), len(y)))
+        xy_q = np.ones((len(x), len(y)))
+
+        # Tight binding Hamiltonian
+        def H(i, j):
+            H = np.array([[fyz[i, j] - mu, off[i, j] + complex(0, so), -so],
+                          [off[i, j] - complex(0, so), fxz[i, j] - mu,
+                           complex(0, so)],
+                          [-so, -complex(0, so), fxy[i, j] - mu]])
+            return H
+
+        def H_q(i, j):
+            H = np.array([[fyz_q[i, j] - mu, off_q[i, j] + complex(0, so),
+                           -so],
+                          [off_q[i, j] - complex(0, so), fxz_q[i, j] - mu,
+                           complex(0, so)],
+                          [-so, -complex(0, so), fxy_q[i, j] - mu]])
+            return H
+
+        # Diagonalization of symmetric Hermitian matrix on k-mesh
+        for i in range(len(x)):
+            for j in range(len(y)):
+                val = la.eigvalsh(H(i, j))
+                val_q = la.eigvalsh(H_q(i, j))
+                val = np.real(val)
+                val_q = np.real(val_q)
+                yz[i, j] = val[0]
+                xz[i, j] = val[1]
+                xy[i, j] = val[2]
+                yz_q[i, j] = val_q[0]
+                xz_q[i, j] = val_q[1]
+                xy_q[i, j] = val_q[2]
+
+        # Band structure
+        bndstr = (yz, xz, xy, yz_q, xz_q, xy_q)
+
+        # Placeholder for contours
+        C = ()
+
+        # Projectors
+        Pyz = np.array([[1, 0, 0], [0, 0, 0], [0, 0, 0]])
+        Pxz = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]])
+        Pxy = np.array([[0, 0, 0], [0, 0, 0], [0, 0, 1]])
+
+        # Generate contours C
+        n = 0
+        plt.figure('SRO_TB', clear=True)
+        for bnd in bndstr:
+            n += 1
+            plt.subplot(2, 3, n)
+            c = plt.contour(X, Y, bnd, colors='black',
+                            linestyles='-', levels=e0)
+            C = C + (c,)
+            plt.axis('equal')
+
+        # Get vertices and label them, useful for plotting separate
+        # parts of the Fermi surface pockets with different colors
+        if vert:
+            plt.figure('SRO_vertices', clear=True)
+            # Placeholders vertices
+            VX = ()
+            VY = ()
+            if proj:  # Also project eigenbasis onto orbitals from here
+
+                # Placeholders for projected FS
+                kx = np.linspace(np.min(x), np.max(x), 1000)
+                ky = np.linspace(np.min(y), np.max(y), 1000)
+                FS = np.zeros((len(kx), len(ky)))
+
+            for n_bnd in range(len(bndstr)):
+                p = C[n_bnd].collections[0].get_paths()
+                p = np.asarray(p)
+                plt.figure('SRO_vertices')
+
+                # Placeholders vertices
+                V_x = ()
+                V_y = ()
+
+                # Get vertices and plot them
+                for i in range(len(p)):
+                    v = p[i].vertices
+                    v_x = v[:, 0]
+                    v_y = v[:, 1]
+                    V_x = V_x + (v_x,)
+                    V_y = V_y + (v_y,)
+                    plt.subplot(1, 3, n_bnd+1)
+                    plt.plot(v_x, v_y)
+                    plt.axis('equal')
+                    plt.text(v_x[0], v_y[0], str(i))
+                    plt.show()
+
+                VX = VX + (V_x,)
+                VY = VY + (V_y,)
+
+                if proj:  # Do projection for all vertices
+                    for j in range(len(V_x)):  # Loop over all vertices
+                        for i in range(len(V_x[j])):  # Loop over k-points
+
+                            #  Find values and diagonalize
+                            x_val, x_idx = utils.find(x, V_x[j][i])
+                            y_val, y_idx = utils.find(y, V_y[j][i])
+                            val_proj, vec_proj = la.eigh(H(x_idx, y_idx))
+                            val_proj = np.real(val_proj)
+                            if any(x == n for x in [0, 1, 3]):
+                                # orbital weights
+                                wyz = np.real(
+                                        np.sum(
+                                                np.conj(vec_proj[:, n_bnd]) *
+                                                (Pyz * vec_proj[:, n_bnd])))
+                                wxz = np.real(
+                                        np.sum(
+                                                np.conj(vec_proj[:, n_bnd]) *
+                                                (Pxz * vec_proj[:, n_bnd])))
+                                wxy = np.real(
+                                        np.sum(
+                                                np.conj(vec_proj[:, n_bnd]) *
+                                                (Pxy * vec_proj[:, n_bnd])))
+
+                                # Total out-of-plane weight
+                                wz = wyz + wxz
+
+                                # Weight for divergence colorscale
+                                w = np.tanh(10 * (wz - wxy))
+
+                                # Build Fermi surface
+                                kx_val, kx_idx = utils.find(kx, V_x[j][i])
+                                ky_val, ky_idx = utils.find(ky, V_y[j][i])
+                                FS[kx_idx, ky_idx] = w
+
+            # Blur for visual effect
+            FS = gaussian_filter(FS, sigma=10, mode='constant')
+            self.kx = kx
+            self.ky = ky
+            self.FS = FS
+            self.VX = VX
+            self.VY = VY
+        self.bndstr = dict([('yz', yz), ('xz', xz), ('xy', xy),
+                            ('yz_q', yz_q), ('xz_q', xz_q), ('xy_q', xy_q)])
 
     def CSRO(self, param=paramCSRO20(), e0=0, vert=False, proj=True):
         """returns self.bndstr, self.kx, self.ky, self.FS
@@ -634,6 +851,12 @@ class TB:
         # Get vertices and label them, useful for plotting separate
         # parts of the Fermi surface pockets with different colors
         if vert:
+            plt.figure('CSRO_vertices', clear=True)
+
+            # Placeholders vertices
+            VX = ()
+            VY = ()
+
             if proj:  # Also project eigenbasis onto orbitals from here
 
                 # Placeholders for projected FS
@@ -644,9 +867,8 @@ class TB:
             for n_bnd in range(len(bndstr)):
                 p = C[n_bnd].collections[0].get_paths()
                 p = np.asarray(p)
-                plt.figure('CSRO_vertices', clear=True)
+                plt.figure('CSRO_vertices')
 
-                # Placeholders vertices
                 V_x = ()
                 V_y = ()
 
@@ -657,10 +879,14 @@ class TB:
                     v_y = v[:, 1]
                     V_x = V_x + (v_x,)
                     V_y = V_y + (v_y,)
+                    plt.subplot(2, 3, n_bnd+1)
                     plt.plot(v_x, v_y)
                     plt.axis('equal')
                     plt.text(v_x[0], v_y[0], str(i))
                     plt.show()
+
+                VX = VX + (V_x,)
+                VY = VY + (V_y,)
 
                 if proj:  # Do projection for all vertices
                     for j in range(len(V_x)):  # Loop over all vertices
@@ -717,6 +943,8 @@ class TB:
             self.kx = kx
             self.ky = ky
             self.FS = FS
+            self.VX = VX
+            self.VY = VY
 
         self.bndstr = dict([('Ayz', Ayz), ('Axz', Axz), ('Axy', Axy),
                             ('Byz', Byz), ('Bxz', Bxz), ('Bxy', Bxy)])
@@ -1011,14 +1239,16 @@ def cost(Kx, Ky, t1, t2, t3, t4, t5, t6, mu, so):
     :J:     cost
     """
 
-    J = 0.
+    # prepare parallelization
+    num_cores = multiprocessing.cpu_count()
+    inputs = range(len(Kx))
 
-    a = np.pi
-
-    for k in range(len(Kx)):
+    def J_eval(k):
+        J = 0
         # extract k's
         kx = Kx[k]
         ky = Ky[k]
+        a = np.pi
 
         # hopping terms
         fx = -2 * np.cos((kx + ky) / 2 * a)
@@ -1055,22 +1285,32 @@ def cost(Kx, Ky, t1, t2, t3, t4, t5, t6, mu, so):
             j = min(abs(val))
 
             # regularization
-            if any(x == k for x in [0, 1, 7]):
-                j *= 1  # 1: no reg.
+            if any(x == k for x in [0]):
+                j *= 2  # 1: no reg.
             J += j
+
+        return J
+
+    # parallel computation
+    J = np.sum(
+            np.array(
+                    Parallel(n_jobs=num_cores)
+                    (delayed(J_eval)(i) for i in inputs)))
 
     return J
 
 
-def cost_deriv(Kx, Ky, t1, t2, t3, t4, t5, t6, mu, so):
-    """returns dJ
+def d_cost(Kx, Ky, P, d):
+    """returns J
 
-    **Calculates the cost gradients of the model**
+    **Calculates the cost of the model**
 
     Args
     ----
     :Kx:    kx of all sheets
     :Ky:    ky of all sheets
+    :P:     P[0]..P[7] correspond to t1..so
+    :d:     derivative with respect to parameter d
     - t1:   Nearest neighbour for out-of-plane orbitals large
     - t2:   Nearest neighbour for out-of-plane orbitals small
     - t3:   Nearest neighbour for dxy orbitals
@@ -1082,38 +1322,51 @@ def cost_deriv(Kx, Ky, t1, t2, t3, t4, t5, t6, mu, so):
 
     Return
     ------
-    :dJ:    gradient of cost w.r.t. parameters
+    :dJ:    derivative of cost
     """
 
     eps = 1e-8
 
-    dJ_t1 = (cost(Kx, Ky, t1 + eps, t2, t3, t4, t5, t6, mu, so) -
-             cost(Kx, Ky, t1 - eps, t2, t3, t4, t5, t6, mu, so)) / (2 * eps)
-
-    dJ_t2 = (cost(Kx, Ky, t1, t2 + eps, t3, t4, t5, t6, mu, so) -
-             cost(Kx, Ky, t1, t2 - eps, t3, t4, t5, t6, mu, so)) / (2 * eps)
-
-    dJ_t3 = (cost(Kx, Ky, t1, t2, t3 + eps, t4, t5, t6, mu, so) -
-             cost(Kx, Ky, t1, t2, t3 - eps, t4, t5, t6, mu, so)) / (2 * eps)
-
-    dJ_t4 = (cost(Kx, Ky, t1, t2, t3, t4 + eps, t5, t6, mu, so) -
-             cost(Kx, Ky, t1, t2, t3, t4 - eps, t5, t6, mu, so)) / (2 * eps)
-
-    dJ_t5 = (cost(Kx, Ky, t1, t2, t3, t4, t5 + eps, t6, mu, so) -
-             cost(Kx, Ky, t1, t2, t3, t4, t5 - eps, t6, mu, so)) / (2 * eps)
-
-    dJ_t6 = (cost(Kx, Ky, t1, t2, t3, t4, t5, t6 + eps, mu, so) -
-             cost(Kx, Ky, t1, t2, t3, t4, t5, t6 - eps, mu, so)) / (2 * eps)
-
-    dJ_mu = (cost(Kx, Ky, t1, t2, t3, t4, t5, t6, mu + eps, so) -
-             cost(Kx, Ky, t1, t2, t3, t4, t5, t6, mu - eps, so)) / (2 * eps)
-
-    dJ_so = (cost(Kx, Ky, t1, t2, t3, t4, t5, t6, mu, so + eps) -
-             cost(Kx, Ky, t1, t2, t3, t4, t5, t6, mu, so + eps)) / (2 * eps)
-
-    dJ = np.array([dJ_t1, dJ_t2, dJ_t3, dJ_t4, dJ_t5, dJ_t6, dJ_mu, dJ_so])
+    P_p = np.copy(P)
+    P_n = np.copy(P)
+    P_p[d] += eps
+    P_n[d] -= eps
+    dJ = (cost(Kx, Ky, *P_p) - cost(Kx, Ky, *P_n)) / (2 * eps)
 
     return dJ
+
+
+def cost_deriv(Kx, Ky, P):
+    """returns dJ
+
+    **Calculates the cost gradients of the model**
+
+    Args
+    ----
+    :Kx:    kx of all sheets
+    :Ky:    ky of all sheets
+    :P:     P[0]..P[7] correspond to t1..so
+    - t1:   Nearest neighbour for out-of-plane orbitals large
+    - t2:   Nearest neighbour for out-of-plane orbitals small
+    - t3:   Nearest neighbour for dxy orbitals
+    - t4:   Next nearest neighbour for dxy orbitals
+    - t5:   Next next nearest neighbour for dxy orbitals
+    - t6:   Off diagonal matrix element
+    - mu:   Chemical potential
+    - so:   spin orbit coupling
+
+    Return
+    ------
+    :DJ:    gradient of cost w.r.t. parameters
+    """
+
+    # parallelize
+    num_cores = multiprocessing.cpu_count()
+    inputs = range(8)
+    DJ = np.array(Parallel(n_jobs=num_cores)(delayed(d_cost)(Kx, Ky, P, i)
+                  for i in inputs))
+
+    return DJ
 
 
 def optimize_TB(Kx, Ky, it_max, P):
@@ -1140,22 +1393,27 @@ def optimize_TB(Kx, Ky, it_max, P):
 
     m = np.zeros(P.size)  # initial parameter
     v = np.zeros(P.size)  # initial parameter
-    beta1 = .9  # paramter Adam optimizer
-    beta2 = .999  # paramter Adam optimizer
+    beta1 = .9  # parameter Adam optimizer
+    beta2 = .999  # parameter Adam optimizer
     epsilon = 1e-8  # preventing from dividing by zero
     alpha = 1e-4  # external learning rate
 
     # start optimizing
+    start_time = time.time()
     for i in range(it_max):
         J[i] = cost(Kx, Ky, *P)  # cost
-        dJ = cost_deriv(Kx, Ky, *P)  # gradient
-
+        DJ = cost_deriv(Kx, Ky, P)  # gradient
         lr = alpha * np.sqrt((1 - beta2) / (1 - beta1))  # learning rate
 
         # update parameters
-        m = beta1 * m + (1 - beta1) * dJ
-        v = beta2 * v + ((1 - beta2) * dJ) * dJ
+        m = beta1 * m + (1 - beta1) * DJ
+        v = beta2 * v + ((1 - beta2) * DJ) * DJ
         P = P - lr * m / (np.sqrt(v) + epsilon)
+
+        # display every 10 iterations
+        if np.mod(i, 10) == 0:
+            print('iteration nr. ' + str(i))
+            print("--- %s seconds ---" % (time.time() - start_time))
 
     # build up dictionary
     param = dict([('t1', P[0]), ('t2', P[1]), ('t3', P[2]), ('t4', P[3]),

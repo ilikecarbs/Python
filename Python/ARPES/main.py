@@ -78,8 +78,7 @@ CRO.fig1()
 
 # %%
 
-CSRO.fig11()
-CSRO.fig12()
+CSRO.fig20(load=False)
 
 
 # %%

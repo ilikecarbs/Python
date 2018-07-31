@@ -61,8 +61,6 @@ save_dir = '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/'
 data_dir = '/Users/denyssutter/Documents/PhD/data/'
 home_dir = '/Users/denyssutter/Documents/library/Python/ARPES'
 
-# %%
-
 
 def fig1(print_fig=True):
     """figure 1
@@ -992,7 +990,7 @@ def fig4(print_fig=True):
 
             # Draw boxes of intensity integration
             rbox = {'ls': '--', 'color': 'r', 'lw': .5}
-            bbox = {'ls': '--', 'color': 'r', 'lw': .5}
+            bbox = {'ls': '--', 'color': 'm', 'lw': .5}
             ax.plot([k[j][_Left_e[j], 0], k[j][_Left_e[j], 0]],
                     [en[j][0, _Top_e[j]], en[j][0, _Bot_e[j]]], **rbox)
             ax.plot([k[j][_Right_e[j], 0], k[j][_Right_e[j], 0]],
@@ -2527,7 +2525,7 @@ def fig14(print_fig=True):
     cols = ['C1', 'C0', 'm', 'C8', 'C9', 'C3']
     fig = plt.figure('TB_eval', figsize=(8, 8), clear=True)
     for i in range(len(x)):
-        en, spec, bndstr = utils.CSRO_eval(x[i], y[i])
+        en, spec, bndstr = utils.CSRO_eval_proj(x[i], y[i])
         k = np.sqrt(x[i] ** 2 + y[i] ** 2)
         if i != 0:
             ax = fig.add_subplot(3, 3, i+1)
@@ -3218,15 +3216,24 @@ def fig20(print_fig=True, load=True):
 
     # load data
     os.chdir(data_dir)
-    alpha_1 = np.loadtxt('coords_CSRO20_alpha_1.dat')
-    alpha_2 = np.loadtxt('coords_CSRO20_alpha_2.dat')
-    beta_1 = np.loadtxt('coords_CSRO20_beta_1.dat')
-    beta_2 = np.loadtxt('coords_CSRO20_beta_2.dat')
-    beta_3 = np.loadtxt('coords_CSRO20_beta_3.dat')
-    gamma_1 = np.loadtxt('coords_CSRO20_gamma_1.dat')
-    gamma_2 = np.loadtxt('coords_CSRO20_gamma_2.dat')
-    gamma_3 = np.loadtxt('coords_CSRO20_gamma_3.dat')
-    delta = np.loadtxt('coords_CSRO20_delta.dat')
+#    alpha_1 = np.loadtxt('coords_CSRO20_alpha_1.dat')
+#    alpha_2 = np.loadtxt('coords_CSRO20_alpha_2.dat')
+#    beta_1 = np.loadtxt('coords_CSRO20_beta_1.dat')
+#    beta_2 = np.loadtxt('coords_CSRO20_beta_2.dat')
+#    beta_3 = np.loadtxt('coords_CSRO20_beta_3.dat')
+#    gamma_1 = np.loadtxt('coords_CSRO20_gamma_1.dat')
+#    gamma_2 = np.loadtxt('coords_CSRO20_gamma_2.dat')
+#    gamma_3 = np.loadtxt('coords_CSRO20_gamma_3.dat')
+#    delta = np.loadtxt('coords_CSRO20_delta.dat')
+    alpha_1 = np.loadtxt('coords_alpha_1.dat')
+    alpha_2 = np.loadtxt('coords_alpha_2.dat')
+    beta_1 = np.loadtxt('coords_beta_1.dat')
+    beta_2 = np.loadtxt('coords_beta_2.dat')
+    beta_3 = np.loadtxt('coords_beta_3.dat')
+    gamma_1 = np.loadtxt('coords_gamma_1.dat')
+    gamma_2 = np.loadtxt('coords_gamma_2.dat')
+    gamma_3 = np.loadtxt('coords_gamma_3.dat')
+    delta = np.loadtxt('coords_delta.dat')
     os.chdir(home_dir)
 
     coords = (alpha_1, alpha_2, beta_1, beta_2, beta_3, gamma_1, gamma_2,
@@ -3259,10 +3266,10 @@ def fig20(print_fig=True, load=True):
         Ky = Ky + (ky,)
 
     # maximum iterations
-    it_max = 3000
+    it_max = 20
 
     # initial parameters
-    p = utils.paramCSRO_fit()
+    p = utils.paramCSRO20()
 
     t1 = p['t1']
     t2 = p['t2']
@@ -3285,7 +3292,6 @@ def fig20(print_fig=True, load=True):
     else:
         # optimize parameters
         it, J, P = utils.optimize_TB(Kx, Ky, it_max, P)
-        print(P)
 
     fig = plt.figure(figname, clear=True, figsize=(7, 7))
     ax = fig.add_axes([.25, .25, .5, .5])
@@ -3316,7 +3322,7 @@ def fig20(print_fig=True, load=True):
           '\n', '==========================================')
     os.chdir(home_dir)
 
-    return it, J, P
+    return it_max, J, P
 
 
 def fig21(print_fig=True):
