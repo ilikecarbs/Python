@@ -44,6 +44,8 @@ Methods (self.*)
         - 3-dimensional (pol*, ang*, en*)
         - 3-dimensional (hv*, ang*, en*)
         - 2-dimensional (ang*, en*)
+    Todo
+        - proper implementation of Bessy header
 """
 
 import os
