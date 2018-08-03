@@ -230,6 +230,62 @@ class Methods:
         print('\n ~ Energies shifted',
               '\n', '==========================================')
 
+    def norm_shift(self):
+        """returns self.ang_shift, self.en_shift, self.int_shift
+
+        **Takes normalized data and shifts all intensities to same index,
+        in this way the Fermi level, e.g., has the same index for all angles**
+
+        Args
+        ----
+
+        Return
+        ------
+        :self.ang_shift:    shifted energies
+        :self.en_shift:     angles reduced to correct dimensions
+        :self.int_shift:    shifted intensities
+        """
+
+        # determine boundaries for new variables
+        bnd_top = np.min(np.max(self.en_norm, axis=1))
+        bnd_bot = np.max(np.min(self.en_norm, axis=1))
+
+        # placeholders
+        top_idxs = np.zeros(self.ang.shape)
+        bot_idxs = np.zeros(self.ang.shape)
+
+        # index-vectors
+        for i in range(self.ang.size):
+            top_val, top_idx = utils.find(self.en_norm[i, :], bnd_top)
+            bot_val, bot_idx = utils.find(self.en_norm[i, :], bnd_bot)
+            top_idxs[i] = top_idx
+            bot_idxs[i] = bot_idx
+
+        # convert into integers
+        top_idxs = top_idxs.astype(int)
+        bot_idxs = bot_idxs.astype(int)
+
+        # determine energy dimension of new variable
+        dim_en = int(np.min(top_idxs - bot_idxs))
+
+        # placeholders
+        ang_shift = np.zeros((self.ang.size, dim_en))
+        en_shift = np.zeros((self.ang.size, dim_en))
+        int_shift = np.zeros((self.ang.size, dim_en))
+
+        # build up variables
+        for i in range(self.ang.size):
+            ang_shift[i, :] = self.angs[i, bot_idxs[i]:bot_idxs[i]+dim_en]
+            en_shift[i, :] = self.en_norm[i, bot_idxs[i]:bot_idxs[i]+dim_en]
+            int_shift[i, :] = self.int_norm[i, bot_idxs[i]:bot_idxs[i]+dim_en]
+
+        self.ang_shift = ang_shift
+        self.en_shift = en_shift
+        self.int_shift = int_shift
+
+        print('\n ~ Spectrum shifted',
+              '\n', '==========================================')
+
     def flatten(self):
         """returns self.int, self.eint, self.int_norm, self.eint_norm
 
