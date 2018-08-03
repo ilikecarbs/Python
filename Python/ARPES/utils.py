@@ -11,7 +11,7 @@ Created on Mon Jun 11 09:57:01 2018
 
 **Useful helper functions**
 
-.. note::n
+.. note::
         To-Do:
             -
 """
@@ -230,7 +230,7 @@ def paramCSRO20():
     """
 
     param = dict([('t1', .115), ('t2', .002), ('t3', .071), ('t4', .039),
-                  ('t5', .012), ('t6', 0), ('mu', .084), ('so', .037)])
+                  ('t5', .012), ('t6', 0), ('mu', .084), ('so', .036)])
     return param
 
 
@@ -310,10 +310,22 @@ def paramCSRO_fit():
     - mu:   Chemical potential
     - so:   spin orbit coupling
     """
+#    From 3000 iteration set
+#    param = dict([('t1', .09201014), ('t2', .00913753), ('t3', .06603581),
+#                  ('t4', .03799015), ('t5', .00984912), ('t6', 0),
+#                  ('mu', .07022563), ('so', .03937185)])
 
-    param = dict([('t1', .09201014), ('t2', .00913753), ('t3', .06603581),
-                  ('t4', .03799015), ('t5', .00984912), ('t6', 0),
-                  ('mu', .07022563), ('so', .03937185)])
+#    From 4000 iteration set
+#    param = dict([('t1', .08836273), ('t2', .00913917), ('t3', .05625457),
+#                  ('t4', .03287336), ('t5', .00755447), ('t6', 0),
+#                  ('mu', .06325721), ('so', .036)])
+
+    param = dict([('t1', .09979339), ('t2', .00778938), ('t3', .0742577),
+                  ('t4', .04302189), ('t5', .01156417), ('t6', 0),
+                  ('mu', .08059366), ('so', .04042714)])
+#    param = dict([('t1', .23208378), ('t2', .03423318), ('t3', .16089406),
+#                  ('t4', .09362689), ('t5', .02956941), ('t6', 0),
+#                  ('mu', .16349357), ('so', .106)])
     return param
 
 
@@ -726,7 +738,7 @@ class TB:
         self.bndstr = dict([('yz', yz), ('xz', xz), ('xy', xy),
                             ('yz_q', yz_q), ('xz_q', xz_q), ('xy_q', xy_q)])
 
-    def CSRO(self, param=paramCSRO20(), e0=0, vert=False, proj=True):
+    def CSRO(self, param=paramCSRO_fit(), e0=0, vert=False, proj=True):
         """returns self.bndstr, self.kx, self.ky, self.FS
 
         **Calculates band structure from 6 band tight binding model**
@@ -1282,10 +1294,11 @@ def cost(Kx, Ky, t1, t2, t3, t4, t5, t6, mu, so):
         for j in range(len(kx)):
             val = la.eigvalsh(H(j))
             val = np.real(val)
+
             j = min(abs(val))
 
             # regularization
-            if any(x == k for x in [0]):
+            if any(x == k for x in [8]):
                 j *= 2  # 1: no reg.
             J += j
 
@@ -1325,7 +1338,7 @@ def d_cost(Kx, Ky, P, d):
     :dJ:    derivative of cost
     """
 
-    eps = 1e-8
+    eps = 1e-9
 
     P_p = np.copy(P)
     P_n = np.copy(P)
@@ -1362,10 +1375,11 @@ def cost_deriv(Kx, Ky, P):
 
     # parallelize
     num_cores = multiprocessing.cpu_count()
-    inputs = range(8)
+    inputs = range(7)  # not including so update
+
     DJ = np.array(Parallel(n_jobs=num_cores)(delayed(d_cost)(Kx, Ky, P, i)
                   for i in inputs))
-
+    DJ = np.append(DJ, 0)
     return DJ
 
 
