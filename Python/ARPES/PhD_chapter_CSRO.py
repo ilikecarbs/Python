@@ -2319,14 +2319,14 @@ def fig12(print_fig=True):
                 vmin=-v_bnd, vmax=v_bnd, alpha=.05)
     c0 = ax.contourf(tb.kx[250:750], tb.ky[250:750], tb.FS[250:750, 250:750],
                      300, cmap='PuOr', vmin=-v_bnd, vmax=v_bnd)
-    plt.plot([-1, 1], [1, 1], 'k-', lw=2)
-    plt.plot([-1, 1], [-1, -1], 'k-', lw=2)
-    plt.plot([1, 1], [-1, 1], 'k-', lw=2)
-    plt.plot([-1, -1], [-1, 1], 'k-', lw=2)
-    plt.plot([-1, 0], [0, 1], 'k--', lw=1)
-    plt.plot([-1, 0], [0, -1], 'k--', lw=1)
-    plt.plot([0, 1], [1, 0], 'k--', lw=1)
-    plt.plot([0, 1], [-1, 0], 'k--', lw=1)
+    ax.plot([-1, 1], [1, 1], 'k-', lw=2)
+    ax.plot([-1, 1], [-1, -1], 'k-', lw=2)
+    ax.plot([1, 1], [-1, 1], 'k-', lw=2)
+    ax.plot([-1, -1], [-1, 1], 'k-', lw=2)
+    ax.plot([-1, 0], [0, 1], 'k--', lw=1)
+    ax.plot([-1, 0], [0, -1], 'k--', lw=1)
+    ax.plot([0, 1], [1, 0], 'k--', lw=1)
+    ax.plot([0, 1], [-1, 0], 'k--', lw=1)
 
     # deocrate axes
     ax.set_xticks(np.arange(-kbnd - 1, kbnd + 1, 1))
@@ -3417,3 +3417,134 @@ def fig21(print_fig=True):
     if print_fig:
         plt.savefig(save_dir + figname + '.png',
                     dpi=600, bbox_inches="tight")
+
+
+def fig22(print_fig=True):
+    """figure 22
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    Tight binding model folded SRO
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    """
+
+    figname = 'CSROfig22'
+
+    # Initialize tight binding model
+    kbnd = 1  # boundaries
+    tb = utils.TB(a=np.pi, kbnd=kbnd, kpoints=300)
+    param = utils.paramSRO()
+    tb.SRO_folded(param=param, e0=0, vert=False, proj=False)
+
+    # load data
+    bndstr = tb.bndstr
+    coord = tb.coord
+    X = coord['X']
+    Y = coord['Y']
+    xz = bndstr['xz']
+    yz = bndstr['yz']
+    xy = bndstr['xy']
+    xz_q = bndstr['xz_q']
+    yz_q = bndstr['yz_q']
+    xy_q = bndstr['xy_q']
+    # collect bands
+    bands = (xz, yz, xy, xz_q, yz_q, xy_q)
+
+    # create figure
+    fig = plt.figure(figname, figsize=(8, 8), clear=True)
+    ax = fig.add_subplot(121)
+    ax.set_position([.1, .3, .4, .4])
+    ax.tick_params(**kwargs_ticks)
+
+    # plot data
+    n = 0  # counter
+    for band in bands:
+        n += 1
+        if n < 4:
+            ax.contour(X, Y, band, colors='C0', ls='-',
+                       linewidths=2, levels=0, alpha=1)
+        else:
+            ax.contour(X, Y, band, colors='C8', linewidths=.5,
+                       levels=0)
+    ax.plot([-1, 0], [0, 1], 'k-', lw=2)
+    ax.plot([-1, 0], [0, -1], 'k-', lw=2)
+    ax.plot([0, 1], [1, 0], 'k-', lw=2)
+    ax.plot([0, 1], [-1, 0], 'k-', lw=2)
+    ax.plot([-.5, -.5], [-.5, .5], 'k--', lw=1)
+    ax.plot([.5, .5], [-.5, .5], 'k--', lw=1)
+    ax.plot([-.5, .5], [.5, .5], 'k--', lw=1)
+    ax.plot([-.5, .5], [-.5, -.5], 'k--', lw=1)
+
+    # deocrate axes
+    ax.set_xticks(np.arange(-kbnd - .5, kbnd + 1, .5))
+    ax.set_yticks(np.arange(-kbnd - .5, kbnd + 1, .5))
+    ax.set_xticklabels(['', '-2', '-1', '0', '1', '2'])
+    ax.set_yticklabels(['', '-2', '-1', '0', '1', '2'])
+    ax.set_xlim(-kbnd, kbnd)
+    ax.set_ylim(-kbnd, kbnd)
+    ax.set_xlabel(r'$k_x \, (\pi/a_o)$', fontdict=font)
+    ax.set_ylabel(r'$k_y \, (\pi/a_o)$', fontdict=font)
+
+    # add text
+    ax.text(-.975, .9, '(a)', fontdict=font)
+
+    # Initialize tight binding model
+    kbnd = 2  # boundaries
+    tb = utils.TB(a=np.pi, kbnd=kbnd, kpoints=300)
+    param = utils.paramSRO()
+    tb.CSRO(param=param, e0=0, vert=False, proj=False)
+
+    # load data
+    bndstr = tb.bndstr
+    coord = tb.coord
+    X = coord['X']
+    Y = coord['Y']
+    Axz = bndstr['Axz']
+    Ayz = bndstr['Ayz']
+    Axy = bndstr['Axy']
+    Bxz = bndstr['Bxz']
+    Byz = bndstr['Byz']
+    Bxy = bndstr['Bxy']
+
+    # collect bands
+    bands = (Axz, Ayz, Axy, Bxz, Byz, Bxy)
+
+    # create figure
+    fig = plt.figure(figname, figsize=(8, 8))
+    ax2 = fig.add_subplot(122)
+    ax2.set_position([.52, .3, .4, .4])
+    ax2.tick_params(**kwargs_ticks)
+
+    # label colors
+    lblc = ['r', 'r', 'C0', 'C4', 'C9', 'C8']
+
+    # plot data
+    n = 0  # counter
+    for band in bands:
+        ax2.contour(X, Y, band, ls='-', colors=lblc[n],
+                    linewidths=2, levels=0, alpha=1)
+        n += 1
+    ax2.plot([-2, 0], [0, 2], 'k-', lw=2)
+    ax2.plot([-2, 0], [0, -2], 'k-', lw=2)
+    ax2.plot([0, 2], [2, 0], 'k-', lw=2)
+    ax2.plot([0, 2], [-2, 0], 'k-', lw=2)
+    ax2.plot([-1, -1], [-1, 1], 'k--', lw=1)
+    ax2.plot([1, 1], [-1, 1], 'k--', lw=1)
+    ax2.plot([-1, 1], [1, 1], 'k--', lw=1)
+    ax2.plot([-1, 1], [-1, -1], 'k--', lw=1)
+
+    # deocrate axes
+    ax2.set_xticks(np.arange(-kbnd - 1, kbnd + 1, 1))
+    ax2.set_yticks(np.arange(-kbnd - 1, kbnd + 1, 1))
+    ax2.set_yticklabels([])
+    ax2.set_xlim(-kbnd, kbnd)
+    ax2.set_ylim(-kbnd, kbnd)
+    ax2.set_xlabel(r'$k_x \, (\pi/a_o)$', fontdict=font)
+
+    # add text
+    ax2.text(-1.95, 1.8, '(b)', fontdict=font)
+
+    plt.show()
+
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")

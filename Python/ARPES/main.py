@@ -61,7 +61,7 @@ CSRO.fig18: CSRO30 Experimental band structure
 CSRO.fig19: CSRO30 Gamma - S cut epsilon pocket
 CSRO.fig20: (L): Fit Fermi surface (it_max=3000 -> 70min, load=True)
 CSRO.fig21: Fermi surface extraction points
-
+CSRO.fig22: Tight binding model folded SRO
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     Which figure do you desire?
@@ -79,6 +79,6 @@ CRO.fig1()
 # %%
 
 #CSRO.fig20(load=False)
-CSRO.fig14()
+CSRO.fig22()
 
 # %%
