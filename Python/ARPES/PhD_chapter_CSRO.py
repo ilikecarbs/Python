@@ -104,8 +104,8 @@ def fig1(print_fig=True):
              V0=0, thdg=6.3, tidg=-16, phidg=90)
 
     # TB
-    TB_A1 = utils.CSRO_eval(A1.k[0], A1.k[1])
-    TB_A2 = utils.CSRO_eval(A2.k[0], A2.k[1])
+    TB_A1 = utils.CSRO_eval(A1.k[0], A1.k[1], utils.paramCSRO_fit())
+    TB_A2 = utils.CSRO_eval(A2.k[0], A2.k[1], utils.paramCSRO_fit())
 
     # MDC
     mdc_ = -.004
@@ -2474,7 +2474,7 @@ def fig14(print_fig=True):
         en = np.zeros((len(dos)))  # placeholder energy
         for i in range(len(dos)):
             en[i] = (bins[i] + bins[i + 1]) / 2
-        ef, _ef = utils.find(en, 0.003)  # fermi energy
+        ef, _ef = utils.find(en, 0.00)  # fermi energy
 
         # integrate filling
         n_full = np.trapz(dos, x=en)  # consistency check
@@ -3216,24 +3216,24 @@ def fig20(print_fig=True, load=True):
 
     # load data
     os.chdir(data_dir)
-#    alpha_1 = np.loadtxt('coords_CSRO20_alpha_1.dat')
-#    alpha_2 = np.loadtxt('coords_CSRO20_alpha_2.dat')
-#    beta_1 = np.loadtxt('coords_CSRO20_beta_1.dat')
-#    beta_2 = np.loadtxt('coords_CSRO20_beta_2.dat')
-#    beta_3 = np.loadtxt('coords_CSRO20_beta_3.dat')
-#    gamma_1 = np.loadtxt('coords_CSRO20_gamma_1.dat')
-#    gamma_2 = np.loadtxt('coords_CSRO20_gamma_2.dat')
-#    gamma_3 = np.loadtxt('coords_CSRO20_gamma_3.dat')
-#    delta = np.loadtxt('coords_CSRO20_delta.dat')
-    alpha_1 = np.loadtxt('coords_alpha_1.dat')
-    alpha_2 = np.loadtxt('coords_alpha_2.dat')
-    beta_1 = np.loadtxt('coords_beta_1.dat')
-    beta_2 = np.loadtxt('coords_beta_2.dat')
-    beta_3 = np.loadtxt('coords_beta_3.dat')
-    gamma_1 = np.loadtxt('coords_gamma_1.dat')
-    gamma_2 = np.loadtxt('coords_gamma_2.dat')
-    gamma_3 = np.loadtxt('coords_gamma_3.dat')
-    delta = np.loadtxt('coords_delta.dat')
+    alpha_1 = np.loadtxt('coords_CSRO20_alpha_1.dat')
+    alpha_2 = np.loadtxt('coords_CSRO20_alpha_2.dat')
+    beta_1 = np.loadtxt('coords_CSRO20_beta_1.dat')
+    beta_2 = np.loadtxt('coords_CSRO20_beta_2.dat')
+    beta_3 = np.loadtxt('coords_CSRO20_beta_3.dat')
+    gamma_1 = np.loadtxt('coords_CSRO20_gamma_1.dat')
+    gamma_2 = np.loadtxt('coords_CSRO20_gamma_2.dat')
+    gamma_3 = np.loadtxt('coords_CSRO20_gamma_3.dat')
+    delta = np.loadtxt('coords_CSRO20_delta.dat')
+#    alpha_1 = np.loadtxt('coords_alpha_1.dat')
+#    alpha_2 = np.loadtxt('coords_alpha_2.dat')
+#    beta_1 = np.loadtxt('coords_beta_1.dat')
+#    beta_2 = np.loadtxt('coords_beta_2.dat')
+#    beta_3 = np.loadtxt('coords_beta_3.dat')
+#    gamma_1 = np.loadtxt('coords_gamma_1.dat')
+#    gamma_2 = np.loadtxt('coords_gamma_2.dat')
+#    gamma_3 = np.loadtxt('coords_gamma_3.dat')
+#    delta = np.loadtxt('coords_delta.dat')
     os.chdir(home_dir)
 
     coords = (alpha_1, alpha_2, beta_1, beta_2, beta_3, gamma_1, gamma_2,
@@ -3266,10 +3266,10 @@ def fig20(print_fig=True, load=True):
         Ky = Ky + (ky,)
 
     # maximum iterations
-    it_max = 20
+    it_max = 200
 
     # initial parameters
-    p = utils.paramCSRO20()
+    p = utils.paramCSRO_fit()
 
     t1 = p['t1']
     t2 = p['t2']
@@ -3310,14 +3310,14 @@ def fig20(print_fig=True, load=True):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.png',
+        plt.savefig(save_dir + figname + '_2layer.png',
                     dpi=600, bbox_inches="tight")
 
     # save data
     os.chdir(data_dir)
-    np.savetxt('Data_CSROfig20_it.dat', np.ravel(it))
-    np.savetxt('Data_CSROfig20_J.dat', np.ravel(J))
-    np.savetxt('Data_CSROfig20_P.dat', np.ravel(P))
+    np.savetxt('Data_CSROfig20_it_30.dat', np.ravel(it))
+    np.savetxt('Data_CSROfig20_J_30.dat', np.ravel(J))
+    np.savetxt('Data_CSROfig20_P_30.dat', np.ravel(P))
     print('\n ~ Data saved (iterations, cost)',
           '\n', '==========================================')
     os.chdir(home_dir)
