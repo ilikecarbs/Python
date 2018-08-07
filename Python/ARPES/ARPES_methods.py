@@ -66,7 +66,7 @@ class Methods:
     from different beamlines and are called from utils.py.**
     """
 
-    def gold(self, Ef_ini):
+    def gold(self, Ef_ini, T_ini=6):
         """Generates gold file
 
         **Fits and generates gold file for normalization.**
@@ -90,20 +90,28 @@ class Methods:
         # From there on, the initial parameters are the ones from last fit.
         ch = 300
 
-        plt.figure('gold')
-        plt.subplot(211)
-        enval, inden = utils.find(self.en, Ef_ini-0.12)
-        plt.plot(self.en[inden:], self.int[ch, inden:], 'bo', markersize=3)
+        kB = 8.6173303e-5  # Boltzmann constant
+
+        # create figure
+        fig = plt.figure(('gold_' + str(self.filename)),
+                         figsize=(6, 6), clear=True)
+        ax1 = fig.add_subplot(311)
+        enval, inden = utils.find(self.en, Ef_ini-0.12)  # energy window
+
+        # plot data
+        ax1.plot(self.en[inden:], self.int[ch, inden:], 'bo', ms=2)
 
         # initial guess
-        p_ini_FDsl = [.001, Ef_ini, np.max(self.int[ch, :]), 20, 0]
+        p_ini_FDsl = [T_ini * kB, Ef_ini, np.max(self.int[ch, :]), 20, 0]
 
         # Placeholders
+        T_fit = np.zeros(len(self.ang))
+        Res = np.zeros(len(self.ang))
         Ef = np.zeros(len(self.ang))
         norm = np.zeros(len(self.ang))
 
         # Fit loop
-        for i in range(0, len(self.ang)):
+        for i in range(len(self.ang)):
             try:
                 p_FDsl, c_FDsl = curve_fit(utils.FDsl, self.en[inden:],
                                            self.int[i, inden:], p_ini_FDsl)
@@ -112,16 +120,26 @@ class Methods:
 
             # Plots data at this particular channel
             if i == ch:
-                plt.plot(self.en[inden:], utils.FDsl(self.en[inden:],
+                ax1.plot(self.en[inden:], utils.FDsl(self.en[inden:],
                          *p_FDsl), 'r-')
+
+            T_fit[i] = p_FDsl[0] / kB
+            Res[i] = np.sqrt(T_fit[i] ** 2 - T_ini ** 2) * 4 * kB
             Ef[i] = p_FDsl[1]  # Fit parameter
-            norm[i] = sum(self.int[i, :])  # Fit parameters
 
         # Fit Fermi level fits with a polynomial
         p_ini_poly2 = [Ef[ch], 0, 0, 0]
-        p_poly2, c_poly2 = curve_fit(utils.poly2, self.ang[bnd:-bnd],
+        p_poly2, c_poly2 = curve_fit(utils.poly_2, self.ang[bnd:-bnd],
                                      Ef[bnd:-bnd], p_ini_poly2)
-        Ef_fit = utils.poly2(self.ang, *p_poly2)
+        Ef_fit = utils.poly_2(self.ang, *p_poly2)
+
+        # boundaries if strong curvature in Fermi level
+        mx = np.max(self.en) - np.max(Ef_fit)
+        mn = np.min(Ef_fit) - np.min(self.en)
+        for i in range(len(self.ang)):
+            mx_val, mx_idx = utils.find(self.en, Ef_fit[i] + mx)
+            mn_val, mn_idx = utils.find(self.en, Ef_fit[i] - mn)
+            norm[i] = np.sum(self.int[i, mn_idx:mx_idx])  # normalization
 
         # Save data
         os.chdir(self.folder)
@@ -130,11 +148,28 @@ class Methods:
         os.chdir('/Users/denyssutter/Documents/library/Python')
 
         # Plot data
-        plt.subplot(212)
-        plt.plot(self.ang, Ef, 'bo')
-        plt.plot(self.ang, Ef_fit, 'r-')
-        plt.ylim(Ef[ch]-5, Ef[ch]+5)
+        ax2 = fig.add_subplot(312)
+        ax2.plot(self.ang, Res * 1e3, 'bo', ms=3)
+        print("Resolution ~" + str(np.mean(Res)) + "eV")
+        ax3 = fig.add_subplot(313)
+        ax3.plot(self.ang, Ef, 'bo', ms=3)
+        ax3.plot(self.ang, Ef_fit, 'r-')
+
+        # decorate axes
+        ax1.tick_params(**kwargs_ticks)
+        ax2.tick_params(**kwargs_ticks)
+        ax2.set_xticklabels([])
+        ax1.xaxis.set_label_position('top')
+        ax1.tick_params(labelbottom='off', labeltop='on')
+        ax3.tick_params(**kwargs_ticks)
+        ax1.set_xlabel(r'$\omega$', fontdict=font)
+        ax1.set_ylabel('Intensity (a.u.)', fontdict=font)
+        ax2.set_ylabel('Resolution (meV)', fontdict=font)
+        ax3.set_xlabel('Detector angles', fontdict=font)
+        ax3.set_ylabel(r'$\omega$', fontdict=font)
+        ax3.set_ylim(self.en[0], self.en[-1])
         self.plt_spec()
+
         plt.show()
 
     def norm(self, gold):
@@ -186,6 +221,10 @@ class Methods:
         self.en_norm = en_norm
         self.int_norm = int_norm
         self.eint_norm = eint_norm
+
+        # generate shifted data
+        if np.size(self.int.shape) == 2:
+            self.norm_shift()
         print('\n ~ Data normalized',
               '\n', '==========================================')
 
@@ -228,6 +267,68 @@ class Methods:
         self.gold = gold
         self.en_norm = en_shift
         print('\n ~ Energies shifted',
+              '\n', '==========================================')
+
+    def norm_shift(self):
+        """returns self.ang_shift, self.en_shift, self.int_shift,
+        self.eint_shift
+
+        **Takes normalized data and shifts all intensities to same index,
+        in this way the Fermi level, e.g., has the same index for all angles**
+
+        Args
+        ----
+
+        Return
+        ------
+        :self.ang_shift:    shifted energies
+        :self.en_shift:     angles reduced to correct dimensions
+        :self.int_shift:    shifted intensities
+        :self.eint_shift:   errors
+        """
+
+        # determine boundaries for new variables
+        bnd_top = np.min(np.max(self.en_norm, axis=1))
+        bnd_bot = np.max(np.min(self.en_norm, axis=1))
+
+        # placeholders
+        top_idxs = np.zeros(self.ang.shape)
+        bot_idxs = np.zeros(self.ang.shape)
+
+        # index-vectors
+        for i in range(self.ang.size):
+            top_val, top_idx = utils.find(self.en_norm[i, :], bnd_top)
+            bot_val, bot_idx = utils.find(self.en_norm[i, :], bnd_bot)
+            top_idxs[i] = top_idx
+            bot_idxs[i] = bot_idx
+
+        # convert into integers
+        top_idxs = top_idxs.astype(int)
+        bot_idxs = bot_idxs.astype(int)
+
+        # determine energy dimension of new variable
+        dim_en = int(np.min(top_idxs - bot_idxs))
+
+        # placeholders
+        ang_shift = np.zeros((self.ang.size, dim_en))
+        en_shift = np.zeros((self.ang.size, dim_en))
+        int_shift = np.zeros((self.ang.size, dim_en))
+        eint_shift = np.zeros((self.ang.size, dim_en))
+
+        # build up variables
+        for i in range(self.ang.size):
+            ang_shift[i, :] = self.angs[i, bot_idxs[i]:bot_idxs[i]+dim_en]
+            en_shift[i, :] = self.en_norm[i, bot_idxs[i]:bot_idxs[i]+dim_en]
+            int_shift[i, :] = self.int_norm[i, bot_idxs[i]:bot_idxs[i]+dim_en]
+            eint_shift[i, :] = self.eint_norm[i,
+                                              bot_idxs[i]:bot_idxs[i]+dim_en]
+
+        self.ang_shift = ang_shift
+        self.en_shift = en_shift
+        self.int_shift = int_shift
+        self.eint_shift = eint_shift
+
+        print('\n ~ Spectrum shifted',
               '\n', '==========================================')
 
     def flatten(self):
@@ -319,6 +420,11 @@ class Methods:
                                        np.min(self.int_norm[:, i]))
                 self.eint_norm[:, i] = (self.eint_norm[:, i] -
                                         np.min(self.eint_norm[:, i]))
+            for i in range(self.en_shift.shape[1]):
+                self.int_shift[:, i] = (self.int_shift[:, i] -
+                                        np.min(self.int_shift[:, i]))
+                self.eint_shift[:, i] = (self.eint_shift[:, i] -
+                                         np.min(self.eint_shift[:, i]))
         except AttributeError:
             pass
 
@@ -380,6 +486,10 @@ class Methods:
                 self.en_norm = self.en_norm[_left:_right, _bot:_top]
                 self.int_norm = self.int_norm[_left:_right, _bot:_top]
                 self.eint_norm = self.eint_norm[_left:_right, _bot:_top]
+                self.ang_shift = self.ang_shift[_left:_right, _bot:_top]
+                self.en_shift = self.en_shift[_left:_right, _bot:_top]
+                self.int_shift = self.int_shift[_left:_right, _bot:_top]
+                self.eint_shift = self.eint_shift[_left:_right, _bot:_top]
             except AttributeError:
                 pass
 
@@ -413,8 +523,9 @@ class Methods:
 
     def ang2k(self, angdg, Ekin, lat_unit=False, a=5.33, b=5.33, c=11,
               V0=0, thdg=0, tidg=0, phidg=0):
-        """returns self.k, self.k_V0, self.kxs, self.kx_V0s,
-        self.kys, self.ky_V0s, self.lat_unit
+        """returns self.k, self.k_V0, self.kxs, self.kx_V0s, self.kx_shift,
+        self.kx_shift_V0, self.kys, self.ky_V0s, self.ky_shift,
+        self.ky_shift_V0, self.lat_unit
 
         **Converts detector angles into k-space**
 
@@ -431,12 +542,16 @@ class Methods:
 
         Return
         ------
-        :self.k:        k-vector
-        :self.k_V0:     k-vector (with inner potential)
-        :self.kxs:      kx-vector broadcasted
-        :self.kx_V0s:   kx-vector broadcasted (with inner potential)
-        :self.kys:      ky-vector broadcasted
-        :self.ky_V0s:   ky-vector broadcasted (with inner potential)
+        :self.k:            k-vector
+        :self.k_V0:         k-vector (with inner potential)
+        :self.kxs:          kx-vector broadcasted
+        :self.kx_V0s:       kx-vector broadcasted (with V0)
+        :self.kx_shift:     kx-vector broadcasted, shifted
+        :self.kx_shift_V0:  kx-vector broadcasted, shifted (with V0)
+        :self.kys:          ky-vector broadcasted
+        :self.ky_V0s:       ky-vector broadcasted (with V0)
+        :self.ky_shift:     ky-vector broadcasted, shifted
+        :self.ky_shift_V0:  ky-vector broadcasted, shifted (with V0)
         :self.lat_unit: reciprocal lattice units (boolean)
         """
 
@@ -494,6 +609,21 @@ class Methods:
                 np.broadcast_to(k[1], (self.en.size, self.ang.size)))
         self.ky_V0s = np.transpose(
                 np.broadcast_to(k_V0[1], (self.en.size, self.ang.size)))
+        try:
+            self.kx_shift = np.transpose(
+                np.broadcast_to(k[0], (self.en_shift.shape[1],
+                                self.ang.size)))
+            self.kx_shift_V0 = np.transpose(
+                    np.broadcast_to(k_V0[0], (self.en_shift.shape[1],
+                                    self.ang.size)))
+            self.ky_shift = np.transpose(
+                    np.broadcast_to(k[1], (self.en_shift.shape[1],
+                                    self.ang.size)))
+            self.ky_shift_V0 = np.transpose(
+                    np.broadcast_to(k_V0[1], (self.en_shift.shape[1],
+                                    self.ang.size)))
+        except AttributeError:
+            pass
         print('\n ~ Angles converted into k-space',
               '\n', '==========================================')
 
@@ -737,7 +867,7 @@ class Methods:
                              vmax=v_max*np.max(self.int))
 
         # Labels and other stuff
-        ax.set_xlabel('Angles', fontdict=font)
+        ax.set_xlabel('Detector angles', fontdict=font)
         ax.set_ylabel(r'$\omega$', fontdict=font)
         pos = ax.get_position()
         cax = plt.axes([pos.x0+pos.width+0.01, pos.y0, 0.03, pos.height])

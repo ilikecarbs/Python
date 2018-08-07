@@ -320,12 +320,38 @@ def paramCSRO_fit():
 #                  ('t4', .03287336), ('t5', .00755447), ('t6', 0),
 #                  ('mu', .06325721), ('so', .036)])
 
-    param = dict([('t1', .09979339), ('t2', .00778938), ('t3', .0742577),
-                  ('t4', .04302189), ('t5', .01156417), ('t6', 0),
-                  ('mu', .08059366), ('so', .04042714)])
-#    param = dict([('t1', .23208378), ('t2', .03423318), ('t3', .16089406),
-#                  ('t4', .09362689), ('t5', .02956941), ('t6', 0),
-#                  ('mu', .16349357), ('so', .106)])
+    # used for figure20
+#    param = dict([('t1', .09979339), ('t2', .00778938), ('t3', .0742577),
+#                  ('t4', .04302189), ('t5', .01156417), ('t6', 0),
+#                  ('mu', .08059366), ('so', .04042714)])
+    # testing GX-fit
+#    param = dict([('t1', .09013866), ('t2', .00886533), ('t3', .07392306),
+#                  ('t4', .03953298), ('t5', .01798494), ('t6', 0),
+#                  ('mu', .07997456), ('so', .04042714)])
+#    # testing all dispersions 10k
+#    param = dict([('t1', .08505056), ('t2', .01004666), ('t3', .07186227),
+#                  ('t4', .04297814), ('t5', .01180308), ('t6', 0),
+#                  ('mu', .06981258), ('so', .04156431)])
+    # low SO
+#    param = dict([('t1', .10362879), ('t2', .00468736), ('t3', .07764697),
+#                  ('t4', .04163935), ('t5', .01655971), ('t6', 0),
+#                  ('mu', .08132872), ('so', .04561293)])
+    # lr 1e-4 start from SRO (all disperions and FS)
+    param = dict([('t1', .08765864), ('t2', .00950954), ('t3', .07530941),
+                  ('t4', .04488273), ('t5', .0128184), ('t6', 0),
+                  ('mu', .0724995+.001), ('so', .04298228)])
+    # lr 5e-4 start from SRO (all disperions and FS)
+#    param = dict([('t1', .10115535), ('t2', .00604792), ('t3', .0775029),
+#                  ('t4', .04252476), ('t5', .01576043), ('t6', 0),
+#                  ('mu', .07990218), ('so', .04574906)])
+    # lr 1e-3 start from SRO (all disperions and FS)
+#    param = dict([('t1', .11267502), ('t2', .00580496), ('t3', .0825573),
+#                  ('t4', .0444382), ('t5', .01699491), ('t6', 0),
+#                  ('mu', .08552713), ('so', .05123512)])
+    # high SO
+#    param = dict([('t1', .20983586), ('t2', .02027852), ('t3', .15528096),
+#                  ('t4', .0903955), ('t5', .02389806), ('t6', 0),
+#                  ('mu', .14948591), ('so', .106)])
     return param
 
 
@@ -1228,7 +1254,7 @@ def CSRO_eval_proj(x, y, param=paramCSRO_fit()):
     return en_tb, int_tb, bndstr
 
 
-def cost(Kx, Ky, t1, t2, t3, t4, t5, t6, mu, so):
+def cost(Kx, Ky, En, t1, t2, t3, t4, t5, t6, mu, so):
     """returns J
 
     **Calculates the cost of the model**
@@ -1237,6 +1263,7 @@ def cost(Kx, Ky, t1, t2, t3, t4, t5, t6, mu, so):
     ----
     :Kx:    kx of all sheets
     :Ky:    ky of all sheets
+    :En:    band energy
     - t1:   Nearest neighbour for out-of-plane orbitals large
     - t2:   Nearest neighbour for out-of-plane orbitals small
     - t3:   Nearest neighbour for dxy orbitals
@@ -1260,6 +1287,7 @@ def cost(Kx, Ky, t1, t2, t3, t4, t5, t6, mu, so):
         # extract k's
         kx = Kx[k]
         ky = Ky[k]
+        en = En[k]
         a = np.pi
 
         # hopping terms
@@ -1295,11 +1323,11 @@ def cost(Kx, Ky, t1, t2, t3, t4, t5, t6, mu, so):
             val = la.eigvalsh(H(j))
             val = np.real(val)
 
-            j = min(abs(val))
+            j = min(abs(en[j] - val))
 
             # regularization
-            if any(x == k for x in [8]):
-                j *= 2  # 1: no reg.
+            if any(x == k for x in np.arange(0, 16, 1)):
+                j *= 2.4  # 1: no reg.
             J += j
 
         return J
@@ -1313,7 +1341,7 @@ def cost(Kx, Ky, t1, t2, t3, t4, t5, t6, mu, so):
     return J
 
 
-def d_cost(Kx, Ky, P, d):
+def d_cost(Kx, Ky, En, P, d):
     """returns J
 
     **Calculates the cost of the model**
@@ -1322,6 +1350,7 @@ def d_cost(Kx, Ky, P, d):
     ----
     :Kx:    kx of all sheets
     :Ky:    ky of all sheets
+    :En:    band energy
     :P:     P[0]..P[7] correspond to t1..so
     :d:     derivative with respect to parameter d
     - t1:   Nearest neighbour for out-of-plane orbitals large
@@ -1344,12 +1373,12 @@ def d_cost(Kx, Ky, P, d):
     P_n = np.copy(P)
     P_p[d] += eps
     P_n[d] -= eps
-    dJ = (cost(Kx, Ky, *P_p) - cost(Kx, Ky, *P_n)) / (2 * eps)
+    dJ = (cost(Kx, Ky, En, *P_p) - cost(Kx, Ky, En, *P_n)) / (2 * eps)
 
     return dJ
 
 
-def cost_deriv(Kx, Ky, P):
+def cost_deriv(Kx, Ky, En, P):
     """returns dJ
 
     **Calculates the cost gradients of the model**
@@ -1358,6 +1387,7 @@ def cost_deriv(Kx, Ky, P):
     ----
     :Kx:    kx of all sheets
     :Ky:    ky of all sheets
+    :En:    band energy
     :P:     P[0]..P[7] correspond to t1..so
     - t1:   Nearest neighbour for out-of-plane orbitals large
     - t2:   Nearest neighbour for out-of-plane orbitals small
@@ -1375,15 +1405,17 @@ def cost_deriv(Kx, Ky, P):
 
     # parallelize
     num_cores = multiprocessing.cpu_count()
-    inputs = range(7)  # not including so update
+    inputs = range(8)  # not including so update
 
-    DJ = np.array(Parallel(n_jobs=num_cores)(delayed(d_cost)(Kx, Ky, P, i)
+    DJ = np.array(Parallel(n_jobs=num_cores)(delayed(d_cost)(Kx, Ky, En, P, i)
                   for i in inputs))
-    DJ = np.append(DJ, 0)
+#    DJ = np.append(DJ, 0)
+    if DJ[-1] > 0:
+        DJ[-1] = 0
     return DJ
 
 
-def optimize_TB(Kx, Ky, it_max, P):
+def optimize_TB(Kx, Ky, En, it_max, P):
     """returns it, J, param
 
     **Optimizes the model and returns the cost and parameters**
@@ -1392,6 +1424,7 @@ def optimize_TB(Kx, Ky, it_max, P):
     ----
     :Kx:        kx of all sheets
     :Ky:        ky of all sheets
+    :En:    band energy
     :it_max:    maximum of iterations
     :P:         TB initial parameters
 
@@ -1402,9 +1435,8 @@ def optimize_TB(Kx, Ky, it_max, P):
     :param:     optimized parameters
     """
 
-    J = np.zeros(it_max)  # cost
-    it = np.arange(0, it_max, 1)  # iterations
-
+    J = np.array([])  # cost
+    it = np.array([])  # iterations
     m = np.zeros(P.size)  # initial parameter
     v = np.zeros(P.size)  # initial parameter
     beta1 = .9  # parameter Adam optimizer
@@ -1414,21 +1446,32 @@ def optimize_TB(Kx, Ky, it_max, P):
 
     # start optimizing
     start_time = time.time()
-    for i in range(it_max):
-        J[i] = cost(Kx, Ky, *P)  # cost
-        DJ = cost_deriv(Kx, Ky, P)  # gradient
-        lr = alpha * np.sqrt((1 - beta2) / (1 - beta1))  # learning rate
 
-        # update parameters
-        m = beta1 * m + (1 - beta1) * DJ
-        v = beta2 * v + ((1 - beta2) * DJ) * DJ
-        P = P - lr * m / (np.sqrt(v) + epsilon)
+    try:
+        while True:
+            for i in range(it_max):
+                it = np.append(it, i)
+                J = np.append(J, cost(Kx, Ky, En, *P))  # cost
+                DJ = cost_deriv(Kx, Ky, En, P)  # gradient
+                lr = alpha * np.sqrt((1 - beta2) / (1 - beta1))  # rate
 
-        # display every 10 iterations
-        if np.mod(i, 10) == 0:
-            print('iteration nr. ' + str(i))
-            print("--- %s seconds ---" % (time.time() - start_time))
+                # update parameters
+                m = beta1 * m + (1 - beta1) * DJ
+                v = beta2 * v + ((1 - beta2) * DJ) * DJ
+                P = P - lr * m / (np.sqrt(v) + epsilon)
+                if P[-1] > .106:
+                    P[-1] = .106
+                if P[-1] < .032:
+                    P[-1] = .032
 
+                # display every 10 iterations
+                if np.mod(i, 10) == 0:
+                    print('iteration nr. ' + str(i))
+                    print("--- %s seconds ---" % (time.time() - start_time))
+                    print("SO = " + str(P[-1]))
+                    print("J = " + str(J[-1]))
+    except KeyboardInterrupt:
+        pass
     # build up dictionary
     param = dict([('t1', P[0]), ('t2', P[1]), ('t3', P[2]), ('t4', P[3]),
                   ('t5', P[4]), ('t6', P[5]), ('mu', P[6]), ('so', P[7])])
