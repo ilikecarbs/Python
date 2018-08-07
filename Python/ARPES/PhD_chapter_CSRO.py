@@ -3549,7 +3549,7 @@ def fig23(print_fig=True, load=True):
     """figure 23
 
     %%%%%%%%%%%%%%%%%%%%
-    Fit GX, GS-direction
+    Fit dispersions + FS
     %%%%%%%%%%%%%%%%%%%%
     """
 
@@ -3601,7 +3601,8 @@ def fig23(print_fig=True, load=True):
     En = ()
 
     # transform into k-space
-    n = 0  # counter
+    n = 0  # counter (datasets)
+    m = 1  # counter (datapoints)
     for coord in coords:
         x = np.zeros(len(coord))
         y = np.zeros(len(coord))
@@ -3612,11 +3613,13 @@ def fig23(print_fig=True, load=True):
                 x[i] = coord[i][0]
                 y[i] = 0
                 en[i] = coord[i][1]
+                m += 2 * 2.4  # regularization
         elif n >= 16:
             for i in range(len(coord)):
                 x[i] = coord[i][0]
                 y[i] = coord[i][1]
                 en[i] = 0
+                m += 1
 
         kx = np.ones(x.size)
         ky = np.ones(y.size)
@@ -3675,18 +3678,23 @@ def fig23(print_fig=True, load=True):
         # optimize parameters
         it, J, P = utils.optimize_TB(Kx, Ky, En, it_max, P)
 
+    J_n = J / m * 1e3
     fig = plt.figure(figname, clear=True, figsize=(7, 7))
     ax = fig.add_axes([.25, .25, .5, .5])
-
+    print(J_n[-1])
     # plot cost
-    ax.plot(it, J, 'C8o', ms=2)
-    ax.plot([0, np.max(it)], [np.min(J), np.min(J)], **kwargs_ef)
+    ax.plot(it, J_n, 'C8o', ms=2)
+    ax.plot([0, np.max(it)], [np.min(J_n), np.min(J_n)], **kwargs_ef)
     ax.tick_params(**kwargs_ticks)
 
     # decorate axes
     ax.set_xlim([np.min(it), np.max(it)])
-    ax.set_xlabel('iterations', fontdict=font)
-    ax.set_ylabel(r'Cost $J$', fontdict=font)
+    ax.set_xlabel('iterations (t)', fontdict=font)
+    ax.set_ylabel(r'fitness $\xi (t)$ (meV)', fontdict=font)
+    ax.arrow(2080, 9.2, 0, -1.2, head_width=160,
+             head_length=.3, fc='k', ec='k')
+    ax.arrow(5950, 7.5, 0, -1.2, head_width=160,
+             head_length=.3, fc='k', ec='k')
 
     plt.show()
 
