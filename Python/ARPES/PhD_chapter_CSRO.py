@@ -84,7 +84,7 @@ def fig1(print_fig=True):
     D.restrict(bot=0, top=1, left=.12, right=.9)
     D.FS(e=0.02, ew=.03)
     D.FS_flatten()
-    D.ang2kFS(D.ang, Ekin=22-4.5, lat_unit=True, a=5.33, b=5.55, c=11,
+    D.ang2kFS(D.ang, Ekin=22-4.5, lat_unit=True, a=5.55, b=5.55, c=11,
               V0=0, thdg=8.7, tidg=4, phidg=88)
 
     # load data for cut Gamma-X
@@ -92,7 +92,7 @@ def fig1(print_fig=True):
     gold = '62091'
     A1 = ARPES.DLS(file, mat, year, sample)
     A1.norm(gold)
-    A1.ang2k(A1.ang, Ekin=22-4.5, lat_unit=True, a=5.33, b=5.55, c=11,
+    A1.ang2k(A1.ang, Ekin=22-4.5, lat_unit=True, a=5.55, b=5.55, c=11,
              V0=0, thdg=9.3, tidg=0, phidg=90)
 
     # load data for cut X-S
@@ -100,7 +100,7 @@ def fig1(print_fig=True):
     gold = '62091'
     A2 = ARPES.DLS(file, mat, year, sample)
     A2.norm(gold)
-    A2.ang2k(A1.ang, Ekin=22-4.5, lat_unit=True, a=5.33, b=5.55, c=11,
+    A2.ang2k(A1.ang, Ekin=22-4.5, lat_unit=True, a=5.55, b=5.55, c=11,
              V0=0, thdg=6.3, tidg=-16, phidg=90)
 
     # TB
@@ -2474,7 +2474,7 @@ def fig14(print_fig=True):
         en = np.zeros((len(dos)))  # placeholder energy
         for i in range(len(dos)):
             en[i] = (bins[i] + bins[i + 1]) / 2
-        ef, _ef = utils.find(en, 0.00)  # fermi energy
+        ef, _ef = utils.find(en, 0.002)  # fermi energy
 
         # integrate filling
         n_full = np.trapz(dos, x=en)  # consistency check
@@ -3225,15 +3225,6 @@ def fig20(print_fig=True, load=True):
     gamma_2 = np.loadtxt('coords_CSRO20_gamma_2.dat')
     gamma_3 = np.loadtxt('coords_CSRO20_gamma_3.dat')
     delta = np.loadtxt('coords_CSRO20_delta.dat')
-#    alpha_1 = np.loadtxt('coords_alpha_1.dat')
-#    alpha_2 = np.loadtxt('coords_alpha_2.dat')
-#    beta_1 = np.loadtxt('coords_beta_1.dat')
-#    beta_2 = np.loadtxt('coords_beta_2.dat')
-#    beta_3 = np.loadtxt('coords_beta_3.dat')
-#    gamma_1 = np.loadtxt('coords_gamma_1.dat')
-#    gamma_2 = np.loadtxt('coords_gamma_2.dat')
-#    gamma_3 = np.loadtxt('coords_gamma_3.dat')
-#    delta = np.loadtxt('coords_delta.dat')
     os.chdir(home_dir)
 
     coords = (alpha_1, alpha_2, beta_1, beta_2, beta_3, gamma_1, gamma_2,
@@ -3242,15 +3233,18 @@ def fig20(print_fig=True, load=True):
     # placeholders
     Kx = ()
     Ky = ()
+    En = ()
 
     # transform into k-space
     for coord in coords:
         x = np.zeros(len(coord))
         y = np.zeros(len(coord))
+        en = np.zeros(len(coord))
 
         for i in range(len(coord)):
             x[i] = coord[i][0]
             y[i] = coord[i][1]
+            en[i] = 0
 
         kx = np.ones(x.size)
         ky = np.ones(y.size)
@@ -3264,9 +3258,10 @@ def fig20(print_fig=True, load=True):
 
         Kx = Kx + (kx,)
         Ky = Ky + (ky,)
+        En = En + (en,)
 
     # maximum iterations
-    it_max = 200
+    it_max = 50
 
     # initial parameters
     p = utils.paramCSRO_fit()
@@ -3291,7 +3286,7 @@ def fig20(print_fig=True, load=True):
         os.chdir(home_dir)
     else:
         # optimize parameters
-        it, J, P = utils.optimize_TB(Kx, Ky, it_max, P)
+        it, J, P = utils.optimize_TB(Kx, Ky, En, it_max, P)
 
     fig = plt.figure(figname, clear=True, figsize=(7, 7))
     ax = fig.add_axes([.25, .25, .5, .5])
@@ -3548,3 +3543,165 @@ def fig22(print_fig=True):
     # Save figure
     if print_fig:
         plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+
+
+def fig23(print_fig=True, load=True):
+    """figure 23
+
+    %%%%%%%%%%%%%%%%%%%%
+    Fit GX, GS-direction
+    %%%%%%%%%%%%%%%%%%%%
+    """
+
+    figname = 'CSROfig23'
+
+    # load data
+    os.chdir(data_dir)
+    GX_alpha_1 = np.loadtxt('dispersion_GX_alpha_1.dat')
+    GX_alpha_2 = np.loadtxt('dispersion_GX_alpha_2.dat')
+    GX_beta_1 = np.loadtxt('dispersion_GX_beta_1.dat')
+    GX_beta_2 = np.loadtxt('dispersion_GX_beta_2.dat')
+    GX_gamma_1 = np.loadtxt('dispersion_GX_gamma_1.dat')
+    GX_gamma_2 = np.loadtxt('dispersion_GX_gamma_2.dat')
+    GX_delta = np.loadtxt('dispersion_GX_delta.dat')
+
+    GS_alpha_1 = np.loadtxt('dispersion_GS_alpha_1.dat')
+    GS_alpha_2 = np.loadtxt('dispersion_GS_alpha_2.dat')
+    GS_beta_1 = np.loadtxt('dispersion_GS_beta_1.dat')
+    GS_beta_2 = np.loadtxt('dispersion_GS_beta_2.dat')
+    GS_gamma_1 = np.loadtxt('dispersion_GS_gamma_1.dat')
+    GS_gamma_2 = np.loadtxt('dispersion_GS_gamma_2.dat')
+    GS_delta = np.loadtxt('dispersion_GS_delta.dat')
+
+    XS_branch_1 = np.loadtxt('dispersion_XS_branch_1.dat')
+    XS_branch_2 = np.loadtxt('dispersion_XS_branch_2.dat')
+
+    alpha_1 = np.loadtxt('coords_CSRO20_alpha_1.dat')
+    alpha_2 = np.loadtxt('coords_CSRO20_alpha_2.dat')
+    beta_1 = np.loadtxt('coords_CSRO20_beta_1.dat')
+    beta_2 = np.loadtxt('coords_CSRO20_beta_2.dat')
+    beta_3 = np.loadtxt('coords_CSRO20_beta_3.dat')
+    gamma_1 = np.loadtxt('coords_CSRO20_gamma_1.dat')
+    gamma_2 = np.loadtxt('coords_CSRO20_gamma_2.dat')
+    gamma_3 = np.loadtxt('coords_CSRO20_gamma_3.dat')
+    delta = np.loadtxt('coords_CSRO20_delta.dat')
+    os.chdir(home_dir)
+
+    coords = (GX_alpha_1, GX_alpha_2, GX_beta_1, GX_beta_2,
+              GX_gamma_1, GX_gamma_2, GX_delta,  # 0 - 6
+              GS_alpha_1, GS_alpha_2, GS_beta_1, GS_beta_2,
+              GS_gamma_1, GS_gamma_2, GS_delta,  # 7 - 13
+              XS_branch_1, XS_branch_2,  # 14, 15
+              alpha_1, alpha_2, beta_1, beta_2, beta_3, gamma_1, gamma_2,
+              gamma_3, delta)  # 16 - 24
+
+    # placeholders
+    Kx = ()
+    Ky = ()
+    En = ()
+
+    # transform into k-space
+    n = 0  # counter
+    for coord in coords:
+        x = np.zeros(len(coord))
+        y = np.zeros(len(coord))
+        en = np.zeros(len(coord))
+
+        if n < 16:
+            for i in range(len(coord)):
+                x[i] = coord[i][0]
+                y[i] = 0
+                en[i] = coord[i][1]
+        elif n >= 16:
+            for i in range(len(coord)):
+                x[i] = coord[i][0]
+                y[i] = coord[i][1]
+                en[i] = 0
+
+        kx = np.ones(x.size)
+        ky = np.ones(y.size)
+
+        for i in range(y.size):
+            if any(x == n for x in np.arange(0, 7, 1)):
+                k, k_V0 = utils.ang2k(x[i], Ekin=22-4.5, lat_unit=True,
+                                      a=5.33, b=5.55, c=11, V0=0, thdg=9.3,
+                                      tidg=y[i], phidg=90)
+            elif any(x == n for x in np.arange(7, 14, 1)):
+                k, k_V0 = utils.ang2k(x[i], Ekin=40 - 4.5, lat_unit=True,
+                                      a=5.5, b=5.5, c=11, V0=0, thdg=2.5,
+                                      tidg=0, phidg=42)
+            elif any(x == n for x in np.arange(14, 16, 1)):
+                k, k_V0 = utils.ang2k(x[i], Ekin=22-4.5, lat_unit=True,
+                                      a=5.33, b=5.55, c=11, V0=0, thdg=6.3,
+                                      tidg=y[i]-16, phidg=90)
+            elif any(x == n for x in np.arange(16, 25, 1)):
+                k, k_V0 = utils.ang2k(x[i], Ekin=22-4.5, lat_unit=True,
+                                      a=5.33, b=5.55, c=11, V0=0, thdg=8.7,
+                                      tidg=y[i]-4, phidg=88)
+
+            kx[i] = k[0]
+            ky[i] = k[1]
+
+        Kx = Kx + (kx,)
+        Ky = Ky + (ky,)
+        En = En + (en,)
+        n += 1
+
+    # maximum iterations
+    it_max = 10000
+
+    # initial parameters
+    p = utils.paramSRO()
+
+    t1 = p['t1']
+    t2 = p['t2']
+    t3 = p['t3']
+    t4 = p['t4']
+    t5 = p['t5']
+    t6 = p['t6']
+    mu = p['mu']
+    so = p['so']
+
+    P = np.array([t1, t2, t3, t4, t5, t6, mu, so])
+
+    # load data
+    if load:
+        os.chdir(data_dir)
+        it = np.loadtxt('Data_CSROfig23_it.dat')
+        J = np.loadtxt('Data_CSROfig23_J.dat')
+        P = np.loadtxt('Data_CSROfig23_P.dat')
+        os.chdir(home_dir)
+    else:
+        # optimize parameters
+        it, J, P = utils.optimize_TB(Kx, Ky, En, it_max, P)
+
+    fig = plt.figure(figname, clear=True, figsize=(7, 7))
+    ax = fig.add_axes([.25, .25, .5, .5])
+
+    # plot cost
+    ax.plot(it, J, 'C8o', ms=2)
+    ax.plot([0, np.max(it)], [np.min(J), np.min(J)], **kwargs_ef)
+    ax.tick_params(**kwargs_ticks)
+
+    # decorate axes
+    ax.set_xlim([np.min(it), np.max(it)])
+    ax.set_xlabel('iterations', fontdict=font)
+    ax.set_ylabel(r'Cost $J$', fontdict=font)
+
+    plt.show()
+
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname,
+                    dpi=600, bbox_inches="tight")
+
+    # save data
+    os.chdir(data_dir)
+    np.savetxt('Data_CSROfig23_it.dat', np.ravel(it))
+    np.savetxt('Data_CSROfig23_J.dat', np.ravel(J))
+    np.savetxt('Data_CSROfig23_P.dat', np.ravel(P))
+    print('\n ~ Data saved (iterations, cost)',
+          '\n', '==========================================')
+    os.chdir(home_dir)
+
+    return it_max, J, P

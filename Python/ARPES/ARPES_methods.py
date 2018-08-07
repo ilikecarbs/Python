@@ -186,6 +186,10 @@ class Methods:
         self.en_norm = en_norm
         self.int_norm = int_norm
         self.eint_norm = eint_norm
+
+        # generate shifted data
+        if np.size(self.int.shape) == 2:
+            self.norm_shift()
         print('\n ~ Data normalized',
               '\n', '==========================================')
 
@@ -231,7 +235,8 @@ class Methods:
               '\n', '==========================================')
 
     def norm_shift(self):
-        """returns self.ang_shift, self.en_shift, self.int_shift
+        """returns self.ang_shift, self.en_shift, self.int_shift,
+        self.eint_shift
 
         **Takes normalized data and shifts all intensities to same index,
         in this way the Fermi level, e.g., has the same index for all angles**
@@ -244,6 +249,7 @@ class Methods:
         :self.ang_shift:    shifted energies
         :self.en_shift:     angles reduced to correct dimensions
         :self.int_shift:    shifted intensities
+        :self.eint_shift:   errors
         """
 
         # determine boundaries for new variables
@@ -272,16 +278,20 @@ class Methods:
         ang_shift = np.zeros((self.ang.size, dim_en))
         en_shift = np.zeros((self.ang.size, dim_en))
         int_shift = np.zeros((self.ang.size, dim_en))
+        eint_shift = np.zeros((self.ang.size, dim_en))
 
         # build up variables
         for i in range(self.ang.size):
             ang_shift[i, :] = self.angs[i, bot_idxs[i]:bot_idxs[i]+dim_en]
             en_shift[i, :] = self.en_norm[i, bot_idxs[i]:bot_idxs[i]+dim_en]
             int_shift[i, :] = self.int_norm[i, bot_idxs[i]:bot_idxs[i]+dim_en]
+            eint_shift[i, :] = self.eint_norm[i,
+                                              bot_idxs[i]:bot_idxs[i]+dim_en]
 
         self.ang_shift = ang_shift
         self.en_shift = en_shift
         self.int_shift = int_shift
+        self.eint_shift = eint_shift
 
         print('\n ~ Spectrum shifted',
               '\n', '==========================================')
@@ -375,6 +385,10 @@ class Methods:
                                        np.min(self.int_norm[:, i]))
                 self.eint_norm[:, i] = (self.eint_norm[:, i] -
                                         np.min(self.eint_norm[:, i]))
+                self.int_shift[:, i] = (self.int_shift[:, i] -
+                                        np.min(self.int_shift[:, i]))
+                self.eint_shift[:, i] = (self.eint_shift[:, i] -
+                                         np.min(self.eint_shift[:, i]))
         except AttributeError:
             pass
 
@@ -436,6 +450,10 @@ class Methods:
                 self.en_norm = self.en_norm[_left:_right, _bot:_top]
                 self.int_norm = self.int_norm[_left:_right, _bot:_top]
                 self.eint_norm = self.eint_norm[_left:_right, _bot:_top]
+                self.ang_shift = self.ang_shift[_left:_right, _bot:_top]
+                self.en_shift = self.en_shift[_left:_right, _bot:_top]
+                self.int_shift = self.int_shift[_left:_right, _bot:_top]
+                self.eint_shift = self.eint_shift[_left:_right, _bot:_top]
             except AttributeError:
                 pass
 
@@ -469,8 +487,9 @@ class Methods:
 
     def ang2k(self, angdg, Ekin, lat_unit=False, a=5.33, b=5.33, c=11,
               V0=0, thdg=0, tidg=0, phidg=0):
-        """returns self.k, self.k_V0, self.kxs, self.kx_V0s,
-        self.kys, self.ky_V0s, self.lat_unit
+        """returns self.k, self.k_V0, self.kxs, self.kx_V0s, self.kx_shift,
+        self.kx_shift_V0, self.kys, self.ky_V0s, self.ky_shift,
+        self.ky_shift_V0, self.lat_unit
 
         **Converts detector angles into k-space**
 
@@ -487,12 +506,16 @@ class Methods:
 
         Return
         ------
-        :self.k:        k-vector
-        :self.k_V0:     k-vector (with inner potential)
-        :self.kxs:      kx-vector broadcasted
-        :self.kx_V0s:   kx-vector broadcasted (with inner potential)
-        :self.kys:      ky-vector broadcasted
-        :self.ky_V0s:   ky-vector broadcasted (with inner potential)
+        :self.k:            k-vector
+        :self.k_V0:         k-vector (with inner potential)
+        :self.kxs:          kx-vector broadcasted
+        :self.kx_V0s:       kx-vector broadcasted (with V0)
+        :self.kx_shift:     kx-vector broadcasted, shifted
+        :self.kx_shift_V0:  kx-vector broadcasted, shifted (with V0)
+        :self.kys:          ky-vector broadcasted
+        :self.ky_V0s:       ky-vector broadcasted (with V0)
+        :self.ky_shift:     ky-vector broadcasted, shifted
+        :self.ky_shift_V0:  ky-vector broadcasted, shifted (with V0)
         :self.lat_unit: reciprocal lattice units (boolean)
         """
 
@@ -550,6 +573,21 @@ class Methods:
                 np.broadcast_to(k[1], (self.en.size, self.ang.size)))
         self.ky_V0s = np.transpose(
                 np.broadcast_to(k_V0[1], (self.en.size, self.ang.size)))
+        try:
+            self.kx_shift = np.transpose(
+                np.broadcast_to(k[0], (self.en_shift.shape[1],
+                                self.ang.size)))
+            self.kx_shift_V0 = np.transpose(
+                    np.broadcast_to(k_V0[0], (self.en_shift.shape[1],
+                                    self.ang.size)))
+            self.ky_shift = np.transpose(
+                    np.broadcast_to(k[1], (self.en_shift.shape[1],
+                                    self.ang.size)))
+            self.ky_shift_V0 = np.transpose(
+                    np.broadcast_to(k_V0[1], (self.en_shift.shape[1],
+                                    self.ang.size)))
+        except AttributeError:
+            pass
         print('\n ~ Angles converted into k-space',
               '\n', '==========================================')
 
