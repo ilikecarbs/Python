@@ -85,7 +85,7 @@ class Methods:
 
         # Change these parameters to tune fitting
         # anchor points for poly fit of Fermi energies
-        bnd = 50
+        bnd = 110
         # Takes initial fit parameters for Fermi function until this value.
         # From there on, the initial parameters are the ones from last fit.
         ch = 300
@@ -153,6 +153,8 @@ class Methods:
         print("Resolution ~" + str(np.mean(Res)) + "eV")
         ax3 = fig.add_subplot(313)
         ax3.plot(self.ang, Ef, 'bo', ms=3)
+        ax3.plot(self.ang[bnd], Ef[bnd], 'ro')
+        ax3.plot(self.ang[-bnd], Ef[-bnd], 'ro')
         ax3.plot(self.ang, Ef_fit, 'r-')
 
         # decorate axes
@@ -266,6 +268,7 @@ class Methods:
 
         self.gold = gold
         self.en_norm = en_shift
+        self.int_norm = self.int
         print('\n ~ Energies shifted',
               '\n', '==========================================')
 
@@ -869,6 +872,7 @@ class Methods:
         # Labels and other stuff
         ax.set_xlabel('Detector angles', fontdict=font)
         ax.set_ylabel(r'$\omega$', fontdict=font)
+        ax.set_ylim(-.05, .02)
         pos = ax.get_position()
         cax = plt.axes([pos.x0+pos.width+0.01, pos.y0, 0.03, pos.height])
         cbar = plt.colorbar(c0, cax=cax, ticks=None)

@@ -256,9 +256,9 @@ def paramCSRO20_opt():
     - so:   spin orbit coupling
     """
 
-    param = dict([('t1', .09335122), ('t2', .00889674), ('t3', .05688837),
-                  ('t4', .03258921), ('t5', .00754219), ('t6', 0),
-                  ('mu', .06510367), ('so', .03607035)])
+    param = dict([('t1', .09950746), ('t2', .00813422), ('t3', .07514404),
+                  ('t4', .03921084), ('t5', .01663676), ('t6', 0),
+                  ('mu', .08077226), ('so', .04490854)])
     return param
 
 
@@ -336,10 +336,25 @@ def paramCSRO_fit():
 #    param = dict([('t1', .10362879), ('t2', .00468736), ('t3', .07764697),
 #                  ('t4', .04163935), ('t5', .01655971), ('t6', 0),
 #                  ('mu', .08132872), ('so', .04561293)])
-    # lr 1e-4 start from SRO (all disperions and FS)
-    param = dict([('t1', .08765864), ('t2', .00950954), ('t3', .07530941),
-                  ('t4', .04488273), ('t5', .0128184), ('t6', 0),
-                  ('mu', .0724995+.001), ('so', .04298228)])
+    
+    # lr 1e-4 start from SRO (all disperions and FS) for fig23
+#    param = dict([('t1', .08765864), ('t2', .00950954), ('t3', .07530941),
+#                  ('t4', .04488273), ('t5', .0128184), ('t6', 0),
+#                  ('mu', .0724995+.00), ('so', .04298228)])
+
+    # test
+#    param = dict([('t1', .13760138), ('t2', .01718124), ('t3', .07318633),
+#                  ('t4', .0332056), ('t5', .0156594), ('t6', 0),
+#                  ('mu', .08905735+.00), ('so', .05056553)])
+
+    # for fig 20
+    param = dict([('t1', .10669605), ('t2', .00806252), ('t3', .07315598),
+                  ('t4', .03753171), ('t5', .01536394), ('t6', 0),
+                  ('mu', .08598504), ('so', .04390769)])
+#    param = dict([('t1', .09950746), ('t2', .00813422), ('t3', .07514404),
+#                  ('t4', .03921084), ('t5', .01663676), ('t6', 0),
+#                  ('mu', .08077226), ('so', .04490854)])
+
     # lr 5e-4 start from SRO (all disperions and FS)
 #    param = dict([('t1', .10115535), ('t2', .00604792), ('t3', .0775029),
 #                  ('t4', .04252476), ('t5', .01576043), ('t6', 0),
@@ -1106,7 +1121,69 @@ def CSRO_eval(x, y, param=paramCSRO_fit()):
     return bndstr
 
 
-def CSRO_eval_proj(x, y, param=paramCSRO_fit()):
+def SRO_eval(x, y, param=paramCSRO_fit()):
+    """returns bndstr
+
+    **Calculates band structure along kx, ky**
+
+    Args
+    ----
+    :param:     TB parameters
+    :x:         kx array
+    :y:         ky array
+
+    Return
+    ------
+    :bndstr:    eigenenergies band structure
+    """
+
+    a = np.pi
+
+    # Load TB parameters
+    t1 = param['t1']  # Nearest neighbour for out-of-plane orbitals large
+    t2 = param['t2']  # Nearest neighbour for out-of-plane orbitals small
+    t3 = param['t3']  # Nearest neighbour for dxy orbitals
+    t4 = param['t4']  # Next nearest neighbour for dxy orbitals
+    t5 = param['t5']  # Next next nearest neighbour for dxy orbitals
+    t6 = param['t6']  # Off diagonal matrix element
+    mu = param['mu']  # Chemical potential
+    so = param['so']  # spin orbit coupling
+
+    # Hopping terms
+    fyz = - 2 * t2 * np.cos(x * a) - 2 * t1 * np.cos(y * a)
+    fxz = - 2 * t1 * np.cos(x * a) - 2 * t2 * np.cos(y * a)
+    fxy = - 2 * t3 * (np.cos(x * a) + np.cos(y * a)) - \
+        4 * t4 * (np.cos(x * a) * np.cos(y * a)) - \
+        2 * t5 * (np.cos(2 * x * a) + np.cos(2 * y * a))
+    off = - 4 * t6 * (np.sin(x * a) * np.sin(y * a))
+
+    # Placeholders energy eigenvalues
+    yz = np.ones(len(x))
+    xz = np.ones(len(x))
+    xy = np.ones(len(x))
+
+    # Tight binding Hamiltonian
+    def H(i):
+        H = np.array([[fyz[i] - mu, off[i] + complex(0, so), -so],
+                      [off[i] - complex(0, so), fxz[i] - mu,
+                       complex(0, so)],
+                      [-so, -complex(0, so), fxy[i] - mu]])
+        return H
+
+    # Diagonalization of symmetric Hermitian matrix on k-mesh
+    for i in range(len(x)):
+        val, vec = la.eigh(H(i))
+        val = np.real(val)
+        yz[i] = val[0]
+        xz[i] = val[1]
+        xy[i] = val[2]
+
+    bndstr = (yz, xz, xy)
+
+    return bndstr
+
+
+def CSRO_eval_proj(x, y, param=paramCSRO20_opt()):
     """returns en_tb, int_tb, bndstr
 
     **Calculates band structure along kx, ky, orbitally projected**
@@ -1326,8 +1403,10 @@ def cost(Kx, Ky, En, t1, t2, t3, t4, t5, t6, mu, so):
             j = min(abs(en[j] - val))
 
             # regularization
-            if any(x == k for x in np.arange(0, 16, 1)):
-                j *= 2.4  # 1: no reg.
+#            if any(x == k for x in np.arange(0, 16, 1)):
+#                j *= 2.4  # 1: no reg.
+#            if any(x == k for x in np.arange(7, 14, 1)):
+#                j *= 1.1  # 1: no reg.
             J += j
 
         return J
@@ -1412,6 +1491,8 @@ def cost_deriv(Kx, Ky, En, P):
 #    DJ = np.append(DJ, 0)
     if DJ[-1] > 0:
         DJ[-1] = 0
+#    elif DJ[-1] <= 0:
+#        DJ[-1] *= 10
     return DJ
 
 
@@ -1424,7 +1505,7 @@ def optimize_TB(Kx, Ky, En, it_max, P):
     ----
     :Kx:        kx of all sheets
     :Ky:        ky of all sheets
-    :En:    band energy
+    :En:        band energy
     :it_max:    maximum of iterations
     :P:         TB initial parameters
 
@@ -1442,7 +1523,7 @@ def optimize_TB(Kx, Ky, En, it_max, P):
     beta1 = .9  # parameter Adam optimizer
     beta2 = .999  # parameter Adam optimizer
     epsilon = 1e-8  # preventing from dividing by zero
-    alpha = 1e-4  # external learning rate
+    alpha = 5e-5  # external learning rate
 
     # start optimizing
     start_time = time.time()
@@ -1450,8 +1531,8 @@ def optimize_TB(Kx, Ky, En, it_max, P):
     try:
         while True:
             for i in range(it_max):
-                it = np.append(it, i)
                 J = np.append(J, cost(Kx, Ky, En, *P))  # cost
+                it = np.append(it, i)
                 DJ = cost_deriv(Kx, Ky, En, P)  # gradient
                 lr = alpha * np.sqrt((1 - beta2) / (1 - beta1))  # rate
 
@@ -1459,18 +1540,24 @@ def optimize_TB(Kx, Ky, En, it_max, P):
                 m = beta1 * m + (1 - beta1) * DJ
                 v = beta2 * v + ((1 - beta2) * DJ) * DJ
                 P = P - lr * m / (np.sqrt(v) + epsilon)
+
                 if P[-1] > .106:
                     P[-1] = .106
                 if P[-1] < .032:
                     P[-1] = .032
 
                 # display every 10 iterations
-                if np.mod(i, 10) == 0:
+                if np.mod(i, 100) == 0:
                     print('iteration nr. ' + str(i))
                     print("--- %s seconds ---" % (time.time() - start_time))
                     print("SO = " + str(P[-1]))
                     print("J = " + str(J[-1]))
-    except KeyboardInterrupt:
+                if np.mod(i, 1000) == 0:
+                    print('iteration nr. ' + str(i))
+                    print("--- %s seconds ---" % (time.time() - start_time))
+                    print("P = " + str(P))
+
+    except (KeyboardInterrupt, ValueError):
         pass
     # build up dictionary
     param = dict([('t1', P[0]), ('t2', P[1]), ('t3', P[2]), ('t4', P[3]),
