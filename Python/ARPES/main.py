@@ -53,7 +53,7 @@ CSRO.fig10: Quasiparticle Z
 CSRO.fig11: Tight binding model CSRO
 CSRO.fig12: Tight binding model SRO
 CSRO.fig13: TB along high symmetry directions, orbitally resolved
-CSRO.fig14: (L): TB and density of states (N=3.7)
+CSRO.fig14: (L): TB and density of states (N=3.80 \pm .11)
 CSRO.fig15: DMFT Fermi surface
 CSRO.fig16: (L): DMFT bandstructure calculation
 CSRO.fig17: (L): LDA bandstructure calculation
@@ -63,6 +63,9 @@ CSRO.fig20: (L): Fit Fermi surface (it_max=3000 -> 70min, load=True)
 CSRO.fig21: Fermi surface extraction points
 CSRO.fig22: Tight binding model folded SRO
 CSRO.fig23: Fit dispersions + FS
+CSRO.fig24: Alternative CSRO.fig1
+CSRO.fig25: Combining fig9 & fig10
+CSRO.fig26: Fermi surface counting(3.84 \pm .14)  TODO
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     Which figure do you desire?
@@ -73,13 +76,12 @@ CSRO.fig23: Fit dispersions + FS
 
 # %%
 
-
 CRO.fig1()
 
 
-# %% 
+# %%
 
-CSRO.fig23(load=True)
-#CSRO.fig1()
+#CSRO.fig20(load=False)
+ CSRO.fig25()
 
 # %%

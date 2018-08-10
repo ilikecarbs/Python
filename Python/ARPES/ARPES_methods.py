@@ -85,7 +85,7 @@ class Methods:
 
         # Change these parameters to tune fitting
         # anchor points for poly fit of Fermi energies
-        bnd = 50
+        bnd = 110
         # Takes initial fit parameters for Fermi function until this value.
         # From there on, the initial parameters are the ones from last fit.
         ch = 300
@@ -153,6 +153,8 @@ class Methods:
         print("Resolution ~" + str(np.mean(Res)) + "eV")
         ax3 = fig.add_subplot(313)
         ax3.plot(self.ang, Ef, 'bo', ms=3)
+        ax3.plot(self.ang[bnd], Ef[bnd], 'ro')
+        ax3.plot(self.ang[-bnd], Ef[-bnd], 'ro')
         ax3.plot(self.ang, Ef_fit, 'r-')
 
         # decorate axes
@@ -266,6 +268,7 @@ class Methods:
 
         self.gold = gold
         self.en_norm = en_shift
+        self.int_norm = self.int
         print('\n ~ Energies shifted',
               '\n', '==========================================')
 
@@ -397,8 +400,31 @@ class Methods:
         print('\n ~ Fermi surface flattened',
               '\n', '==========================================')
 
+    def int_amp(self, amp=1):
+        """returns self.int, self.eint renormalized
+
+        **renoramlizes self.int, self.eint**
+
+        Args
+        ----
+        :amp:       renormalization factor
+
+        Return
+        ------
+        :self.int:  renoramlized intensity
+        :self.eint: error
+        """
+
+        self.int = self.int * amp
+        self.eint = self.eint * amp
+
+        print('\n ~ intensity renormalized',
+              '\n', '==========================================')
+    
     def bkg(self):
-        """returns self.int, self.int_norm, self.eint, self.eint_norm
+        """returns self.int, self.int_norm, self.eint, self.eint_norm,
+        self.bkg, self.ebkg, self.bkg_norm, self.ebkg_norm,
+        self.bkg_shift, self.ebkg_shift
 
         **For every energy, the minimum signal is subtracted for all angles**
 
@@ -410,28 +436,51 @@ class Methods:
         ------
         :self.int:          intensity background subtracted
         :self.int_norm:     normalized intensity background subtracted
+        :self.int_shift:    normalized intensity background subtracted
         :self.eint:         errors on new intensity
         :self.eint_norm:    errors on new normalized intensity
+        :self.eint_shift:   errors on new normalized intensity
+        :self.bkg:          background from int
+        :self.bkg_norm:     background from int_norm
+        :self.bkg_shift:    background from int_shift
+        :self.ebkg:         error
+        :self.ebkg_norm:    error
+        :self.ebkg_shift:   error
         """
 
+        bkg = np.zeros(self.int.shape[1])
+        ebkg = np.zeros(self.int.shape[1])
+
         try:
+            bkg_norm = np.zeros(self.int_norm.shape[1])
+            ebkg_norm = np.zeros(self.int_norm.shape[1])
+            bkg_shift = np.zeros(self.int_shift.shape[1])
+            ebkg_shift = np.zeros(self.int_shift.shape[1])
             for i in range(self.en.size):
-                self.int_norm[:, i] = (self.int_norm[:, i] -
-                                       np.min(self.int_norm[:, i]))
-                self.eint_norm[:, i] = (self.eint_norm[:, i] -
-                                        np.min(self.eint_norm[:, i]))
+                bkg_norm[i] = np.min(self.int_norm[:, i])
+                ebkg_norm[i] = np.min(self.eint_norm[:, i])
+                self.int_norm[:, i] = (self.int_norm[:, i] - bkg_norm[i])
+                self.eint_norm[:, i] = (self.eint_norm[:, i] - ebkg_norm[i])
             for i in range(self.en_shift.shape[1]):
-                self.int_shift[:, i] = (self.int_shift[:, i] -
-                                        np.min(self.int_shift[:, i]))
-                self.eint_shift[:, i] = (self.eint_shift[:, i] -
-                                         np.min(self.eint_shift[:, i]))
+                bkg_shift[i] = np.min(self.int_shift[:, i])
+                ebkg_shift[i] = np.min(self.eint_shift[:, i])
+                self.int_shift[:, i] = (self.int_shift[:, i] - bkg_shift[i])
+                self.eint_shift[:, i] = (self.eint_shift[:, i] - ebkg_shift[i])
+            self.bkg_norm = bkg_norm
+            self.ebkg_norm = ebkg_norm
+            self.bkg_shift = bkg_shift
+            self.ebkg_shift = ebkg_shift
         except AttributeError:
             pass
 
         for i in range(self.en.size):
-            self.int[:, i] = (self.int[:, i] - np.min(self.int[:, i]))
-            self.eint[:, i] = (self.eint[:, i] - np.min(self.eint[:, i]))
-
+            bkg[i] = np.min(self.int[:, i])
+            ebkg[i] = np.min(self.eint[:, i])
+            self.int[:, i] = (self.int[:, i] - bkg[i])
+            self.eint[:, i] = (self.eint[:, i] - ebkg[i])
+            self.bkg = bkg
+            self.ebkg = ebkg
+        self
         print('\n ~ Background subtracted',
               '\n', '==========================================')
 
@@ -869,6 +918,7 @@ class Methods:
         # Labels and other stuff
         ax.set_xlabel('Detector angles', fontdict=font)
         ax.set_ylabel(r'$\omega$', fontdict=font)
+        ax.set_ylim(-.05, .02)
         pos = ax.get_position()
         cax = plt.axes([pos.x0+pos.width+0.01, pos.y0, 0.03, pos.height])
         cbar = plt.colorbar(c0, cax=cax, ticks=None)
