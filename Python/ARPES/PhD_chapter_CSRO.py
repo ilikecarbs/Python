@@ -897,22 +897,22 @@ def fig4(print_fig=True):
 
     for j in range(4):
         D = ARPES.Bessy(files[j], mat, year, sample)
+        if j == 0:
+            D.int_amp(1.52)  # renoramlize intensity for this spectrum
         D.norm(gold=gold)
+        D.bkg()
     #    D.restrict(bot=.7, top=.9, left=.33, right=.5)
     #    D.restrict(bot=.7, top=.9, left=.0, right=1)
-        D.bkg()
 
         # Transform data
         if j == 0:
             D.ang2k(D.ang, Ekin=48, lat_unit=True, a=5.5, b=5.5, c=11,
                     V0=0, thdg=2.4, tidg=0, phidg=45)
-            int_norm = D.int_norm * 1.5  # normalize to high energy tail
-            eint_norm = D.eint_norm * 1.5
         else:
             D.ang2k(D.ang, Ekin=48, lat_unit=True, a=5.5, b=5.5, c=11,
-                    V0=0, thdg=2.9, tidg=0, phidg=45)
-            int_norm = D.int_norm
-            eint_norm = D.eint_norm
+                    V0=0, thdg=2.8, tidg=0, phidg=45)
+        int_norm = D.int_norm
+        eint_norm = D.eint_norm
 
         # The data set appears to have an offset in energy
         # This has been corrected by comparing to the other spectra (e.g. LH)
@@ -1186,14 +1186,14 @@ def fig4(print_fig=True):
                     capsize=2, color='red', fmt='o', ms=5)
         ax.errorbar(T, int_b, yerr=eint_b, lw=.5,
                     capsize=2, color='m', fmt='d', ms=5)
-        ax.plot([1.3, 32], [1, .68], 'r--', lw=.5)
+        ax.plot([1.3, 32], [1, .64], 'r--', lw=.5)
         ax.plot([1.3, 32], [.99, .99], 'm--', lw=.5)
 
         # decorate axes
         ax.set_xticks(T)
         ax.set_yticks(np.arange(.7, 1.05, .1))
         ax.set_xlim(0, 32)
-        ax.set_ylim(.67, 1.07)
+        ax.set_ylim(.65, 1.08)
         ax.grid(True, alpha=.2)
         ax.set_xlabel(r'$T$ (K)', fontdict=font)
         ax.tick_params(labelleft='off', labelright='on')
@@ -1207,8 +1207,8 @@ def fig4(print_fig=True):
                        + r'$\mathrm{d}k \, \mathrm{d}\omega$'),
                       fontdict=font, fontsize=8)
         # add text
-        ax.text(1.3, 1.036, r'(h)')
-        ax.text(8, .82, r'$\bar{\delta}$-band', color='r')
+        ax.text(1.3, 1.038, r'(h)')
+        ax.text(8, .79, r'$\bar{\delta}$-band', color='r')
         ax.text(17, .92, r'$\bar{\beta}$-band', color='m')
 
     fig = plt.figure(figname, figsize=(8, 8), clear=True)
@@ -1497,21 +1497,19 @@ def fig6(print_fig=True, load=True):
 
         # Load Bessy data
         D = ARPES.Bessy(files[j], mat, year, sample)
+        if j == 0:
+            D.int_amp(1.52)  # renoramlize intensity for this spectrum
         D.norm(gold=gold)
-        D.restrict(bot=.7, top=.9, left=.31, right=.56)
         D.bkg()
+        D.restrict(bot=.7, top=.9, left=.31, right=.56)
         if j == 0:
             D.ang2k(D.ang, Ekin=48, lat_unit=False, a=5.5, b=5.5, c=11,
                     V0=0, thdg=2.4, tidg=0, phidg=45)
-
-            # intensity adjustment from background comparison
-            int_norm = D.int_norm * 1.5
-            eint_norm = D.eint_norm * 1.5
         else:
             D.ang2k(D.ang, Ekin=48, lat_unit=False, a=5.5, b=5.5, c=11,
-                    V0=0, thdg=2.9, tidg=0, phidg=45)
-            int_norm = D.int_norm
-            eint_norm = D.eint_norm
+                    V0=0, thdg=2.8, tidg=0, phidg=45)
+        int_norm = D.int_norm
+        eint_norm = D.eint_norm
         en_norm = D.en_norm - .008  # Fermi level adjustment
 
         # collect data
@@ -1714,9 +1712,18 @@ def fig6(print_fig=True, load=True):
         ax.tick_params(**kwargs_ticks)
         ax.errorbar(-loc_en, re, ewidth * v_LDA,
                     color=Re_cols[j], lw=.5, capsize=2, fmt='o', ms=2)
-        _bot = 0  # first index of fitting ReS
-        _top = 20  # last index of fitting ReS
-
+        _bot = 7  # first index of fitting ReS
+        _top = 25  # last index of fitting ReS
+        if j == 1:
+            _bot = 5
+            _top = 15
+        if j == 2:
+            _bot = 7
+            _top = 20
+#        ax.errorbar(-loc_en[_bot], re[_bot], ewidth[_bot] * v_LDA,
+#                    color='r', lw=.5, capsize=2, fmt='o', ms=2)
+#        ax.errorbar(-loc_en[_top], re[_top], ewidth[_top] * v_LDA,
+#                    color='r', lw=.5, capsize=2, fmt='o', ms=2)
         # Boundaries
         re_bot = np.array([0 - eps, 1 - Delta])  # upper boundary
         re_top = np.array([0 + eps, 1 + Delta])  # bottom boundary
@@ -1756,10 +1763,10 @@ def fig6(print_fig=True, load=True):
         # First row again
         ax = fig.add_subplot(4, 4, j+1)
         ax.plot(loc, loc_en, 'C8o', ms=.5)
+        ax.plot(xx, yy, 'C4--', lw=1)
 
         # decorate axes
         if j == 0:
-            ax.plot(xx, yy, 'C4--', lw=1)
             ax.arrow(loc[20], -.05, 0, loc_en[20]+.04,
                      head_width=0.01, head_length=0.01, fc='r', ec='r')
             ax.arrow(loc[20], -.05, 0, loc_en[20]+.005,
@@ -3896,7 +3903,7 @@ def fig25(print_fig=True):
     fig = plt.figure(figname, figsize=(10, 10), clear=True)
 
     ax1 = fig.add_subplot(131)
-    ax1.set_position([.2, .3, .3, .3])
+    ax1.set_position([.18, .3, .3, .3])
     ax1.tick_params(direction='in', length=1.5, width=.5, colors='k')
 
     # plot data
@@ -3958,8 +3965,8 @@ def fig25(print_fig=True):
     ax2.set_yticks(np.arange(0, .5, .1))
     ax2.set_xlim(1, 44)
     ax2.set_ylim(0, .35)
-    ax2.set_xlabel(r'$T$ (K)')
-    ax2.set_ylabel(r'$Z$')
+    ax2.set_xlabel(r'$T$ (K)', fontdict=font)
+    ax2.set_ylabel(r'$Z$', fontdict=font)
 
     # add text
     ax2.text(11, .33, r'S. Nakatsuji $\mathit{et\, \,al.}$',
