@@ -22,6 +22,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 import matplotlib.cm as cm
+from scipy.ndimage import gaussian_filter
 
 import utils
 
@@ -420,7 +421,7 @@ class Methods:
 
         print('\n ~ intensity renormalized',
               '\n', '==========================================')
-    
+
     def bkg(self):
         """returns self.int, self.int_norm, self.eint, self.eint_norm,
         self.bkg, self.ebkg, self.bkg_norm, self.ebkg_norm,
@@ -569,6 +570,188 @@ class Methods:
 
         print('\n ~ Spectra restricted',
               '\n', '==========================================')
+
+    def smooth(self, it=30, sig=1):
+        """returns self.int_smooth
+
+        **smoothends intensity**
+
+        Args
+        ----
+        :it:                iterations
+        :sig:               gaussian filter strength
+
+        Return
+        ------
+        :self.int_smooth:   smoothened intensity
+        """
+
+        intensity = self.int
+
+        for i in range(it):
+            intensity = gaussian_filter(intensity, sigma=sig)
+
+        self.int_smooth = intensity
+
+        print('\n ~ Spectra smoothened',
+              '\n', '==========================================')
+
+    def curvature_2D(self, Cx=1e-18, Cy=1e-21, it=30, sig=1):
+        """returns self.C_2D
+
+        **Curvature in 2 dimensions**
+
+        Args
+        ----
+        :Cx:            curvature factor Cx
+        :Cy:            curvature factor Cy
+        :it:            iterations of smoothing
+        :sig:           smoothening strength
+
+        Return
+        ------
+        :self.C_2D:     Curvature map 2D
+        """
+
+        self.smooth(it=it, sig=sig)
+
+        C_2D = utils.curvature_inequiv(self.ang, self.en,
+                                       self.int_smooth,
+                                       Cx=Cx, Cy=Cy)
+
+#        C_2D[C_2D < 0] = 0
+        self.C_2D = C_2D
+
+        # create figure
+        fig = plt.figure('curvature_2D', figsize=(6, 6), clear=True)
+        ax1 = fig.add_subplot(121)
+        ax1.tick_params(**kwargs_ticks)
+        ax1.contourf(self.ang, self.en, np.transpose(self.int),
+                     100, **kwargs_spec)
+
+        # Labels and other stuff
+        ax1.set_xlabel('Detector angles', fontdict=font)
+        ax1.set_ylabel(r'$\omega$', fontdict=font)
+
+        ax2 = fig.add_subplot(122)
+        ax2.tick_params(**kwargs_ticks)
+        c0 = ax2.contourf(self.ang, self.en, np.transpose(self.C_2D),
+                          100, **kwargs_spec,
+                          vmax=1*np.max(self.C_2D))
+
+        # Labels and other stuff
+        ax2.set_xlabel('Detector angles', fontdict=font)
+        ax2.set_yticklabels([])
+
+        pos = ax2.get_position()
+        cax = plt.axes([pos.x0+pos.width+0.01, pos.y0, 0.03, pos.height])
+        cbar = plt.colorbar(c0, cax=cax, ticks=None)
+        cbar.set_ticks([])
+        fig.show()
+
+    def curvature_MDC(self, C0=1e10, it=30, sig=1):
+        """returns self.C_MDC
+
+        **Curvature from MDC's**
+
+        Args
+        ----
+        :C0:            curvature parameter
+        :it:            iterations of smoothing
+        :sig:           smoothening strength
+
+        Return
+        ------
+        :self.C_MDC:    Curvature map 2D
+        """
+
+        self.smooth(it=it, sig=sig)
+
+        C_MDC = utils.curvature_MDC(self.ang, self.en,
+                                    self.int_smooth,
+                                    C0=C0)
+
+#        C_MDC[C_MDC < 0] = 0
+        self.C_MDC = C_MDC
+
+        # create figure
+        fig = plt.figure('curvature_2D', figsize=(6, 6), clear=True)
+        ax1 = fig.add_subplot(121)
+        ax1.tick_params(**kwargs_ticks)
+        ax1.contourf(self.ang, self.en, np.transpose(self.int),
+                     100, **kwargs_spec)
+
+        # Labels and other stuff
+        ax1.set_xlabel('Detector angles', fontdict=font)
+        ax1.set_ylabel(r'$\omega$', fontdict=font)
+
+        ax2 = fig.add_subplot(122)
+        ax2.tick_params(**kwargs_ticks)
+        c0 = ax2.contourf(self.ang, self.en, np.transpose(self.C_MDC),
+                          100, **kwargs_spec,
+                          vmax=1*np.max(self.C_MDC))
+
+        # Labels and other stuff
+        ax2.set_xlabel('Detector angles', fontdict=font)
+        ax2.set_yticklabels([])
+
+        pos = ax2.get_position()
+        cax = plt.axes([pos.x0+pos.width+0.01, pos.y0, 0.03, pos.height])
+        cbar = plt.colorbar(c0, cax=cax, ticks=None)
+        cbar.set_ticks([])
+        fig.show()
+
+    def curvature_EDC(self, C0=1e10, it=30, sig=1):
+        """returns self.C_EDC
+
+        **Curvature from EDC's**
+
+        Args
+        ----
+        :C0:            curvature parameter
+        :it:            iterations of smoothing
+        :sig:           smoothening strength
+
+        Return
+        ------
+        :self.C_EDC:    Curvature map 2D
+        """
+
+        self.smooth(it=it, sig=sig)
+
+        C_EDC = utils.curvature_EDC(self.ang, self.en,
+                                    self.int_smooth,
+                                    C0=C0)
+
+#        C_MDC[C_MDC < 0] = 0
+        self.C_EDC = C_EDC
+
+        # create figure
+        fig = plt.figure('curvature_2D', figsize=(6, 6), clear=True)
+        ax1 = fig.add_subplot(121)
+        ax1.tick_params(**kwargs_ticks)
+        ax1.contourf(self.ang, self.en, np.transpose(self.int),
+                     100, **kwargs_spec)
+
+        # Labels and other stuff
+        ax1.set_xlabel('Detector angles', fontdict=font)
+        ax1.set_ylabel(r'$\omega$', fontdict=font)
+
+        ax2 = fig.add_subplot(122)
+        ax2.tick_params(**kwargs_ticks)
+        c0 = ax2.contourf(self.ang, self.en, np.transpose(self.C_EDC),
+                          100, **kwargs_spec,
+                          vmax=1*np.max(self.C_EDC))
+
+        # Labels and other stuff
+        ax2.set_xlabel('Detector angles', fontdict=font)
+        ax2.set_yticklabels([])
+
+        pos = ax2.get_position()
+        cax = plt.axes([pos.x0+pos.width+0.01, pos.y0, 0.03, pos.height])
+        cbar = plt.colorbar(c0, cax=cax, ticks=None)
+        cbar.set_ticks([])
+        fig.show()
 
     def ang2k(self, angdg, Ekin, lat_unit=False, a=5.33, b=5.33, c=11,
               V0=0, thdg=0, tidg=0, phidg=0):
@@ -918,7 +1101,6 @@ class Methods:
         # Labels and other stuff
         ax.set_xlabel('Detector angles', fontdict=font)
         ax.set_ylabel(r'$\omega$', fontdict=font)
-        ax.set_ylim(-.05, .02)
         pos = ax.get_position()
         cax = plt.axes([pos.x0+pos.width+0.01, pos.y0, 0.03, pos.height])
         cbar = plt.colorbar(c0, cax=cax, ticks=None)

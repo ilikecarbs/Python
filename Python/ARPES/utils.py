@@ -725,7 +725,7 @@ class TB:
                     v_y = v[:, 1]
                     V_x = V_x + (v_x,)
                     V_y = V_y + (v_y,)
-                    plt.subplot(1, 3, n_bnd+1)
+                    plt.subplot(2, 3, n_bnd+1)
                     plt.plot(v_x, v_y)
                     plt.axis('equal')
                     plt.text(v_x[0], v_y[0], str(i))
@@ -1643,7 +1643,7 @@ def ang2k(angdg, Ekin, lat_unit=False, a=5.33, b=5.33, c=11,
               '\n', '==========================================')
 
 
-def partial_deriv(x, y, f):
+def partial_deriv_2D(x, y, f):
     """returns F
 
     **Derivatives of 2-dimensional data**
@@ -1696,6 +1696,62 @@ def partial_deriv(x, y, f):
     return F
 
 
+def curvature_MDC(x, y, f, C0):
+    """returns C
+
+    **Curvature 1dim**
+
+    Args
+    ----
+    :x:     x-axis
+    :f:     data (1-dim)
+    :C0:    curvature parameter
+
+    Return
+    ------
+    :C:     Curvature
+    """
+
+    # derivatives
+    F = partial_deriv_2D(x, y, f)
+
+    # unpack partial derivatives
+    fx = F['fx']
+    fxx = F['fxx']
+
+    C = - fxx / (C0 + fx ** 2) ** (3/2)
+
+    return C
+
+
+def curvature_EDC(x, y, f, C0):
+    """returns C
+
+    **Curvature 1dim**
+
+    Args
+    ----
+    :x:     x-axis
+    :f:     data (1-dim)
+    :C0:    curvature parameter
+
+    Return
+    ------
+    :C:     Curvature
+    """
+
+    # derivatives
+    F = partial_deriv_2D(x, y, f)
+
+    # unpack partial derivatives
+    fy = F['fy']
+    fyy = F['fyy']
+
+    C = - fyy / (C0 + fy ** 2) ** (3/2)
+
+    return C
+
+
 def curvature_equiv(x, y, f, C0):
     """returns C
 
@@ -1714,7 +1770,7 @@ def curvature_equiv(x, y, f, C0):
     """
 
     # derivatives
-    F = partial_deriv(x, y, f)
+    F = partial_deriv_2D(x, y, f)
 
     # unpack partial derivaatives
     fx = F['fx']
@@ -1756,7 +1812,7 @@ def curvature_inequiv(x, y, f, Cx, Cy):
     """
 
     # derivatives
-    F = partial_deriv(x, y, f)
+    F = partial_deriv_2D(x, y, f)
 
     # unpack partial derivaatives
     fx = F['fx']
@@ -1774,9 +1830,37 @@ def curvature_inequiv(x, y, f, Cx, Cy):
     # denominator term
     denom = (1 + Cx * fx ** 2 + Cy * fyy ** 2) ** (3 / 2)
 
-    C = (nom_1 - nom_2 + nom_3) / denom
+    C = - (nom_1 - nom_2 + nom_3) / denom
 
     return C
+
+
+def area(x, y):
+    """returns a
+
+    **Calculates enclosed area with Green's theorem**
+
+    Args
+    ----
+    :x:     x-data
+    :y:     y-data
+
+    Return
+    ------
+    :a:     area
+    """
+
+    a = 0
+    x0, y0 = x[0], y[0]
+    for i in range(len(x)-1):
+        x1 = x[i+1]
+        y1 = y[i+1]
+        dx = x1 - x0
+        dy = y1 - y0
+        a += 0.5 * (y0 * dx - x0 * dy)
+        x0 = x1
+        y0 = y1
+    return a
 
 
 """

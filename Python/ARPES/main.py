@@ -65,7 +65,10 @@ CSRO.fig22: Tight binding model folded SRO
 CSRO.fig23: Fit dispersions + FS
 CSRO.fig24: Alternative CSRO.fig1
 CSRO.fig25: Combining fig9 & fig10
-CSRO.fig26: Fermi surface counting(3.84 \pm .14)  TODO
+CSRO.fig26: Fermi surface counting CSRO (3.84 \pm .14)
+CSRO.fig27: Fermi surface counting CSRO unfolded
+CSRO.fig28: Fermi surface counting SRO
+CSRO.fig29: Fermi surface folded CSRO
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     Which figure do you desire?
@@ -82,6 +85,6 @@ CRO.fig1()
 # %%
 
 #CSRO.fig20(load=False)
- CSRO.fig25()
+ CSRO.fig29(print_fig=True)
 
 # %%
