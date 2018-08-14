@@ -590,6 +590,7 @@ class Methods:
 
         for i in range(it):
             intensity = gaussian_filter(intensity, sigma=sig)
+#            intensity = savgol_filter(intensity, 21, 6)
 
         self.int_smooth = intensity
 

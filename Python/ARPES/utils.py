@@ -336,7 +336,7 @@ def paramCSRO_fit():
 #    param = dict([('t1', .10362879), ('t2', .00468736), ('t3', .07764697),
 #                  ('t4', .04163935), ('t5', .01655971), ('t6', 0),
 #                  ('mu', .08132872), ('so', .04561293)])
-    
+
     # lr 1e-4 start from SRO (all disperions and FS) for fig23
 #    param = dict([('t1', .08765864), ('t2', .00950954), ('t3', .07530941),
 #                  ('t4', .04488273), ('t5', .0128184), ('t6', 0),
@@ -2131,7 +2131,6 @@ def lor(x, *p):
     Args
     ----
     :x:      momentum
-    :n:      number of Lorentzians
     :p[0]:   center
     :p[1]:   HWHM
     :p[2]:   amplitudes
@@ -2158,7 +2157,6 @@ def lor_2(x, *p):
     Args
     ----
     :x:          momentum
-    :n:          number of Lorentzians
     :p[0:1]:     center
     :p[2:3]:     HWHM
     :p[4:5]:     amplitudes
@@ -2185,7 +2183,6 @@ def lor_4(x, *p):
     Args
     ----
     :x:          momentum
-    :n:          number of Lorentzians
     :p[0:3]:     center
     :p[4:7]:     HWHM
     :p[8:-4]:    amplitudes
@@ -2212,7 +2209,6 @@ def lor_6(x, *p):
     Args
     ----
     :x:          momentum
-    :n:          number of Lorentzians
     :p[0:5]:     center
     :p[6:11]:    HWHM
     :p[12:-4]:   amplitudes
@@ -2266,7 +2262,6 @@ def lor_8(x, *p):
     Args
     ----
     :x:          momentum
-    :n:          number of Lorentzians
     :p[0:7]:     center
     :p[8:15]:    HWHM
     :p[16:-4]:   amplitudes
@@ -2285,6 +2280,32 @@ def lor_8(x, *p):
     return lor_8
 
 
+def gauss(x, *p):
+    """returns gauss
+
+    **wrapper function of gauss_n with n=1**
+
+    Args
+    ----
+    :x:        momentum axis
+    :p[0]:     center
+    :p[1]:     width
+    :p[2]:     amplitudes
+
+    :p[-3]:    constant
+    :p[-2]:    slope
+    :p[-1]:    quadratic
+
+    Return
+    ------
+    :gauss:    Gaussian
+    """
+
+    gauss = gauss_n(x, 1, *p)
+
+    return gauss
+
+
 def gauss_2(x, *p):
     """returns gauss_2
 
@@ -2293,7 +2314,6 @@ def gauss_2(x, *p):
     Args
     ----
     :x:          momentum axis
-    :n:          number of Gaussians
     :p[0:2]:     center
     :p[3:5]:     width
     :p[6:8]:     amplitudes
@@ -2310,3 +2330,10 @@ def gauss_2(x, *p):
     gauss_2 = gauss_n(x, 2, *p)
 
     return gauss_2
+
+
+"""
+%%%%%%%%%%%%%%%%%%%%%%%
+  External functions
+%%%%%%%%%%%%%%%%%%%%%%%
+"""

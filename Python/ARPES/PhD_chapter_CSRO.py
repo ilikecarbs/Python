@@ -9,7 +9,7 @@ Created on Wed Jun 20 11:30:51 2018
    PhD_chapter_CSRO
 %%%%%%%%%%%%%%%%%%%%%
 
-**Plotting helper functions**
+**Thesis figures Ca1.8Sr0.2RuO4**
 
 .. note::
         To-Do:

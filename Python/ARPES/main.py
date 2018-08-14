@@ -17,12 +17,19 @@ Created on Tue Jun 19 15:14:29 2018
             -
 """
 
+import PhD_chapter_Concepts as CON
 import PhD_chapter_CRO as CRO
 import PhD_chapter_CSRO as CSRO
 
 
 # %%
 """
+----------  Concept Figures   ----------
+CON.fig1:   Photoemission principle DOS
+CON.fig2:   Electron transmission
+CON.fig3:   EDC / MDC
+CON.fig4:   Experimental Setup
+
 ----------  Ca2RuO4 Figures   ----------
 CRO.fig1:   DFT plot: figure 3 of Nature Comm.
 CRO.fig2:   (L): DMFT plot: figure 3 of Nature Comm.
@@ -70,12 +77,19 @@ CSRO.fig27: Fermi surface counting CSRO unfolded
 CSRO.fig28: Fermi surface counting SRO
 CSRO.fig29: Fermi surface folded CSRO
 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     Which figure do you desire?
             enter below:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 """
+
+
+# %%
+
+CON.fig4()
+
 
 # %%
 
@@ -84,7 +98,7 @@ CRO.fig1()
 
 # %%
 
-#CSRO.fig20(load=False)
- CSRO.fig29(print_fig=True)
+# CSRO.fig20(load=False)
+CSRO.fig29(print_fig=True)
 
 # %%
