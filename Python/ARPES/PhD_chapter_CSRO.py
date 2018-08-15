@@ -9,7 +9,7 @@ Created on Wed Jun 20 11:30:51 2018
    PhD_chapter_CSRO
 %%%%%%%%%%%%%%%%%%%%%
 
-**Plotting helper functions**
+**Thesis figures Ca1.8Sr0.2RuO4**
 
 .. note::
         To-Do:
@@ -3590,10 +3590,10 @@ def fig22(print_fig=True):
     ax.plot([-1, 0], [0, -1], 'k-', lw=2)
     ax.plot([0, 1], [1, 0], 'k-', lw=2)
     ax.plot([0, 1], [-1, 0], 'k-', lw=2)
-    ax.plot([-.5, -.5], [-.5, .5], 'k--', lw=1)
-    ax.plot([.5, .5], [-.5, .5], 'k--', lw=1)
-    ax.plot([-.5, .5], [.5, .5], 'k--', lw=1)
-    ax.plot([-.5, .5], [-.5, -.5], 'k--', lw=1)
+    ax.plot([-.5, -.5], [-.5, .5], **kwargs_ef)
+    ax.plot([.5, .5], [-.5, .5], **kwargs_ef)
+    ax.plot([-.5, .5], [.5, .5], **kwargs_ef)
+    ax.plot([-.5, .5], [-.5, -.5], **kwargs_ef)
 
     # deocrate axes
     ax.set_xticks(np.arange(-kbnd - .5, kbnd + 1, .5))
@@ -3648,10 +3648,10 @@ def fig22(print_fig=True):
     ax2.plot([-2, 0], [0, -2], 'k-', lw=2)
     ax2.plot([0, 2], [2, 0], 'k-', lw=2)
     ax2.plot([0, 2], [-2, 0], 'k-', lw=2)
-    ax2.plot([-1, -1], [-1, 1], 'k--', lw=1)
-    ax2.plot([1, 1], [-1, 1], 'k--', lw=1)
-    ax2.plot([-1, 1], [1, 1], 'k--', lw=1)
-    ax2.plot([-1, 1], [-1, -1], 'k--', lw=1)
+    ax2.plot([-1, -1], [-1, 1], **kwargs_ef)
+    ax2.plot([1, 1], [-1, 1], **kwargs_ef)
+    ax2.plot([-1, 1], [1, 1], **kwargs_ef)
+    ax2.plot([-1, 1], [-1, -1], **kwargs_ef)
 
     # deocrate axes
     ax2.set_xticks(np.arange(-kbnd - 1, kbnd + 1, 1))
@@ -3998,6 +3998,400 @@ def fig25(print_fig=True):
     # add text
     axi.text(2e-1, 1e1, r'$\propto T^2$')
 
+    plt.show()
+
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+
+
+def fig26(print_fig=True):
+    """figure 26
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%
+    Fermi surface counting CSRO
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%
+    """
+
+    figname = 'CSROfig26'
+
+    # calculate band structure
+    kbnd = 1  # boundaries
+    tb = utils.TB(a=np.pi, kbnd=kbnd, kpoints=200)
+    param = utils.paramCSRO_fit()
+    tb.CSRO(param=param, e0=0.00, vert=True, proj=True)
+
+    # get vertices
+    VX = tb.VX
+    VY = tb.VY
+
+    # vertices of pockets
+    alpha = np.array([VX[3][3], VY[3][3]])
+    beta = np.array([VX[3][2], VY[3][2]])
+    gamma_1 = np.array([VX[4][0], VY[4][0]])
+    gamma_2 = np.array([VX[4][1], VY[4][1]])
+    gamma_3 = np.array([VX[4][2], VY[4][2]])
+    gamma_4 = np.array([VX[4][3], VY[4][3]])
+    delta_1 = np.array([VX[3][0], VY[3][0]])
+    delta_2 = np.array([VX[3][1], VY[3][1]])
+    delta_3 = np.array([VX[3][4], VY[3][4]])
+    delta_4 = np.array([VX[3][5], VY[3][5]])
+
+    bands = (alpha, beta, gamma_1, gamma_2, gamma_3, gamma_4,
+             delta_1, delta_2, delta_3, delta_4)  # collect bands
+
+    fig = plt.figure(figname, figsize=(7, 7), clear=True)
+
+    cols = ['C1', 'm', 'b', 'r']
+    lbls = [r'(a)  $electron$', r'(b)  $hole$',
+            r'(c)  $electron$', r'(d)  $hole$']
+    loc_x = [.08, .3, .52, .74]
+    FS_areas = np.zeros(4)  # placeholders
+    BZ = 4  # area of BZ
+
+    n = 0  # counter
+    m = 0
+    for band in bands:
+        if any(x == m for x in [0, 1, 2, 6]):
+            FS_areas[n] = utils.area(band[0, :], band[1, :])
+            ax = fig.add_subplot(1, 4, n+1)
+            ax.set_position([loc_x[n], .4, .2, .2])
+            ax.tick_params(**kwargs_ticks)
+            ax.plot([-1, -1], [-1, 1], **kwargs_ef)
+            ax.plot([1, 1], [-1, 1], **kwargs_ef)
+            ax.plot([-1, 1], [1, 1], **kwargs_ef)
+            ax.plot([-1, 1], [-1, -1], **kwargs_ef)
+            n += 1
+
+        ax.plot(band[0, :], band[1, :], color=cols[n-1], lw=1)
+        ax.fill(band[0, :], band[1, :], color=cols[n-1], alpha=.1)
+
+        ax.set_yticklabels([])
+        ax.set_xticklabels([])
+        ax.set_yticks([])
+        ax.set_xticks([])
+        ax.set_xlim(-1.4, 1.4)
+        ax.set_ylim(-1.4, 1.4)
+
+        if any(x == m for x in [0, 1]):
+            ax.text(-1.3, 1.1, lbls[n-1])
+        elif any(x == m for x in [2, 6]):
+            ax.text(-1.3, 1.1, lbls[n-1])
+#        if m == 0:
+#            ax.text(-.85, -.9, '1. BZ', fontdict=font)
+
+        m += 1
+    FS_areas = np.abs(FS_areas) / BZ
+    FS_areas[2] *= 4
+    FS_areas[3] *= 4
+
+    al = FS_areas[0]  # electron
+    be = FS_areas[1]  # hole
+    ga = FS_areas[2]  # electron
+    de = FS_areas[3]  # hole
+
+    n = (2 +  # full bands from folding
+         al +
+         ga +
+         (1 - de) +
+         (1 - be))
+
+    print(n)
+
+    plt.show()
+
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+
+
+def fig27(print_fig=True):
+    """figure 27
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    Fermi surface counting CSRO unfolded
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    """
+
+    figname = 'CSROfig27'
+
+    # calculate band structure
+    kbnd = 2  # boundaries
+    tb = utils.TB(a=np.pi, kbnd=kbnd, kpoints=200)
+    param = utils.paramCSRO_fit()
+    tb.SRO(param=param, e0=0.00, vert=True, proj=True)
+
+    # get vertices
+    VX = tb.VX
+    VY = tb.VY
+
+    # vertices of pockets
+    alpha_1 = np.array([VX[0][0], VY[0][0]])
+    alpha_2 = np.array([VX[0][1], VY[0][1]])
+    alpha_3 = np.array([VX[0][4], VY[0][4]])
+    alpha_4 = np.array([VX[0][5], VY[0][5]])
+    beta = np.array([VX[2][8], VY[2][8]])
+    gamma_1 = np.array([VX[1][0], VY[1][0]])
+    gamma_2 = np.array([VX[1][1], VY[1][1]])
+    gamma_3 = np.array([VX[1][2], VY[1][2]])
+    gamma_4 = np.array([VX[1][3], VY[1][3]])
+    delta_1 = np.array([VX[0][2], VY[0][2]])
+    delta_2 = np.array([VX[0][3], VY[0][3]])
+    delta_3 = np.array([VX[0][6], VY[0][6]])
+    delta_4 = np.array([VX[0][7], VY[0][7]])
+
+    bands = (alpha_1, alpha_2, alpha_3, alpha_4, beta,
+             gamma_1, gamma_2, gamma_3, gamma_4,
+             delta_1, delta_2, delta_3, delta_4)  # collect bands
+
+    fig = plt.figure(figname, figsize=(7, 7), clear=True)
+
+    cols = ['m', 'g', 'c', 'C1']
+    lbls = [r'(a)  $hole$', r'(b)  $electron$',
+            r'(c)  $hole$', r'(d)  $electron$']
+    loc_x = [.08, .3, .52, .74]
+    FS_areas = np.zeros(4)  # placeholders
+    BZ = 4  # area of BZ
+
+    n = 0  # counter
+    m = 0
+    for band in bands:
+        if any(x == m for x in [0, 4, 5, 9]):
+            FS_areas[n] = utils.area(band[0, :], band[1, :])
+            ax = fig.add_subplot(1, 4, n+1)
+            ax.set_position([loc_x[n], .4, .2, .2])
+            ax.tick_params(**kwargs_ticks)
+            ax.plot([-1, -1], [-1, 1], **kwargs_ef)
+            ax.plot([1, 1], [-1, 1], **kwargs_ef)
+            ax.plot([-1, 1], [1, 1], **kwargs_ef)
+            ax.plot([-1, 1], [-1, -1], **kwargs_ef)
+#            ax.plot([-1, 0], [0, 1], 'k--', lw=0.5, alpha=.5)
+#            ax.plot([-1, 0], [0, -1], 'k--', lw=0.5, alpha=.5)
+#            ax.plot([0, 1], [1, 0], 'k--', lw=0.5, alpha=.5)
+#            ax.plot([0, 1], [-1, 0], 'k--', lw=0.5, alpha=.5)
+            n += 1
+
+        ax.plot(band[0, :], band[1, :], color=cols[n-1], lw=1)
+        ax.fill(band[0, :], band[1, :], color=cols[n-1], alpha=.1)
+
+        ax.set_yticklabels([])
+        ax.set_xticklabels([])
+        ax.set_yticks([])
+        ax.set_xticks([])
+        ax.set_xlim(-1.4, 1.4)
+        ax.set_ylim(-1.4, 1.4)
+
+        props = dict(fc='w', ec='w', alpha=0.8,
+                     pad=.0)
+
+        if any(x == m for x in [0, 4]):
+            ax.text(-1.3, 1.1, lbls[n-1], bbox=props)
+        elif any(x == m for x in [5, 9]):
+            ax.text(-1.3, 1.1, lbls[n-1], bbox=props)
+#        if m == 0:
+#            ax.text(-.6, -.9, '1. BZ', fontdict=font)
+
+        m += 1
+    FS_areas = np.abs(FS_areas) / BZ
+
+    al = FS_areas[0]  # hole
+    be = FS_areas[1]  # electron
+    ga = FS_areas[2]  # hole
+    de = FS_areas[3]  # electron
+
+    n = (2 * (1 - al) +
+         2 * be +
+         2 * (1 - ga) +
+         2 * de)
+
+    print(n)
+
+    plt.show()
+
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+
+
+def fig28(print_fig=True):
+    """figure 28
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%
+    Fermi surface counting SRO
+    %%%%%%%%%%%%%%%%%%%%%%%%%%
+    """
+
+    figname = 'CSROfig28'
+
+    # calculate band structure
+    kbnd = 2  # boundaries
+    tb = utils.TB(a=np.pi, kbnd=kbnd, kpoints=200)
+    param = utils.paramSRO()
+    tb.SRO(param=param, e0=0.00, vert=True, proj=True)
+
+    # get vertices
+    VX = tb.VX
+    VY = tb.VY
+
+    # vertices of pockets
+    alpha_1 = np.array([VX[0][0], VY[0][0]])
+    alpha_2 = np.array([VX[0][1], VY[0][1]])
+    alpha_3 = np.array([VX[0][2], VY[0][2]])
+    alpha_4 = np.array([VX[0][3], VY[0][3]])
+    beta = np.array([VX[2][8], VY[2][8]])
+    gamma = np.array([VX[1][8], VY[1][8]])
+
+    bands = (alpha_1, alpha_2, alpha_3, alpha_4, beta, gamma)
+
+    fig = plt.figure(figname, figsize=(7, 7), clear=True)
+
+    cols = ['m', 'g', 'c', 'C1']
+    lbls = [r'(a)  $hole$', r'(b)  $electron$',
+            r'(c)  $electron$']
+    loc_x = [.08, .3, .52, .74]
+    FS_areas = np.zeros(3)  # placeholders
+    BZ = 4  # area of BZ
+
+    n = 0  # counter
+    m = 0
+    for band in bands:
+        if any(x == m for x in [0, 4, 5]):
+            FS_areas[n] = utils.area(band[0, :], band[1, :])
+            ax = fig.add_subplot(1, 4, n+1)
+            ax.set_position([loc_x[n], .4, .2, .2])
+            ax.tick_params(**kwargs_ticks)
+            ax.plot([-1, -1], [-1, 1], **kwargs_ef)
+            ax.plot([1, 1], [-1, 1], **kwargs_ef)
+            ax.plot([-1, 1], [1, 1], **kwargs_ef)
+            ax.plot([-1, 1], [-1, -1], **kwargs_ef)
+            n += 1
+
+        ax.plot(band[0, :], band[1, :], color=cols[n-1], lw=1)
+        ax.fill(band[0, :], band[1, :], color=cols[n-1], alpha=.1)
+
+        ax.set_yticklabels([])
+        ax.set_xticklabels([])
+        ax.set_yticks([])
+        ax.set_xticks([])
+        ax.set_xlim(-1.4, 1.4)
+        ax.set_ylim(-1.4, 1.4)
+
+        props = dict(fc='w', ec='w', alpha=0.8,
+                     pad=.0)
+
+        if any(x == m for x in [0, 4]):
+            ax.text(-1.3, 1.1, lbls[n-1], bbox=props)
+        elif any(x == m for x in [5]):
+            ax.text(-1.3, 1.1, lbls[n-1], bbox=props)
+#        if m == 0:
+#            ax.text(-.6, -.9, '1. BZ', fontdict=font)
+
+        m += 1
+    FS_areas = np.abs(FS_areas) / BZ
+
+    al = FS_areas[0]  # hole
+    be = FS_areas[1]  # electron
+    ga = FS_areas[2]  # hole
+
+    n = (2 * (1 - al) +
+         2 * be +
+         2 * ga)
+
+    print(n)
+
+    plt.show()
+
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+
+
+def fig29(print_fig=True):
+    """figure 29
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%
+    Fermi surface folded CSRO
+    %%%%%%%%%%%%%%%%%%%%%%%%%
+    """
+
+    figname = 'CSROfig29'
+
+    # calculate band structure
+    kbnd = 1.5  # boundaries
+    tb = utils.TB(a=np.pi, kbnd=kbnd, kpoints=200)
+    param = utils.paramCSRO_fit()
+    tb.SRO_folded(param=param, e0=-0.00, vert=True, proj=True)
+
+    # get vertices
+    VX = tb.VX
+    VY = tb.VY
+
+    # vertices of pockets
+    alpha_1 = np.array([VX[0][0], VY[0][0]])
+    alpha_2 = np.array([VX[0][2], VY[0][2]])
+    alpha_3 = np.array([VX[0][3], VY[0][3]])
+    alpha_4 = np.array([VX[0][6], VY[0][6]])
+    beta = np.array([VX[2][2], VY[2][2]])
+    gamma_1 = np.array([VX[1][0], VY[1][0]])
+    gamma_2 = np.array([VX[1][1], VY[1][1]])
+    gamma_3 = np.array([VX[1][2], VY[1][2]])
+    gamma_4 = np.array([VX[1][3], VY[1][3]])
+    delta_1 = np.array([VX[0][1], VY[0][1]])
+    delta_2 = np.array([VX[0][4], VY[0][4]])
+    delta_3 = np.array([VX[0][5], VY[0][5]])
+    delta_4 = np.array([VX[0][7], VY[0][7]])
+
+    f_alpha = np.array([VX[3][4], VY[3][4]])
+    f_beta = np.array([VX[5][0], VY[5][0]])
+    f_gamma = np.array([VX[4][2], VY[4][2]])
+    f_delta = np.array([VX[3][5], VY[3][5]])
+
+    bands = (alpha_1, alpha_2, alpha_3, alpha_4, beta,
+             gamma_1, gamma_2, gamma_3, gamma_4,
+             delta_1, delta_2, delta_3, delta_4)
+
+    f_bands = (f_alpha, f_beta,
+               f_gamma, f_delta)
+
+    fig = plt.figure(figname, figsize=(7, 7), clear=True)
+    ax = fig.add_subplot(121)
+    ax.set_position([.3, .3, .4, .4])
+    ax.tick_params(**kwargs_ticks)
+
+    cols = ['m', 'g', 'c', 'C1']
+
+    n = 0  # counter
+    m = 0
+    for band in bands:
+        if any(x == m for x in [0, 4, 5, 9]):
+            n += 1
+        ax.plot(band[0, :], band[1, :], color=cols[n-1], lw=1)
+        ax.fill(band[0, :], band[1, :], color=cols[n-1], alpha=.1)
+        m += 1
+
+    n = 0
+    m = 0
+    for band in f_bands:
+        if any(x == m for x in [0, 1, 2, 3]):
+            n += 1
+        ax.plot(band[0, :], band[1, :], color=cols[n-1], lw=1, ls='--')
+#        ax.fill(band[0, :], band[1, :], color=cols[n], alpha=.1)
+        m += 1
+
+    ax.plot([-.5, -.5], [-.5, .5], 'k:', lw=1.5)
+    ax.plot([.5, .5], [-.5, .5], 'k:', lw=1.5)
+    ax.plot([-.5, .5], [.5, .5], 'k:', lw=1.5)
+    ax.plot([-.5, .5], [-.5, -.5], 'k:', lw=1.5)
+    ax.plot([-1, 0], [0, 1], **kwargs_ef, alpha=.2)
+    ax.plot([-1, 0], [0, -1], **kwargs_ef, alpha=.2)
+    ax.plot([0, 1], [1, 0], **kwargs_ef, alpha=.2)
+    ax.plot([0, 1], [-1, 0], **kwargs_ef, alpha=.2)
+    ax.set_yticklabels([])
+    ax.set_xticklabels([])
+    ax.set_yticks([])
+    ax.set_xticks([])
+    ax.set_xlim(-1, 1)
+    ax.set_ylim(-1, 1)
     plt.show()
 
     # Save figure

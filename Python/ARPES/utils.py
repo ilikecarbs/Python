@@ -336,7 +336,7 @@ def paramCSRO_fit():
 #    param = dict([('t1', .10362879), ('t2', .00468736), ('t3', .07764697),
 #                  ('t4', .04163935), ('t5', .01655971), ('t6', 0),
 #                  ('mu', .08132872), ('so', .04561293)])
-    
+
     # lr 1e-4 start from SRO (all disperions and FS) for fig23
 #    param = dict([('t1', .08765864), ('t2', .00950954), ('t3', .07530941),
 #                  ('t4', .04488273), ('t5', .0128184), ('t6', 0),
@@ -725,7 +725,7 @@ class TB:
                     v_y = v[:, 1]
                     V_x = V_x + (v_x,)
                     V_y = V_y + (v_y,)
-                    plt.subplot(1, 3, n_bnd+1)
+                    plt.subplot(2, 3, n_bnd+1)
                     plt.plot(v_x, v_y)
                     plt.axis('equal')
                     plt.text(v_x[0], v_y[0], str(i))
@@ -1573,77 +1573,123 @@ def optimize_TB(Kx, Ky, En, it_max, P):
 
 def ang2k(angdg, Ekin, lat_unit=False, a=5.33, b=5.33, c=11,
           V0=0, thdg=0, tidg=0, phidg=0):
-        """returns k, k_V0
+    """returns k, k_V0
 
-        **Converts detector angles into k-space**
+    **Converts detector angles into k-space**
 
-        Args
-        ----
-        :angdg:     detector angles in degrees
-        :Ekin:      photon kinetic energy
-        :lat_unit:  lattice units used (Boolean)
-        :a, b, c:   lattice parameters
-        :V0:        inner potential
-        :thdg:      manipulator angle theta in degrees
-        :tidg:      manipulator angle tilt in degrees
-        :phidg:     manipulator angle phi in degrees
+    Args
+    ----
+    :angdg:     detector angles in degrees
+    :Ekin:      photon kinetic energy
+    :lat_unit:  lattice units used (Boolean)
+    :a, b, c:   lattice parameters
+    :V0:        inner potential
+    :thdg:      manipulator angle theta in degrees
+    :tidg:      manipulator angle tilt in degrees
+    :phidg:     manipulator angle phi in degrees
 
-        Return
-        ------
-        :k:        k-vector
-        :k_V0:     k-vector (with inner potential)
-        """
+    Return
+    ------
+    :k:        k-vector
+    :k_V0:     k-vector (with inner potential)
+    """
 
-        hbar = 6.58212e-16  # eV * s
-        me = 5.68563e-32  # eV * s^2 / Angstrom^2
-        ang = np.pi * angdg / 180
-        th = np.pi * thdg / 180
-        ti = np.pi * tidg / 180
-        phi = np.pi * phidg / 180
+    hbar = 6.58212e-16  # eV * s
+    me = 5.68563e-32  # eV * s^2 / Angstrom^2
+    ang = np.pi * angdg / 180
+    th = np.pi * thdg / 180
+    ti = np.pi * tidg / 180
+    phi = np.pi * phidg / 180
 
-        # Rotation matrices
-        Ti = np.array([
-                [1, 0, 0],
-                [0, np.cos(ti), np.sin(ti)],
-                [0, -np.sin(ti), np.cos(ti)]
-                ])
-        Phi = np.array([
-                [np.cos(phi), -np.sin(phi), 0],
-                [np.sin(phi), np.cos(phi), 0],
-                [0, 0, 1]
-                ])
-        Th = np.array([
-                [np.cos(th), 0, -np.sin(th)],
-                [0, 1, 0],
-                [np.sin(th), 0, np.cos(th)]
-                ])
+    # Rotation matrices
+    Ti = np.array([
+            [1, 0, 0],
+            [0, np.cos(ti), np.sin(ti)],
+            [0, -np.sin(ti), np.cos(ti)]
+            ])
+    Phi = np.array([
+            [np.cos(phi), -np.sin(phi), 0],
+            [np.sin(phi), np.cos(phi), 0],
+            [0, 0, 1]
+            ])
+    Th = np.array([
+            [np.cos(th), 0, -np.sin(th)],
+            [0, 1, 0],
+            [np.sin(th), 0, np.cos(th)]
+            ])
 
-        # Norm of k-vector
-        k_norm = np.sqrt(2 * me * Ekin) / hbar
-        k_norm_V0 = np.sqrt(2 * me * (Ekin + V0)) / hbar
+    # Norm of k-vector
+    k_norm = np.sqrt(2 * me * Ekin) / hbar
+    k_norm_V0 = np.sqrt(2 * me * (Ekin + V0)) / hbar
 
-        # Placeholders
-        kv = np.ones((3, 1))
-        kv_V0 = np.ones((3, 1))
+    # Placeholders
+    kv = np.ones((3, 1))
+    kv_V0 = np.ones((3, 1))
 
-        # Build k-vector
-        kv = np.array([k_norm * np.sin(ang), 0 * ang, k_norm * np.cos(ang)])
-        kv_V0 = np.array([k_norm * np.sin(ang), 0 * ang,
-                          np.sqrt(k_norm_V0**2 - (k_norm * np.sin(ang)**2))])
-        k = np.matmul(Phi, np.matmul(Ti, np.matmul(Th, kv)))
-        k_V0 = np.matmul(Phi, np.matmul(Ti, np.matmul(Th, kv_V0)))
+    # Build k-vector
+    kv = np.array([k_norm * np.sin(ang), 0 * ang, k_norm * np.cos(ang)])
+    kv_V0 = np.array([k_norm * np.sin(ang), 0 * ang,
+                      np.sqrt(k_norm_V0**2 - (k_norm * np.sin(ang)**2))])
+    k = np.matmul(Phi, np.matmul(Ti, np.matmul(Th, kv)))
+    k_V0 = np.matmul(Phi, np.matmul(Ti, np.matmul(Th, kv_V0)))
 
-        if lat_unit:  # lattice units
-            k *= np.array([a / np.pi, b / np.pi, c / np.pi])
-            k_V0 *= np.array([a / np.pi, b / np.pi, c / np.pi])
+    if lat_unit:  # lattice units
+        k *= np.array([a / np.pi, b / np.pi, c / np.pi])
+        k_V0 *= np.array([a / np.pi, b / np.pi, c / np.pi])
 
-        return k, k_V0
+    return k, k_V0
 
-        print('\n ~ Angles converted into k-space',
-              '\n', '==========================================')
+    print('\n ~ Angles converted into k-space',
+          '\n', '==========================================')
 
 
-def partial_deriv(x, y, f):
+def det_angle(k_i, angdg, thdg, tidg, phidg):
+    """returns k
+
+    **Transforms detector angles with manipulator angles**
+
+    Args
+    ----
+    :k_i:       distance to detector
+    :angdg:     detector angles
+    :thdg:      theta
+    :tidg:      tilt
+    :phidg:     azimuth
+
+    Return
+    ------
+    :k:     transformed vector
+    """
+
+    ang = np.pi * angdg / 180
+    th = np.pi * thdg / 180
+    ti = np.pi * tidg / 180
+    phi = np.pi * phidg / 180
+
+    # Rotation matrices
+    Ti = np.array([
+            [1, 0, 0],
+            [0, np.cos(ti), np.sin(ti)],
+            [0, -np.sin(ti), np.cos(ti)]
+            ])
+    Phi = np.array([
+            [np.cos(phi), -np.sin(phi), 0],
+            [np.sin(phi), np.cos(phi), 0],
+            [0, 0, 1]
+            ])
+    Th = np.array([
+            [np.cos(th), 0, -np.sin(th)],
+            [0, 1, 0],
+            [np.sin(th), 0, np.cos(th)]
+            ])
+
+    kv = np.array([k_i * np.sin(ang), 0 * ang, k_i * np.cos(ang)])
+    k = np.matmul(Phi, np.matmul(Ti, np.matmul(Th, kv)))
+
+    return k
+
+
+def partial_deriv_2D(x, y, f):
     """returns F
 
     **Derivatives of 2-dimensional data**
@@ -1696,6 +1742,62 @@ def partial_deriv(x, y, f):
     return F
 
 
+def curvature_MDC(x, y, f, C0):
+    """returns C
+
+    **Curvature 1dim**
+
+    Args
+    ----
+    :x:     x-axis
+    :f:     data (1-dim)
+    :C0:    curvature parameter
+
+    Return
+    ------
+    :C:     Curvature
+    """
+
+    # derivatives
+    F = partial_deriv_2D(x, y, f)
+
+    # unpack partial derivatives
+    fx = F['fx']
+    fxx = F['fxx']
+
+    C = - fxx / (C0 + fx ** 2) ** (3/2)
+
+    return C
+
+
+def curvature_EDC(x, y, f, C0):
+    """returns C
+
+    **Curvature 1dim**
+
+    Args
+    ----
+    :x:     x-axis
+    :f:     data (1-dim)
+    :C0:    curvature parameter
+
+    Return
+    ------
+    :C:     Curvature
+    """
+
+    # derivatives
+    F = partial_deriv_2D(x, y, f)
+
+    # unpack partial derivatives
+    fy = F['fy']
+    fyy = F['fyy']
+
+    C = - fyy / (C0 + fy ** 2) ** (3/2)
+
+    return C
+
+
 def curvature_equiv(x, y, f, C0):
     """returns C
 
@@ -1714,7 +1816,7 @@ def curvature_equiv(x, y, f, C0):
     """
 
     # derivatives
-    F = partial_deriv(x, y, f)
+    F = partial_deriv_2D(x, y, f)
 
     # unpack partial derivaatives
     fx = F['fx']
@@ -1756,7 +1858,7 @@ def curvature_inequiv(x, y, f, Cx, Cy):
     """
 
     # derivatives
-    F = partial_deriv(x, y, f)
+    F = partial_deriv_2D(x, y, f)
 
     # unpack partial derivaatives
     fx = F['fx']
@@ -1774,9 +1876,37 @@ def curvature_inequiv(x, y, f, Cx, Cy):
     # denominator term
     denom = (1 + Cx * fx ** 2 + Cy * fyy ** 2) ** (3 / 2)
 
-    C = (nom_1 - nom_2 + nom_3) / denom
+    C = - (nom_1 - nom_2 + nom_3) / denom
 
     return C
+
+
+def area(x, y):
+    """returns a
+
+    **Calculates enclosed area with Green's theorem**
+
+    Args
+    ----
+    :x:     x-data
+    :y:     y-data
+
+    Return
+    ------
+    :a:     area
+    """
+
+    a = 0
+    x0, y0 = x[0], y[0]
+    for i in range(len(x)-1):
+        x1 = x[i+1]
+        y1 = y[i+1]
+        dx = x1 - x0
+        dy = y1 - y0
+        a += 0.5 * (y0 * dx - x0 * dy)
+        x0 = x1
+        y0 = y1
+    return a
 
 
 """
@@ -2047,7 +2177,6 @@ def lor(x, *p):
     Args
     ----
     :x:      momentum
-    :n:      number of Lorentzians
     :p[0]:   center
     :p[1]:   HWHM
     :p[2]:   amplitudes
@@ -2074,7 +2203,6 @@ def lor_2(x, *p):
     Args
     ----
     :x:          momentum
-    :n:          number of Lorentzians
     :p[0:1]:     center
     :p[2:3]:     HWHM
     :p[4:5]:     amplitudes
@@ -2101,7 +2229,6 @@ def lor_4(x, *p):
     Args
     ----
     :x:          momentum
-    :n:          number of Lorentzians
     :p[0:3]:     center
     :p[4:7]:     HWHM
     :p[8:-4]:    amplitudes
@@ -2128,7 +2255,6 @@ def lor_6(x, *p):
     Args
     ----
     :x:          momentum
-    :n:          number of Lorentzians
     :p[0:5]:     center
     :p[6:11]:    HWHM
     :p[12:-4]:   amplitudes
@@ -2182,7 +2308,6 @@ def lor_8(x, *p):
     Args
     ----
     :x:          momentum
-    :n:          number of Lorentzians
     :p[0:7]:     center
     :p[8:15]:    HWHM
     :p[16:-4]:   amplitudes
@@ -2201,6 +2326,32 @@ def lor_8(x, *p):
     return lor_8
 
 
+def gauss(x, *p):
+    """returns gauss
+
+    **wrapper function of gauss_n with n=1**
+
+    Args
+    ----
+    :x:        momentum axis
+    :p[0]:     center
+    :p[1]:     width
+    :p[2]:     amplitudes
+
+    :p[-3]:    constant
+    :p[-2]:    slope
+    :p[-1]:    quadratic
+
+    Return
+    ------
+    :gauss:    Gaussian
+    """
+
+    gauss = gauss_n(x, 1, *p)
+
+    return gauss
+
+
 def gauss_2(x, *p):
     """returns gauss_2
 
@@ -2209,7 +2360,6 @@ def gauss_2(x, *p):
     Args
     ----
     :x:          momentum axis
-    :n:          number of Gaussians
     :p[0:2]:     center
     :p[3:5]:     width
     :p[6:8]:     amplitudes
@@ -2226,3 +2376,10 @@ def gauss_2(x, *p):
     gauss_2 = gauss_n(x, 2, *p)
 
     return gauss_2
+
+
+"""
+%%%%%%%%%%%%%%%%%%%%%%%
+  External functions
+%%%%%%%%%%%%%%%%%%%%%%%
+"""

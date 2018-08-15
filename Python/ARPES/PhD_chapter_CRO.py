@@ -9,7 +9,7 @@ Created on Wed Jun 20 11:30:51 2018
    PhD_chapter_CRO
 %%%%%%%%%%%%%%%%%%%%%
 
-**Plotting helper functions**
+**Thesis figures Ca2RuO4**
 
 .. note::
         To-Do:
