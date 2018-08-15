@@ -21,6 +21,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from mpl_toolkits.mplot3d import Axes3D
+from scipy.special import sph_harm
+
 
 # Set standard fonts
 plt.rcParams['mathtext.fontset'] = 'cm'
@@ -547,6 +549,374 @@ def fig4(print_fig=True):
     ax.plot(x_cir, y_cir, -1, 'k--', alpha=.1, lw=.5)
     plt.axis('off')
     ax.view_init(elev=20, azim=30)
+
+    plt.show()
+
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+
+
+def fig5(print_fig=True):
+    """figure 5
+
+    %%%%%%%%%%%%%%%%
+    eg, t2g orbitals
+    %%%%%%%%%%%%%%%%
+    """
+
+    figname = 'CONfig5'
+
+    # create figure
+    fig = plt.figure(figname, figsize=(8, 8), clear=True)
+    ax = fig.add_axes([.1, .1, .8, .8], projection='3d')
+
+    theta_1d = np.linspace(0, np.pi, 300)
+    phi_1d = np.linspace(0, 2*np.pi, 300)
+
+    theta_2d, phi_2d = np.meshgrid(theta_1d, phi_1d)
+    xyz_2d = np.array([np.sin(theta_2d) * np.sin(phi_2d),
+                      np.sin(theta_2d) * np.cos(phi_2d),
+                      np.cos(theta_2d)])
+
+    colormap = cm.ScalarMappable(cmap=plt.get_cmap("PRGn"))
+    colormap.set_clim(-.45, .45)
+
+    l_ = 2  # angular momentum
+
+    # build orbitals
+    dz2 = sph_harm(0, l_, phi_2d, theta_2d)
+
+    dxz = ((sph_harm(-1, l_, phi_2d, theta_2d)
+           - sph_harm(1, l_, phi_2d, theta_2d))
+           / np.sqrt(2))
+
+    dyz = (1j * (sph_harm(-1, l_, phi_2d, theta_2d)
+           + sph_harm(1, l_, phi_2d, theta_2d))
+           / np.sqrt(2))
+
+    dxy = (1j * (sph_harm(-2, l_, phi_2d, theta_2d)
+           - sph_harm(2, l_, phi_2d, theta_2d))
+           / np.sqrt(2))
+
+    dx2y2 = ((sph_harm(-2, l_, phi_2d, theta_2d)
+             + sph_harm(2, l_, phi_2d, theta_2d))
+             / np.sqrt(2))
+
+    dz2_r = np.abs(dz2.real)*xyz_2d
+    dxz_r = np.abs(dxz.real)*xyz_2d
+    dyz_r = np.abs(dyz.real)*xyz_2d
+    dxy_r = np.abs(dxy.real)*xyz_2d
+    dx2y2_r = np.abs(dx2y2.real)*xyz_2d
+
+    orbitals_r = (dxy_r, dxz_r, dyz_r, dz2_r, dx2y2_r)
+    orbitals = (dxy, dxz, dyz, dz2, dx2y2)
+
+    # locations
+    x = [0, 0, 0, 0, 0]
+    y = [1.1, 2.6, 4.1, 1.85, 3.35]
+    z = [1, 1, 1, 2.65, 2.65]
+
+    # plot orbitals
+    for i in range(5):
+        ax.plot_surface(orbitals_r[i][0]+x[i], orbitals_r[i][1]+y[i],
+                        orbitals_r[i][2]+z[i],
+                        facecolors=colormap.to_rgba(orbitals[i].real),
+                        rstride=2, cstride=2)
+
+    # surfaces
+    X_t2g = np.zeros((2, 2))
+    z_t2g = [.2, 1.9]
+    y_t2g = [.2, 4.9]
+    Y_t2g, Z_t2g = np.meshgrid(y_t2g, z_t2g)
+
+    X_eg = np.zeros((2, 2))
+    z_eg = [1.9, 3.6]
+    y_eg = [.2, 4.9]
+    Y_eg, Z_eg = np.meshgrid(y_eg, z_eg)
+
+    # plot surfaces
+    ax.plot_surface(X_t2g, Y_t2g, Z_t2g, alpha=.2, color='b')
+    ax.plot_surface(X_eg, Y_eg, Z_eg, alpha=.2, color='C0')
+    ax.quiver(0, 0, 0, 0, 0, 1, arrow_length_ratio=.08,
+              color='k')
+    ax.quiver(0, 0, 0, 0, 1, 0, arrow_length_ratio=.06,
+              color='k')
+    ax.quiver(0, 0, 0, 1, 0, 0, arrow_length_ratio=.08,
+              color='k')
+    ax.set_xlim(1, 4)
+    ax.set_ylim(2.5, 5.5)
+    ax.set_zlim(1, 4)
+    plt.axis('off')
+    ax.view_init(elev=20, azim=30)
+
+    # add text
+    ax.text(1.25, 0, 0, '$x$', fontdict=font)
+    ax.text(0, 1.1, -.05, '$y$', fontdict=font)
+    ax.text(0, -.05, 1.1, '$z$', fontdict=font)
+
+    ax.text(0, 1.05, 1.45, r'$d_{xy}$', fontdict=font)
+    ax.text(0, 2.5, 1.5, r'$d_{yz}$', fontdict=font)
+    ax.text(0, 3.85, 1.5, r'$d_{xz}$', fontdict=font)
+    ax.text(0, 1.75, 3.35, r'$d_{z^2}$', fontdict=font)
+    ax.text(0, 3.1, 3.05, r'$d_{x^2-y^2}$', fontdict=font)
+
+    ax.text(0, .3, 3.3, r'$e_{g}$', fontsize=15, color='k')
+    ax.text(0, .3, 1.6, r'$t_{2g}$', fontsize=15, color='k')
+
+    plt.show()
+
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+
+
+def fig6(print_fig=True):
+    """figure 6
+
+    %%%%%%%%%%%%%%%%%%
+    Manipulator angles
+    %%%%%%%%%%%%%%%%%%
+    """
+
+    figname = 'CONfig6'
+
+    fig = plt.figure(figname, figsize=(8, 8), clear=True)
+
+    ax = fig.add_axes([.1, .1, .8, .8], projection='3d')
+
+    k_i = 3
+    phi, theta = np.mgrid[0.0:0.5*np.pi:180j, 0.0:2.0*np.pi:720j]
+    x_i = k_i * np.sin(phi) * np.cos(theta)
+    y_i = k_i * np.sin(phi) * np.sin(theta)
+    z_i = k_i * np.cos(phi)
+
+    # draw hemisphere
+    ax.plot_surface(x_i, y_i, z_i, color='C8', alpha=.1)
+
+    # detector angles
+    angdg = np.linspace(-20, 20, 100)
+    thdg = 10
+    tidg = 20
+    phidg = 0
+
+    # angle x-axis
+    phi = np.pi/8
+
+    # angle indicators
+    k = utils.det_angle(k_i, angdg, thdg, tidg, phidg)
+    k_ti = utils.det_angle(2.2, np.linspace(0, thdg, 30), thdg, tidg, phidg)
+    k_0 = utils.det_angle(k_i, 0, 0, tidg, phidg)
+#    k_m = det_angle(.6, angdg, thdg, tidg, phidg)
+    k_full = utils.det_angle(k_i, np.linspace(-90, 90, 200), 0, tidg, phidg)
+
+    # angle indicator
+    x_th_m = np.zeros(50)
+    y_th_m = 1.5 * np.sin(np.linspace(0, tidg*np.pi/180, 50))
+    z_th_m = 1.5 * np.cos(np.linspace(0, tidg*np.pi/180, 50))
+
+    x_phi_m = 1.7 * np.sin(np.linspace(0, phi, 50))
+    y_phi_m = 1.7 * np.cos(np.linspace(0, phi, 50))
+    z_phi_m = np.zeros(50)
+
+    # lines
+    ax.quiver(0, 0, 0, 0, 0, k_i, color='k', arrow_length_ratio=.06, lw=2)
+    ax.quiver(0, 0, 0, k_i*np.sin(phi), k_i*np.cos(phi), 0,
+              color='k', arrow_length_ratio=.06, lw=2)
+    ax.quiver(0, 0, 0, k_i*np.sin(phi-np.pi/2), k_i*np.cos(phi-np.pi/2), 0,
+              color='k', arrow_length_ratio=.06, lw=2)
+    ax.plot([0, 0], [0, k_i], [0, 0], 'k--', lw=1)
+    ax.plot([0, k[0, 50]], [0, k[1, 50]], [0, k[2, 50]], 'k--', lw=1)
+    ax.plot([0, k_0[0]], [0, k_0[1]], [0, k_0[2]], 'k--', lw=1)
+
+    ax.plot(k_full[0], k_full[1], k_full[2], **kwargs_ef)
+    ax.plot([0, k[0, -1]], [0, k[1, -1]], [0, k[2, -1]], **kwargs_ef)
+    ax.plot([0, k[0, 0]], [0, k[1, 0]], [0, k[2, 0]], **kwargs_ef)
+    ax.plot(k[0], k[1], k[2], 'r-', lw=3)
+    ax.plot(k_ti[0], k_ti[1], k_ti[2], 'C0-')
+    ax.plot(x_th_m, y_th_m, z_th_m, 'C0-')
+    ax.plot(x_phi_m, y_phi_m, z_phi_m, 'C0-')
+
+    # Cylinder
+    kwargs_cyl = {'alpha': .05, 'color': 'k'}  # keywords cylinder
+    r = 3
+    x_cyl = np.linspace(-r, r, 100)
+    z_cyl = np.linspace(-1, 0, 100)
+    X_cyl, Z_cyl = np.meshgrid(x_cyl, z_cyl)
+    Y_cyl = np.sqrt(r**2 - X_cyl**2)
+
+    x_cir = r * np.cos(np.linspace(0, 2*np.pi, 360))
+    y_cir = r * np.sin(np.linspace(0, 2*np.pi, 360))
+
+    R, Phi = np.meshgrid(np.linspace(0, r, 100), np.linspace(0, 2*np.pi, 100))
+
+    X_cir = R * np.cos(Phi)
+    Y_cir = R * np.sin(Phi)
+    Z_ceil = np.zeros((100, 100))
+    Z_floor = -np.ones((100, 100))
+
+    # draw cylinder
+    ax.plot_surface(X_cyl, Y_cyl, Z_cyl, **kwargs_cyl)
+    ax.plot_surface(X_cyl, -Y_cyl, Z_cyl, **kwargs_cyl)
+    ax.plot_surface(X_cir, Y_cir, Z_floor, **kwargs_cyl)
+    ax.plot_surface(X_cir, Y_cir, Z_ceil, **kwargs_cyl)
+    ax.plot(x_cir, y_cir, 'k-', alpha=.1)
+    ax.plot(x_cir, y_cir, -1, 'k--', alpha=.1, lw=.5)
+
+    ax.set_xlim([-2, 2])
+    ax.set_ylim([-2, 2])
+    ax.set_zlim([-1, 3])
+
+    plt.axis('off')
+    ax.view_init(elev=20, azim=50)
+
+    # add text
+    ax.text(-.2, .2, 2.8, r'Detector angles  $\alpha$', fontsize=15, color='r')
+    ax.text(1.5, 3.2, 0, '$x$', fontsize=15, color='k')
+    ax.text(-2.9, 1.2, 0, '$y$', fontsize=15, color='k')
+    ax.text(0, -.1, 3.1, '$z$', fontsize=15, color='k')
+    ax.text(-.2, -.2, 1, r'$\Theta$', fontsize=15, color='k')
+    ax.text(-.2, .53, 1.8, r'$\chi$', fontsize=15, color='k')
+    ax.text(.48, 1.32, 0, r'$\Phi$', fontsize=15, color='k')
+    ax.text(3., 3, 0, 'SAMPLE', fontsize=15, color='k')
+    plt.show()
+
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+
+
+def fig7(print_fig=True):
+    """figure 7
+
+    %%%%%%%%%%%%
+    Mirror plane
+    %%%%%%%%%%%%
+    """
+
+    figname = 'CONfig7'
+
+    fig = plt.figure(figname, figsize=(8, 8), clear=True)
+    ax = fig.add_axes([.1, .1, .8, .8], projection='3d')
+    ax.tick_params(**kwargs_ticks)
+
+    # Create a sphere
+    k_i = 3
+
+    k_phi = np.pi/2
+    k_th = np.pi/4
+
+    theta_1d = np.linspace(0, np.pi, 300)
+    phi_1d = np.linspace(0, 2*np.pi, 300)
+
+    theta_2d, phi_2d = np.meshgrid(theta_1d, phi_1d)
+    xyz_2d = np.array([np.sin(theta_2d) * np.sin(phi_2d),
+                      np.sin(theta_2d) * np.cos(phi_2d),
+                      np.cos(theta_2d)])
+
+    colormap = cm.ScalarMappable(cmap=plt.get_cmap("PRGn"))
+    colormap.set_clim(-.45, .45)
+
+    l_ = 2
+    dx2y2 = ((sph_harm(-2, l_, phi_2d, theta_2d)
+             + sph_harm(2, l_, phi_2d, theta_2d))
+             / np.sqrt(2))
+    dx2y2_r = np.abs(dx2y2.real)*xyz_2d
+
+    ax.plot_surface(dx2y2_r[0]*3, dx2y2_r[1]*3,
+                    dx2y2_r[2]*.0, alpha=.1,
+                    facecolors=colormap.to_rgba(dx2y2.real),
+                    rstride=2, cstride=2)
+
+    X = np.zeros((2, 2))
+    z = [0, 3.5]
+    y = [-3, 3]
+    Y, Z = np.meshgrid(y, z)
+    ax.plot_surface(X, Y, Z, alpha=.2, color='C8')
+
+    angdg = np.linspace(-15, 15, 100)
+    thdg = -40
+    tidg = 0
+    phidg = 90
+    k_1 = utils.det_angle(4, angdg, -40, tidg, 90)
+    # k_2 = utils.det_angle(4, angdg, 0, 40, 0)
+    y_hv = np.linspace(-2, -.25, 100)
+    x_hv = .2*np.sin(y_hv*50)
+    z_hv = -y_hv
+
+    kx_i = k_i * np.sin(k_th) * np.cos(k_phi)
+    ky_i = k_i * np.sin(k_th) * np.sin(k_phi)
+    kz_i = k_i * np.cos(k_th)
+
+    ax.quiver(0, 0, 0, 0, 0, 2.5, arrow_length_ratio=.08,
+              color='k')
+    ax.quiver(0, 0, 0, 0, 2.5, 0, arrow_length_ratio=.06,
+              color='k')
+    ax.quiver(0, 0, 0, 2.5, 0, 0, arrow_length_ratio=.08,
+              color='k')
+    ax.quiver(0, 0, 0, kx_i-.1, ky_i-.1, kz_i-.1, arrow_length_ratio=.08, lw=2,
+              color='r')
+    ax.quiver(x_hv[-1], y_hv[-1], z_hv[-1], .1, .3, -.2,
+              arrow_length_ratio=.6, color='c')
+
+    ax.quiver(0, -1.5, 1.5, 0, .7, .7, arrow_length_ratio=.2,
+              color='b', lw=2)
+    ax.quiver(0, -1.5, 1.5, .8, 0, 0, arrow_length_ratio=.2,
+              color='b', lw=2)
+    ax.plot([0, 0], [0, 0], [0, 0], 'o', mec='k', mfc='w', ms=5)
+    ax.plot([kx_i, kx_i], [ky_i, ky_i], [kz_i, kz_i],
+            'o', mec='k', mfc='k', ms=5)
+    ax.plot([0, k_1[0, 0]], [0, k_1[1, 0]], [0, k_1[2, 0]], **kwargs_ef)
+    ax.plot([0, k_1[0, -1]], [0, k_1[1, -1]], [0, k_1[2, -1]], **kwargs_ef)
+    ax.plot(k_1[0], k_1[1], k_1[2], 'r-', lw=3)
+    # ax.plot(k_2[0], k_2[1], k_2[2], 'r-', lw=3, alpha=.1)
+    ax.plot(x_hv, y_hv, z_hv, 'c', lw=2)
+    ax.set_xlim([-3, 3])
+    ax.set_ylim([-3, 3])
+    ax.set_zlim([-2, 4])
+    ax.set_aspect("equal")
+    # ax.plot_surface(x_i, y_i, z_i, color="r", alpha=.05)
+
+    # add text
+    ax.text(0, -2.2, 2, r'$hv$', fontdict=font)
+    ax.text(0, 2.3, 2., r'$e^-$', fontdict=font)
+    ax.text(2.9, 0, 0, r'$x$', fontdict=font)
+    ax.text(0, 2.6, 0, r'$y$', fontdict=font)
+    ax.text(0, -.1, 2.6, r'$z$', fontdict=font)
+    ax.text(2.8, 2.5, -0.25, 'SAMPLE', fontdict=font)
+    ax.text(1.5, -1.3, 0, r'$d_{x^2-y^2}$', fontdict=font)
+    ax.text(0, -2.6, 2.6, 'Mirror plane', fontdict=font)
+    ax.text(1.9, 0, 1.85, r'$\bar{\sigma}$', fontdict=font)
+    ax.text(.8, 0, 2.15, r'$\bar{\pi}$', fontdict=font)
+    ax.text(0, 2.2, 3.5, r'Detector', fontdict=font)
+    kwargs_cyl = {'alpha': .05, 'color': 'k'}  # keywords cylinder
+
+    # Cylinder
+    r = 3
+    x_cyl = np.linspace(-r, r, 100)
+    z_cyl = np.linspace(-1, 0, 100)
+    X_cyl, Z_cyl = np.meshgrid(x_cyl, z_cyl)
+    Y_cyl = np.sqrt(r**2 - X_cyl**2)
+
+    x_cir = r * np.cos(np.linspace(0, 2*np.pi, 360))
+    y_cir = r * np.sin(np.linspace(0, 2*np.pi, 360))
+
+    R, Phi = np.meshgrid(np.linspace(0, r, 100), np.linspace(0, 2*np.pi, 100))
+
+    X_cir = R * np.cos(Phi)
+    Y_cir = R * np.sin(Phi)
+    Z_ceil = np.zeros((100, 100))
+    Z_floor = -np.ones((100, 100))
+
+    # draw cylinder
+    ax.plot_surface(X_cyl, Y_cyl, Z_cyl, **kwargs_cyl)
+    ax.plot_surface(X_cyl, -Y_cyl, Z_cyl, **kwargs_cyl)
+    ax.plot_surface(X_cir, Y_cir, Z_floor, **kwargs_cyl)
+    ax.plot_surface(X_cir, Y_cir, Z_ceil, **kwargs_cyl)
+    ax.plot(x_cir, y_cir, 'k-', alpha=.1)
+    ax.plot(x_cir, y_cir, -1, 'k--', alpha=.1, lw=.5)
+    plt.axis('off')
+    ax.view_init(elev=20, azim=50)
 
     plt.show()
 

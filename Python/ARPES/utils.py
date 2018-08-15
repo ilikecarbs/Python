@@ -1573,74 +1573,120 @@ def optimize_TB(Kx, Ky, En, it_max, P):
 
 def ang2k(angdg, Ekin, lat_unit=False, a=5.33, b=5.33, c=11,
           V0=0, thdg=0, tidg=0, phidg=0):
-        """returns k, k_V0
+    """returns k, k_V0
 
-        **Converts detector angles into k-space**
+    **Converts detector angles into k-space**
 
-        Args
-        ----
-        :angdg:     detector angles in degrees
-        :Ekin:      photon kinetic energy
-        :lat_unit:  lattice units used (Boolean)
-        :a, b, c:   lattice parameters
-        :V0:        inner potential
-        :thdg:      manipulator angle theta in degrees
-        :tidg:      manipulator angle tilt in degrees
-        :phidg:     manipulator angle phi in degrees
+    Args
+    ----
+    :angdg:     detector angles in degrees
+    :Ekin:      photon kinetic energy
+    :lat_unit:  lattice units used (Boolean)
+    :a, b, c:   lattice parameters
+    :V0:        inner potential
+    :thdg:      manipulator angle theta in degrees
+    :tidg:      manipulator angle tilt in degrees
+    :phidg:     manipulator angle phi in degrees
 
-        Return
-        ------
-        :k:        k-vector
-        :k_V0:     k-vector (with inner potential)
-        """
+    Return
+    ------
+    :k:        k-vector
+    :k_V0:     k-vector (with inner potential)
+    """
 
-        hbar = 6.58212e-16  # eV * s
-        me = 5.68563e-32  # eV * s^2 / Angstrom^2
-        ang = np.pi * angdg / 180
-        th = np.pi * thdg / 180
-        ti = np.pi * tidg / 180
-        phi = np.pi * phidg / 180
+    hbar = 6.58212e-16  # eV * s
+    me = 5.68563e-32  # eV * s^2 / Angstrom^2
+    ang = np.pi * angdg / 180
+    th = np.pi * thdg / 180
+    ti = np.pi * tidg / 180
+    phi = np.pi * phidg / 180
 
-        # Rotation matrices
-        Ti = np.array([
-                [1, 0, 0],
-                [0, np.cos(ti), np.sin(ti)],
-                [0, -np.sin(ti), np.cos(ti)]
-                ])
-        Phi = np.array([
-                [np.cos(phi), -np.sin(phi), 0],
-                [np.sin(phi), np.cos(phi), 0],
-                [0, 0, 1]
-                ])
-        Th = np.array([
-                [np.cos(th), 0, -np.sin(th)],
-                [0, 1, 0],
-                [np.sin(th), 0, np.cos(th)]
-                ])
+    # Rotation matrices
+    Ti = np.array([
+            [1, 0, 0],
+            [0, np.cos(ti), np.sin(ti)],
+            [0, -np.sin(ti), np.cos(ti)]
+            ])
+    Phi = np.array([
+            [np.cos(phi), -np.sin(phi), 0],
+            [np.sin(phi), np.cos(phi), 0],
+            [0, 0, 1]
+            ])
+    Th = np.array([
+            [np.cos(th), 0, -np.sin(th)],
+            [0, 1, 0],
+            [np.sin(th), 0, np.cos(th)]
+            ])
 
-        # Norm of k-vector
-        k_norm = np.sqrt(2 * me * Ekin) / hbar
-        k_norm_V0 = np.sqrt(2 * me * (Ekin + V0)) / hbar
+    # Norm of k-vector
+    k_norm = np.sqrt(2 * me * Ekin) / hbar
+    k_norm_V0 = np.sqrt(2 * me * (Ekin + V0)) / hbar
 
-        # Placeholders
-        kv = np.ones((3, 1))
-        kv_V0 = np.ones((3, 1))
+    # Placeholders
+    kv = np.ones((3, 1))
+    kv_V0 = np.ones((3, 1))
 
-        # Build k-vector
-        kv = np.array([k_norm * np.sin(ang), 0 * ang, k_norm * np.cos(ang)])
-        kv_V0 = np.array([k_norm * np.sin(ang), 0 * ang,
-                          np.sqrt(k_norm_V0**2 - (k_norm * np.sin(ang)**2))])
-        k = np.matmul(Phi, np.matmul(Ti, np.matmul(Th, kv)))
-        k_V0 = np.matmul(Phi, np.matmul(Ti, np.matmul(Th, kv_V0)))
+    # Build k-vector
+    kv = np.array([k_norm * np.sin(ang), 0 * ang, k_norm * np.cos(ang)])
+    kv_V0 = np.array([k_norm * np.sin(ang), 0 * ang,
+                      np.sqrt(k_norm_V0**2 - (k_norm * np.sin(ang)**2))])
+    k = np.matmul(Phi, np.matmul(Ti, np.matmul(Th, kv)))
+    k_V0 = np.matmul(Phi, np.matmul(Ti, np.matmul(Th, kv_V0)))
 
-        if lat_unit:  # lattice units
-            k *= np.array([a / np.pi, b / np.pi, c / np.pi])
-            k_V0 *= np.array([a / np.pi, b / np.pi, c / np.pi])
+    if lat_unit:  # lattice units
+        k *= np.array([a / np.pi, b / np.pi, c / np.pi])
+        k_V0 *= np.array([a / np.pi, b / np.pi, c / np.pi])
 
-        return k, k_V0
+    return k, k_V0
 
-        print('\n ~ Angles converted into k-space',
-              '\n', '==========================================')
+    print('\n ~ Angles converted into k-space',
+          '\n', '==========================================')
+
+
+def det_angle(k_i, angdg, thdg, tidg, phidg):
+    """returns k
+
+    **Transforms detector angles with manipulator angles**
+
+    Args
+    ----
+    :k_i:       distance to detector
+    :angdg:     detector angles
+    :thdg:      theta
+    :tidg:      tilt
+    :phidg:     azimuth
+
+    Return
+    ------
+    :k:     transformed vector
+    """
+
+    ang = np.pi * angdg / 180
+    th = np.pi * thdg / 180
+    ti = np.pi * tidg / 180
+    phi = np.pi * phidg / 180
+
+    # Rotation matrices
+    Ti = np.array([
+            [1, 0, 0],
+            [0, np.cos(ti), np.sin(ti)],
+            [0, -np.sin(ti), np.cos(ti)]
+            ])
+    Phi = np.array([
+            [np.cos(phi), -np.sin(phi), 0],
+            [np.sin(phi), np.cos(phi), 0],
+            [0, 0, 1]
+            ])
+    Th = np.array([
+            [np.cos(th), 0, -np.sin(th)],
+            [0, 1, 0],
+            [np.sin(th), 0, np.cos(th)]
+            ])
+
+    kv = np.array([k_i * np.sin(ang), 0 * ang, k_i * np.cos(ang)])
+    k = np.matmul(Phi, np.matmul(Ti, np.matmul(Th, kv)))
+
+    return k
 
 
 def partial_deriv_2D(x, y, f):

@@ -29,6 +29,9 @@ CON.fig1:   Photoemission principle DOS
 CON.fig2:   Electron transmission
 CON.fig3:   EDC / MDC
 CON.fig4:   Experimental Setup
+CON.fig5:   (L): eg, t2g orbitals
+CON.fig6:   Manipulator angles
+CON.fig7:   Mirror plane
 
 ----------  Ca2RuO4 Figures   ----------
 CRO.fig1:   DFT plot: figure 3 of Nature Comm.
@@ -85,10 +88,9 @@ CSRO.fig29: Fermi surface folded CSRO
 
 """
 
-
 # %%
 
-CON.fig4()
+CON.fig2()
 
 
 # %%
