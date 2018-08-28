@@ -32,6 +32,7 @@ CON.fig4:   Experimental Setup
 CON.fig5:   (L): eg, t2g orbitals
 CON.fig6:   Manipulator angles
 CON.fig7:   Mirror plane
+CON.fig8:   Data normalization
 
 ----------  Ca2RuO4 Figures   ----------
 CRO.fig1:   DFT plot: figure 3 of Nature Comm.
@@ -90,17 +91,17 @@ CSRO.fig29: Fermi surface folded CSRO
 
 # %%
 
-CON.fig2()
+CON.fig8()
 
 
 # %%
 
-CRO.fig1()
+CRO.fig7()
 
 
 # %%
 
 # CSRO.fig20(load=False)
-CSRO.fig29(print_fig=True)
+CSRO.fig3(print_fig=True)
 
 # %%

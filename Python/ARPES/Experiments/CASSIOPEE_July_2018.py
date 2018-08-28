@@ -54,6 +54,21 @@ golds = ['S30005', 'S30006', 'S30007']
 mode = 'cut_txt'
 
 # %%
+# T=110K
+# 90eV
+
+files = ['S30041', 'S30042', 'S30043']  # CR, LH, LV
+golds = ['S30005', 'S30006', 'S30007']
+
+
+# %%
+# T=100K
+# 90eV
+
+files = ['S30036', 'S30038', 'S30037']  # CR, LH, LV
+golds = ['S30005', 'S30006', 'S30007']
+
+# %%
 # Low temperature T=65K
 # 90eV
 
@@ -97,6 +112,38 @@ gold = 'S30005'
 mode = 'FSM'
 
 # %%
+# T=120K
+# 90eV
+
+file = 'S3_FSM_fine_hv90_T120'
+gold = 'S30005'
+mode = 'FSM'
+
+# %%
+# T=110K
+# 90eV
+
+file = 'S3_FSM_fine_hv90_T110'
+gold = 'S30005'
+mode = 'FSM'
+
+# %%
+# T=90
+# 90eV
+
+file = 'S3_FSM_fine_hv90_T90'
+gold = 'S30023'
+mode = 'FSM'
+
+# %%
+# Low temperature T=75K
+# 90eV
+
+file = 'S3_FSM_fine_hv90_T75'
+gold = 'S30023'
+mode = 'FSM'
+
+# %%
 # Low temperature T=65K
 # 90eV
 
@@ -112,13 +159,6 @@ file = 'S3_FSM_fine_hv75_T65'
 gold = 'S30021'
 mode = 'FSM'
 
-# %%
-# Intermediate temperature T=90
-# 90eV
-
-file = 'S3_FSM_fine_hv90_T90'
-gold = 'S30023'
-mode = 'FSM'
 
 # %%
 

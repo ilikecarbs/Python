@@ -22,6 +22,10 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from mpl_toolkits.mplot3d import Axes3D
 from scipy.special import sph_harm
+from scipy.stats import exponnorm
+from scipy.optimize import curve_fit
+
+import ARPES
 
 
 # Set standard fonts
@@ -818,14 +822,14 @@ def fig7(print_fig=True):
     colormap.set_clim(-.45, .45)
 
     l_ = 2
-    dx2y2 = ((sph_harm(-2, l_, phi_2d, theta_2d)
-             + sph_harm(2, l_, phi_2d, theta_2d))
-             / np.sqrt(2))
-    dx2y2_r = np.abs(dx2y2.real)*xyz_2d
+    dxy = (1j * (sph_harm(-2, l_, phi_2d, theta_2d)
+           - sph_harm(2, l_, phi_2d, theta_2d))
+           / np.sqrt(2))
+    dxy_r = np.abs(dxy.real)*xyz_2d
 
-    ax.plot_surface(dx2y2_r[0]*3, dx2y2_r[1]*3,
-                    dx2y2_r[2]*.0, alpha=.1,
-                    facecolors=colormap.to_rgba(dx2y2.real),
+    ax.plot_surface(dxy_r[0]*3, dxy_r[1]*3,
+                    dxy_r[2]*.0, alpha=.1,
+                    facecolors=colormap.to_rgba(dxy.real),
                     rstride=2, cstride=2)
 
     X = np.zeros((2, 2))
@@ -835,9 +839,7 @@ def fig7(print_fig=True):
     ax.plot_surface(X, Y, Z, alpha=.2, color='C8')
 
     angdg = np.linspace(-15, 15, 100)
-    thdg = -40
     tidg = 0
-    phidg = 90
     k_1 = utils.det_angle(4, angdg, -40, tidg, 90)
     # k_2 = utils.det_angle(4, angdg, 0, 40, 0)
     y_hv = np.linspace(-2, -.25, 100)
@@ -884,7 +886,7 @@ def fig7(print_fig=True):
     ax.text(0, 2.6, 0, r'$y$', fontdict=font)
     ax.text(0, -.1, 2.6, r'$z$', fontdict=font)
     ax.text(2.8, 2.5, -0.25, 'SAMPLE', fontdict=font)
-    ax.text(1.5, -1.3, 0, r'$d_{x^2-y^2}$', fontdict=font)
+    ax.text(2., 1.3, 0, r'$d_{xy}$', fontdict=font)
     ax.text(0, -2.6, 2.6, 'Mirror plane', fontdict=font)
     ax.text(1.9, 0, 1.85, r'$\bar{\sigma}$', fontdict=font)
     ax.text(.8, 0, 2.15, r'$\bar{\pi}$', fontdict=font)
@@ -917,6 +919,154 @@ def fig7(print_fig=True):
     ax.plot(x_cir, y_cir, -1, 'k--', alpha=.1, lw=.5)
     plt.axis('off')
     ax.view_init(elev=20, azim=50)
+
+    plt.show()
+
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+
+
+def fig8(print_fig=True):
+    """figure 8
+
+    %%%%%%%%%%%%%%%%%%
+    Data normalization
+    %%%%%%%%%%%%%%%%%%
+    """
+
+    figname = 'CONfig8'
+
+    mat = 'CSRO20'
+    year = '2017'
+    sample = 'S6'
+    gold = '62091'
+
+    D = ARPES.DLS(gold, mat, year, sample)
+    D.norm(gold=gold)
+
+    fig = plt.figure(figname, figsize=(8, 8), clear=True)
+    ax1 = fig.add_subplot(321)
+    ax1.set_position([.1, .5, .35, .35])
+    ax1.tick_params(**kwargs_ticks)
+
+    # plot data
+    c0 = ax1.contourf(D.ang, D.en, np.transpose(D.int), 200, **kwargs_ex)
+
+    # decorate axes
+    ax1.set_xticklabels([])
+    ax1.set_ylabel(r'$E_\mathrm{kin}$ (eV)', fontdict=font)
+
+    ax2 = fig.add_subplot(322)
+    ax2.set_position([.1, .14, .35, .35])
+    ax2.tick_params(**kwargs_ticks)
+
+    # plot data
+    ax2.contourf(D.angs, D.en_norm, D.int_norm, 200, **kwargs_ex)
+    ax2.plot([D.ang[0], D.ang[-1]], [0, 0], **kwargs_ef)
+
+    # decorate axes
+    ax2.set_ylabel(r'$\omega$ (eV)', fontdict=font)
+    ax2.set_xlabel(r'Detector angles', fontdict=font)
+
+    # add text
+    ax1.text(-15, 17.652, '(a)', fontdict=font)
+    ax2.text(-15, 0.02, '(b)', fontdict=font)
+
+    # colorbar
+    pos = ax1.get_position()
+    cax = plt.axes([pos.x0, pos.y0+pos.height+.01,
+                    pos.width, .01])
+    cbar = plt.colorbar(c0, cax=cax, ticks=None, orientation='horizontal')
+    cbar.set_ticks([])
+
+    # some constant
+    Ef_ini = 17.645
+    T_ini = 6
+    bnd = 1
+    ch = 300
+
+    kB = 8.6173303e-5  # Boltzmann constant
+
+    # create figure
+    ax3 = fig.add_subplot(323)
+    ax3.set_position([.55, .63, .35, .22])
+    enval, inden = utils.find(D.en, Ef_ini-0.12)  # energy window
+
+    # plot data
+    ax3.plot(D.en[inden:], D.int[ch, inden:], 'bo', ms=2)
+
+    # initial guess
+    p_ini_FDsl = [T_ini * kB, Ef_ini, np.max(D.int[ch, :]), 20, 0]
+
+    # Placeholders
+    T_fit = np.zeros(len(D.ang))
+    Res = np.zeros(len(D.ang))
+    Ef = np.zeros(len(D.ang))
+    norm = np.zeros(len(D.ang))
+
+    # Fit loop
+    for i in range(len(D.ang)):
+        try:
+            p_FDsl, c_FDsl = curve_fit(utils.FDsl, D.en[inden:],
+                                       D.int[i, inden:], p_ini_FDsl)
+        except RuntimeError:
+            print("Error - convergence not reached")
+
+        # Plots data at this particular channel
+        if i == ch:
+            ax3.plot(D.en[inden:], utils.FDsl(D.en[inden:],
+                     *p_FDsl), 'r-')
+
+        T_fit[i] = p_FDsl[0] / kB
+        Res[i] = np.sqrt(T_fit[i] ** 2 - T_ini ** 2) * 4 * kB
+        Ef[i] = p_FDsl[1]  # Fit parameter
+
+    # Fit Fermi level fits with a polynomial
+    p_ini_poly2 = [Ef[ch], 0, 0, 0]
+    p_poly2, c_poly2 = curve_fit(utils.poly_2, D.ang[bnd:-bnd],
+                                 Ef[bnd:-bnd], p_ini_poly2)
+    Ef_fit = utils.poly_2(D.ang, *p_poly2)
+
+    # boundaries if strong curvature in Fermi level
+    mx = np.max(D.en) - np.max(Ef_fit)
+    mn = np.min(Ef_fit) - np.min(D.en)
+    for i in range(len(D.ang)):
+        mx_val, mx_idx = utils.find(D.en, Ef_fit[i] + mx)
+        mn_val, mn_idx = utils.find(D.en, Ef_fit[i] - mn)
+        norm[i] = np.sum(D.int[i, mn_idx:mx_idx])  # normalization
+
+    # Plot data
+    ax4 = fig.add_subplot(324)
+    ax4.set_position([.55, .14, .35, .22])
+    ax4.plot(D.ang, Res * 1e3, 'bo', ms=3)
+    print("Resolution ~" + str(np.mean(Res)) + "eV")
+    ax5 = fig.add_subplot(325)
+    ax5.set_position([.55, .37, .35, .22])
+    ax5.plot(D.ang, Ef, 'bo', ms=3)
+    ax5.plot(D.ang[bnd], Ef[bnd], 'ro')
+    ax5.plot(D.ang[-bnd], Ef[-bnd], 'ro')
+    ax5.plot(D.ang, Ef_fit, 'r-')
+
+    # decorate axes
+    ax3.tick_params(**kwargs_ticks)
+    ax3.set_ylim(0, 1400)
+    ax4.tick_params(**kwargs_ticks)
+    ax5.set_xticklabels([])
+    ax3.xaxis.set_label_position('top')
+    ax3.tick_params(labelbottom='off', labeltop='on')
+    ax5.tick_params(**kwargs_ticks)
+    ax3.set_xlabel(r'$\omega$', fontdict=font)
+    ax3.set_ylabel('Intensity (a.u.)', fontdict=font)
+    ax4.set_ylabel('Resolution (meV)', fontdict=font)
+    ax4.set_xlabel('Detector angles', fontdict=font)
+    ax5.set_ylabel(r'$\omega$ (eV)', fontdict=font)
+    ax5.set_ylim(D.en[0], D.en[-1])
+
+    # add text
+    ax3.text(17.558, 1250, '(c)', fontdict=font)
+    ax5.text(-17, 17.648, '(d)', fontdict=font)
+    ax4.text(-17, 12.1, '(e)', fontdict=font)
 
     plt.show()
 
