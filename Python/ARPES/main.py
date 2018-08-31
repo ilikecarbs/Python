@@ -80,7 +80,7 @@ CSRO.fig26: Fermi surface counting CSRO (3.84 \pm .14)
 CSRO.fig27: Fermi surface counting CSRO unfolded
 CSRO.fig28: Fermi surface counting SRO
 CSRO.fig29: Fermi surface folded CSRO
-
+CSRO.fig30: xFig1 2nd version
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     Which figure do you desire?
@@ -102,6 +102,6 @@ CRO.fig7()
 # %%
 
 # CSRO.fig20(load=False)
-CSRO.fig3(print_fig=True)
+CSRO.fig30(print_fig=True)
 
 # %%

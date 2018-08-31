@@ -330,33 +330,6 @@ def fig1(print_fig=True):
                     np.arange(26, 34, 1),
                     np.arange(16, 24, 1)))
 
-#            # indices of relevant paths
-#            axy = np.arange(0, 4, 1)
-#            bxz = np.arange(16, 24, 1)
-#            byz = np.array([16, 17, 20, 21])
-#
-#            # color the paths
-#            if n == 1:
-#                ind = axy
-#                col = 'r'
-#            elif n == 2:
-#                ind = bxz
-#                col = 'b'
-#            elif n == 3:
-#                ind = byz
-#                col = 'k'
-#                v = p[18].vertices
-#
-#                # plot tight binding model
-#                ax.plot(v[:, 0], v[:, 1], ls=':', color='m', lw=1)
-#                v = p[2].vertices
-#                ax.plot(v[:, 0], v[:, 1], ls=':', color='m', lw=1)
-#                v = p[19].vertices
-#                ax.plot(v[:, 0], v[:, 1], ls=':', color='C1', lw=1)
-#            for j in ind:
-#                v = p[j].vertices
-#                ax.plot(v[:, 0], v[:, 1], ls=':', color=col, lw=1)
-
             if n == 3:
                 for j in al:
                     v = p[j].vertices
@@ -679,7 +652,7 @@ def fig3(print_fig=True):
              V0=0, thdg=2.4, tidg=0, phidg=45)
 
     # TB
-    TB_D = utils.CSRO_eval(D.k[0], D.k[1])
+    # TB_D = utils.CSRO_eval(D.k[0], D.k[1])
 
     # Collect data
     data = (D.int_norm, LH.int_norm, LV.int_norm)
@@ -723,9 +696,9 @@ def fig3(print_fig=True):
             if j == 0:
                 ax.contourf(ks[j], en[j], data[j], 300, **kwargs_ex,
                             vmin=.05*np.max(data[j]), vmax=.35*np.max(data[j]))
-                for bands in range(6):
-                    TB_D[bands][TB_D[bands] > 0] = 10
-                    ax.plot(k[j], TB_D[bands], 'wo', ms=.5, alpha=.2)
+#                for bands in range(6):
+#                    TB_D[bands][TB_D[bands] > 0] = 10
+#                    ax.plot(k[j], TB_D[bands], 'wo', ms=.5, alpha=.2)
                 mdc = mdc / np.max(mdc)
 
                 # decorate axes
@@ -4110,8 +4083,8 @@ def fig25(print_fig=True):
     eim = np.loadtxt('Data_CSROfig9_eim.dat')
     C_B = np.genfromtxt('Data_C_Braden.csv', delimiter=',')
     C_M = np.genfromtxt('Data_C_Maeno.csv', delimiter=',')
-    R_1 = np.genfromtxt('Data_R_1.csv', delimiter=',')
-    R_2 = np.genfromtxt('Data_R_2.csv', delimiter=',')
+#    R_1 = np.genfromtxt('Data_R_1.csv', delimiter=',')
+#    R_2 = np.genfromtxt('Data_R_2.csv', delimiter=',')
     os.chdir(home_dir)
     print('\n ~ Data loaded (Zs, specific heat, transport data)',
           '\n', '==========================================')
@@ -4144,9 +4117,9 @@ def fig25(print_fig=True):
 
     print('gamma='+str(gamma / np.mean(Z_e)))
 
-    # fit for resistivity curve
-    xx = np.array([1e-3, 1e4])
-    yy = 2.3 * xx ** 2
+#    # fit for resistivity curve
+#    xx = np.array([1e-3, 1e4])
+#    yy = 2.3 * xx ** 2
 
     # create figure
     fig = plt.figure(figname, figsize=(10, 10), clear=True)
@@ -4507,7 +4480,7 @@ def fig27(print_fig=True):
          2 * (1 - ga) +
          2 * de)
 
-    print(n)
+    print((1-al), be, (1-ga), de)
 
     plt.show()
 
@@ -4600,7 +4573,7 @@ def fig28(print_fig=True):
          2 * be +
          2 * ga)
 
-    print(n)
+    print(1-al, be, ga)
 
     plt.show()
 
@@ -4621,15 +4594,15 @@ def fig29(print_fig=True):
 
     # calculate band structure
     kbnd = 1.5  # boundaries
-    tb = utils.TB(a=np.pi, kbnd=kbnd, kpoints=200)
-    param = utils.paramCSRO_fit()
+    tb = utils.TB(a=np.pi, kbnd=kbnd, kpoints=100)
+    param = utils.paramCSRO20_opt()
     tb.SRO_folded(param=param, e0=-0.00, vert=True, proj=True)
 
     # get vertices
     VX = tb.VX
     VY = tb.VY
 
-    # vertices of pockets
+    # vertices of pocket
     alpha_1 = np.array([VX[0][0], VY[0][0]])
     alpha_2 = np.array([VX[0][2], VY[0][2]])
     alpha_3 = np.array([VX[0][3], VY[0][3]])
@@ -4645,7 +4618,10 @@ def fig29(print_fig=True):
     delta_4 = np.array([VX[0][7], VY[0][7]])
 
     f_alpha = np.array([VX[3][4], VY[3][4]])
-    f_beta = np.array([VX[5][0], VY[5][0]])
+    f_beta_1 = np.array([VX[5][0], VY[5][0]])
+    f_beta_2 = np.array([VX[5][1], VY[5][1]])
+    f_beta_3 = np.array([VX[5][2], VY[5][2]])
+    f_beta_4 = np.array([VX[5][3], VY[5][3]])
     f_gamma = np.array([VX[4][2], VY[4][2]])
     f_delta = np.array([VX[3][5], VY[3][5]])
 
@@ -4653,50 +4629,504 @@ def fig29(print_fig=True):
              gamma_1, gamma_2, gamma_3, gamma_4,
              delta_1, delta_2, delta_3, delta_4)
 
-    f_bands = (f_alpha, f_beta,
+    f_bands = (f_alpha, f_beta_1, f_beta_2, f_beta_3, f_beta_4,
                f_gamma, f_delta)
 
-    fig = plt.figure(figname, figsize=(7, 7), clear=True)
-    ax = fig.add_subplot(121)
-    ax.set_position([.3, .3, .4, .4])
+    fig = plt.figure(figname, figsize=(10, 10), clear=True)
+    ax = fig.add_subplot(144)
+    ax.set_position([.723, .3, .28*2/3, .28])
     ax.tick_params(**kwargs_ticks)
 
-    cols = ['m', 'g', 'c', 'C1']
+    cols = ['c', 'b', 'm', 'C1']
 
     n = 0  # counter
     m = 0
     for band in bands:
         if any(x == m for x in [0, 4, 5, 9]):
             n += 1
-        ax.plot(band[0, :], band[1, :], color=cols[n-1], lw=1)
-        ax.fill(band[0, :], band[1, :], color=cols[n-1], alpha=.1)
+        ax.plot(band[0, :], band[1, :], color=cols[n-1], lw=1, zorder=0)
+        ax.fill(band[0, :], band[1, :], color=cols[n-1], alpha=.1,
+                zorder=0)
         m += 1
 
     n = 0
     m = 0
     for band in f_bands:
-        if any(x == m for x in [0, 1, 2, 3]):
+        if any(x == m for x in [0, 1, 5, 6]):
             n += 1
-        ax.plot(band[0, :], band[1, :], color=cols[n-1], lw=1, ls='--')
+        ax.plot(band[0, :], band[1, :], color=cols[n-1], lw=1, ls='--',
+                zorder=0)
 #        ax.fill(band[0, :], band[1, :], color=cols[n], alpha=.1)
         m += 1
 
-    ax.plot([-.5, -.5], [-.5, .5], 'k:', lw=1.5)
-    ax.plot([.5, .5], [-.5, .5], 'k:', lw=1.5)
-    ax.plot([-.5, .5], [.5, .5], 'k:', lw=1.5)
-    ax.plot([-.5, .5], [-.5, -.5], 'k:', lw=1.5)
+    ax.plot([-.5, -.5], [-.5, .5], 'k-', lw=1.5)
+    ax.plot([.5, .5], [-.5, .5], 'k-', lw=1.5)
+    ax.plot([-.5, .5], [.5, .5], 'k-', lw=1.5)
+    ax.plot([-.5, .5], [-.5, -.5], 'k-', lw=1.5)
+    ax.plot([-1, 0], [0, 1], **kwargs_ef, alpha=1)
+    ax.plot([-1, 0], [0, -1], **kwargs_ef, alpha=1)
+    ax.plot([0, 1], [1, 0], **kwargs_ef, alpha=1)
+    ax.plot([0, 1], [-1, 0], **kwargs_ef, alpha=1)
+
+    ax.fill_between([-1, 0], [-5, -5], [0, -1], color='w', alpha=1,
+                    zorder=2)
+    ax.fill_between([0, 1], [-5, -5], [-1, 0], color='w', alpha=1,
+                    zorder=2)
+    ax.fill_between([-1, 0], [0, 1], [5, 5], color='w', alpha=1,
+                    zorder=2)
+    ax.fill_between([0, 1], [1, 0], [5, 5], color='w', alpha=1,
+                    zorder=2)
+
+    c1x = -.7
+    c1y = -1.2
+    l1 = .1
+    c2x = -.7
+    c2y = -1.5
+    l2 = .07
+    ax.plot([c1x-l1, c1x], [c1y, c1y+l1], **kwargs_ef)
+    ax.plot([c1x-l1, c1x], [c1y, c1y-l1], **kwargs_ef)
+    ax.plot([c1x, c1x+l1], [c1y+l1, c1y], **kwargs_ef)
+    ax.plot([c1x, c1x+l1], [c1y-l1, c1y], **kwargs_ef)
+    ax.text(c1x+.15, c1y-.03, 'tetr. BZ')
+    ax.plot([c2x-l2, c2x-l2], [c2y-l2, c2y+l2], 'k-', lw=1.5)
+    ax.plot([c2x+l2, c2x+l2], [c2y-l2, c2y+l2], 'k-', lw=1.5)
+    ax.plot([c2x-l2, c2x+l2], [c2y+l2, c2y+l2], 'k-', lw=1.5)
+    ax.plot([c2x-l2, c2x+l2], [c2y-l2, c2y-l2], 'k-', lw=1.5)
+    ax.text(c2x+.15, c2y-.03, 'orth. BZ')
     ax.plot([-1, 0], [0, 1], **kwargs_ef, alpha=.2)
     ax.plot([-1, 0], [0, -1], **kwargs_ef, alpha=.2)
     ax.plot([0, 1], [1, 0], **kwargs_ef, alpha=.2)
     ax.plot([0, 1], [-1, 0], **kwargs_ef, alpha=.2)
-    ax.set_yticklabels([])
-    ax.set_xticklabels([])
+
+    ux = .2
+    uy = -1.2
+    fx = .2
+    fy = -1.5
+    l0 = .07
+    ax.plot([ux-l0, ux-l0], [uy-l0, uy], color=cols[0], lw=1, ls='-')
+    ax.plot([ux-l0, ux], [uy-l0, uy-l0], color=cols[0], lw=1, ls='-')
+    ax.plot([ux+l0, ux+l0], [uy-l0, uy], color=cols[1], lw=1, ls='-')
+    ax.plot([ux, ux+l0], [uy-l0, uy-l0], color=cols[1], lw=1, ls='-')
+    ax.plot([ux+l0, ux+l0], [uy, uy+l0], color=cols[2], lw=1, ls='-')
+    ax.plot([ux, ux+l0], [uy+l0, uy+l0], color=cols[2], lw=1, ls='-')
+    ax.plot([ux-l0, ux-l0], [uy, uy+l0], color=cols[3], lw=1, ls='-')
+    ax.plot([ux-l0, ux], [uy+l0, uy+l0], color=cols[3], lw=1, ls='-')
+    ax.fill_between([ux-l0, ux], [uy-l0, uy-l0], [uy, uy],
+                    color=cols[0], alpha=.1, zorder=3)
+    ax.fill_between([ux, ux+l0], [uy-l0, uy-l0], [uy, uy],
+                    color=cols[1], alpha=.1, zorder=3)
+    ax.fill_between([ux, ux+l0], [uy, uy], [uy+l0, uy+l0],
+                    color=cols[2], alpha=.1, zorder=3)
+    ax.fill_between([ux-l0, ux], [uy, uy], [uy+l0, uy+l0],
+                    color=cols[3], alpha=.1, zorder=3)
+    ax.text(ux+.15, uy-.05, 'unfolded')
+    ax.plot([fx-l0, fx-l0], [fy-l0, fy], color=cols[0], lw=1, ls='--')
+    ax.plot([fx-l0, fx], [fy-l0, fy-l0], color=cols[0], lw=1, ls='--')
+    ax.plot([fx+l0, fx+l0], [fy-l0, fy], color=cols[1], lw=1, ls='--')
+    ax.plot([fx, fx+l0], [fy-l0, fy-l0], color=cols[1], lw=1, ls='--')
+    ax.plot([fx+l0, fx+l0], [fy, fy+l0], color=cols[2], lw=1, ls='--')
+    ax.plot([fx, fx+l0], [fy+l0, fy+l0], color=cols[2], lw=1, ls='--')
+    ax.plot([fx-l0, fx-l0], [fy, fy+l0], color=cols[3], lw=1, ls='--')
+    ax.plot([fx-l0, fx], [fy+l0, fy+l0], color=cols[3], lw=1, ls='--')
+    ax.text(fx+.15, fy-.05, 'folded')
+
+    ax.text(-.93, 1., '(d)', fontsize=12)
+    ax.text(.15, .88, r'$\alpha$', color=cols[0], fontsize=12)
+    ax.text(.35, .7, r'$\beta$', color=cols[1], fontsize=12)
+    ax.text(.55, .5, r'$\gamma$', color=cols[2], fontsize=12)
+    ax.text(.87, .15, r'$\delta$', color=cols[3], fontsize=12)
     ax.set_yticks([])
     ax.set_xticks([])
     ax.set_xlim(-1, 1)
-    ax.set_ylim(-1, 1)
+    ax.set_ylim(-1.8, 1.2)
+
     plt.show()
 
     # Save figure
     if print_fig:
         plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+
+
+def fig30(print_fig=True):
+    """figure 30
+
+    %%%%%%%%%%%%%%%%%
+    xFig1 2nd version
+    %%%%%%%%%%%%%%%%%
+    """
+
+    figname = 'CSROfig30'
+
+    mat = 'CSRO20'
+    year = '2017'
+    sample = 'S6'
+
+    # load data for FS map
+    file = '62087'
+    gold = '62081'
+
+    e = .01  # start from above EF
+    ew = .015  # integration window (5meV below EF)
+    D = ARPES.DLS(file, mat, year, sample)
+    D.norm(gold=gold)
+    D.restrict(bot=0, top=1, left=.12, right=.9)
+    D.FS(e=e, ew=ew)
+    D.FS_flatten()
+
+    # distortion of spectrum corrected with a/b
+    D.ang2kFS(D.ang, Ekin=22-4.5, lat_unit=True, a=5.2, b=5.7, c=11,
+              V0=0, thdg=8.7, tidg=4, phidg=88)
+
+    # useful for panels
+    ratio = (np.max(D.ky) - np.min(D.ky))/(np.max(D.kx) - np.min(D.kx))
+    print(ratio)
+
+    # load data for cut Gamma-X
+    file = '62090'
+    gold = '62091'
+    A1 = ARPES.DLS(file, mat, year, sample)
+    A1.norm(gold)
+    A1.ang2k(A1.ang, Ekin=22-4.5, lat_unit=True, a=5.2, b=5.55, c=11,
+             V0=0, thdg=9.2, tidg=0, phidg=90)
+
+    # load data for cut X-S
+    file = '62097'
+    gold = '62091'
+    A2 = ARPES.DLS(file, mat, year, sample)
+    A2.norm(gold)
+    A2.ang2k(A2.ang, Ekin=22-4.5, lat_unit=True, a=5.2, b=5.7, c=11,
+             V0=0, thdg=9.2-3.5, tidg=-16, phidg=90)
+
+    # TB
+    param = utils.paramCSRO20_opt()  # Load parameters
+
+    # MDC
+    mdc_ = -.004
+    mdcw_ = .002
+    mdc = np.zeros(A1.ang.shape)  # placeholder
+
+    # build MDC
+    for i in range(len(A1.ang)):
+        mdc_val, _mdc = utils.find(A1.en_norm[i, :], mdc_)
+        mdcw_val, _mdcw = utils.find(A1.en_norm[i, :], mdc_ - mdcw_)
+        mdc[i] = np.sum(A1.int_norm[i, _mdcw:_mdc])
+    mdc = mdc / np.max(mdc)  # normalize
+
+    # start MDC fitting
+    plt.figure('MDC', figsize=(4, 4), clear=True)
+    d = 1e-5
+
+    # initial guess
+    p_mdc_i = np.array([-1.4, -1.3, -1.1, -.9, -.7, -.6, -.3, .3,
+                        .05, .05, .05, .05, .05, .05, .1, .1,
+                        .3, .3, .4, .4, .5, .5, .1, .1,
+                        .33, 0.02, .02])
+
+    # fit boundaries
+    bounds_bot = np.concatenate((p_mdc_i[0:-3] - np.inf, p_mdc_i[-3:] - d))
+    bounds_top = np.concatenate((p_mdc_i[0:-3] + np.inf, p_mdc_i[-3:] + d))
+    p_mdc_bounds = (bounds_bot, bounds_top)
+
+    # fit MDC
+    p_mdc, cov_mdc = curve_fit(
+            utils.lor_8, A1.k[1], mdc, p_mdc_i, bounds=p_mdc_bounds)
+
+    # plot fit and background
+    b_mdc = utils.poly_2(A1.k[1], *p_mdc[-3:])
+    f_mdc = utils.lor_8(A1.k[1], *p_mdc) - b_mdc
+    f_mdc[0] = 0  # for the filling plot to have nice edges
+    f_mdc[-1] = 0
+    plt.plot(A1.k[1], mdc, 'bo')
+    plt.plot(A1.k[1], f_mdc)
+    plt.plot(A1.k[1], b_mdc, 'k--')
+
+    # Figure panels
+    def fig30a():
+        ax = fig.add_subplot(141)
+        ax.set_position([.08, .3, .22, .28])
+        ax.tick_params(**kwargs_ticks)
+
+        # plot data
+        ax.contourf(A1.en_norm, A1.kys, A1.int_norm, 300, **kwargs_ex,
+                    vmin=.1*np.max(A1.int_norm), vmax=.7*np.max(A1.int_norm))
+        ax.plot([0, 0], [np.min(A1.kys), np.max(A1.kys)], **kwargs_ef)
+        ax.plot([-.005, -.005], [np.min(A1.kys), np.max(A1.kys)],
+                **kwargs_cut)
+
+        # decorate axes
+        ax.set_xlim(-.06, .03)
+        ax.set_ylim(np.min(D.ky), np.max(D.ky))
+        ax.set_xticks(np.arange(-.06, .03, .02))
+        ax.set_xticklabels(['-60', '-40', '-20', '0', '20'])
+        ax.set_yticks([-1.5, -1, -.5, 0, .5])
+        ax.set_xlabel(r'$\omega\,(\mathrm{meV})$', fontdict=font)
+        ax.set_ylabel(r'$k_x \,(\pi/a)$', fontdict=font)
+        ax.plot((mdc - b_mdc) / 30 + .001, A1.k[1], 'o', ms=1.5, color='C9')
+        ax.fill(f_mdc / 30 + .001, A1.k[1], alpha=.2, color='C9')
+
+        # add text
+        ax.text(-.058, .57, '(a)', fontsize=12)
+        ax.text(.024, -.03, r'$\Gamma$', fontsize=12, color='k')
+        ax.text(.024, -1.03, 'Y', fontsize=12, color='k')
+
+        # labels
+        cols = ['c', 'm', 'b', 'b', 'm', 'c', 'C1', 'C1']
+        lbls = [r'$\alpha$', r'$\gamma$', r'$\beta$',
+                r'$\beta$', r'$\gamma$',
+                r'$\alpha$', r'$\delta$', r'$\delta$']
+
+        # coordinate corrections to label positions
+        corr = np.array([.012, .004, .007, .004, .002, .01, .002, .0015])
+        p_mdc[6 + 16] *= 1.5
+
+        # plot MDC fits
+        for i in range(8):
+            plt.plot((utils.lor(A1.k[1], p_mdc[i], p_mdc[i+8], p_mdc[i+16],
+                     p_mdc[-3], p_mdc[-2], p_mdc[-1]) - b_mdc) / 30 + .001,
+                     A1.k[1], lw=.5, color=cols[i])
+            plt.text(p_mdc[i+16]/5+corr[i], p_mdc[i]-.03, lbls[i],
+                     fontsize=10, color=cols[i])
+        plt.plot(f_mdc / 30 + .001, A1.k[1], color='b', lw=.5)
+
+    def fig30b():
+        ax = fig.add_subplot(142)
+        ax.set_position([.31, .3, .28/ratio, .28])
+        ax.tick_params(**kwargs_ticks)
+
+        # plot data
+        ax.contourf(D.kx, D.ky, np.flipud(D.map), 300, **kwargs_ex,
+                    vmax=.9 * np.max(D.map), vmin=.3 * np.max(D.map))
+        ax.plot(A1.k[0], A1.k[1], ls='-.', color='turquoise', lw=1)
+        ax.plot(A2.k[0], A2.k[1], ls='-.', color='turquoise', lw=1)
+
+        # decorate axes
+        ax.set_xlabel(r'$k_y \,(\pi/b)$', fontdict=font)
+
+        # add text
+        ax.text(-.65, .56, r'(b)', fontsize=12, color='w')
+        ax.text(-.05, -.03, r'$\Gamma$', fontsize=12, color='w')
+        ax.text(-.05, -1.03, r'Y', fontsize=12, color='w')
+        ax.text(.95, -.03, r'X', fontsize=12, color='w')
+        ax.text(.95, -1.03, r'S', fontsize=12, color='w')
+
+        # Tight Binding Model
+        tb = utils.TB(a=np.pi, kbnd=2, kpoints=200)  # Initialize
+        tb.CSRO(param)  # Calculate bandstructure
+
+        plt.figure(figname)
+        bndstr = tb.bndstr  # Load bandstructure
+        coord = tb.coord  # Load coordinates
+
+        # read dictionaries
+        X = coord['X']
+        Y = coord['Y']
+        Axy = bndstr['Axy']
+        Bxz = bndstr['Bxz']
+        Byz = bndstr['Byz']
+        bands = (Axy, Bxz, Byz)
+
+        # loop over bands
+        n = 0  # counter
+        for band in bands:
+            n += 1
+            ax.contour(X, Y, band, colors='w', linestyles=':', levels=0,
+                       linewidths=1)
+
+        ax.set_xticks([-.5, 0, .5, 1])
+        ax.set_yticks([-1.5, -1, -.5, 0, .5])
+        ax.set_yticklabels([])
+        ax.set_xlim(np.min(D.kx), np.max(D.kx))
+        ax.set_ylim(np.min(D.ky), np.max(D.ky))
+
+    def fig30c():
+        ax = fig.add_subplot(143)
+        ax.set_position([.31+.28/ratio+.01, .3, .17, .28])
+        ax.tick_params(**kwargs_ticks)
+
+        # plot data
+        c0 = ax.contourf(-np.transpose(np.fliplr(A2.en_norm)),
+                         np.transpose(A2.kys),
+                         np.transpose(np.fliplr(A2.int_norm)), 300,
+                         **kwargs_ex,
+                         vmin=.1*np.max(A2.int_norm),
+                         vmax=.7*np.max(A2.int_norm))
+        ax.plot([0, 0], [np.min(A2.kys), np.max(A2.kys)], **kwargs_ef)
+
+        # decorate axes
+        ax.set_xticks(np.arange(0, .08, .02))
+        ax.set_xticklabels(['0', '-20', '-40', '-60'])
+        ax.set_yticks([-1.5, -1, -.5, 0, .5])
+        ax.set_yticklabels([])
+        ax.set_xlabel(r'$\omega\,(\mathrm{meV})$', fontdict=font)
+        ax.set_xlim(-.01, .06)
+        ax.set_ylim(np.min(D.ky), np.max(D.ky))
+
+        # add text
+        ax.text(-.0085, .56, '(c)', fontsize=12)
+        ax.text(-.008, -.03, 'X', fontsize=12, color='k')
+        ax.text(-.008, -1.03, 'S', fontsize=12, color='k')
+
+        pos = ax.get_position()
+        cax = plt.axes([pos.x0+pos.width+0.01,
+                        pos.y0, 0.01, pos.height])
+        cbar = plt.colorbar(c0, cax=cax, ticks=None)
+        cbar.set_ticks([])
+        cbar.set_clim(np.min(A2.int_norm), np.max(A2.int_norm))
+
+    def fig30d():
+        # calculate band structure
+        kbnd = 1.5  # boundaries
+        tb = utils.TB(a=np.pi, kbnd=kbnd, kpoints=200)
+        tb.SRO_folded(param=param, e0=-0.00, vert=True, proj=True)
+
+        # get vertices
+        VX = tb.VX
+        VY = tb.VY
+
+        # vertices of pocket
+        alpha_1 = np.array([VX[0][0], VY[0][0]])
+        alpha_2 = np.array([VX[0][2], VY[0][2]])
+        alpha_3 = np.array([VX[0][3], VY[0][3]])
+        alpha_4 = np.array([VX[0][6], VY[0][6]])
+        beta = np.array([VX[2][2], VY[2][2]])
+        gamma_1 = np.array([VX[1][0], VY[1][0]])
+        gamma_2 = np.array([VX[1][1], VY[1][1]])
+        gamma_3 = np.array([VX[1][2], VY[1][2]])
+        gamma_4 = np.array([VX[1][3], VY[1][3]])
+        delta_1 = np.array([VX[0][1], VY[0][1]])
+        delta_2 = np.array([VX[0][4], VY[0][4]])
+        delta_3 = np.array([VX[0][5], VY[0][5]])
+        delta_4 = np.array([VX[0][7], VY[0][7]])
+
+        f_alpha = np.array([VX[3][4], VY[3][4]])
+        f_beta_1 = np.array([VX[5][0], VY[5][0]])
+        f_beta_2 = np.array([VX[5][1], VY[5][1]])
+        f_beta_3 = np.array([VX[5][2], VY[5][2]])
+        f_beta_4 = np.array([VX[5][3], VY[5][3]])
+        f_gamma = np.array([VX[4][2], VY[4][2]])
+        f_delta = np.array([VX[3][5], VY[3][5]])
+
+        bands = (alpha_1, alpha_2, alpha_3, alpha_4, beta,
+                 gamma_1, gamma_2, gamma_3, gamma_4,
+                 delta_1, delta_2, delta_3, delta_4)
+
+        f_bands = (f_alpha, f_beta_1, f_beta_2, f_beta_3, f_beta_4,
+                   f_gamma, f_delta)
+
+        ax = fig.add_subplot(144)
+        ax.set_position([.723, .3, .28*2/3, .28])
+        ax.tick_params(**kwargs_ticks)
+
+        cols = ['c', 'b', 'm', 'C1']
+
+        n = 0  # counter
+        m = 0
+        for band in bands:
+            if any(x == m for x in [0, 4, 5, 9]):
+                n += 1
+            ax.plot(band[0, :], band[1, :], color=cols[n-1], lw=1, zorder=0)
+            ax.fill(band[0, :], band[1, :], color=cols[n-1], alpha=.1,
+                    zorder=0)
+            m += 1
+
+        n = 0
+        m = 0
+        for band in f_bands:
+            if any(x == m for x in [0, 1, 5, 6]):
+                n += 1
+            ax.plot(band[0, :], band[1, :], color=cols[n-1], lw=1, ls='--',
+                    zorder=0)
+    #        ax.fill(band[0, :], band[1, :], color=cols[n], alpha=.1)
+            m += 1
+
+        ax.plot([-.5, -.5], [-.5, .5], 'k-', lw=1.5)
+        ax.plot([.5, .5], [-.5, .5], 'k-', lw=1.5)
+        ax.plot([-.5, .5], [.5, .5], 'k-', lw=1.5)
+        ax.plot([-.5, .5], [-.5, -.5], 'k-', lw=1.5)
+        ax.plot([-1, 0], [0, 1], **kwargs_ef, alpha=1)
+        ax.plot([-1, 0], [0, -1], **kwargs_ef, alpha=1)
+        ax.plot([0, 1], [1, 0], **kwargs_ef, alpha=1)
+        ax.plot([0, 1], [-1, 0], **kwargs_ef, alpha=1)
+
+        ax.fill_between([-1, 0], [-5, -5], [0, -1], color='w', alpha=1,
+                        zorder=2)
+        ax.fill_between([0, 1], [-5, -5], [-1, 0], color='w', alpha=1,
+                        zorder=2)
+        ax.fill_between([-1, 0], [0, 1], [5, 5], color='w', alpha=1,
+                        zorder=2)
+        ax.fill_between([0, 1], [1, 0], [5, 5], color='w', alpha=1,
+                        zorder=2)
+
+        c1x = -.7
+        c1y = -1.2
+        l1 = .1
+        c2x = -.7
+        c2y = -1.5
+        l2 = .07
+        ax.plot([c1x-l1, c1x], [c1y, c1y+l1], **kwargs_ef)
+        ax.plot([c1x-l1, c1x], [c1y, c1y-l1], **kwargs_ef)
+        ax.plot([c1x, c1x+l1], [c1y+l1, c1y], **kwargs_ef)
+        ax.plot([c1x, c1x+l1], [c1y-l1, c1y], **kwargs_ef)
+        ax.text(c1x+.15, c1y-.03, 'tetr. BZ')
+        ax.plot([c2x-l2, c2x-l2], [c2y-l2, c2y+l2], 'k-', lw=1.5)
+        ax.plot([c2x+l2, c2x+l2], [c2y-l2, c2y+l2], 'k-', lw=1.5)
+        ax.plot([c2x-l2, c2x+l2], [c2y+l2, c2y+l2], 'k-', lw=1.5)
+        ax.plot([c2x-l2, c2x+l2], [c2y-l2, c2y-l2], 'k-', lw=1.5)
+        ax.text(c2x+.15, c2y-.03, 'orth. BZ')
+        ax.plot([-1, 0], [0, 1], **kwargs_ef, alpha=.2)
+        ax.plot([-1, 0], [0, -1], **kwargs_ef, alpha=.2)
+        ax.plot([0, 1], [1, 0], **kwargs_ef, alpha=.2)
+        ax.plot([0, 1], [-1, 0], **kwargs_ef, alpha=.2)
+
+        ux = .2
+        uy = -1.2
+        fx = .2
+        fy = -1.5
+        l0 = .07
+        ax.plot([ux-l0, ux-l0], [uy-l0, uy], color=cols[0], lw=1, ls='-')
+        ax.plot([ux-l0, ux], [uy-l0, uy-l0], color=cols[0], lw=1, ls='-')
+        ax.plot([ux+l0, ux+l0], [uy-l0, uy], color=cols[1], lw=1, ls='-')
+        ax.plot([ux, ux+l0], [uy-l0, uy-l0], color=cols[1], lw=1, ls='-')
+        ax.plot([ux+l0, ux+l0], [uy, uy+l0], color=cols[2], lw=1, ls='-')
+        ax.plot([ux, ux+l0], [uy+l0, uy+l0], color=cols[2], lw=1, ls='-')
+        ax.plot([ux-l0, ux-l0], [uy, uy+l0], color=cols[3], lw=1, ls='-')
+        ax.plot([ux-l0, ux], [uy+l0, uy+l0], color=cols[3], lw=1, ls='-')
+        ax.fill_between([ux-l0, ux], [uy-l0, uy-l0], [uy, uy],
+                        color=cols[0], alpha=.1, zorder=3)
+        ax.fill_between([ux, ux+l0], [uy-l0, uy-l0], [uy, uy],
+                        color=cols[1], alpha=.1, zorder=3)
+        ax.fill_between([ux, ux+l0], [uy, uy], [uy+l0, uy+l0],
+                        color=cols[2], alpha=.1, zorder=3)
+        ax.fill_between([ux-l0, ux], [uy, uy], [uy+l0, uy+l0],
+                        color=cols[3], alpha=.1, zorder=3)
+        ax.text(ux+.15, uy-.05, 'unfolded')
+        ax.plot([fx-l0, fx-l0], [fy-l0, fy], color=cols[0], lw=1, ls='--')
+        ax.plot([fx-l0, fx], [fy-l0, fy-l0], color=cols[0], lw=1, ls='--')
+        ax.plot([fx+l0, fx+l0], [fy-l0, fy], color=cols[1], lw=1, ls='--')
+        ax.plot([fx, fx+l0], [fy-l0, fy-l0], color=cols[1], lw=1, ls='--')
+        ax.plot([fx+l0, fx+l0], [fy, fy+l0], color=cols[2], lw=1, ls='--')
+        ax.plot([fx, fx+l0], [fy+l0, fy+l0], color=cols[2], lw=1, ls='--')
+        ax.plot([fx-l0, fx-l0], [fy, fy+l0], color=cols[3], lw=1, ls='--')
+        ax.plot([fx-l0, fx], [fy+l0, fy+l0], color=cols[3], lw=1, ls='--')
+        ax.text(fx+.15, fy-.05, 'folded')
+
+        ax.text(-.93, 1., '(d)', fontsize=12)
+        ax.text(.15, .88, r'$\alpha$', color=cols[0], fontsize=12)
+        ax.text(.35, .7, r'$\beta$', color=cols[1], fontsize=12)
+        ax.text(.55, .5, r'$\gamma$', color=cols[2], fontsize=12)
+        ax.text(.87, .15, r'$\delta$', color=cols[3], fontsize=12)
+        ax.set_yticks([])
+        ax.set_xticks([])
+        ax.set_xlim(-1, 1)
+        ax.set_ylim(-1.8, 1.2)
+
+    fig = plt.figure(figname, figsize=(10, 10), clear=True)
+    fig30a()
+    fig30b()
+    fig30c()
+    fig30d()
+    fig.show()
+
+    # Save figure
+    if print_fig:
+        fig.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
