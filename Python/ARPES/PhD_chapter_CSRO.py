@@ -1178,8 +1178,8 @@ def fig4(print_fig=True):
                 ax.set_ylabel(r'$\omega\,(\mathrm{meV})$', fontdict=font)
 
                 # add text
-                ax.text(-1.18, .007, r'$\bar{\delta}$-band', color='r')
-                ax.text(-.52, .007, r'$\bar{\beta}$-band', color='m')
+                ax.text(-1.18, .007, r'$\gamma$-band', color='r')
+                ax.text(-.52, .007, r'$\alpha$-band', color='m')
 
             elif j == 3:
                 # Plot cut of EDC's high temp
@@ -1236,9 +1236,9 @@ def fig4(print_fig=True):
 
     def fig4efg():
         # labels and position
-        lbls = [r'(e) $\bar{\delta}$-band',
-                r'(f) $\bar{\delta}$-band (zoom)',
-                r'(g) $\bar{\beta}$-band (zoom)']
+        lbls = [r'(e) $\gamma$-band',
+                r'(f) $\gamma$-band (zoom)',
+                r'(g) $\alpha$-band (zoom)']
         lbls_x = [-.77, -.093, -.093]
         lbls_y = [2.05, 1.08, 1.08]
 
@@ -1425,8 +1425,8 @@ def fig4(print_fig=True):
                       fontdict=font, fontsize=8)
         # add text
         ax.text(1.3, 1.038, r'(h)')
-        ax.text(8, .79, r'$\bar{\delta}$-band', color='r')
-        ax.text(17, .92, r'$\bar{\beta}$-band', color='m')
+        ax.text(8, .79, r'$\gamma$-band', color='r')
+        ax.text(17, .92, r'$\alpha$-band', color='m')
 
     fig = plt.figure(figname, figsize=(8, 8), clear=True)
     fig4abcd()
@@ -4061,9 +4061,9 @@ def fig23(print_fig=True, load=True):
 def fig25(print_fig=True):
     """figure 25
 
-    %%%%%%%%%%%%%%%%
-    Quasiparticle Z
-    %%%%%%%%%%%%%%%%
+    %%%%%%%%%%%%%%%%%%%%%
+    self energy + Z + DOS
+    %%%%%%%%%%%%%%%%%%%%%
     """
 
     figname = 'CSROfig25'
@@ -4622,7 +4622,11 @@ def fig29(print_fig=True):
     f_beta_2 = np.array([VX[5][1], VY[5][1]])
     f_beta_3 = np.array([VX[5][2], VY[5][2]])
     f_beta_4 = np.array([VX[5][3], VY[5][3]])
-    f_gamma = np.array([VX[4][2], VY[4][2]])
+    f_gamma_1 = np.array([VX[4][2], VY[4][2]])
+#    f_gamma_2 = np.array([VX[4][1], VY[4][1]])
+#    f_gamma_3 = np.array([VX[4][2], VY[4][2]])
+#    f_gamma_4 = np.array([VX[4][3], VY[4][3]])
+#    f_gamma_5 = np.array([VX[4][4], VY[4][4]])
     f_delta = np.array([VX[3][5], VY[3][5]])
 
     bands = (alpha_1, alpha_2, alpha_3, alpha_4, beta,
@@ -4630,7 +4634,7 @@ def fig29(print_fig=True):
              delta_1, delta_2, delta_3, delta_4)
 
     f_bands = (f_alpha, f_beta_1, f_beta_2, f_beta_3, f_beta_4,
-               f_gamma, f_delta)
+               f_gamma_1, f_delta)
 
     fig = plt.figure(figname, figsize=(10, 10), clear=True)
     ax = fig.add_subplot(144)
@@ -4668,20 +4672,24 @@ def fig29(print_fig=True):
     ax.plot([0, 1], [1, 0], **kwargs_ef, alpha=1)
     ax.plot([0, 1], [-1, 0], **kwargs_ef, alpha=1)
 
-    ax.fill_between([-1, 0], [-5, -5], [0, -1], color='w', alpha=1,
+#    ax.fill_between([-1, 0], [-5, -5], [0, -1], color='w', alpha=1,
+#                    zorder=2)
+#    ax.fill_between([0, 1], [-5, -5], [-1, 0], color='w', alpha=1,
+#                    zorder=2)
+#    ax.fill_between([-1, 0], [0, 1], [5, 5], color='w', alpha=1,
+#                    zorder=2)
+#    ax.fill_between([0, 1], [1, 0], [5, 5], color='w', alpha=1,
+#                    zorder=2)
+    ax.fill_between([-1, 1], [-5, -5], [-1, -1], color='w', alpha=1,
                     zorder=2)
-    ax.fill_between([0, 1], [-5, -5], [-1, 0], color='w', alpha=1,
-                    zorder=2)
-    ax.fill_between([-1, 0], [0, 1], [5, 5], color='w', alpha=1,
-                    zorder=2)
-    ax.fill_between([0, 1], [1, 0], [5, 5], color='w', alpha=1,
+    ax.fill_between([-1, 1], [1, 1], [5, 5], color='w', alpha=1,
                     zorder=2)
 
     c1x = -.7
-    c1y = -1.2
+    c1y = -1.5
     l1 = .1
     c2x = -.7
-    c2y = -1.5
+    c2y = -1.8
     l2 = .07
     ax.plot([c1x-l1, c1x], [c1y, c1y+l1], **kwargs_ef)
     ax.plot([c1x-l1, c1x], [c1y, c1y-l1], **kwargs_ef)
@@ -4699,9 +4707,9 @@ def fig29(print_fig=True):
     ax.plot([0, 1], [-1, 0], **kwargs_ef, alpha=.2)
 
     ux = .2
-    uy = -1.2
+    uy = -1.5
     fx = .2
-    fy = -1.5
+    fy = -1.8
     l0 = .07
     ax.plot([ux-l0, ux-l0], [uy-l0, uy], color=cols[0], lw=1, ls='-')
     ax.plot([ux-l0, ux], [uy-l0, uy-l0], color=cols[0], lw=1, ls='-')
@@ -4730,15 +4738,15 @@ def fig29(print_fig=True):
     ax.plot([fx-l0, fx], [fy+l0, fy+l0], color=cols[3], lw=1, ls='--')
     ax.text(fx+.15, fy-.05, 'folded')
 
-    ax.text(-.93, 1., '(d)', fontsize=12)
-    ax.text(.15, .88, r'$\alpha$', color=cols[0], fontsize=12)
-    ax.text(.35, .7, r'$\beta$', color=cols[1], fontsize=12)
-    ax.text(.55, .5, r'$\gamma$', color=cols[2], fontsize=12)
-    ax.text(.87, .15, r'$\delta$', color=cols[3], fontsize=12)
+    ax.text(-.93, .8, '(d)', fontsize=12)
+    ax.text(-.75, -1.25, r'$\alpha$', color=cols[0], fontsize=12)
+    ax.text(-.55, -1.25, r'$\beta$', color=cols[1], fontsize=12)
+    ax.text(-.35, -1.25, r'$\gamma$', color=cols[2], fontsize=12)
+    ax.text(-.15, -1.25, r'$\delta$', color=cols[3], fontsize=12)
     ax.set_yticks([])
     ax.set_xticks([])
     ax.set_xlim(-1, 1)
-    ax.set_ylim(-1.8, 1.2)
+    ax.set_ylim(-2, 1)
 
     plt.show()
 
@@ -5003,7 +5011,11 @@ def fig30(print_fig=True):
         f_beta_2 = np.array([VX[5][1], VY[5][1]])
         f_beta_3 = np.array([VX[5][2], VY[5][2]])
         f_beta_4 = np.array([VX[5][3], VY[5][3]])
-        f_gamma = np.array([VX[4][2], VY[4][2]])
+        f_gamma_1 = np.array([VX[4][2], VY[4][2]])
+    #    f_gamma_2 = np.array([VX[4][1], VY[4][1]])
+    #    f_gamma_3 = np.array([VX[4][2], VY[4][2]])
+    #    f_gamma_4 = np.array([VX[4][3], VY[4][3]])
+    #    f_gamma_5 = np.array([VX[4][4], VY[4][4]])
         f_delta = np.array([VX[3][5], VY[3][5]])
 
         bands = (alpha_1, alpha_2, alpha_3, alpha_4, beta,
@@ -5011,7 +5023,7 @@ def fig30(print_fig=True):
                  delta_1, delta_2, delta_3, delta_4)
 
         f_bands = (f_alpha, f_beta_1, f_beta_2, f_beta_3, f_beta_4,
-                   f_gamma, f_delta)
+                   f_gamma_1, f_delta)
 
         ax = fig.add_subplot(144)
         ax.set_position([.723, .3, .28*2/3, .28])
@@ -5048,20 +5060,23 @@ def fig30(print_fig=True):
         ax.plot([0, 1], [1, 0], **kwargs_ef, alpha=1)
         ax.plot([0, 1], [-1, 0], **kwargs_ef, alpha=1)
 
-        ax.fill_between([-1, 0], [-5, -5], [0, -1], color='w', alpha=1,
+#        ax.fill_between([-1, 0], [-5, -5], [0, -1], color='w', alpha=1,
+#                        zorder=2)
+#        ax.fill_between([0, 1], [-5, -5], [-1, 0], color='w', alpha=1,
+#                        zorder=2)
+#        ax.fill_between([-1, 0], [0, 1], [5, 5], color='w', alpha=1,
+#                        zorder=2)
+#        ax.fill_between([0, 1], [1, 0], [5, 5], color='w', alpha=1,
+#                        zorder=2)
+        ax.fill_between([-1, 1], [-5, -5], [-1, -1], color='w', alpha=1,
                         zorder=2)
-        ax.fill_between([0, 1], [-5, -5], [-1, 0], color='w', alpha=1,
+        ax.fill_between([-1, 1], [1, 1], [5, 5], color='w', alpha=1,
                         zorder=2)
-        ax.fill_between([-1, 0], [0, 1], [5, 5], color='w', alpha=1,
-                        zorder=2)
-        ax.fill_between([0, 1], [1, 0], [5, 5], color='w', alpha=1,
-                        zorder=2)
-
         c1x = -.7
-        c1y = -1.2
+        c1y = -1.5
         l1 = .1
         c2x = -.7
-        c2y = -1.5
+        c2y = -1.8
         l2 = .07
         ax.plot([c1x-l1, c1x], [c1y, c1y+l1], **kwargs_ef)
         ax.plot([c1x-l1, c1x], [c1y, c1y-l1], **kwargs_ef)
@@ -5079,9 +5094,9 @@ def fig30(print_fig=True):
         ax.plot([0, 1], [-1, 0], **kwargs_ef, alpha=.2)
 
         ux = .2
-        uy = -1.2
+        uy = -1.5
         fx = .2
-        fy = -1.5
+        fy = -1.8
         l0 = .07
         ax.plot([ux-l0, ux-l0], [uy-l0, uy], color=cols[0], lw=1, ls='-')
         ax.plot([ux-l0, ux], [uy-l0, uy-l0], color=cols[0], lw=1, ls='-')
@@ -5110,15 +5125,15 @@ def fig30(print_fig=True):
         ax.plot([fx-l0, fx], [fy+l0, fy+l0], color=cols[3], lw=1, ls='--')
         ax.text(fx+.15, fy-.05, 'folded')
 
-        ax.text(-.93, 1., '(d)', fontsize=12)
-        ax.text(.15, .88, r'$\alpha$', color=cols[0], fontsize=12)
-        ax.text(.35, .7, r'$\beta$', color=cols[1], fontsize=12)
-        ax.text(.55, .5, r'$\gamma$', color=cols[2], fontsize=12)
-        ax.text(.87, .15, r'$\delta$', color=cols[3], fontsize=12)
+        ax.text(-.93, .8, '(d)', fontsize=12)
+        ax.text(-.75, -1.25, r'$\alpha$', color=cols[0], fontsize=12)
+        ax.text(-.55, -1.25, r'$\beta$', color=cols[1], fontsize=12)
+        ax.text(-.35, -1.25, r'$\gamma$', color=cols[2], fontsize=12)
+        ax.text(-.15, -1.25, r'$\delta$', color=cols[3], fontsize=12)
         ax.set_yticks([])
         ax.set_xticks([])
         ax.set_xlim(-1, 1)
-        ax.set_ylim(-1.8, 1.2)
+        ax.set_ylim(-2, 1)
 
     fig = plt.figure(figname, figsize=(10, 10), clear=True)
     fig30a()
@@ -5130,3 +5145,79 @@ def fig30(print_fig=True):
     # Save figure
     if print_fig:
         fig.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+
+
+def fig31(print_fig=True):
+    """figure 31
+
+    %%%%%%%%%%%%%%%%%
+    xFig3 self energy
+    %%%%%%%%%%%%%%%%%
+    """
+
+    figname = 'CSROfig31'
+
+    os.chdir(data_dir)
+    Z_e = np.loadtxt('Data_CSROfig5_Z_e.dat')
+    Z_b = np.loadtxt('Data_CSROfig6_Z_b.dat')
+    dims = np.loadtxt('Data_CSROfig6_dims.dat', dtype=np.int32)
+    Loc_en = np.loadtxt('Data_CSROfig6_Loc_en.dat')
+    Loc_en = np.reshape(np.ravel(Loc_en), (dims[0], dims[1]))
+    re = np.loadtxt('Data_CSROfig9_re.dat')
+    ere = np.loadtxt('Data_CSROfig9_ere.dat')
+    im = np.loadtxt('Data_CSROfig9_im.dat')
+    eim = np.loadtxt('Data_CSROfig9_eim.dat')
+    os.chdir(home_dir)
+    print('\n ~ Data loaded (Zs, specific heat, transport data)',
+          '\n', '==========================================')
+
+    print('Z_e='+str(np.mean(Z_e)))
+    print('Z_b='+str(np.mean(Z_b)))
+
+    # Reshape data
+    re = np.reshape(np.ravel(re), (dims[0], dims[1]))
+    ere = np.reshape(np.ravel(ere), (dims[0], dims[1]))
+    im = np.reshape(np.ravel(im), (dims[0], dims[1]))
+    eim = np.reshape(np.ravel(eim), (dims[0], dims[1]))
+
+#    # fit for resistivity curve
+#    xx = np.array([1e-3, 1e4])
+#    yy = 2.3 * xx ** 2
+
+    # create figure
+    fig = plt.figure(figname, figsize=(10, 10), clear=True)
+
+    ax1 = fig.add_subplot(131)
+    ax1.set_position([.08, .3, .25, .25])
+    ax1.tick_params(direction='in', length=1.5, width=.5, colors='k')
+
+    # plot data
+    spec = 2
+    en = -Loc_en[spec]
+    ax1.errorbar(en, im[spec], eim[spec],
+                 color=[0, .4, .4], lw=.5, capsize=2, fmt='d', ms=2)
+    ax1.errorbar(en, re[spec], ere[spec],
+                 color='goldenrod', lw=.5, capsize=2, fmt='o', ms=2)
+
+    # decorate axes
+    ax1.set_ylabel('Self energy (meV)', fontdict=font)
+    ax1.set_yticks(np.arange(0, .3, .05))
+    ax1.set_yticklabels(['0', '50', '100', '150', '200', '250'])
+    ax1.set_xticks(np.arange(0, .12, .02))
+    ax1.set_xticklabels(['0', '-20', '-40', '-60', '-80', '-100'])
+    ax1.set_xlabel(r'$\omega\,(\mathrm{meV})$', fontdict=font)
+    ax1.set_xlim(0, .1)
+    ax1.set_ylim(-.01, .25)
+    ax1.grid(True, alpha=.2)
+
+    # add text
+    ax1.text(.005, .18, r'$\Re\Sigma (\omega) \, (1-Z)^{-1}$',
+             fontsize=12, color='goldenrod')
+    ax1.text(.06, .014, r'$\Im\Sigma (\omega)$',
+             fontsize=12, color=[0, .4, .4])
+
+    plt.show()
+
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")

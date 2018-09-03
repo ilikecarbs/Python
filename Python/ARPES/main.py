@@ -75,7 +75,7 @@ CSRO.fig21: Fermi surface extraction points
 CSRO.fig22: Tight binding model folded SRO
 CSRO.fig23: Fit dispersions + FS
 CSRO.fig24: Alternative CSRO.fig1
-CSRO.fig25: Combining fig9 & fig10
+CSRO.fig25: self energy + Z + DOS
 CSRO.fig26: Fermi surface counting CSRO (3.84 \pm .14)
 CSRO.fig27: Fermi surface counting CSRO unfolded
 CSRO.fig28: Fermi surface counting SRO
@@ -102,6 +102,6 @@ CRO.fig7()
 # %%
 
 # CSRO.fig20(load=False)
-CSRO.fig30(print_fig=True)
+CSRO.fig4(print_fig=True)
 
 # %%
