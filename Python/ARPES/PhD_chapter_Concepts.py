@@ -1073,3 +1073,256 @@ def fig8(print_fig=True):
     # Save figure
     if print_fig:
         plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+
+
+def fig9(print_fig=True):
+    """figure 9
+
+    %%%%%%%%%%%%%%%%%
+    Analyzer energies
+    %%%%%%%%%%%%%%%%%
+    """
+
+    figname = 'CONfig9'
+
+    fig = plt.figure(figname, figsize=(8, 8), clear=True)
+
+    ax = fig.add_axes([.2, .2, .6, .6])
+    ax.tick_params(**kwargs_ticks)
+
+    # plot lines
+    ax.plot([.5, 1], [0, 0], **kwargs_ef)
+    ax.plot([1, 1], [-1, 0], 'k-')
+    ax.plot([1, 1.5], [0, 2], 'k-')
+    ax.plot([1.5, 1.5], [2, 1], 'k-')
+    ax.plot([1.5, 2], [2, 2], **kwargs_ef)
+    ax.plot([.75, 1.8], [2.75, 2.75], **kwargs_ef)
+    ax.plot([1, 2], [-.5, -.5], **kwargs_ef)
+    ax.plot([.75, .9], [-.85, -.85], **kwargs_ef)
+    ax.arrow(.75, -.85, 0, 3.45, head_width=0.02, head_length=0.1, fc='r',
+             ec='r', lw=.2)
+    ax.plot(.75, -.85, 'o', markeredgecolor='k', markerfacecolor='w')
+    ax.plot(.75, 2.75, 'ko')
+    xx = np.linspace(.45, .7, 100)
+    yy = -.1*np.sin(xx*99) + 2 - xx
+    ax.plot(xx, yy, 'c-')
+    ax.arrow(.6, -.25, 0, .15, head_width=0.02, head_length=0.1,
+             fc='k', ec='k')
+    ax.arrow(.6, -.25, 0, -.15, head_width=0.02, head_length=0.1,
+             fc='k', ec='k')
+    ax.arrow(.85, -.65, 0, .05, head_width=0.02, head_length=0.1,
+             fc='k', ec='k')
+    ax.arrow(.85, -.65, 0, -.1, head_width=0.02, head_length=0.1,
+             fc='k', ec='k')
+    ax.arrow(.85, 0, 0, -.4, head_width=0.02, head_length=0.1,
+             fc='k', ec='k')
+    ax.arrow(.85, 0, 0, 2.6, head_width=0.02, head_length=0.1,
+             fc='k', ec='k')
+    ax.arrow(1.65, 0, 0, -.4, head_width=0.02, head_length=0.1,
+             fc='k', ec='k')
+    ax.arrow(1.65, 0, 0, 1.4, head_width=0.02, head_length=0.1,
+             fc='k', ec='k')
+    ax.arrow(1.65, 1.7, 0, -.1, head_width=0.02, head_length=0.1,
+             fc='k', ec='k')
+    ax.arrow(1.65, 1.7, 0, .2, head_width=0.02, head_length=0.1,
+             fc='k', ec='k')
+    ax.arrow(1.65, 2.3, 0, -.2, head_width=0.02, head_length=0.1,
+             fc='k', ec='k')
+    ax.arrow(1.65, 2.3, 0, .35, head_width=0.02, head_length=0.1,
+             fc='k', ec='k')
+    ax.arrow(.702, 1.275, .02, -.03, head_width=0.03, head_length=0.03, lw=1.2,
+             fc='c', ec='c')
+
+    ax.plot([1.8, 1.85], [2.5, 2.5], 'k-')
+    ax.plot([1.8, 1.85], [3, 3], 'k-')
+    ax.plot([1.8, 1.8], [2.5, 3], 'k-')
+    ax.plot([1.85, 1.85], [2.5, 3], 'k-')
+    ax.fill_between([1.8, 1.85], [2.5, 2.5], [3, 3], color='m')
+    ax.fill_between([1.5, 2], [1.5, 1.5], [1, 1], color='k', alpha=.3)
+    ax.fill_between([.5, 1], [-1, -1], [-.5, -.5], color='C8', alpha=1)
+    
+
+    # add text
+    ax.text(.62, -.3, r'$\Phi$', fontdict=font)
+    ax.text(.88, -.7, r'$E_\mathrm{b}$', fontdict=font)
+    ax.text(.88, 1, r'$E_\mathrm{kin}$', fontdict=font)
+    ax.text(.4, -.05, r'$E_\mathrm{vac}$', fontdict=font)
+    ax.text(.4, -.55, r'$E_\mathrm{F}$', fontdict=font)
+    ax.text(2.01, 1.45, r'$E_\mathrm{F}$', fontdict=font)
+    ax.text(2.01, 1.95, r'$E_\mathrm{vac}$', fontdict=font)
+    ax.text(1.67, 2.3, r'$E_\mathrm{p}$', fontdict=font)
+    ax.text(1.67, 1.7, r'$\Phi_\mathrm{A}$', fontdict=font)
+    ax.text(1.67, .4, r'$eV_\mathrm{R}$', fontdict=font)
+    ax.text(.53, -.72, 'Sample', fontdict=font)
+    ax.text(1.7, 1.2, 'Analyzer', fontdict=font)
+    ax.text(.55, 1.65, r'$h \nu$', fontdict=font)
+    ax.text(1.88, 2.7, 'MCP', fontdict=font)
+    ax.set_xlim(0.3, 2.2)
+    ax.set_ylim(-1.2, 3.3)
+    plt.axis('off')
+
+    plt.show()
+
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+
+
+def fig10(print_fig=True):
+    """figure 10
+
+    %%%%%%%%%%%%%%
+    Analyzer setup
+    %%%%%%%%%%%%%%
+    """
+
+    figname = 'CONfig10'
+
+    fig = plt.figure(figname, figsize=(8, 8), clear=True)
+
+    ax = fig.add_axes([.2, .2, .6, .6])
+    ax.tick_params(**kwargs_ticks)
+
+    r1 = 1.5
+    r2 = 2
+    r3 = 3
+
+    r4 = 1.75
+    r5 = 1.75
+
+    phi = np.linspace(0, np.pi, 100)
+    x1 = r1 * np.cos(phi)
+    x2 = r2 * np.cos(phi)
+    x3 = r3 * np.cos(phi)
+    x4 = r4 * np.cos(phi)
+    x5 = r5 * np.cos(phi)
+    y1 = r1 * np.sin(phi) + 5
+    y2 = r2 * np.sin(phi) + 5
+    y3 = r3 * np.sin(phi) + 5
+    y4 = r4 * np.sin(phi) + 4.9
+    y5 = r5 * np.sin(phi) + 5.1
+    phi_i1 = np.linspace(11/12*np.pi, 13/12*np.pi, 100)
+    phi_i2 = np.linspace(-1/12*np.pi, 1/12*np.pi, 100)
+    xi1 = 7.5 * np.cos(phi_i1) + 5.5
+    yi1 = 7.5 * np.sin(phi_i1) + 3.15
+    xi2 = 7.5 * np.cos(phi_i2) - 9
+    yi2 = 7.5 * np.sin(phi_i2) + 3.15
+
+    # round geometries
+    ax.plot(x1, y1, 'k-', x2, y2, 'k-', x3, y3, 'k-')
+    ax.plot(x4, y4, 'k--', x5, y5, 'k--')
+    ax.plot(xi1, yi1, 'k--')
+    ax.plot(xi2, yi2, 'k--')
+
+    # herzog plate
+    ax.plot([-r3, -r2], [5, 5], 'k-',
+            [r2, r3], [5, 5], 'k-',
+            [-r1, r1], [5, 5], 'k-')
+    ax.plot([-r3, -r2], [4.9, 4.9], 'k-',
+            [r2, r3], [4.9, 4.9], 'k-',
+            [-r1, r1], [4.9, 4.9], 'k-')
+    ax.plot([-r3, -r2], [4.8, 4.8], 'k-',
+            [r2, r3], [4.8, 4.8], 'k-',
+            [-r1, r1], [4.8, 4.8], 'k-')
+    ax.plot([-r1, -r1], [4.8, 4.9], 'k-',
+            [-r2, -r2], [4.8, 4.9], 'k-',
+            [-r3, -r3], [4.8, 4.9], 'k-')
+    ax.plot([r1, r1], [4.8, 4.9], 'k-',
+            [r2, r2], [4.8, 4.9], 'k-',
+            [r3, r3], [4.8, 4.9], 'k-')
+    ax.fill_between([-r3, -r2], 4.8, 4.9, color='k', alpha=.3)
+    ax.fill_between([r2, r3], 4.8, 4.9, color='k', alpha=.3)
+    ax.fill_between([-r1, r1], 4.8, 4.9, color='k', alpha=.3)
+    # MCP
+    ax.plot([1.3, 2.2], [4.2, 4.2], 'k-',
+            [1.3, 2.2], [4., 4.], 'k-',
+            [1.3, 1.3], [4., 4.2], 'k-',
+            [2.2, 2.2], [4., 4.2], 'k-')
+    ax.fill_between([1.3, 2.2], [4, 4], [4.2, 4.2], color='m')
+
+    # beam onto MCP
+    ax.plot([1.75, 1.9], [5, 4.2], 'k--')
+    ax.plot([1.75, 1.6], [5, 4.2], 'k--')
+
+    # lenses
+    ax.plot([-2.5, -2.2], [4.5, 4.5], 'k-',
+            [-1.3, -1], [4.5, 4.5], 'k-',
+            [-2.5, -2.2], [4., 4.], 'k-',
+            [-1.3, -1], [4., 4.], 'k-')
+    ax.plot([-2.5, -2.5], [4, 4.5], 'k-',
+            [-2.2, -2.2], [4, 4.5], 'k-',
+            [-1.3, -1.3], [4, 4.5], 'k-',
+            [-1., -1.], [4, 4.5], 'k-')
+    ax.plot([-2.5, -2.2], [3.5, 3.5], 'k-',
+            [-1.3, -1], [3.5, 3.5], 'k-',
+            [-2.5, -2.2], [3., 3.], 'k-',
+            [-1.3, -1], [3., 3.], 'k-')
+    ax.plot([-2.5, -2.5], [3, 3.5], 'k-',
+            [-2.2, -2.2], [3, 3.5], 'k-',
+            [-1.3, -1.3], [3, 3.5], 'k-',
+            [-1., -1.], [3, 3.5], 'k-')
+    ax.plot([-2.5, -2.2], [2.5, 2.5], 'k-',
+            [-1.3, -1], [2.5, 2.5], 'k-',
+            [-2.5, -2.2], [2., 2.], 'k-',
+            [-1.3, -1], [2., 2.], 'k-')
+    ax.plot([-2.5, -2.5], [2, 2.5], 'k-',
+            [-2.2, -2.2], [2, 2.5], 'k-',
+            [-1.3, -1.3], [2, 2.5], 'k-',
+            [-1., -1.], [2, 2.5], 'k-')
+
+    # grounding
+    ax.plot([-2, -1.5], [.7, .7], 'k-',
+            [-2, -1.5], [.6, .6], 'k-',
+            [-2, -2], [.6, .7], 'k-',
+            [-1.5, -1.5], [.6, .7], 'k-')
+    ax.fill_between([-2, -1.5], .6, .7, color='C8')
+    ax.plot([-1.75, -1.75], [.6, .3], 'k-')
+    ax.plot([-1.95, -1.55], [.3, .3], 'k-')
+    ax.plot([-1.9, -1.6], [.22, .22], 'k-')
+    ax.plot([-1.85, -1.65], [.14, .14], 'k-')
+
+    ax.plot([-r1, -r1], [5, 8.15], 'k-', lw=1)
+    ax.plot([-r2, -r2], [5, 8.15], 'k-', lw=1)
+    xx = np.linspace(-3.5, -2.2, 100)
+    yy = -.1 * np.sin(xx * 30) - .3 - .5 * xx
+    ax.plot(xx, yy, 'c-')
+    ax.arrow(-2.2, .8, .08, -.07, head_width=0.12, head_length=0.12, lw=1.2,
+             fc='c', ec='c')
+
+    ax.arrow(-2, 3.1, 0, 0, head_width=0.2, head_length=0.2,
+             fc='k', ec='k')
+    ax.arrow(-1.5, 3.1, 0, 0, head_width=0.2, head_length=0.2,
+             fc='k', ec='k')
+    ax.arrow(-.1, 6.85, 0.001, 0, head_width=0.2, head_length=0.2,
+             fc='k', ec='k')
+    ax.arrow(-.1, 6.65, 0.001, 0, head_width=0.2, head_length=0.2,
+             fc='k', ec='k')
+
+    ax.arrow(0, 5, .9, .95, head_width=0.1, head_length=0.15,
+             fc='k', ec='k')
+    ax.arrow(0, 5, .8, 2.7, head_width=0.1, head_length=0.15,
+             fc='k', ec='k')
+    ax.arrow(-1.75, 8, -.1, 0, head_width=0.1, head_length=0.15,
+             fc='k', ec='k')
+    ax.arrow(-1.75, 8, .1, 0, head_width=0.1, head_length=0.15,
+             fc='k', ec='k')
+    ax.plot(-1.75, 1., 'ko', ms=7)
+    ax.set_xlim(-4.5, 4.5)
+    ax.set_ylim(-.5, 8.5)
+
+    # add text
+    ax.text(1.4, 3.6, 'MCP', fontdict=font)
+    ax.text(-.8, 3.2, 'electrostatic', fontdict=font)
+    ax.text(-.8, 2.85, 'lenses', fontdict=font)
+    ax.text(-1.5, .9, r'$e^-$', fontdict=font)
+    ax.text(-1.3, .4, 'sample', fontdict=font)
+    ax.text(-4, 1.5, r'$h\nu$', fontdict=font)
+    ax.text(-1.9, 8.2, r'$w$', fontdict=font)
+    ax.text(.55, 5.3, r'$r_1$', fontdict=font)
+    ax.text(.8, 7.2, r'$r_2$', fontdict=font)
+    plt.axis('off')
+    plt.show()
+
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")

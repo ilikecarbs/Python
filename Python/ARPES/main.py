@@ -51,7 +51,7 @@ CRO.fig13:  Constant energy maps alpha band -0.5eV
 CRO.fig14:  Constant energy maps gamma band -2.4eV
 
 ----------  Ca1.8Sr0.2RuO4 Figures ----------
-CSRO.fig1:  Experimental data: Figure 1 CSRO20 paper
+CSRO.fig1:  Experimental data FS + cuts
 CSRO.fig2:  Experimental PSI data: Figure 2 CSCRO20 paper
 CSRO.fig3:  (L): Polarization and orbital characters. Figure 3 in paper
 CSRO.fig4:  (L): Temperature dependence. Figure 4 in paper
@@ -81,6 +81,7 @@ CSRO.fig27: Fermi surface counting CSRO unfolded
 CSRO.fig28: Fermi surface counting SRO
 CSRO.fig29: Fermi surface folded CSRO
 CSRO.fig30: xFig1 2nd version
+CSRO.fig31: xFig3 self energy
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     Which figure do you desire?
@@ -91,7 +92,7 @@ CSRO.fig30: xFig1 2nd version
 
 # %%
 
-CON.fig8()
+CON.fig9()
 
 
 # %%
@@ -102,6 +103,6 @@ CRO.fig7()
 # %%
 
 # CSRO.fig20(load=False)
-CSRO.fig4(print_fig=True)
+CSRO.fig31(print_fig=True)
 
 # %%
