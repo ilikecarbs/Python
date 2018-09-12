@@ -1140,7 +1140,6 @@ def fig9(print_fig=True):
     ax.fill_between([1.8, 1.85], [2.5, 2.5], [3, 3], color='m')
     ax.fill_between([1.5, 2], [1.5, 1.5], [1, 1], color='k', alpha=.3)
     ax.fill_between([.5, 1], [-1, -1], [-.5, -.5], color='C8', alpha=1)
-    
 
     # add text
     ax.text(.62, -.3, r'$\Phi$', fontdict=font)
@@ -1279,14 +1278,14 @@ def fig10(print_fig=True):
     ax.plot([-1.75, -1.75], [.6, .3], 'k-')
     ax.plot([-1.95, -1.55], [.3, .3], 'k-')
     ax.plot([-1.9, -1.6], [.22, .22], 'k-')
-    ax.plot([-1.85, -1.65], [.14, .14], 'k-')
+    ax.plot([-1.85, -1.65], [.15, .15], 'k-')
 
     ax.plot([-r1, -r1], [5, 8.15], 'k-', lw=1)
     ax.plot([-r2, -r2], [5, 8.15], 'k-', lw=1)
     xx = np.linspace(-3.5, -2.2, 100)
     yy = -.1 * np.sin(xx * 30) - .3 - .5 * xx
     ax.plot(xx, yy, 'c-')
-    ax.arrow(-2.2, .8, .08, -.07, head_width=0.12, head_length=0.12, lw=1.2,
+    ax.arrow(-2.2, .8, .08, -.06, head_width=0.12, head_length=0.12, lw=1.2,
              fc='c', ec='c')
 
     ax.arrow(-2, 3.1, 0, 0, head_width=0.2, head_length=0.2,
@@ -1312,10 +1311,10 @@ def fig10(print_fig=True):
 
     # add text
     ax.text(1.4, 3.6, 'MCP', fontdict=font)
-    ax.text(-.8, 3.2, 'electrostatic', fontdict=font)
+    ax.text(-.8, 3.2, 'Electrostatic', fontdict=font)
     ax.text(-.8, 2.85, 'lenses', fontdict=font)
     ax.text(-1.5, .9, r'$e^-$', fontdict=font)
-    ax.text(-1.3, .4, 'sample', fontdict=font)
+    ax.text(-1.3, .4, 'Sample', fontdict=font)
     ax.text(-4, 1.5, r'$h\nu$', fontdict=font)
     ax.text(-1.9, 8.2, r'$w$', fontdict=font)
     ax.text(.55, 5.3, r'$r_1$', fontdict=font)

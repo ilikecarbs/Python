@@ -33,6 +33,8 @@ CON.fig5:   (L): eg, t2g orbitals
 CON.fig6:   Manipulator angles
 CON.fig7:   Mirror plane
 CON.fig8:   Data normalization
+CON.fig9:   Analyzer energies
+CON.fig10:  Analyzer setup
 
 ----------  Ca2RuO4 Figures   ----------
 CRO.fig1:   DFT plot: figure 3 of Nature Comm.
@@ -92,12 +94,12 @@ CSRO.fig31: xFig3 self energy
 
 # %%
 
-CON.fig9()
+CON.fig10()
 
 
 # %%
 
-CRO.fig7()
+CRO.fig1()
 
 
 # %%
