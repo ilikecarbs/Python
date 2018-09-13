@@ -35,6 +35,8 @@ CON.fig7:   Mirror plane
 CON.fig8:   Data normalization
 CON.fig9:   Analyzer energies
 CON.fig10:  Analyzer setup
+CON.fig11:  Laue + Crystal
+CON.fig12:  Inelastic mean free path
 
 ----------  Ca2RuO4 Figures   ----------
 CRO.fig1:   DFT plot: figure 3 of Nature Comm.
@@ -94,7 +96,7 @@ CSRO.fig31: xFig3 self energy
 
 # %%
 
-CON.fig10()
+CON.fig12()
 
 
 # %%
@@ -105,6 +107,6 @@ CRO.fig1()
 # %%
 
 # CSRO.fig20(load=False)
-CSRO.fig31(print_fig=True)
+CSRO.fig24(print_fig=True)
 
 # %%

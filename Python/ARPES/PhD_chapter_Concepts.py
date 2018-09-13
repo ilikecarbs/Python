@@ -16,14 +16,15 @@ Created on Mon Aug 13 08:59:09 2018
             -
 """
 
+import os
 import utils
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from mpl_toolkits.mplot3d import Axes3D
 from scipy.special import sph_harm
-from scipy.stats import exponnorm
 from scipy.optimize import curve_fit
+import matplotlib.image as mpimg
 
 import ARPES
 
@@ -1320,6 +1321,106 @@ def fig10(print_fig=True):
     ax.text(.55, 5.3, r'$r_1$', fontdict=font)
     ax.text(.8, 7.2, r'$r_2$', fontdict=font)
     plt.axis('off')
+    plt.show()
+
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+
+
+def fig11(print_fig=True):
+    """figure 11
+
+    %%%%%%%%%%%%%%
+    Laue + Crystal
+    %%%%%%%%%%%%%%
+    """
+
+    figname = 'CONfig11'
+
+    fig = plt.figure(figname, figsize=(10, 4), clear=True)
+
+    ax1 = fig.add_subplot(121)
+    ax1.tick_params(**kwargs_ticks)
+    ax1.set_position([.1, .29, .5, .5])
+    ax1.set_xticks([])
+    ax1.set_yticks([])
+    laue = mpimg.imread(data_dir+'CON11a.jpg')
+    laue = laue[:, 20:-20]
+    phi = np.linspace(-np.pi/2, -np.pi/4*3+.05)
+    x = 313 + 160 * np.cos(phi)
+    y = 220 + 160 * np.sin(phi)
+
+    ax1.imshow(laue, cmap='gray')
+    ax1.plot([258, 225], [100, 30], 'k--', lw=.5)
+    ax1.plot([224, 165], [120, 60], 'k--', lw=.5)
+    ax1.plot([312, 313], [85, 35], 'k--', lw=.5)
+    ax1.plot(x, y, 'k--', lw=.5)
+    ax1.text(10, 35, '(a)', fontdict=font)
+    ax1.text(270, 95, r'$\alpha_1$')
+    ax1.text(222, 110, r'$\alpha_2$')
+    ax1.text(258, 30, 'Ru-O-Ru')
+    ax1.text(125, 55, 'Ru-Ru')
+
+    ax2 = fig.add_subplot(122)
+    ax2.tick_params(**kwargs_ticks)
+    ax2.set_position([.4, .29, .5, .5])
+    ax2.set_xticks([])
+    ax2.set_yticks([])
+    crystal = mpimg.imread(data_dir+'CON11b.jpg')
+    crystal = crystal[70:1200, :, :]
+    ax2.imshow(crystal)
+    ax2.text(20, 90, '(b)', fontdict=font)
+
+    plt.show()
+
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+
+
+def fig12(print_fig=True):
+    """figure 12
+
+    %%%%%%%%%%%%%%%%%%%%%%%%
+    Inelastic mean free path
+    %%%%%%%%%%%%%%%%%%%%%%%%
+    """
+
+    figname = 'CONfig12'
+
+    # load data
+    os.chdir(data_dir)
+    data = np.genfromtxt('IMFP.csv', delimiter=',')
+    E_kin = data[:, 0]
+    IMFP = data[:, 1]
+    xx = np.linspace(E_kin[0], E_kin[-1], 1000)
+    lamb = 143 / xx ** 2 + .053 * np.sqrt(xx) 
+
+    # create figure
+    fig = plt.figure(figname, figsize=(6, 6), clear=True)
+    ax = fig.add_axes([.2, .2, .6, .6])
+    ax.tick_params(**kwargs_ticks)
+
+    # plot data
+    ax.loglog(E_kin, IMFP, 'ko', ms=3)
+    ax.loglog(xx, lamb, 'r--')
+    ax.fill_between([10, 1e3], .1, 2, color='C0', alpha=.3)
+    ax.fill_between([6, 10], .1, 12, color='c', alpha=.3)
+    ax.fill_between([1e3, 5e3], .1, 10, color='b', alpha=.3)
+
+    # decorate axes
+    ax.set_xlabel('Electron energy (eV)', fontdict=font)
+    ax.set_ylabel(r'$\lambda_\mathrm{IMFP}$ (nm)', fontdict=font)
+    ax.set_ylim(.1, 1e3)
+
+    # add text
+    ax.text(5, 15, 'Laser', color='c')
+    ax.text(30, 2.7, 'Conventional', color='C0')
+    ax.text(1e3, 13, 'Soft X-ray', color='b')
+    ax.text(1.5, 3e2,
+            r'$\lambda_\mathrm{IMFP} \simeq 143 E^{-2} + 0.054 \sqrt{E}$',
+            color='r')
     plt.show()
 
     # Save figure
