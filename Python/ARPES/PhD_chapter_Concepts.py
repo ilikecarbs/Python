@@ -21,6 +21,8 @@ import utils
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+from matplotlib import colors as mcolors
 from mpl_toolkits.mplot3d import Axes3D
 from scipy.special import sph_harm
 from scipy.optimize import curve_fit
@@ -1144,7 +1146,7 @@ def fig9(print_fig=True):
 
     # add text
     ax.text(.62, -.3, r'$\Phi$', fontdict=font)
-    ax.text(.88, -.7, r'$E_\mathrm{b}$', fontdict=font)
+    ax.text(.88, -.7, r'$E_\mathrm{B}$', fontdict=font)
     ax.text(.88, 1, r'$E_\mathrm{kin}$', fontdict=font)
     ax.text(.4, -.05, r'$E_\mathrm{vac}$', fontdict=font)
     ax.text(.4, -.55, r'$E_\mathrm{F}$', fontdict=font)
@@ -1395,7 +1397,7 @@ def fig12(print_fig=True):
     E_kin = data[:, 0]
     IMFP = data[:, 1]
     xx = np.linspace(E_kin[0], E_kin[-1], 1000)
-    lamb = 143 / xx ** 2 + .053 * np.sqrt(xx) 
+    lamb = 143 / xx ** 2 + .053 * np.sqrt(xx)
 
     # create figure
     fig = plt.figure(figname, figsize=(6, 6), clear=True)
@@ -1419,8 +1421,130 @@ def fig12(print_fig=True):
     ax.text(30, 2.7, 'Conventional', color='C0')
     ax.text(1e3, 13, 'Soft X-ray', color='b')
     ax.text(1.5, 3e2,
-            r'$\lambda_\mathrm{IMFP} \simeq 143 E^{-2} + 0.054 \sqrt{E}$',
+            (r'$\lambda_\mathrm{IMFP} \simeq (143$' +
+             r'$\cdot E\,\mathrm{[eV]}^{-2} + 0.054$' +
+             r'$ \cdot \sqrt{E\,\mathrm{[eV]}})\,\mathrm{nm}$'),
             color='r')
+    plt.show()
+
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+
+
+def fig13(print_fig=True):
+    """figure 13
+
+    %%%%%%%%%%%%%
+    Sr2RuO4 model
+    %%%%%%%%%%%%%
+    """
+
+    figname = 'CONfig13'
+
+    fig = plt.figure(figname, figsize=(5, 8), clear=True)
+
+    ax = fig.add_axes([.1, .1, .8, .8], projection='3d')
+    ax.tick_params(**kwargs_ticks)
+
+    u = np.linspace(0, 2 * np.pi, 100)
+    v = np.linspace(0, np.pi, 100)
+    X0 = .25 * np.outer(np.cos(u), np.sin(v))
+    Y0 = .25 * np.outer(np.sin(u), np.sin(v))
+    Z0 = .25 * np.outer(np.ones(np.size(u)), np.cos(v))
+    X = .15 * np.outer(np.cos(u), np.sin(v))
+    Y = .15 * np.outer(np.sin(u), np.sin(v))
+    Z = .15 * np.outer(np.ones(np.size(u)), np.cos(v))
+    Xs = .3 * np.outer(np.cos(u), np.sin(v))
+    Ys = .3 * np.outer(np.sin(u), np.sin(v))
+    Zs = .3 * np.outer(np.ones(np.size(u)), np.cos(v))
+
+    def cc(arg):
+        return mcolors.to_rgba(arg, alpha=.75)
+
+    def triang(x0, y0, z0, x, y, z):
+        X = [x0+x, 0+x, 0+x]
+        Y = [0+y, 0+y, y0+y]
+        Z = [0+z, z0+z, 0+z]
+        verts = [list(zip(X, Y, Z))]
+        return verts
+
+    def octahedron(x, y, z):
+        v1 = triang(-1, 1, 1, x, y, z)
+        v2 = triang(-1, -1, 1, x, y, z)
+        v3 = triang(-1, -1, -1, x, y, z)
+        v4 = triang(-1, 1, -1, x, y, z)
+        v5 = triang(1, 1, 1, x, y, z)
+        v6 = triang(1, -1, 1, x, y, z)
+        v7 = triang(1, -1, -1, x, y, z)
+        v8 = triang(1, 1, -1, x, y, z)
+        V = [v1, v2, v3, v4, v5, v6, v7, v8]
+        for i in range(8):
+            ax.add_collection3d(Poly3DCollection(V[i], facecolors=cc('w'),
+                                                 edgecolor=cc('k')), zs='z')
+
+        ax.plot_surface(X0 + x, Y0 + y, Z0 + z,  rstride=4,
+                        cstride=4, color='r', lw=0)
+        ax.plot_surface(X + x, Y + y, Z + z + 1,  rstride=4,
+                        cstride=4, color='b', lw=0)
+        ax.plot_surface(X + x, Y + y, Z + z - 1,  rstride=4,
+                        cstride=4, color='b', lw=0)
+        ax.plot_surface(X + x, Y + y + 1, Z + z,  rstride=4,
+                        cstride=4, color='b', lw=0)
+        ax.plot_surface(X + x, Y + y - 1, Z + z,  rstride=4,
+                        cstride=4, color='b', lw=0)
+        ax.plot_surface(X + x + 1, Y + y, Z + z,  rstride=4,
+                        cstride=4, color='b', lw=0)
+        ax.plot_surface(X + x - 1, Y + y, Z + z,  rstride=4,
+                        cstride=4, color='b', lw=0)
+
+    ax.plot([1, 1], [1, 1], [3, -3], 'k-')
+    ax.plot([-1, -1], [1, 1], [3, -3], 'k-')
+    ax.plot([1, 1], [-1, -1], [3, -3], 'k-')
+    ax.plot([-1, -1], [-1, -1], [3, -3], 'k-')
+    ax.plot([-1, 1], [-1, -1], [1, 1], 'k-')
+    ax.plot([-1, 1], [-1, -1], [-1, -1], 'k-')
+    ax.plot([-1, -1], [1, -1], [1, 1], 'k-')
+    ax.plot([-1, -1], [1, -1], [-1, -1], 'k-')
+    ax.plot([1, 1], [1, -1], [1, 1], 'k-')
+    ax.plot([1, 1], [1, -1], [-1, -1], 'k-')
+    ax.plot([-1, 1], [1, 1], [1, 1], 'k-')
+    ax.plot([-1, 1], [1, 1], [-1, -1], 'k-')
+    ax.plot_surface(Xs + 1, Ys + 1, Zs + 1,  rstride=4,
+                    cstride=4, color='c', lw=0)
+    ax.plot_surface(Xs - 1, Ys - 1, Zs + 1,  rstride=4,
+                    cstride=4, color='c', lw=0)
+    ax.plot_surface(Xs - 1, Ys + 1, Zs + 1,  rstride=4,
+                    cstride=4, color='c', lw=0)
+    ax.plot_surface(Xs + 1, Ys - 1, Zs + 1,  rstride=4,
+                    cstride=4, color='c', lw=0)
+    ax.plot_surface(Xs + 1, Ys + 1, Zs - 1,  rstride=4,
+                    cstride=4, color='c', lw=0)
+    ax.plot_surface(Xs - 1, Ys - 1, Zs - 1,  rstride=4,
+                    cstride=4, color='c', lw=0)
+    ax.plot_surface(Xs - 1, Ys + 1, Zs - 1,  rstride=4,
+                    cstride=4, color='c', lw=0)
+    ax.plot_surface(Xs + 1, Ys - 1, Zs - 1,  rstride=4,
+                    cstride=4, color='c', lw=0)
+    ax.plot_surface(Xs, Ys, Zs - 2, rstride=4,
+                    cstride=4, color='c', lw=0)
+    ax.plot_surface(Xs, Ys, Zs + 2, rstride=4,
+                    cstride=4, color='c', lw=0)
+
+    octahedron(0, 0, 0)
+    octahedron(1, 1, 3)
+    octahedron(1, 1, -3)
+    octahedron(1, -1, 3)
+    octahedron(1, -1, -3)
+    octahedron(-1, 1, 3)
+    octahedron(-1, 1, -3)
+    octahedron(-1, -1, 3)
+    octahedron(-1, -1, -3)
+    ax.set_xlim(-1.5, 1.5)
+    ax.set_ylim(-1.5, 1.5)
+    ax.set_zlim(-2.5, 2.5)
+    ax.view_init(elev=7, azim=20)
+    plt.axis('off')
     plt.show()
 
     # Save figure

@@ -718,7 +718,7 @@ def fig3(print_fig=True):
 
             ax.plot([np.min(ks[j]), np.max(ks[j])], [0, 0], **kwargs_ef)
             ax.plot([np.min(ks[j]), np.max(ks[j])], [mdc_val, mdc_val],
-                    **kwargs_cut)
+                    'r-.', lw=.5)
 
             # decorate axes
             ax.set_xticks(np.arange(-1, 1, .5))
@@ -3706,14 +3706,40 @@ def fig21(print_fig=True):
               V0=0, thdg=8.7, tidg=4, phidg=88)
 
     # create figure
-    fig = plt.figure('read_out', figsize=(8, 8), clear=True)
+    fig = plt.figure(figname, figsize=(8, 8), clear=True)
     ax = fig.add_subplot(132)
-    ax.set_position([.37, .3, .28, .35])
+    # ax.set_position([.37, .3, .28, .35])
+    ratio = (np.max(D.ky) - np.min(D.ky))/(np.max(D.kx) - np.min(D.kx))
+    ax.set_position([.277+.01+.22, .3, .28/ratio, .28])
     ax.tick_params(**kwargs_ticks)
 
     # plot data
     ax.contourf(D.kx, D.ky, np.flipud(D.map), 300, **kwargs_ex,
                 vmax=.9 * np.max(D.map), vmin=.3 * np.max(D.map))
+
+#    # Tight Binding Model
+#    param = utils.paramCSRO20_opt()  # Load parameters
+#    tb = utils.TB(a=np.pi, kbnd=2, kpoints=200)  # Initialize
+#    tb.CSRO(param)  # Calculate bandstructure
+#
+#    plt.figure(figname)
+#    bndstr = tb.bndstr  # Load bandstructure
+#    coord = tb.coord  # Load coordinates
+#
+#    # read dictionaries
+#    X = coord['X']
+#    Y = coord['Y']
+#    Axy = bndstr['Axy']
+#    Bxz = bndstr['Bxz']
+#    Byz = bndstr['Byz']
+#    bands = (Axy, Bxz, Byz)
+#
+#    # loop over bands
+#    n = 0  # counter
+#    for band in bands:
+#        n += 1
+#        ax.contour(X, Y, band, colors='w', linestyles=':', levels=0,
+#                   linewidths=1)
 
     # decorate axes
     ax.set_xlabel(r'$k_y \,(\pi/b)$', fontdict=font)
@@ -3748,7 +3774,7 @@ def fig21(print_fig=True):
             kx[i] = k[0]
             ky[i] = k[1]
 
-            plt.plot(kx, ky, 'ro', ms=.2, alpha=.3)
+            # plt.plot(kx, ky, 'ro', ms=.2, alpha=.3)
 
     plt.show()
 
@@ -4423,7 +4449,7 @@ def fig27(print_fig=True):
 
     fig = plt.figure(figname, figsize=(7, 7), clear=True)
 
-    cols = ['m', 'g', 'c', 'C1']
+    cols = ['c', 'b', 'm', 'C1']
     lbls = [r'(a)  $hole$', r'(b)  $electron$',
             r'(c)  $hole$', r'(d)  $electron$']
     loc_x = [.08, .3, .52, .74]
@@ -4522,7 +4548,7 @@ def fig28(print_fig=True):
 
     fig = plt.figure(figname, figsize=(7, 7), clear=True)
 
-    cols = ['m', 'g', 'c', 'C1']
+    cols = ['c', 'b', 'm', 'C1']
     lbls = [r'(a)  $hole$', r'(b)  $electron$',
             r'(c)  $electron$']
     loc_x = [.08, .3, .52, .74]
@@ -4739,7 +4765,7 @@ def fig29(print_fig=True):
     ax.plot([fx-l0, fx], [fy+l0, fy+l0], color=cols[3], lw=1, ls='--')
     ax.text(fx+.15, fy-.05, 'folded')
 
-    ax.text(-.93, .8, '(d)', fontsize=12)
+    # ax.text(-.93, .8, '(d)', fontsize=12)
     ax.text(-.75, -1.25, r'$\alpha$', color=cols[0], fontsize=12)
     ax.text(-.55, -1.25, r'$\beta$', color=cols[1], fontsize=12)
     ax.text(-.35, -1.25, r'$\gamma$', color=cols[2], fontsize=12)

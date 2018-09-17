@@ -1271,3 +1271,282 @@ def fig14(print_fig=True):
     # Save figure
     if print_fig:
         plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+
+
+def fig15(print_fig=True):
+    """figure 15
+
+    %%%%%%%%%%%%%%%%%%
+    Schematic DOS OSMP
+    %%%%%%%%%%%%%%%%%%
+    """
+
+    figname = 'CROfig15'
+
+    fig = plt.figure(figname, figsize=(6, 4), clear=True)
+
+    ax = fig.add_axes([.2, .2, .6, .6])
+    ax.tick_params(**kwargs_ticks)
+
+    def DOS(R, w):
+        # semi circle
+        th = np.linspace(-np.pi/2, np.pi/2, 200)
+        r = R / np.sqrt(1 - (w * np.cos(th)) ** 2)
+        x = r * np.cos(th)
+        y = r * np.sin(th)
+        return x, y
+
+    # coordinates
+    x, y = DOS(.3, .95)
+    x_z, y_z = DOS(.2, .98)
+    x_xy, y_xy = DOS(.35, .8)
+    xs_z, ys_z = DOS(.12, .98)
+    xl_z, yl_z = DOS(.17, .98)
+    xs_xy, ys_xy = DOS(.1, .8)
+    xl_xy, yl_xy = DOS(.3, .8)
+
+    # filling indices
+    fill1 = 108
+    fill2 = 103
+    fill3 = 128
+
+    # coloumn 1
+    ax.plot(x, y, color='k', lw=1)
+    ax.arrow(0, -.75, 0, 1.5, head_width=0.05, head_length=0.05,
+             fc='k', ec='k')
+    ax.arrow(0.3, .5, 1.2, 0, head_width=0.02, head_length=0.05,
+             fc='k', ec='k')
+    ax.plot([0, .9], [.1, .1], **kwargs_ef)
+    ax.fill_betweenx(y[:fill1], 0, x[:fill1], color='k', alpha=.3)
+    ax.text(.3, .56, r'$+\,\mathrm{crystal\,\,field}$', fontsize=8)
+    ax.text(-.1, .85, r'$\omega$', fontdict=font)
+    ax.text(.1, -.6, r'DOS($\omega$)', fontdict=font)
+
+    # coloumn 2
+    ax.plot(x_z+2, y_z+.06, color='b', lw=1)
+    ax.plot(x_xy+2, y_xy-.12, color='C1', lw=1)
+    ax.arrow(2, -.75, 0, 1.5, head_width=0.05, head_length=0.05,
+             fc='k', ec='k')
+    ax.arrow(2.3, .5, 1.2, 0, head_width=0.02, head_length=0.05,
+             fc='k', ec='k')
+    ax.plot([0+2, .97+2], [.1, .1], **kwargs_ef)
+    ax.fill_betweenx(y_z[:fill2]+.06, 0+2,
+                     x_z[:fill2]+2, color='b', alpha=.3)
+    ax.fill_betweenx(y_xy[:fill3]-.12, 0+2,
+                     x_xy[:fill3]+2, color='C1', alpha=.3)
+    ax.text(3.1, 0, r'$d_{\gamma z}$', color='b')
+    ax.text(2.7, -.22, r'$d_{xy}$', color='C1')
+    ax.text(2.3, .58, r'$+\,U,$ $+\,J_\mathrm{H}$')
+    ax.text(1.9, .85, r'$\omega$', fontdict=font)
+
+    # coloumn 3
+    ax.plot(xs_z+4, ys_z+.5, color='b', lw=1)
+    ax.plot(xl_z+4, yl_z-.3, color='b', lw=1)
+    ax.plot(xs_xy+4, ys_xy+.35, color='C1', lw=1)
+    ax.plot(xl_xy+4, yl_xy-.25, color='C1', lw=1)
+    ax.arrow(4, -.75, 0, 1.5, head_width=0.05, head_length=0.05,
+             fc='k', ec='k')
+    ax.arrow(5, .1, 0, .2, head_width=0.05, head_length=0.05,
+             fc='C1', ec='C1')
+    ax.arrow(5, .1, 0, -.32, head_width=0.05, head_length=0.05,
+             fc='C1', ec='C1')
+    ax.arrow(5.6, .1, 0, .35, head_width=0.05, head_length=0.05,
+             fc='b', ec='b')
+    ax.arrow(5.6, .1, 0, -.4, head_width=0.05, head_length=0.05,
+             fc='b', ec='b')
+    ax.plot([0+4, .9+4], [.1, .1], **kwargs_ef)
+    ax.fill_betweenx(yl_z-.3, 0+4, xl_z+4, color='b', alpha=.3)
+    ax.fill_betweenx(yl_xy-.25, 0+4, xl_xy+4, color='C1', alpha=.3)
+    ax.text(3.9, .85, r'$\omega$', fontdict=font)
+    ax.text(5.05, 0.02, r'$\Delta_{xy}$', color='C1')
+    ax.text(5.65, 0.02, r'$\Delta_{\gamma z}$', color='b')
+
+    ax.set_xlim(-.3, 6.2)
+    ax.set_ylim(-.9, 1)
+    plt.axis('off')
+    plt.show()
+
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+
+
+def fig16(print_fig=True):
+    """figure 16
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%
+    Schematic DOS band / Mott
+    %%%%%%%%%%%%%%%%%%%%%%%%%
+    """
+
+    figname = 'CROfig16'
+
+    fig = plt.figure(figname, figsize=(6, 4), clear=True)
+
+    ax = fig.add_axes([.2, .2, .6, .6])
+    ax.tick_params(**kwargs_ticks)
+
+    def DOS(R, w):
+        # semi circle
+        th = np.linspace(-np.pi/2, np.pi/2, 200)
+        r = R / np.sqrt(1 - (w * np.cos(th)) ** 2)
+        x = r * np.cos(th)
+        y = r * np.sin(th)
+        return x, y
+
+    # coordinates
+    x, y = DOS(.3, .95)
+    x_z, y_z = DOS(.2, .98)
+    x_xy, y_xy = DOS(.35, .8)
+    xs_z, ys_z = DOS(.15, .98)
+    xl_z, yl_z = DOS(.15, .98)
+
+    # filling indices
+    fill1 = 108
+    fill2 = 100
+
+    # coloumn 1
+    ax.plot(x, y, color='k', lw=1)
+    ax.arrow(0, -.75, 0, 1.5, head_width=0.05, head_length=0.05,
+             fc='k', ec='k')
+    ax.arrow(0.3, .5, 1.2, 0, head_width=0.02, head_length=0.05,
+             fc='k', ec='k')
+    ax.plot([0, .9], [.1, .1], **kwargs_ef)
+    ax.fill_betweenx(y[:fill1], 0, x[:fill1], color='k', alpha=.3)
+    ax.text(.3, .56, r'$+\,\mathrm{crystal\,\,field}$', fontsize=8)
+    ax.text(.3, .39, r'$+\,\mathrm{interactions}$', fontsize=8)
+    ax.text(-.1, .85, r'$\omega$', fontdict=font)
+    ax.text(.1, -.6, r'DOS($\omega$)', fontdict=font)
+
+    # coloumn 2
+    ax.plot(x_z+2, y_z+.105, color='b', lw=1)
+    ax.plot(x_xy+2, y_xy-.3, color='C1', lw=1)
+    ax.arrow(2, -.75, 0, 1.5, head_width=0.05, head_length=0.05,
+             fc='k', ec='k')
+    ax.arrow(2.3, .5, 1.2, 0, head_width=0.02, head_length=0.05,
+             fc='k', ec='k')
+    ax.plot([0+2, .97+2], [.1, .1], **kwargs_ef)
+    ax.fill_betweenx(y_z[:fill2]+.105, 0+2, x_z[:fill2]+2, color='b', alpha=.3)
+    ax.fill_betweenx(y_xy-.3, 0+2, x_xy+2, color='C1', alpha=.3)
+    ax.text(3.1, 0, r'$d_{\gamma z}$', color='b')
+    ax.text(2.7, -.22, r'$d_{xy}$', color='C1')
+    ax.text(2.3, .58, r'$+\,U,$ $+\,J_\mathrm{H}$')
+    ax.text(1.9, .85, r'$\omega$', fontdict=font)
+
+    # coloumn 3
+    ax.plot(xs_z+4, ys_z+.5, color='b', lw=1)
+    ax.plot(xl_z+4, yl_z-.3, color='b', lw=1)
+    ax.plot(x_xy+4, y_xy-.3, color='C1', lw=1)
+    ax.arrow(4, -.75, 0, 1.5, head_width=0.05, head_length=0.05,
+             fc='k', ec='k')
+    ax.arrow(5, .1, 0, .35, head_width=0.05, head_length=0.05,
+             fc='b', ec='b')
+    ax.arrow(5, .1, 0, -.35, head_width=0.05, head_length=0.05,
+             fc='b', ec='b')
+    ax.plot([0+4, .9+4], [.1, .1], **kwargs_ef)
+    ax.fill_betweenx(yl_z-.3, 0+4, xl_z+4, color='b', alpha=.3)
+    ax.fill_betweenx(y_xy-.3, 0+4, x_xy+4, color='C1', alpha=.3)
+    ax.text(3.9, .85, r'$\omega$', fontdict=font)
+    ax.text(5.05, 0.02, r'$\Delta_{\gamma z}$', color='b')
+
+    ax.set_xlim(-.3, 6.2)
+    ax.set_ylim(-.9, 1)
+    plt.axis('off')
+    plt.show()
+
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+
+
+def fig17(print_fig=True):
+    """figure 17
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%
+    Schematic DOS uniform gap
+    %%%%%%%%%%%%%%%%%%%%%%%%%
+    """
+
+    figname = 'CROfig17'
+
+    fig = plt.figure(figname, figsize=(6, 4), clear=True)
+
+    ax = fig.add_axes([.2, .2, .6, .6])
+    ax.tick_params(**kwargs_ticks)
+
+    def DOS(R, w):
+        # semi circle
+        th = np.linspace(-np.pi/2, np.pi/2, 200)
+        r = R / np.sqrt(1 - (w * np.cos(th)) ** 2)
+        x = r * np.cos(th)
+        y = r * np.sin(th)
+        return x, y
+
+    # coordinates
+    x, y = DOS(.3, .95)
+    x_z, y_z = DOS(.2, .98)
+    x_xy, y_xy = DOS(.35, .8)
+    xs_z, ys_z = DOS(.12, .98)
+    xl_z, yl_z = DOS(.17, .98)
+    xs_xy, ys_xy = DOS(.1, .8)
+    xl_xy, yl_xy = DOS(.3, .8)
+
+    # filling indices
+    fill1 = 108
+    fill2 = 103
+    fill3 = 128
+
+    # coloumn 1
+    ax.plot(x, y, color='k', lw=1)
+    ax.arrow(0, -.75, 0, 1.5, head_width=0.05, head_length=0.05,
+             fc='k', ec='k')
+    ax.arrow(0.3, .5, 1.2, 0, head_width=0.02, head_length=0.05,
+             fc='k', ec='k')
+    ax.plot([0, .9], [.1, .1], **kwargs_ef)
+    ax.fill_betweenx(y[:fill1], 0, x[:fill1], color='k', alpha=.3)
+    ax.text(.3, .56, r'$+\,\mathrm{crystal\,\,field}$', fontsize=8)
+    ax.text(-.1, .85, r'$\omega$', fontdict=font)
+    ax.text(.1, -.6, r'DOS($\omega$)', fontdict=font)
+
+    # coloumn 2
+    ax.plot(x_z+2, y_z+.06, color='b', lw=1)
+    ax.plot(x_xy+2, y_xy-.12, color='C1', lw=1)
+    ax.arrow(2, -.75, 0, 1.5, head_width=0.05, head_length=0.05,
+             fc='k', ec='k')
+    ax.arrow(2.3, .5, 1.2, 0, head_width=0.02, head_length=0.05,
+             fc='k', ec='k')
+    ax.plot([0+2, .97+2], [.1, .1], **kwargs_ef)
+    ax.fill_betweenx(y_z[:fill2]+.06, 0+2,
+                     x_z[:fill2]+2, color='b', alpha=.3)
+    ax.fill_betweenx(y_xy[:fill3]-.12, 0+2,
+                     x_xy[:fill3]+2, color='C1', alpha=.3)
+    ax.text(3.1, 0, r'$d_{\gamma z}$', color='b')
+    ax.text(2.7, -.22, r'$d_{xy}$', color='C1')
+    ax.text(2.3, .56, r'$+\,\mathrm{uniform\,\,gap}$', fontsize=8)
+    ax.text(1.9, .85, r'$\omega$', fontdict=font)
+
+    # coloumn 3
+    ax.plot(xs_z+4, ys_z+.3, color='b', lw=1)
+    ax.plot(xl_z+4, yl_z-.3, color='b', lw=1)
+    ax.plot(xs_xy+4, ys_xy+.3, color='C1', lw=1)
+    ax.plot(xl_xy+4, yl_xy-.3, color='C1', lw=1)
+    ax.arrow(4, -.75, 0, 1.5, head_width=0.05, head_length=0.05,
+             fc='k', ec='k')
+    ax.arrow(5, .1, 0, .15, head_width=0.05, head_length=0.05,
+             fc='k', ec='k')
+    ax.arrow(5, .1, 0, -.35, head_width=0.05, head_length=0.05,
+             fc='k', ec='k')
+    ax.plot([0+4, .9+4], [.1, .1], **kwargs_ef)
+    ax.fill_betweenx(yl_z-.3, 0+4, xl_z+4, color='b', alpha=.3)
+    ax.fill_betweenx(yl_xy-.3, 0+4, xl_xy+4, color='C1', alpha=.3)
+    ax.text(3.9, .85, r'$\omega$', fontdict=font)
+    ax.text(5.05, -0.03, r'$\Delta$', color='k')
+
+    ax.set_xlim(-.3, 6.2)
+    ax.set_ylim(-.9, 1)
+    plt.axis('off')
+    plt.show()
+
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")

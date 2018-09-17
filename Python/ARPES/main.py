@@ -37,6 +37,7 @@ CON.fig9:   Analyzer energies
 CON.fig10:  Analyzer setup
 CON.fig11:  Laue + Crystal
 CON.fig12:  Inelastic mean free path
+CON.fig13:  Sr2RuO4 model
 
 ----------  Ca2RuO4 Figures   ----------
 CRO.fig1:   DFT plot: figure 3 of Nature Comm.
@@ -53,6 +54,7 @@ CRO.fig11:  Multiplet analysis Ca2RuO4
 CRO.fig12:  Constant energy maps oxygen band -5.2eV
 CRO.fig13:  Constant energy maps alpha band -0.5eV
 CRO.fig14:  Constant energy maps gamma band -2.4eV
+CRO.fig15:  Schematic DOS OSMP
 
 ----------  Ca1.8Sr0.2RuO4 Figures ----------
 CSRO.fig1:  Experimental data FS + cuts
@@ -96,17 +98,17 @@ CSRO.fig31: xFig3 self energy
 
 # %%
 
-CON.fig12()
+CON.fig13()
 
 
 # %%
 
-CRO.fig1()
+CRO.fig17()
 
 
 # %%
 
 # CSRO.fig20(load=False)
-CSRO.fig24(print_fig=True)
+CSRO.fig21(print_fig=True)
 
 # %%
