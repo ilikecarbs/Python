@@ -3774,7 +3774,7 @@ def fig21(print_fig=True):
             kx[i] = k[0]
             ky[i] = k[1]
 
-            # plt.plot(kx, ky, 'ro', ms=.2, alpha=.3)
+            plt.plot(kx, ky, 'ro', ms=.2, alpha=.3)
 
     plt.show()
 

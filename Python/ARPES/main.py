@@ -55,6 +55,9 @@ CRO.fig12:  Constant energy maps oxygen band -5.2eV
 CRO.fig13:  Constant energy maps alpha band -0.5eV
 CRO.fig14:  Constant energy maps gamma band -2.4eV
 CRO.fig15:  Schematic DOS OSMP
+CRO.fig16:  Schematic DOS band / Mott
+CRO.fig17:  Schematic DOS uniform gap
+CRO.fig18:  Oxygen bands + DFT
 
 ----------  Ca1.8Sr0.2RuO4 Figures ----------
 CSRO.fig1:  Experimental data FS + cuts
@@ -103,7 +106,7 @@ CON.fig13()
 
 # %%
 
-CRO.fig17()
+CRO.fig5(print_fig=True)
 
 
 # %%
