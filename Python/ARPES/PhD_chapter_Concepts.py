@@ -195,7 +195,8 @@ def fig1(print_fig=True):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
 
 
 def fig2(print_fig=True):
@@ -263,8 +264,8 @@ def fig2(print_fig=True):
     ax.plot(x_f, y_f+off, 'C8-')
     ax.fill_between([-3, 3], [3.6, 3.6], [4, 4], color='C8', alpha=.2)
     ax.fill_between([-3, 3], [-.4, -.4], [0, 0], color='k', alpha=.2)
-    ax.set_xlim(-4, 4)
-    ax.set_ylim(-1, 7)
+    ax.set_xlim(-3.25, 3.25)
+    ax.set_ylim(-.4, 6.1)
 
     ax.arrow(-k_f, 1, 0, .35, head_width=0.1, head_length=0.1,
              fc='k', ec='k', lw=.5)
@@ -320,7 +321,8 @@ def fig2(print_fig=True):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
 
 
 def fig3(print_fig=True):
@@ -388,7 +390,8 @@ def fig3(print_fig=True):
     f_inc[-1] = 0
 
     # plot data
-    c0 = ax1.pcolormesh(k, w, model, cmap=cm.bone_r)
+    c0 = ax1.pcolormesh(k, w, model, cmap=cm.bone_r, zorder=.1)
+    ax1.set_rasterization_zorder(.2)
     ax1.plot([k[0], k[-1]], [0, 0], **kwargs_ef)
     ax1.plot([k[0], k[-1]], [mdc_val, mdc_val], ls='-.', color='C8', lw=.5)
     ax1.plot([edc_val, edc_val], [w[0], w[-1]], ls='-.', color='C8', lw=.5)
@@ -403,8 +406,9 @@ def fig3(print_fig=True):
     ax3.tick_params(**kwargs_ticks)
     ax3.plot([0, 100], [0, 0], **kwargs_ef)
     ax3.plot(edc, w, 'ko-', lw=1, ms=1)
-    ax3.fill(f_coh, w, alpha=.5, color='b')
-    ax3.fill(f_inc, w, alpha=.5, color='C0')
+    ax3.fill(f_coh, w, alpha=.5, color='b', zorder=.1)
+    ax3.fill(f_inc, w, alpha=.5, color='C0', zorder=.1)
+    ax3.set_rasterization_zorder(.2)
 
     # decorate axes
     ax1.set_xticklabels([])
@@ -443,7 +447,8 @@ def fig3(print_fig=True):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
 
 
 def fig4(print_fig=True):
@@ -490,15 +495,15 @@ def fig4(print_fig=True):
     kz_i = k_i * np.cos(k_th)
 
     ax.quiver(0, 0, 0, 0, 0, 2.5, arrow_length_ratio=.08,
-              color='k')
+              color='k', zorder=.1)
     ax.quiver(0, 0, 0, 0, 2.5, 0, arrow_length_ratio=.06,
-              color='k')
+              color='k', zorder=.1)
     ax.quiver(0, 0, 0, 2.5, 0, 0, arrow_length_ratio=.08,
-              color='k')
+              color='k', zorder=.1)
     ax.quiver(0, 0, 0, kx_i-.1, ky_i-.1, kz_i-.1, arrow_length_ratio=.08, lw=2,
-              color='r')
+              color='r', zorder=.1)
     ax.quiver(x_hv[-1], y_hv[-1], z_hv[-1], .1, .3, -.2,
-              arrow_length_ratio=.6, color='c')
+              arrow_length_ratio=.6, color='c', zorder=.1)
 
     ax.plot([0, 0], [0, 0], [0, 0], 'o', mec='k', mfc='w', ms=5)
     ax.plot([kx_i, kx_i], [ky_i, ky_i], [kz_i, kz_i],
@@ -548,10 +553,11 @@ def fig4(print_fig=True):
     Z_floor = -np.ones((100, 100))
 
     # draw cylinder
-    ax.plot_surface(X_cyl, Y_cyl, Z_cyl, **kwargs_cyl)
-    ax.plot_surface(X_cyl, -Y_cyl, Z_cyl, **kwargs_cyl)
-    ax.plot_surface(X_cir, Y_cir, Z_floor, **kwargs_cyl)
-    ax.plot_surface(X_cir, Y_cir, Z_ceil, **kwargs_cyl)
+    ax.plot_surface(X_cyl, Y_cyl, Z_cyl, **kwargs_cyl, zorder=.1)
+    ax.plot_surface(X_cyl, -Y_cyl, Z_cyl, **kwargs_cyl, zorder=.1)
+    ax.plot_surface(X_cir, Y_cir, Z_floor, **kwargs_cyl, zorder=.1)
+    ax.plot_surface(X_cir, Y_cir, Z_ceil, **kwargs_cyl, zorder=.1)
+    ax.set_rasterization_zorder(.2)
     ax.plot(x_cir, y_cir, 'k-', alpha=.1)
     ax.plot(x_cir, y_cir, -1, 'k--', alpha=.1, lw=.5)
     plt.axis('off')
@@ -561,7 +567,8 @@ def fig4(print_fig=True):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+        plt.savefig(save_dir + figname + '.png', dpi=200,
+                    bbox_inches="tight")
 
 
 def fig5(print_fig=True):
@@ -629,7 +636,7 @@ def fig5(print_fig=True):
         ax.plot_surface(orbitals_r[i][0]+x[i], orbitals_r[i][1]+y[i],
                         orbitals_r[i][2]+z[i],
                         facecolors=colormap.to_rgba(orbitals[i].real),
-                        rstride=2, cstride=2)
+                        rstride=2, cstride=2, zorder=.1)
 
     # surfaces
     X_t2g = np.zeros((2, 2))
@@ -643,8 +650,8 @@ def fig5(print_fig=True):
     Y_eg, Z_eg = np.meshgrid(y_eg, z_eg)
 
     # plot surfaces
-    ax.plot_surface(X_t2g, Y_t2g, Z_t2g, alpha=.2, color='b')
-    ax.plot_surface(X_eg, Y_eg, Z_eg, alpha=.2, color='C0')
+    ax.plot_surface(X_t2g, Y_t2g, Z_t2g, alpha=.2, color='b', zorder=.1)
+    ax.plot_surface(X_eg, Y_eg, Z_eg, alpha=.2, color='C0', zorder=.1)
     ax.quiver(0, 0, 0, 0, 0, 1, arrow_length_ratio=.08,
               color='k')
     ax.quiver(0, 0, 0, 0, 1, 0, arrow_length_ratio=.06,
@@ -670,12 +677,13 @@ def fig5(print_fig=True):
 
     ax.text(0, .3, 3.3, r'$e_{g}$', fontsize=15, color='k')
     ax.text(0, .3, 1.6, r'$t_{2g}$', fontsize=15, color='k')
-
+    ax.set_rasterization_zorder(.2)
     plt.show()
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+        plt.savefig(save_dir + figname + '.png', dpi=300,
+                    bbox_inches="tight")
 
 
 def fig6(print_fig=True):
@@ -790,7 +798,8 @@ def fig6(print_fig=True):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+        plt.savefig(save_dir + figname + '.png', dpi=200,
+                    bbox_inches="tight")
 
 
 def fig7(print_fig=True):
@@ -927,7 +936,8 @@ def fig7(print_fig=True):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+        plt.savefig(save_dir + figname + '.png', dpi=300,
+                    bbox_inches="tight")
 
 
 def fig8(print_fig=True):
@@ -954,7 +964,9 @@ def fig8(print_fig=True):
     ax1.tick_params(**kwargs_ticks)
 
     # plot data
-    c0 = ax1.contourf(D.ang, D.en, np.transpose(D.int), 200, **kwargs_ex)
+    c0 = ax1.contourf(D.ang, D.en, np.transpose(D.int), 200, **kwargs_ex,
+                      zorder=.1)
+    ax1.set_rasterization_zorder(.2)
 
     # decorate axes
     ax1.set_xticklabels([])
@@ -965,7 +977,8 @@ def fig8(print_fig=True):
     ax2.tick_params(**kwargs_ticks)
 
     # plot data
-    ax2.contourf(D.angs, D.en_norm, D.int_norm, 200, **kwargs_ex)
+    ax2.contourf(D.angs, D.en_norm, D.int_norm, 200, **kwargs_ex, zorder=.1)
+    ax2.set_rasterization_zorder(.2)
     ax2.plot([D.ang[0], D.ang[-1]], [0, 0], **kwargs_ef)
 
     # decorate axes
@@ -1075,7 +1088,8 @@ def fig8(print_fig=True):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
 
 
 def fig9(print_fig=True):
@@ -1167,7 +1181,8 @@ def fig9(print_fig=True):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
 
 
 def fig10(print_fig=True):
@@ -1327,7 +1342,8 @@ def fig10(print_fig=True):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
 
 
 def fig11(print_fig=True):
@@ -1378,7 +1394,8 @@ def fig11(print_fig=True):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
 
 
 def fig12(print_fig=True):
@@ -1429,7 +1446,8 @@ def fig12(print_fig=True):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
 
 
 def fig13(print_fig=True):
@@ -1549,4 +1567,5 @@ def fig13(print_fig=True):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+        plt.savefig(save_dir + figname + '.png', dpi=200,
+                    bbox_inches="tight")

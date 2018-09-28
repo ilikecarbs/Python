@@ -101,16 +101,13 @@ CSRO.fig31: xFig3 self energy
 
 # %%
 
-CON.fig13()
-
-
-# %%
-
-CRO.fig5(print_fig=True)
-
+CON.fig1()
 
 # %%
 
+CRO.fig10(print_fig=True)
+
+# %%
 # CSRO.fig20(load=False)
 CSRO.fig21(print_fig=True)
 
