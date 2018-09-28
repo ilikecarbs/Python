@@ -32,6 +32,12 @@ CON.fig4:   Experimental Setup
 CON.fig5:   (L): eg, t2g orbitals
 CON.fig6:   Manipulator angles
 CON.fig7:   Mirror plane
+CON.fig8:   Data normalization
+CON.fig9:   Analyzer energies
+CON.fig10:  Analyzer setup
+CON.fig11:  Laue + Crystal
+CON.fig12:  Inelastic mean free path
+CON.fig13:  Sr2RuO4 model
 
 ----------  Ca2RuO4 Figures   ----------
 CRO.fig1:   DFT plot: figure 3 of Nature Comm.
@@ -48,9 +54,13 @@ CRO.fig11:  Multiplet analysis Ca2RuO4
 CRO.fig12:  Constant energy maps oxygen band -5.2eV
 CRO.fig13:  Constant energy maps alpha band -0.5eV
 CRO.fig14:  Constant energy maps gamma band -2.4eV
+CRO.fig15:  Schematic DOS OSMP
+CRO.fig16:  Schematic DOS band / Mott
+CRO.fig17:  Schematic DOS uniform gap
+CRO.fig18:  Oxygen bands + DFT
 
 ----------  Ca1.8Sr0.2RuO4 Figures ----------
-CSRO.fig1:  Experimental data: Figure 1 CSRO20 paper
+CSRO.fig1:  Experimental data FS + cuts
 CSRO.fig2:  Experimental PSI data: Figure 2 CSCRO20 paper
 CSRO.fig3:  (L): Polarization and orbital characters. Figure 3 in paper
 CSRO.fig4:  (L): Temperature dependence. Figure 4 in paper
@@ -74,12 +84,13 @@ CSRO.fig21: Fermi surface extraction points
 CSRO.fig22: Tight binding model folded SRO
 CSRO.fig23: Fit dispersions + FS
 CSRO.fig24: Alternative CSRO.fig1
-CSRO.fig25: Combining fig9 & fig10
+CSRO.fig25: self energy + Z + DOS
 CSRO.fig26: Fermi surface counting CSRO (3.84 \pm .14)
 CSRO.fig27: Fermi surface counting CSRO unfolded
 CSRO.fig28: Fermi surface counting SRO
 CSRO.fig29: Fermi surface folded CSRO
-
+CSRO.fig30: xFig1 2nd version
+CSRO.fig31: xFig3 self energy
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     Which figure do you desire?
@@ -90,17 +101,14 @@ CSRO.fig29: Fermi surface folded CSRO
 
 # %%
 
-CON.fig2()
-
-
-# %%
-
-CRO.fig1()
-
+CON.fig1()
 
 # %%
 
+CRO.fig10(print_fig=True)
+
+# %%
 # CSRO.fig20(load=False)
-CSRO.fig29(print_fig=True)
+CSRO.fig21(print_fig=True)
 
 # %%

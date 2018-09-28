@@ -86,7 +86,8 @@ class Methods:
 
         # Change these parameters to tune fitting
         # anchor points for poly fit of Fermi energies
-        bnd = 110
+#        bnd = 110*0
+        bnd = 1
         # Takes initial fit parameters for Fermi function until this value.
         # From there on, the initial parameters are the ones from last fit.
         ch = 300
@@ -169,7 +170,7 @@ class Methods:
         ax1.set_ylabel('Intensity (a.u.)', fontdict=font)
         ax2.set_ylabel('Resolution (meV)', fontdict=font)
         ax3.set_xlabel('Detector angles', fontdict=font)
-        ax3.set_ylabel(r'$\omega$', fontdict=font)
+        ax3.set_ylabel(r'$\omega$ (eV)', fontdict=font)
         ax3.set_ylim(self.en[0], self.en[-1])
         self.plt_spec()
 
