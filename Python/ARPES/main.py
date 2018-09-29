@@ -101,7 +101,7 @@ CSRO.fig31: xFig3 self energy
 
 # %%
 
-CON.fig1()
+CON.fig2()
 
 # %%
 
@@ -109,6 +109,6 @@ CRO.fig10(print_fig=True)
 
 # %%
 # CSRO.fig20(load=False)
-CSRO.fig21(print_fig=True)
+CSRO.fig22(print_fig=True)
 
 # %%
