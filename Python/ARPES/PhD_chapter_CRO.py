@@ -1913,3 +1913,80 @@ def fig18(print_fig=True):
     if print_fig:
         plt.savefig(save_dir + figname + '.pdf', dpi=100,
                     bbox_inches="tight", rasterized=True)
+
+
+def fig19(print_fig=True):
+    """figure 19
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%
+    Schematic DOS Mott-Hubbard
+    %%%%%%%%%%%%%%%%%%%%%%%%%%
+    """
+
+    figname = 'CROfig19'
+
+    fig = plt.figure(figname, figsize=(6, 4), clear=True)
+
+    ax = fig.add_axes([.2, .2, .6, .6])
+    ax.tick_params(**kwargs_ticks)
+
+    def DOS(R, w):
+        # semi circle
+        th = np.linspace(-np.pi/2, np.pi/2, 200)
+        r = R / np.sqrt(1 - (w * np.cos(th)) ** 2)
+        x = r * np.cos(th)
+        y = r * np.sin(th)
+        return x, y
+
+    # coordinates
+    x, y = DOS(.3, .95)
+    x_UHB, y_UHB = DOS(.1, .996)
+    x_LHB, y_LHB = DOS(.1, .996)
+
+    # filling indices
+    fill1 = 100
+    fill2 = 0
+    fill3 = 200
+
+    # coloumn 1
+    ax.plot(x, y+.1, color='k', lw=1)
+    ax.arrow(0, -.75, 0, 1.5, head_width=0.05, head_length=0.05,
+             fc='k', ec='k')
+    ax.arrow(0.3, .5, 1.2, 0, head_width=0.02, head_length=0.05,
+             fc='k', ec='k')
+    ax.plot([0, 1], [.1, .1], **kwargs_ef)
+    ax.fill_betweenx(y[:fill1]+.1, 0, x[:fill1], color='k', alpha=.3)
+    ax.text(.7, .56, r'$+U$', fontsize=10)
+    ax.text(-.1, .85, r'$\omega$', fontdict=font)
+    ax.text(.1, -.6, r'DOS($\omega$)', fontdict=font)
+
+    # coloumn 2
+    ax.plot(x_UHB+2, y_UHB+.4, color='k', lw=1)
+    ax.plot(x_LHB+2, y_LHB-.2, color='k', lw=1)
+    ax.arrow(2, -.75, 0, 1.5, head_width=0.05, head_length=0.05,
+             fc='k', ec='k')
+
+    ax.plot([0+2, .97+2], [.1, .1], **kwargs_ef)
+    ax.fill_betweenx(y_UHB[:fill2]+.4, 0+2,
+                     x_UHB[:fill2]+2, color='k', alpha=.3)
+    ax.fill_betweenx(y_LHB[:fill3]-.2, 0+2,
+                     x_LHB[:fill3]+2, color='k', alpha=.3)
+    ax.arrow(3.3, .18, 0, .15, head_width=0.05, head_length=0.05,
+             fc='k', ec='k')
+    ax.arrow(3.3, .18, 0, -.35, head_width=0.05, head_length=0.05,
+             fc='k', ec='k')
+    ax.text(2.1, .37, r'$\mathrm{UHB}$', color='k')
+    ax.text(2.1, -.23, r'$\mathrm{LHB}$', color='k')
+    ax.text(1.9, .85, r'$\omega$', fontdict=font)
+
+    ax.text(3.4, 0.06, r'$\Delta$', color='k')
+
+    ax.set_xlim(-.3, 6.2)
+    ax.set_ylim(-.9, 1)
+    plt.axis('off')
+    plt.show()
+
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname + '.png', dpi=400,
+                    bbox_inches="tight")

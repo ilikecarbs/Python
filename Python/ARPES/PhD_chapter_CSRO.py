@@ -2591,10 +2591,11 @@ def fig12(print_fig=True):
     for band in bands:
         ax.contour(X, Y, band, colors='black', ls='-',
                    levels=0, alpha=.2)
-    ax.contourf(tb.kx, tb.ky, tb.FS, 300, cmap='PuOr',
+    ax.contourf(tb.kx, tb.ky, tb.FS, 300, cmap='PuOr', zorder=.1,
                 vmin=-v_bnd, vmax=v_bnd, alpha=.05)
     c0 = ax.contourf(tb.kx[250:750], tb.ky[250:750], tb.FS[250:750, 250:750],
-                     300, cmap='PuOr', vmin=-v_bnd, vmax=v_bnd)
+                     300, cmap='PuOr', vmin=-v_bnd, vmax=v_bnd, zorder=.1)
+    ax.set_rasterization_zorder(.2)
     ax.plot([-1, 1], [1, 1], 'k-', lw=2)
     ax.plot([-1, 1], [-1, -1], 'k-', lw=2)
     ax.plot([1, 1], [-1, 1], 'k-', lw=2)
@@ -2607,8 +2608,8 @@ def fig12(print_fig=True):
     # deocrate axes
     ax.set_xticks(np.arange(-kbnd - 1, kbnd + 1, 1))
     ax.set_yticks(np.arange(-kbnd - 1, kbnd + 1, 1))
-    ax.set_xlim(-kbnd, kbnd)
-    ax.set_ylim(-kbnd, kbnd)
+    ax.set_xlim(-1, 1)
+    ax.set_ylim(-1, 1)
     ax.set_xlabel(r'$k_x \, (\pi/a)$', fontdict=font)
     ax.set_ylabel(r'$k_y \, (\pi/b)$', fontdict=font)
 
@@ -2622,7 +2623,8 @@ def fig12(print_fig=True):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
 
 
 def fig13(print_fig=True):
@@ -3912,7 +3914,8 @@ def fig22(print_fig=True):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
 
 
 def fig23(print_fig=True, load=True):
