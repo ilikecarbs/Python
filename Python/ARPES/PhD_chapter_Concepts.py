@@ -1569,3 +1569,78 @@ def fig13(print_fig=True):
     if print_fig:
         plt.savefig(save_dir + figname + '.png', dpi=200,
                     bbox_inches="tight")
+
+
+def fig14(print_fig=True):
+    """figure 14
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    Fermi liquid scattering scheme
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    """
+
+    figname = 'CONfig14'
+
+    fig = plt.figure(figname, figsize=(5, 2.5), clear=True)
+
+    ax = fig.add_axes([0, 0, 1, 1])
+    ax.tick_params(**kwargs_ticks)
+
+    def circ(R):
+        phi = np.linspace(0, 2*np.pi, 100)
+        x = R * np.cos(phi)
+        y = R * np.sin(phi)
+        return x, y
+
+    # coordinates
+    x_a, y_a = circ(.5)
+    x_a -= 1
+    x_inner, y_inner = circ(.3)
+    x_outer, y_outer = circ(.7)
+
+    # plot data panel (a)
+    ax.plot(x_a, y_a, color='k', lw=1)
+    ax.plot(x_a+2, y_a, color='k', lw=1)
+    ax.plot(-1.2, -.3, 'ko', markerfacecolor='w')
+    ax.plot(-.5, .35, 'ko', markerfacecolor='w')
+    ax.plot(-.9, .6, 'ko')
+    ax.plot(-.8, -.55, 'ko')
+    ax.arrow(-1.2, -.3, .275, .82, head_width=0.05, head_length=0.05,
+             fc='k', ec='k', lw=.5)
+    ax.arrow(-.5, .35, -.27, -.82, head_width=0.05, head_length=0.05,
+             fc='k', ec='k', lw=.5)
+
+    # plot data panel (b)
+    ax.arrow(.4, 0, -.05, 0, head_width=0.05, head_length=0.05,
+             fc='k', ec='k', lw=.5)
+    ax.arrow(.4, 0, .05, 0, head_width=0.05, head_length=0.05,
+             fc='k', ec='k', lw=.5)
+    ax.arrow(1, -.4, 0, -.05, head_width=0.05, head_length=0.05,
+             fc='k', ec='k', lw=.5)
+    ax.arrow(1, -.4, 0, .05, head_width=0.05, head_length=0.05,
+             fc='k', ec='k', lw=.5)
+    ax.plot(x_outer+1, y_outer, 'k--')
+    ax.fill_between(x_a, 0, y_a, color='C0')
+    ax.fill_between(x_a+2, 0, y_a, color='C0')
+    ax.fill_between(x_inner+1, 0, y_inner, color=(0, 0, .4))
+
+    # add text
+    ax.text(-1.6, .7, '(a)', fontdict=font)
+    ax.text(.3, .7, '(b)', fontdict=font)
+    ax.text(-1.33, -.28, r'$\mathbf{k}^\prime$', fontdict=font)
+    ax.text(-.83, .57, r'$\mathbf{k}^\prime - \mathbf{q}$', fontdict=font)
+    ax.text(-.43, .31, r'$\mathbf{k}$', fontdict=font)
+    ax.text(-1.15, -.65, r'$\mathbf{k} + \mathbf{q}$', fontdict=font)
+    ax.text(.36, .08, r'$\epsilon_\mathbf{k}^q$', fontdict=font)
+    ax.text(1.05, -.42, r'$\epsilon_\mathbf{k}^q$', fontdict=font)
+
+    # axes
+    ax.set_ylim(-.9, .9)
+    ax.set_xlim(-1.8, 1.8)
+    plt.axis('off')
+    plt.show()
+
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)

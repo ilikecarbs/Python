@@ -38,6 +38,7 @@ CON.fig10:  Analyzer setup
 CON.fig11:  Laue + Crystal
 CON.fig12:  Inelastic mean free path
 CON.fig13:  Sr2RuO4 model
+CON.fig14:  Fermi liquid scattering scheme
 
 ----------  Ca2RuO4 Figures   ----------
 CRO.fig1:   DFT plot: figure 3 of Nature Comm.
@@ -58,6 +59,7 @@ CRO.fig15:  Schematic DOS OSMP
 CRO.fig16:  Schematic DOS band / Mott
 CRO.fig17:  Schematic DOS uniform gap
 CRO.fig18:  Oxygen bands + DFT
+CRO.fig19:  Schematic DOS Mott-Hubbard
 
 ----------  Ca1.8Sr0.2RuO4 Figures ----------
 CSRO.fig1:  Experimental data FS + cuts
@@ -101,11 +103,11 @@ CSRO.fig31: xFig3 self energy
 
 # %%
 
-CON.fig2()
+CON.fig14()
 
 # %%
 
-CRO.fig10(print_fig=True)
+CRO.fig19(print_fig=True)
 
 # %%
 # CSRO.fig20(load=False)
