@@ -39,6 +39,8 @@ CON.fig11:  Laue + Crystal
 CON.fig12:  Inelastic mean free path
 CON.fig13:  Sr2RuO4 model
 CON.fig14:  Fermi liquid scattering scheme
+CON.fig15:  Fermi liquid momentum distribution
+CON.fig16:  Filling control Mott
 
 ----------  Ca2RuO4 Figures   ----------
 CRO.fig1:   DFT plot: figure 3 of Nature Comm.
@@ -103,7 +105,7 @@ CSRO.fig31: xFig3 self energy
 
 # %%
 
-CON.fig14()
+CON.fig15()
 
 # %%
 
