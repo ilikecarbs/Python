@@ -1644,3 +1644,122 @@ def fig14(print_fig=True):
     if print_fig:
         plt.savefig(save_dir + figname + '.pdf', dpi=100,
                     bbox_inches="tight", rasterized=True)
+
+
+def fig15(print_fig=True):
+    """figure 15
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    Fermi liquid momentum distribution
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    """
+
+    figname = 'CONfig15'
+
+    k = np.linspace(-1.5, 1, 300)
+    k_1 = np.linspace(-1.5, 0, 300)
+    k_2 = np.linspace(0, 1, 300)
+
+    kF = 0
+
+    n_0 = utils.FDsl(k, 0, kF, 1, 0, 0)
+    n_1 = utils.FDsl(k_1, .3, kF+.5, 1, 0, 0)
+    n_2 = utils.FDsl(k_2, .3, kF-.5, 1, 0, 0)
+
+    fig = plt.figure(figname, figsize=(6, 6), clear=True)
+
+    ax1 = fig.add_axes([.18, .35, .3, .3])
+    ax2 = fig.add_axes([.5, .35, .3, .3])
+    ax1.tick_params(**kwargs_ticks)
+    ax2.tick_params(**kwargs_ticks)
+
+    ax1.plot(k, n_0, 'k-')
+    ax1.plot([-2, 1], [0, 0], **kwargs_ef)
+    ax2.plot([-2, 1], [0, 0], **kwargs_ef)
+    ax2.plot(k_1, n_1, 'k-')
+    ax2.plot(k_2, n_2, 'k-')
+    ax2.plot([0, 0], [n_1[-1], n_2[0]], 'k-')
+    ax2.arrow(.2, .5, 0, .27, head_width=0.05, head_length=0.05,
+              fc='k', ec='k', zorder=3)
+    ax2.arrow(.2, .5, 0, -.27, head_width=0.05, head_length=0.05,
+              fc='k', ec='k', zorder=3)
+
+    # decorate axes
+    ax1.set_xlim(-1.5, 1)
+    ax1.set_ylim(-.1, 1.2)
+    ax1.set_xticks([0])
+    ax2.set_xticks([0])
+    ax1.set_xticklabels([r'$\mathbf{k}_\mathrm{F}$'], fontdict=font)
+    ax2.set_xticklabels([r'$\mathbf{k}_\mathrm{F}$'], fontdict=font)
+    ax1.set_yticks([0, 1])
+    ax2.set_yticks([0, 1])
+    ax2.set_yticklabels([])
+    ax2.set_xlim(-1.5, 1)
+    ax2.set_ylim(-.1, 1.2)
+    ax1.set_ylabel(r'$n_\mathbf{k}$', fontdict=font)
+
+    ax2.text(.3, .48, '$Z$', fontdict=font)
+    plt.show()
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
+
+
+def fig16(print_fig=True):
+    """figure 16
+
+    %%%%%%%%%%%%%%%%%%%%
+    Filling control Mott
+    %%%%%%%%%%%%%%%%%%%%
+    """
+
+    figname = 'CONfig16'
+
+    def Ellipse(R, w):
+        # semi circle
+        th = np.linspace(0, -np.pi, 200)
+        r = R / np.sqrt(1 - (w * np.cos(th)) ** 2)
+        x = r * np.cos(th)
+        y = r * np.sin(th)
+        return x, y
+
+    x1, y1 = Ellipse(1.5, .95)
+    x2, y2 = Ellipse(1.5, .88)
+    x3, y3 = Ellipse(1.5, 0)
+
+    fig = plt.figure(figname, figsize=(6, 6), clear=True)
+
+    ax = fig.add_axes([.3, .3, .4, .4])
+    ax.tick_params(**kwargs_ticks)
+    ax.plot(x1, y1, 'C0--', x2, y2, 'b--', x3, y3, 'k--')
+    ax.plot([0, 0], [-1.5, 0], 'r-', lw=5)
+    ax.fill_between(x1, y1, 0, color='C0', alpha=.2)
+    ax.fill_between(x2, y2, 0, color='b', alpha=.2)
+    ax.fill_between(x3, y3, 0, color='k', alpha=.2)
+
+    ax.arrow(0, -1.75, 0, .2, head_width=.3, head_length=.1, fc='k',
+             ec='k', lw=1, zorder=2)
+
+    ax.set_xlim(-6., 6)
+    ax.set_ylim(-2, 0)
+    ax.set_xticks([-6, 0, 6])
+    ax.set_xticklabels((0, 1, 2))
+    ax.set_yticks([])
+    ax.set_yticklabels(['$U_c$'], fontdict=font)
+    ax.set_xlabel('band filling $n$', fontdict=font)
+    ax.set_ylabel('Coulomb $U$', fontdict=font)
+
+    ax.text(-2.3, -1.85, 'Mott-insulator', fontdict=font)
+    ax.text(.8, -.2, 'AF-I',  rotation='vertical',
+            horizontalalignment='center', color='k')
+    ax.text(2.4, -.2, 'AF-M',  rotation='vertical',
+            horizontalalignment='center', color='b')
+    ax.text(4., -.2, 'PM-M',  rotation='vertical',
+            horizontalalignment='center', color='C0')
+    plt.show()
+
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
