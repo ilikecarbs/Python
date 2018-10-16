@@ -105,7 +105,7 @@ CSRO.fig31: xFig3 self energy
 
 # %%
 
-CON.fig15()
+CON.fig16()
 
 # %%
 

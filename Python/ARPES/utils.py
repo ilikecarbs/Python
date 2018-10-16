@@ -1421,9 +1421,9 @@ def cost(Kx, Ky, En, t1, t2, t3, t4, t5, t6, mu, so):
 
 
 def d_cost(Kx, Ky, En, P, d):
-    """returns J
+    """returns dJ
 
-    **Calculates the cost of the model**
+    **Calculates the derivative of the cost of the model**
 
     Args
     ----
