@@ -12,7 +12,7 @@ import utils_RTDC as utils
 import os
 
 # Directory paths
-save_dir = '/Users/denyssutter/Documents/library/Python/Zivi/'
+save_dir = '/Users/denyssutter/Documents/library/Python/RTDC/'
 
 # Set standard fonts
 plt.rcParams['mathtext.fontset'] = 'cm'
