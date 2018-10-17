@@ -221,11 +221,6 @@ def beta_sh(n, gamma, Eh, sig_c, nu, r_0, fn, gn):
 def alpha_sp(n, E_0, sig_c, nu, r_0, fn, gn):
     G = E_0 / (2*(1+nu))
 
-#    an = (n*gn[n] - fn[n]) / (n**2+n+1+2*n*nu+nu)
-#    bn = (((2+3*n-n**3+2*n*nu+2*nu)*fn[n] + (n**2+2*n-1+2*nu)*gn[n]) /
-#          (n-1)*(n**2+n+1+2*n*nu+nu))
-#    alpha = sig_c * r_0 / (2*G) * (an * (n+1)*(n-2+4*nu) + bn * n)
-
     nom_alpha = (fn[n]*(2*nu-2*(nu-1)*n**2+nu*n-1) +
                  gn[n]*n*(n+1)*((2*nu-1)*n-nu+2))
     denom_alpha = (n-1)*(nu+n**2+2*nu*n+n+1)

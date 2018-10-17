@@ -17,14 +17,15 @@ Created on Wed Jun 20 11:30:51 2018
 """
 
 import os
-import ARPES
-import utils
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from scipy.optimize import curve_fit
 from scipy import integrate
 from scipy.special import sph_harm
+
+import ARPES_header as ARPES
+import ARPES_utils as utils
 
 
 # Set standard fonts

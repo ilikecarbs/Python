@@ -61,7 +61,7 @@ def Cell_Def(Q=1.2e-11, r_0=7e-6, print_fig=True):
     Plot
     """
 
-    figname = 'Cell_Def'
+    figname = 'xFig_Cell_Def'
 
     """
     %%%%%%%%%%%%%%%%%%%%%%%
@@ -100,7 +100,7 @@ def Cell_Def(Q=1.2e-11, r_0=7e-6, print_fig=True):
     v_0 = u / v_equil  # velocity of the cell
 
     sig_c = eta * v_0 / r_0  # characteristic stress
-    th = np.linspace(0, 2*np.pi, 50)  # polar angle
+    th = np.linspace(0, 2*np.pi, 600)  # polar angle
 
     # keyword arguments for calculations
     kwargs_sh = {'th': th, 'gamma': gamma, 'Eh': Eh, 'sig_c': sig_c,
@@ -209,7 +209,7 @@ def Stream_Func(Q=1.2e-11, r_0=9e-6, print_fig=True):
     Plot
     """
 
-    figname = 'Stream_Func'
+    figname = 'xFig_Stream_Func'
 
     """
     %%%%%%%%%%%%%%%%%%%%%%%
@@ -373,7 +373,7 @@ def Fit_Shell(E_ini=1, Q=1.2e-11, gamma_pre=.1, it_max=1000, alpha=5e-3,
     Plot
     """
 
-    figname = 'Fit_Shell'
+    figname = 'xFig_Fit_Shell'
 
     # Data preparations
     coord_sh = np.loadtxt('coord_sh.dat')

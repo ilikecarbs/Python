@@ -5,9 +5,9 @@ Created on Mon Jun 11 09:57:01 2018
 
 @author: ilikecarbs
 
-%%%%%%%%%%%%%%%%%%%%%
-        utils
-%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        ARPES_utils
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 **Useful helper functions**
 
@@ -19,7 +19,6 @@ Created on Mon Jun 11 09:57:01 2018
 import numpy as np
 import matplotlib.pyplot as plt
 from numpy import linalg as la
-import utils
 from scipy import special
 from scipy.ndimage.filters import gaussian_filter
 from matplotlib.colors import LinearSegmentedColormap
@@ -534,8 +533,8 @@ class TB:
                         for i in range(len(V_x[j])):  # Loop over k-points
 
                             #  Find values and diagonalize
-                            x_val, x_idx = utils.find(x, V_x[j][i])
-                            y_val, y_idx = utils.find(y, V_y[j][i])
+                            x_val, x_idx = find(x, V_x[j][i])
+                            y_val, y_idx = find(y, V_y[j][i])
                             val_proj, vec_proj = la.eigh(H(x_idx, y_idx))
                             val_proj = np.real(val_proj)
 
@@ -560,8 +559,8 @@ class TB:
                             w = np.tanh(10 * (wz - wxy))
 
                             # Build Fermi surface
-                            kx_val, kx_idx = utils.find(kx, V_x[j][i])
-                            ky_val, ky_idx = utils.find(ky, V_y[j][i])
+                            kx_val, kx_idx = find(kx, V_x[j][i])
+                            ky_val, ky_idx = find(ky, V_y[j][i])
                             FS[kx_idx, ky_idx] = w
 
             # Blur for visual effect
@@ -739,8 +738,8 @@ class TB:
                         for i in range(len(V_x[j])):  # Loop over k-points
 
                             #  Find values and diagonalize
-                            x_val, x_idx = utils.find(x, V_x[j][i])
-                            y_val, y_idx = utils.find(y, V_y[j][i])
+                            x_val, x_idx = find(x, V_x[j][i])
+                            y_val, y_idx = find(y, V_y[j][i])
                             val_proj, vec_proj = la.eigh(H(x_idx, y_idx))
                             val_proj = np.real(val_proj)
                             if any(x == n for x in [0, 1, 3]):
@@ -765,8 +764,8 @@ class TB:
                                 w = np.tanh(10 * (wz - wxy))
 
                                 # Build Fermi surface
-                                kx_val, kx_idx = utils.find(kx, V_x[j][i])
-                                ky_val, ky_idx = utils.find(ky, V_y[j][i])
+                                kx_val, kx_idx = find(kx, V_x[j][i])
+                                ky_val, ky_idx = find(ky, V_y[j][i])
                                 FS[kx_idx, ky_idx] = w
 
             # Blur for visual effect
@@ -946,8 +945,8 @@ class TB:
                         for i in range(len(V_x[j])):  # Loop over k-points
 
                             # Find values and diagonalize
-                            x_val, x_idx = utils.find(x, V_x[j][i])
-                            y_val, y_idx = utils.find(y, V_y[j][i])
+                            x_val, x_idx = find(x, V_x[j][i])
+                            y_val, y_idx = find(y, V_y[j][i])
                             val_proj, vec_proj = la.eigh(H(x_idx, y_idx))
                             val_proj = np.real(val_proj)
 
@@ -987,8 +986,8 @@ class TB:
                             w = np.tanh(10*(wz - wxy))
 
                             # Build Fermi surface
-                            kx_val, kx_idx = utils.find(kx, V_x[j][i])
-                            ky_val, ky_idx = utils.find(ky, V_y[j][i])
+                            kx_val, kx_idx = find(kx, V_x[j][i])
+                            ky_val, ky_idx = find(ky, V_y[j][i])
                             FS[kx_idx, ky_idx] = w + 0
 
             # Blur for visual effect
@@ -1319,7 +1318,7 @@ def CSRO_eval_proj(x, y, param=paramCSRO20_opt()):
             w = np.tanh(10 * (wz - wxy))
 
             # Build band structure
-            en_tb_val, en_tb_idx = utils.find(en_tb, en_val)
+            en_tb_val, en_tb_idx = find(en_tb, en_val)
             int_tb[en_tb_idx, i] = w
             n += 1
 
@@ -1564,7 +1563,7 @@ def optimize_TB(Kx, Ky, En, it_max, P):
                   ('t5', P[4]), ('t6', P[5]), ('mu', P[6]), ('so', P[7])])
 
     # visualize result
-    tb = utils.TB(a=np.pi, kbnd=1, kpoints=100)  # Initialize
+    tb = TB(a=np.pi, kbnd=1, kpoints=100)  # Initialize
     tb.CSRO(param=param, e0=0, vert=False, proj=False)
     plt.show()
 
