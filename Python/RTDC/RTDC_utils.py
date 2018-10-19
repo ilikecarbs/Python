@@ -11,6 +11,8 @@ from scipy.special import iv, kv
 from math import factorial
 from scipy import integrate
 import time
+from joblib import Parallel, delayed
+import multiprocessing
 
 
 def I_1(n):
@@ -310,7 +312,42 @@ def def_sp(th, E_0, sig_c, nu, r_0, fn, gn):
     return A, d, x_d, z_d
 
 
-def cost_sh(x_0, z_0, gamma, Eh, sig_c, nu, r_0, fn, gn):
+def R2(x, z, th=np.pi):
+    """returns x_rot, z_rot
+
+    **rotates x, z coordinates by angle th**
+
+    Args
+    ----
+    :x:       x-coordinates from data
+    :z:       z-coordinates from data
+    :th:      rotation angle
+
+
+    Return
+    ------
+    :x_rot:   rotated x-coordinates
+    :z_rot:   rotated z-coordinates
+    """
+
+    # vectorize input
+    vec = np.transpose(np.array([x, z]))
+    vec_rot = np.copy(vec)
+
+    # 2-dim rotation matrix
+    R = np.array([[np.cos(th), -np.sin(th)],
+                  [np.sin(th), np.cos(th)]])
+
+    # rotate dataset
+    for i in range(vec.shape[0]):
+        vec_rot[i] = np.matmul(R, vec[i])
+    x_rot = vec_rot[:, 0]
+    z_rot = vec_rot[:, 1]
+
+    return x_rot, z_rot
+
+
+def cost_sh(x_0, z_0, gamma, sig_c, nu, r_0, fn, gn, Eh, x_s, z_s):
     """returns J
 
     **Calculates the cost of the model**
@@ -320,24 +357,27 @@ def cost_sh(x_0, z_0, gamma, Eh, sig_c, nu, r_0, fn, gn):
     :x_0:       x-coordinates from data
     :z_0:       z-coordinates from data
     :gamma:     tension of shell
-    :Eh:        stiffness of shell
     :sig_c:     characteristic stress
     :nu:        Poisson ratio
     :r_0:       estimated radius undeformed cell
     :fn:        fn-coefficients
     :gn:        gn-coefficients
+    :Eh:        stiffness of shell
+    :x_s:       center of mass x-coordinate
+    :z_s:       center of maxx z-coordinate
 
     Return
     ------
     :J:         cost
     """
 
-    r_exp = np.sqrt(x_0**2 + z_0**2)
+    r_exp = np.sqrt((x_0-x_s)**2 + (z_0-z_s)**2)
     th_exp = np.zeros(len(r_exp))
 
     half_idx = int(len(r_exp)/2)
-    th_exp[:half_idx] = np.arccos(z_0[:half_idx] / r_exp[:half_idx])
-    th_exp[half_idx:] = -np.arccos(z_0[half_idx:] / r_exp[half_idx:])
+    th_exp[:half_idx] = np.arccos((z_0[:half_idx]-z_s) / r_exp[:half_idx])
+    th_exp[half_idx:] = 2*np.pi - np.arccos((z_0[half_idx:]-z_s) /
+                                            r_exp[half_idx:])
 
     A_sh, d_sh, x_sh, z_sh = def_sh(th_exp, gamma, Eh, sig_c, nu, r_0, fn, gn)
 
@@ -348,22 +388,24 @@ def cost_sh(x_0, z_0, gamma, Eh, sig_c, nu, r_0, fn, gn):
     return J
 
 
-def d_cost_sh(x_0, z_0, gamma, Eh, sig_c, nu, r_0, fn, gn):
+def d_cost_sh(x_0, z_0, gamma, sig_c, nu, r_0, fn, gn, P, d):
     """returns dJ
 
-    **Calculates the derivative of the cost of the model**
+    **Calculates the derivative of the cost of the model
+    of parameter P[d]**
 
     Args
     ----
     :x_0:       x-coordinates from data
     :z_0:       z-coordinates from data
     :gamma:     tension of shell
-    :Eh:        stiffness of shell
     :sig_c:     characteristic stress
     :nu:        Poisson ratio
     :r_0:       estimated radius undeformed cell
     :fn:        fn-coefficients
     :gn:        gn-coefficients
+    :P:         P[0]: Eh, P[1]: x_s, P[2]: z_s
+    :d:         derivative with respect to parameter d
 
 
     Return
@@ -373,16 +415,54 @@ def d_cost_sh(x_0, z_0, gamma, Eh, sig_c, nu, r_0, fn, gn):
 
     eps = 1e-9
 
-    Eh_p = Eh + eps
-    Eh_n = Eh - eps
-    dJ = (cost_sh(x_0, z_0, gamma, Eh_p, sig_c, nu, r_0, fn, gn) -
-          cost_sh(x_0, z_0, gamma, Eh_n, sig_c, nu, r_0, fn, gn)) / (2 * eps)
+    P_p = np.copy(P)  # placeholder
+    P_n = np.copy(P)  # placeholder
+    P_p[d] += eps
+    P_n[d] -= eps
+
+    # derivative of parameter P[d]
+    dJ = (cost_sh(x_0, z_0, gamma, sig_c, nu, r_0, fn, gn, *P_p) -
+          cost_sh(x_0, z_0, gamma, sig_c, nu, r_0, fn, gn, *P_n)) / (2 * eps)
 
     return dJ
 
 
-def optimize_sh(x_0, z_0, gamma_pre, E_ini, sig_c, nu, r_0, fn, gn,
-                it_max, alpha):
+def cost_deriv_sh(x_0, z_0, gamma, sig_c, nu, r_0, fn, gn, P):
+    """returns dJ
+
+    **Calculates the cost gradients of the model**
+
+    Args
+    ----
+    :x_0:       x-coordinates from data
+    :z_0:       z-coordinates from data
+    :gamma:     tension of shell
+    :sig_c:     characteristic stress
+    :nu:        Poisson ratio
+    :r_0:       estimated radius undeformed cell
+    :fn:        fn-coefficients
+    :gn:        gn-coefficients
+    :P:         P[0]: Eh, P[1]: x_s, P[2]: z_s
+
+    Return
+    ------
+    :DJ:        gradient of cost w.r.t. parameters
+    """
+
+    # parallelize
+    num_cores = multiprocessing.cpu_count()
+    inputs = range(3)
+
+    DJ = np.array(Parallel(n_jobs=num_cores)(delayed(d_cost_sh)
+                                             (x_0, z_0, gamma, sig_c,
+                                              nu, r_0, fn, gn, P, i)
+                  for i in inputs))
+
+    return DJ
+
+
+def optimize_sh(x_0, z_0, gamma_pre, sig_c, nu, r_0, fn, gn,
+                it_max, alpha, P):
     """returns it, J, Eh
 
     **Optimizes the model and returns the cost and parameters**
@@ -392,7 +472,6 @@ def optimize_sh(x_0, z_0, gamma_pre, E_ini, sig_c, nu, r_0, fn, gn,
     :x_0:       x-coordinates from data
     :z_0:       z-coordinates from data
     :gamma:     tension of shell
-    :E_ini:     initial stiffness of shell
     :sig_c:     characteristic stress
     :nu:        Poisson ratio
     :r_0:       estimated radius undeformed cell
@@ -400,6 +479,7 @@ def optimize_sh(x_0, z_0, gamma_pre, E_ini, sig_c, nu, r_0, fn, gn,
     :gn:        gn-coefficients
     :it_max:    maximum of iterations
     :alpha:     learning rate
+    :P:         initial parameters: P[0]: stiffness, P[1]: x_s, P[2]: z_s
 
     Return
     ------
@@ -410,37 +490,211 @@ def optimize_sh(x_0, z_0, gamma_pre, E_ini, sig_c, nu, r_0, fn, gn,
 
     J = np.array([])  # cost
     it = np.array([])  # iterations
-
-    m = 0
-    v = 0
+    m = np.zeros(P.size)  # start values
+    v = np.zeros(P.size)  # start values
     beta1 = .9  # parameter Adam optimizer
     beta2 = .999  # parameter Adam optimizer
     epsilon = 1e-8  # preventing from dividing by zero
-    Eh = E_ini
+    Alpha = np.array([alpha, alpha*1e-7, alpha*1e-7])  # learning rates
 
     # start optimizing
     start_time = time.time()
 
     for i in range(it_max):
-        gamma = gamma_pre * Eh
-        J = np.append(J, cost_sh(x_0, z_0, gamma, Eh, sig_c, nu, r_0, fn, gn))
+        gamma = gamma_pre * P[0]
+        J = np.append(J, cost_sh(x_0, z_0, gamma, sig_c, nu, r_0, fn, gn, *P))
         it = np.append(it, i)
-        dJ = d_cost_sh(x_0, z_0, gamma, Eh, sig_c, nu, r_0, fn, gn)
-        lr = alpha * np.sqrt((1 - beta2) / (1 - beta1))  # rate
+        DJ = cost_deriv_sh(x_0, z_0, gamma, sig_c, nu, r_0, fn, gn, P)
+        lr = Alpha * np.sqrt((1 - beta2) / (1 - beta1))  # rate
 
         # update parameters
-        m = beta1 * m + (1 - beta1) * dJ
-        v = beta2 * v + ((1 - beta2) * dJ) * dJ
-        Eh = Eh - lr * m / (np.sqrt(v) + epsilon)
+        m = beta1 * m + (1 - beta1) * DJ
+        v = beta2 * v + ((1 - beta2) * DJ) * DJ
+        P = P - lr * m / (np.sqrt(v) + epsilon)
 
         # display every 10 iterations
-        if np.mod(i, 10) == 0:
+        if np.mod(i, 50) == 0:
             print('iteration nr. ' + str(i))
             print("--- %s seconds ---" % (time.time() - start_time))
             print("J = " + str(J[-1]))
-        if np.mod(i, 10) == 0:
+        if np.mod(i, 50) == 0:
             print('iteration nr. ' + str(i))
             print("--- %s seconds ---" % (time.time() - start_time))
-            print("Eh = " + str(Eh))
+            print("Eh = " + str(P[0]))
 
-    return it, J, Eh
+    return it, J, P
+
+
+def cost_sp(x_0, z_0, sig_c, nu, r_0, fn, gn, E_0, x_s, z_s):
+    """returns J
+
+    **Calculates the cost of the model**
+
+    Args
+    ----
+    :x_0:       x-coordinates from data
+    :z_0:       z-coordinates from data
+    :gamma:     tension of shell
+    :sig_c:     characteristic stress
+    :nu:        Poisson ratio
+    :r_0:       estimated radius undeformed cell
+    :fn:        fn-coefficients
+    :gn:        gn-coefficients
+    :E_0:       stiffness of sphere
+    :x_s:       center of mass x-coordinate
+    :z_s:       center of maxx z-coordinate
+
+    Return
+    ------
+    :J:         cost
+    """
+
+    r_exp = np.sqrt((x_0-x_s)**2 + (z_0-z_s)**2)
+    th_exp = np.zeros(len(r_exp))
+
+    half_idx = int(len(r_exp)/2)
+    th_exp[:half_idx] = np.arccos((z_0[:half_idx]-z_s) / r_exp[:half_idx])
+    th_exp[half_idx:] = 2*np.pi - np.arccos((z_0[half_idx:]-z_s) /
+                                            r_exp[half_idx:])
+
+    A_sp, d_sp, x_sp, z_sp = def_sp(th_exp, E_0, sig_c, nu, r_0, fn, gn)
+
+    r_sp = np.sqrt(x_sp**2 + z_sp**2)
+
+    J = np.sum(np.abs(r_exp - r_sp)) / len(x_0) * 1e6
+
+    return J
+
+
+def d_cost_sp(x_0, z_0, sig_c, nu, r_0, fn, gn, P, d):
+    """returns dJ
+
+    **Calculates the derivative of the cost of the model
+    of parameter P[d]**
+
+    Args
+    ----
+    :x_0:       x-coordinates from data
+    :z_0:       z-coordinates from data
+    :gamma:     tension of shell
+    :sig_c:     characteristic stress
+    :nu:        Poisson ratio
+    :r_0:       estimated radius undeformed cell
+    :fn:        fn-coefficients
+    :gn:        gn-coefficients
+    :P:         P[0]: E_0, P[1]: x_s, P[2]: z_s
+    :d:         derivative with respect to parameter d
+
+
+    Return
+    ------
+    :dJ:    derivative of cost
+    """
+
+    eps = 1e-9
+
+    P_p = np.copy(P)  # placeholder
+    P_n = np.copy(P)  # placeholder
+    P_p[d] += eps
+    P_n[d] -= eps
+
+    # derivative of parameter P[d]
+    dJ = (cost_sp(x_0, z_0, sig_c, nu, r_0, fn, gn, *P_p) -
+          cost_sp(x_0, z_0, sig_c, nu, r_0, fn, gn, *P_n)) / (2 * eps)
+
+    return dJ
+
+
+def cost_deriv_sp(x_0, z_0, sig_c, nu, r_0, fn, gn, P):
+    """returns dJ
+
+    **Calculates the cost gradients of the model**
+
+    Args
+    ----
+    :x_0:       x-coordinates from data
+    :z_0:       z-coordinates from data
+    :sig_c:     characteristic stress
+    :nu:        Poisson ratio
+    :r_0:       estimated radius undeformed cell
+    :fn:        fn-coefficients
+    :gn:        gn-coefficients
+    :P:         P[0]: E_0, P[1]: x_s, P[2]: z_s
+
+    Return
+    ------
+    :DJ:        gradient of cost w.r.t. parameters
+    """
+
+    # parallelize
+    num_cores = multiprocessing.cpu_count()
+    inputs = range(3)
+
+    DJ = np.array(Parallel(n_jobs=num_cores)(delayed(d_cost_sp)
+                                             (x_0, z_0, sig_c,
+                                              nu, r_0, fn, gn, P, i)
+                  for i in inputs))
+
+    return DJ
+
+
+def optimize_sp(x_0, z_0, sig_c, nu, r_0, fn, gn,
+                it_max, alpha, P):
+    """returns it, J, Eh
+
+    **Optimizes the model and returns the cost and parameters**
+
+    Args
+    ----
+    :x_0:       x-coordinates from data
+    :z_0:       z-coordinates from data
+    :sig_c:     characteristic stress
+    :nu:        Poisson ratio
+    :r_0:       estimated radius undeformed cell
+    :fn:        fn-coefficients
+    :gn:        gn-coefficients
+    :it_max:    maximum of iterations
+    :alpha:     learning rate
+    :P:         initial parameters: P[0]: stiffness, P[1]: x_s, P[2]: z_s
+
+    Return
+    ------
+    :it:        iteratons
+    :J:         cost
+    :E_0:       optimized stiffness of the sphere
+    """
+
+    J = np.array([])  # cost
+    it = np.array([])  # iterations
+    m = np.zeros(P.size)  # start values
+    v = np.zeros(P.size)  # start values
+    beta1 = .9  # parameter Adam optimizer
+    beta2 = .999  # parameter Adam optimizer
+    epsilon = 1e-8  # preventing from dividing by zero
+    Alpha = np.array([alpha, alpha*1e-9, alpha*1e-9])  # learning rates
+
+    # start optimizing
+    start_time = time.time()
+
+    for i in range(it_max):
+        J = np.append(J, cost_sp(x_0, z_0, sig_c, nu, r_0, fn, gn, *P))
+        it = np.append(it, i)
+        DJ = cost_deriv_sp(x_0, z_0, sig_c, nu, r_0, fn, gn, P)
+        lr = Alpha * np.sqrt((1 - beta2) / (1 - beta1))  # rate
+
+        # update parameters
+        m = beta1 * m + (1 - beta1) * DJ
+        v = beta2 * v + ((1 - beta2) * DJ) * DJ
+        P = P - lr * m / (np.sqrt(v) + epsilon)
+
+        # display every 10 iterations
+        if np.mod(i, 50) == 0:
+            print('iteration nr. ' + str(i))
+            print("--- %s seconds ---" % (time.time() - start_time))
+            print("J = " + str(J[-1]))
+        if np.mod(i, 50) == 0:
+            print('iteration nr. ' + str(i))
+            print("--- %s seconds ---" % (time.time() - start_time))
+            print("E0 = " + str(P[0]))
+
+    return it, J, P

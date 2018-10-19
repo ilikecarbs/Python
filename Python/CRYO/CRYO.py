@@ -83,7 +83,7 @@ def FirstCool(print_fig=True):
     ax.plot([90, 36], [6, 20], 'k--', lw=1)
     ax.plot([108, 102], [6, 20], 'k--', lw=1)
 
-    ax.fill_between(t[:t0_idx], 0, T[:t0_idx], color='C0', alpha=.5)
+    ax.fill_between(t[:t0_idx], 0, T[:t0_idx], color='C0', alpha=.3)
     ax.set_xlim(-150, 108)
     ax.set_ylim(0, 1.05 * T[0])
     ax.set_ylabel(r'$T$ (K)', fontdict=font)
@@ -94,7 +94,7 @@ def FirstCool(print_fig=True):
 
     axi1.plot(t, T, 'k-')
     axi1.plot([t[0], t[-1]], [4.2, 4.2], ls='--', color='C1')
-    axi1.fill_between(t[:t0_idx], 0, T[:t0_idx], color='C0', alpha=.5)
+    axi1.fill_between(t[:t0_idx], 0, T[:t0_idx], color='C0', alpha=.3)
     axi1.text(10, 10, r'$T=4.2\,$K', color='C1', fontsize=12)
     axi1.text(4, 60, 'LHe$_4$ cooldown', fontdict=font)
     axi1.set_xlim(-2, 19)

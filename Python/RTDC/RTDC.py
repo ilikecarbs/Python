@@ -8,7 +8,7 @@ Created on Thu Oct 11 15:35:59 2018
 
 import numpy as np
 import matplotlib.pyplot as plt
-import utils_RTDC as utils
+import RTDC_utils as utils
 import os
 
 # Directory paths
@@ -43,7 +43,7 @@ kwargs_ticks = {'bottom': True,
                 'colors': 'black'}
 
 
-def Cell_Def(Q=1.2e-11, r_0=7e-6, print_fig=True):
+def Cell_Def(Q=1.2e-11, r_0=7e-6, save_data=False, print_fig=True):
     """Plots model of cell deformation
 
     **model deformation of elastic sphere and
@@ -100,7 +100,7 @@ def Cell_Def(Q=1.2e-11, r_0=7e-6, print_fig=True):
     v_0 = u / v_equil  # velocity of the cell
 
     sig_c = eta * v_0 / r_0  # characteristic stress
-    th = np.linspace(0, 2*np.pi, 600)  # polar angle
+    th = np.linspace(-np.pi, np.pi, 600)  # polar angle
 
     # keyword arguments for calculations
     kwargs_sh = {'th': th, 'gamma': gamma, 'Eh': Eh, 'sig_c': sig_c,
@@ -115,9 +115,10 @@ def Cell_Def(Q=1.2e-11, r_0=7e-6, print_fig=True):
     A_sp, d_sp, x_sp, z_sp = utils.def_sp(**kwargs_sp)
     u_r_sp, u_th_sp = utils.disp_sp(**kwargs_sp)
 
-    os.chdir(save_dir)
-    np.savetxt('coord_sh.dat', np.array([x_sh, z_sh]))
-    np.savetxt('coord_sp.dat', np.array([x_sp, z_sh]))
+    if save_data:
+        os.chdir(save_dir)
+        np.savetxt('coord_sh.dat', np.array([x_sh, z_sh]))
+        np.savetxt('coord_sp.dat', np.array([x_sp, z_sh]))
 
     """
     %%%%%%%%%%%%%%
@@ -125,6 +126,7 @@ def Cell_Def(Q=1.2e-11, r_0=7e-6, print_fig=True):
     %%%%%%%%%%%%%%
     """
 
+    # circle
     x0 = r_0*np.cos(th)
     z0 = r_0*np.sin(th)
 
@@ -226,7 +228,8 @@ def Stream_Func(Q=1.2e-11, r_0=9e-6, print_fig=True):
 
     lambd = r_0 / R_0
 
-    z_bnd = 1.5
+    # parameters
+    z_bnd = 1.5  # boundary
     R_0 = 1/lambd
     grid = 100
     num_lev = 25
@@ -239,10 +242,10 @@ def Stream_Func(Q=1.2e-11, r_0=9e-6, print_fig=True):
 
     A_n, B_n, C_n, D_n, v_equil = utils.Cpts(N, lambd)
 
-    xx = np.linspace(-R_0, R_0, grid)
-    zz = np.linspace(-z_bnd, z_bnd, grid)
+    x_grid = np.linspace(-R_0, R_0, grid)
+    z_grid = np.linspace(-z_bnd, z_bnd, grid)
 
-    Z, X = np.meshgrid(zz, xx)
+    Z, X = np.meshgrid(z_grid, x_grid)
     r = np.sqrt(X**2 + Z**2)
 
     cos_th = Z/r
@@ -351,16 +354,15 @@ def Coefficients(res=100, N=40):
         print('Set valid save directory (save_dir) in RT_DC.py')
 
 
-def Fit_Shell(E_ini=1, Q=1.2e-11, gamma_pre=.1, it_max=1000, alpha=5e-3,
+def Fit_Shell(Eh_ini=.1, Q=1.2e-11, gamma_pre=.1, it_max=500, alpha=5e-3,
               print_fig=True):
-    """Plots stream function and velocity dependency
+    """Plots Shell fit
 
-    **Stream function according to Mietke et al., parameters obtained
-    by strategy laid out by Haberman or Mietke et al.**
+    **Fitting data with shell model**
 
     Args
     ----
-    :E_ini:     initial stiffness guess
+    :Eh_ini:    initial stiffness guess
     :Q:         flow rate
     :gamma_pre: pre-factor of surface tension
     :it_max:    maximum iterations
@@ -375,20 +377,18 @@ def Fit_Shell(E_ini=1, Q=1.2e-11, gamma_pre=.1, it_max=1000, alpha=5e-3,
 
     figname = 'xFig_Fit_Shell'
 
+    os.chdir(save_dir)
     # Data preparations
     coord_sh = np.loadtxt('coord_sh.dat')
 
-    x_0 = coord_sh[0, :]  # x-data in meters
-    z_0 = coord_sh[1, :]  # z-data in meters
+    x_0 = coord_sh[0, :] + 2e-6  # x-data in meters
+    z_0 = coord_sh[1, :] + 2e-6  # z-data in meters
+
+    x_s_ini = np.sum(x_0) / len(x_0)
+    z_s_ini = np.sum(z_0) / len(z_0)
 
     A_0 = utils.area(x_0, z_0)  # area of data
     r_0 = np.sqrt(A_0 / np.pi)  # radius of circle with area A_0
-    r_m = np.sqrt(x_0**2 + z_0**2)  # radii for different coordinates
-    th_m = np.zeros(len(r_m))  # theta angle for different coordinates
-
-    half_idx = int(len(r_m)/2)  # index of half of the data set
-    th_m[:half_idx] = np.arccos(z_0[:half_idx] / r_m[:half_idx])  # fill theta
-    th_m[half_idx:] = -np.arccos(z_0[half_idx:] / r_m[half_idx:])  # fill theta
 
     """
     %%%%%%%%%%%%%%%%
@@ -406,13 +406,14 @@ def Fit_Shell(E_ini=1, Q=1.2e-11, gamma_pre=.1, it_max=1000, alpha=5e-3,
     lambd = r_0 / R_0
 
     nu = .5  # compressibility (0.5 ~incompressible)
-    gamma = gamma_pre * E_ini  # surface tension
+    gamma = gamma_pre * Eh_ini  # surface tension
     eta = .015  # viscosity
 
     fn, v_equil = utils.f_n(N=N, lambd=lambd)  # expansion coefficients
     gn, v_equil = utils.g_n(N=N, lambd=lambd)  # expansion coefficients
     v_0 = u / v_equil  # velocity of the cell
     sig_c = eta * v_0 / r_0  # characteristic stress
+    P_ini = np.array([Eh_ini, x_s_ini, z_s_ini])
 
     """
     %%%%%%%%%%%%%%%%
@@ -420,11 +421,15 @@ def Fit_Shell(E_ini=1, Q=1.2e-11, gamma_pre=.1, it_max=1000, alpha=5e-3,
     %%%%%%%%%%%%%%%%
     """
 
-    kw_opt_sh = {'x_0': x_0, 'z_0': z_0, 'gamma_pre': gamma_pre,
-                 'E_ini': E_ini, 'sig_c': sig_c, 'nu': nu, 'r_0': r_0,
-                 'fn': fn, 'gn': gn, 'it_max': it_max, 'alpha': alpha}
+    kwargs_opt_sh = {'x_0': x_0, 'z_0': z_0, 'gamma_pre': gamma_pre,
+                     'sig_c': sig_c, 'nu': nu, 'r_0': r_0, 'fn': fn, 'gn': gn,
+                     'it_max': it_max, 'alpha': alpha, 'P': P_ini}
 
-    it, J, fit = utils.optimize_sh(**kw_opt_sh)
+    it, J, P = utils.optimize_sh(**kwargs_opt_sh)
+    print(P)
+    Eh = P[0]
+    x_s = P[1]
+    z_s = P[2]
 
     """
     %%%%%%%%%%%%%%
@@ -433,9 +438,9 @@ def Fit_Shell(E_ini=1, Q=1.2e-11, gamma_pre=.1, it_max=1000, alpha=5e-3,
     """
 
     th = np.linspace(0, 2*np.pi, 600)
-    gamma = gamma_pre * fit
+    gamma = gamma_pre * Eh
 
-    kwargs_sh = {'th': th, 'gamma': gamma, 'Eh': fit, 'sig_c': sig_c,
+    kwargs_sh = {'th': th, 'gamma': gamma, 'Eh': Eh, 'sig_c': sig_c,
                  'nu': nu, 'r_0': r_0, 'fn': fn, 'gn': gn}
 
     # extract deformation
@@ -444,14 +449,140 @@ def Fit_Shell(E_ini=1, Q=1.2e-11, gamma_pre=.1, it_max=1000, alpha=5e-3,
     # plot
     fig = plt.figure(figname, figsize=(8, 8), clear=True)
     ax1 = fig.add_axes([.07, .3, .4, .4])
-    ax1.plot(x_0*1e6, z_0*1e6, 'ko')
-    ax1.plot(x_sh*1e6, z_sh*1e6, 'r-')
+    ax1.plot(x_0*1e6, z_0*1e6, 'ko', ms=5)
+    ax1.plot((x_sh + P[1])*1e6, (z_sh + P[2])*1e6, 'r-')
     ax1.set_xlabel(r'$x$ ($\mu$m)', fontdict=font)
     ax1.set_ylabel(r'$z$ ($\mu$m)', fontdict=font)
-    ax1.text(-3.5, -.5,
-             r'$Eh_\mathrm{fit}=$'+str(np.round(fit*1e3, 2))+r'$\,$nN/$\mu$m',
+    ax1.text(x_s*1e6-3.5, z_s*1e6+1,
+             r'$Eh_\mathrm{fit}=$'+str(np.round(Eh*1e3, 1))+r'$\,$nN/$\mu$m',
              fontdict=font)
+    ax1.text(x_s*1e6-3., z_s*1e6-1,
+             r'$A_\mathrm{fit}=$'+str(np.round(A_sh*1e12, 1)) +
+             r'$\,\mu \mathrm{m}^2$',
+             fontdict=font)
+    ax1.text(x_s*1e6-2.5, z_s*1e6-3,
+             r'$d_\mathrm{fit}=$'+str(np.round(d_sh, 3)),
+             fontdict=font)
+    ax2 = fig.add_axes([.58, .3, .4, .4])
+    ax2.plot(it, J, 'k-')
+    ax2.set_xlim(0, it_max)
+    ax2.set_ylim(0, np.max(J))
+    ax2.set_xlabel('iterations', fontdict=font)
+    ax2.set_ylabel('cost $J$', fontdict=font)
 
+    plt.show()
+
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
+
+
+def Fit_Sphere(E_0_ini=1e6, Q=1.2e-11, it_max=500, alpha=5e-3, print_fig=True):
+    """Plots Sphere fit
+
+    **Fitting data with shell model**
+
+    Args
+    ----
+    :E_0_ini:   initial stiffness guess
+    :Q:         flow rate
+    :it_max:    maximum iterations
+    :alpha:     learning rate
+    :print_fig: print figure (True / False)
+
+
+    Return
+    ------
+    Plot
+    """
+
+    figname = 'xFig_Fit_Sphere'
+
+    os.chdir(save_dir)
+    # Data preparations
+    coord_sp = np.loadtxt('coord_sp.dat')
+
+    x_0 = coord_sp[0, :] + 2e-6  # x-data in meters
+    z_0 = coord_sp[1, :] + 2e-6  # z-data in meters
+
+    x_s_ini = np.sum(x_0) / len(x_0)
+    z_s_ini = np.sum(z_0) / len(z_0)
+
+    A_0 = utils.area(x_0, z_0)  # area of data
+    r_0 = np.sqrt(A_0 / np.pi)  # radius of circle with area A_0
+
+    """
+    %%%%%%%%%%%%%%%%
+       Parameters
+    %%%%%%%%%%%%%%%%
+    """
+
+    l_0 = 2e-5  # channel side length
+    R_0 = 1.094 * l_0 / 2  # equivalent radius
+    K_2 = 2.096  # constant
+    u = K_2 * Q / l_0**2  # Poiseuille flow at inifinity (liquid velocity)
+
+    N = 20  # number of equations taken into account, N=20 high enough
+
+    lambd = r_0 / R_0
+
+    nu = .5  # compressibility (0.5 ~incompressible)
+    eta = .015  # viscosity
+
+    fn, v_equil = utils.f_n(N=N, lambd=lambd)  # expansion coefficients
+    gn, v_equil = utils.g_n(N=N, lambd=lambd)  # expansion coefficients
+    v_0 = u / v_equil  # velocity of the cell
+    sig_c = eta * v_0 / r_0  # characteristic stress
+    P_ini = np.array([E_0_ini, x_s_ini, z_s_ini])
+
+    """
+    %%%%%%%%%%%%%%%%
+       Optimizing
+    %%%%%%%%%%%%%%%%
+    """
+
+    kwargs_opt_sp = {'x_0': x_0, 'z_0': z_0,
+                     'sig_c': sig_c, 'nu': nu, 'r_0': r_0, 'fn': fn, 'gn': gn,
+                     'it_max': it_max, 'alpha': alpha, 'P': P_ini}
+
+    it, J, P = utils.optimize_sp(**kwargs_opt_sp)
+    print(P)
+    E_0 = P[0]
+    x_s = P[1]
+    z_s = P[2]
+
+    """
+    %%%%%%%%%%%%%%
+       Results
+    %%%%%%%%%%%%%%
+    """
+
+    th = np.linspace(0, 2*np.pi, 600)
+
+    kwargs_sp = {'th': th, 'E_0': E_0, 'sig_c': sig_c,
+                 'nu': nu, 'r_0': r_0, 'fn': fn, 'gn': gn}
+
+    # extract deformation
+    A_sp, d_sp, x_sp, z_sp = utils.def_sp(**kwargs_sp)
+
+    # plot
+    fig = plt.figure(figname, figsize=(8, 8), clear=True)
+    ax1 = fig.add_axes([.07, .3, .4, .4])
+    ax1.plot(x_0*1e6, z_0*1e6, 'ko', ms=5)
+    ax1.plot((x_sp + P[1])*1e6, (z_sp + P[2])*1e6, 'r-')
+    ax1.set_xlabel(r'$x$ ($\mu$m)', fontdict=font)
+    ax1.set_ylabel(r'$z$ ($\mu$m)', fontdict=font)
+    ax1.text(x_s*1e6-3.5, z_s*1e6+1,
+             r'$E_{0, \mathrm{fit}}=$'+str(np.round(E_0*1e-3, 3))+r'$\,$kPa',
+             fontdict=font)
+    ax1.text(x_s*1e6-3., z_s*1e6-1,
+             r'$A_\mathrm{fit}=$'+str(np.round(A_sp*1e12, 1)) +
+             r'$\,\mu \mathrm{m}^2$',
+             fontdict=font)
+    ax1.text(x_s*1e6-2.5, z_s*1e6-3,
+             r'$d_\mathrm{fit}=$'+str(np.round(d_sp, 3)),
+             fontdict=font)
     ax2 = fig.add_axes([.58, .3, .4, .4])
     ax2.plot(it, J, 'k-')
     ax2.set_xlim(0, it_max)
