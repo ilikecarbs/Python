@@ -12,7 +12,8 @@ import RTDC_utils as utils
 import os
 
 # Directory paths
-save_dir = '/Users/denyssutter/Documents/library/Python/RTDC/'
+save_dir = '/Users/denyssutter/Documents/Denys/Zivi/Figs/'
+data_dir = '/Users/denyssutter/Documents/Denys/Zivi/data/'
 
 # Set standard fonts
 plt.rcParams['mathtext.fontset'] = 'cm'
@@ -61,7 +62,7 @@ def Cell_Def(Q=1.2e-11, r_0=7e-6, save_data=False, print_fig=True):
     Plot
     """
 
-    figname = 'xFig_Cell_Def'
+    figname = 'Cell_Def'
 
     """
     %%%%%%%%%%%%%%%%%%%%%%%
@@ -116,7 +117,7 @@ def Cell_Def(Q=1.2e-11, r_0=7e-6, save_data=False, print_fig=True):
     u_r_sp, u_th_sp = utils.disp_sp(**kwargs_sp)
 
     if save_data:
-        os.chdir(save_dir)
+        os.chdir(data_dir)
         np.savetxt('coord_sh.dat', np.array([x_sh, z_sh]))
         np.savetxt('coord_sp.dat', np.array([x_sp, z_sh]))
 
@@ -197,7 +198,7 @@ def Stream_Func(Q=1.2e-11, r_0=9e-6, print_fig=True):
     """Plots stream function and velocity dependency
 
     **Stream function according to Mietke et al., parameters obtained
-    by strategy laid out by Haberman or Mietke et al.**
+    by strategy laid out by Mietke et al.**
 
     Args
     ----
@@ -211,7 +212,7 @@ def Stream_Func(Q=1.2e-11, r_0=9e-6, print_fig=True):
     Plot
     """
 
-    figname = 'xFig_Stream_Func'
+    figname = 'Stream_Func'
 
     """
     %%%%%%%%%%%%%%%%%%%%%%%
@@ -312,7 +313,7 @@ def Stream_Func(Q=1.2e-11, r_0=9e-6, print_fig=True):
 def Coefficients(res=100, N=40):
     """Calculates and produces data files of expansion coefficients
 
-    **Paramters fn, gn and v_equilibrium for given resolution res
+    **Paramters fn, gn and v_equil for given resolution res
     saved as .dat files for faster computation of area-vs-deformation plots**
 
     Args
@@ -345,7 +346,7 @@ def Coefficients(res=100, N=40):
         n += 1
 
     try:
-        os.chdir(save_dir)
+        os.chdir(data_dir)
         np.savetxt('Fn.dat', Fn)
         np.savetxt('Gn.dat', Gn)
         np.savetxt('V_equil.dat', V_equil)
@@ -375,9 +376,9 @@ def Fit_Shell(Eh_ini=.1, Q=1.2e-11, gamma_pre=.1, it_max=500, alpha=5e-3,
     Plot
     """
 
-    figname = 'xFig_Fit_Shell'
+    figname = 'Fit_Shell'
 
-    os.chdir(save_dir)
+    os.chdir(data_dir)
     # Data preparations
     coord_sh = np.loadtxt('coord_sh.dat')
 
@@ -497,9 +498,9 @@ def Fit_Sphere(E_0_ini=1e6, Q=1.2e-11, it_max=500, alpha=5e-3, print_fig=True):
     Plot
     """
 
-    figname = 'xFig_Fit_Sphere'
+    figname = 'Fit_Sphere'
 
-    os.chdir(save_dir)
+    os.chdir(data_dir)
     # Data preparations
     coord_sp = np.loadtxt('coord_sp.dat')
 
