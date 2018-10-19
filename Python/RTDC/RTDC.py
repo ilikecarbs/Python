@@ -4,12 +4,23 @@
 Created on Thu Oct 11 15:35:59 2018
 
 @author: denyssutter
+
+%%%%%%%%%%
+   RTDC
+%%%%%%%%%%
+
+**Scripts for figures and called by RTDC_main**
+
+.. note::
+        To-Do:
+            -
 """
 
 import numpy as np
 import matplotlib.pyplot as plt
 import RTDC_utils as utils
 import os
+
 
 # Directory paths
 save_dir = '/Users/denyssutter/Documents/Denys/Zivi/Figs/'
@@ -118,8 +129,10 @@ def Cell_Def(Q=1.2e-11, r_0=7e-6, save_data=False, print_fig=True):
 
     if save_data:
         os.chdir(data_dir)
-        np.savetxt('coord_sh.dat', np.array([x_sh, z_sh]))
-        np.savetxt('coord_sp.dat', np.array([x_sp, z_sh]))
+        np.savetxt('coord_sh.dat', np.array([x_sh[range(0, len(th), 10)],
+                                            z_sh[range(0, len(th), 10)]]))
+        np.savetxt('coord_sp.dat', np.array([x_sp[range(0, len(th), 10)],
+                                            z_sp[range(0, len(th), 10)]]))
 
     """
     %%%%%%%%%%%%%%
@@ -145,7 +158,7 @@ def Cell_Def(Q=1.2e-11, r_0=7e-6, save_data=False, print_fig=True):
     ax_2 = fig.add_subplot(222)
     ax_2.tick_params(**kwargs_ticks)
     ax_2.set_position([.54, .51, .4, .4])
-    ax_2.plot(x_sh, z_sh, 'ko', ms=1)
+    ax_2.plot(x_sh, z_sh, 'k-')
     ax_2.plot(x0, z0, 'k--')
     ax_2.fill_between(x_sh, 0, z_sh, color='C8', alpha=1)
     ax_2.plot([0, 0], [-1.3*r_0, 1.3*r_0], 'k-.', lw=.5)
@@ -173,7 +186,7 @@ def Cell_Def(Q=1.2e-11, r_0=7e-6, save_data=False, print_fig=True):
     ax_4 = fig.add_subplot(224)
     ax_4.tick_params(**kwargs_ticks)
     ax_4.set_position([.54, .08, .4, .4])
-    ax_4.plot(x_sp, z_sp, 'ro', ms=1)
+    ax_4.plot(x_sp, z_sp, 'r-')
     ax_4.plot(x0, z0, 'k--')
     ax_4.fill_between(x_sp, 0, z_sp, color='C8', alpha=1)
     ax_4.plot([0, 0], [-1.3*r_0, 1.3*r_0], 'k-.', lw=.5)
@@ -355,8 +368,8 @@ def Coefficients(res=100, N=40):
         print('Set valid save directory (save_dir) in RT_DC.py')
 
 
-def Fit_Shell(Eh_ini=.1, Q=1.2e-11, gamma_pre=.1, it_max=500, alpha=5e-3,
-              print_fig=True):
+def Fit_Shell(x_0, z_0, Eh_ini=.1, Q=1.2e-11, gamma_pre=.1, it_max=500,
+              alpha=5e-3, print_fig=True):
     """Plots Shell fit
 
     **Fitting data with shell model**
@@ -377,13 +390,6 @@ def Fit_Shell(Eh_ini=.1, Q=1.2e-11, gamma_pre=.1, it_max=500, alpha=5e-3,
     """
 
     figname = 'Fit_Shell'
-
-    os.chdir(data_dir)
-    # Data preparations
-    coord_sh = np.loadtxt('coord_sh.dat')
-
-    x_0 = coord_sh[0, :] + 2e-6  # x-data in meters
-    z_0 = coord_sh[1, :] + 2e-6  # z-data in meters
 
     x_s_ini = np.sum(x_0) / len(x_0)
     z_s_ini = np.sum(z_0) / len(z_0)
@@ -479,7 +485,8 @@ def Fit_Shell(Eh_ini=.1, Q=1.2e-11, gamma_pre=.1, it_max=500, alpha=5e-3,
                     bbox_inches="tight", rasterized=True)
 
 
-def Fit_Sphere(E_0_ini=1e6, Q=1.2e-11, it_max=500, alpha=5e-3, print_fig=True):
+def Fit_Sphere(x_0, z_0, E_0_ini=1e6, Q=1.2e-11, it_max=500, alpha=5e-3,
+               print_fig=True):
     """Plots Sphere fit
 
     **Fitting data with shell model**
@@ -499,13 +506,6 @@ def Fit_Sphere(E_0_ini=1e6, Q=1.2e-11, it_max=500, alpha=5e-3, print_fig=True):
     """
 
     figname = 'Fit_Sphere'
-
-    os.chdir(data_dir)
-    # Data preparations
-    coord_sp = np.loadtxt('coord_sp.dat')
-
-    x_0 = coord_sp[0, :] + 2e-6  # x-data in meters
-    z_0 = coord_sp[1, :] + 2e-6  # z-data in meters
 
     x_s_ini = np.sum(x_0) / len(x_0)
     z_s_ini = np.sum(z_0) / len(z_0)

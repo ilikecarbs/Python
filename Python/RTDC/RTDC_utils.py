@@ -4,7 +4,18 @@
 Created on Thu Oct  4 14:26:47 2018
 
 @author: denyssutter
+
+%%%%%%%%%%%%%%%%
+   RTDC_utils
+%%%%%%%%%%%%%%%%
+
+**Useful functions for calculations and fit procedure**
+
+.. note::
+        To-Do:
+            -
 """
+
 from numpy.polynomial import legendre as L
 import numpy as np
 from scipy.special import iv, kv
@@ -16,22 +27,83 @@ import multiprocessing
 
 
 def I_1(n):
-    return integrate.quad(lambda x: x**(n-1) /
-                          (iv(1, x)**2 - iv(0, x) * iv(2, x)), 0, 100)[0]
+    """returns integral I_1
+
+    **Integral S_2 in Haberman paper**
+
+    Args
+    ----
+    :n:         degree
+
+    Return
+    ------
+    :I_1:       S_2 integral
+    """
+
+    I_1 = integrate.quad(lambda x: x**(n-1) /
+                         (iv(1, x)**2 - iv(0, x) * iv(2, x)), 0, 100)[0]
+
+    return I_1
 
 
 def I_2(n):
-    return integrate.quad(lambda x: x**n *
-                          (iv(1, x) * kv(1, x) + iv(2, x) * kv(0, x)) /
-                          (iv(1, x)**2 - iv(0, x) * iv(2, x)), 0, 100)[0]
+    """returns integral I_2
+
+    **Integral S_4 in Haberman paper**
+
+    Args
+    ----
+    :n:         degree
+
+    Return
+    ------
+    :I_2:       S_4 integral
+    """
+
+    I_2 = integrate.quad(lambda x: x**n *
+                         (iv(1, x) * kv(1, x) + iv(2, x) * kv(0, x)) /
+                         (iv(1, x)**2 - iv(0, x) * iv(2, x)), 0, 100)[0]
+
+    return I_2
 
 
 def I_3(n):
-    return integrate.quad(lambda x: -x**(n-1) /
-                          (iv(1, x)**2 - iv(0, x) * iv(2, x)), 0, 100)[0]
+    """returns integral I_3
+
+    **Integral S_3 in Haberman paper**
+
+    Args
+    ----
+    :n:         degree
+
+    Return
+    ------
+    :I_3:       S_3 integral
+    """
+
+    I_3 = integrate.quad(lambda x: -x**(n-1) /
+                         (iv(1, x)**2 - iv(0, x) * iv(2, x)), 0, 100)[0]
+
+    return I_3
 
 
 def A_alpha(n, k, lambd, I1, I2):
+    """A
+
+    **From SM equation (S1) definitions, Exponent of I1 is corrected**
+
+    Args
+    ----
+    :n, k:      degrees
+    :lambd:     relative radius of cell to the channel
+    :I1, I2:    Integrals from Haberman paper
+
+
+    Return
+    ------
+    :A:         A_alpha(n, k)
+    """
+
     A = -I2[2*k+n+2] / factorial(2*k) * lambd**(n+2*k+3)
 
     if k > 0:
@@ -42,6 +114,22 @@ def A_alpha(n, k, lambd, I1, I2):
 
 
 def A_beta(n, k, lambd, I1):
+    """A
+
+    **From SM equation (S1) definitions, Exponent of I1 is corrected**
+
+    Args
+    ----
+    :n, k:      degrees
+    :lambd:     relative radius of cell to the channel
+    :I1:        Integral from Haberman paper
+
+
+    Return
+    ------
+    :A:         A_beta(n, k)
+    """
+
     A = -I1[2*k+n+3]/(factorial(2*k)*(4*k+5)) * lambd**(n+2*k+5)
     A[int(2*k/2)] += (4*k+3)*factorial(2*k+2)/4 * np.pi
 
@@ -49,6 +137,22 @@ def A_beta(n, k, lambd, I1):
 
 
 def B_alpha(n, k, lambd, I2, I3):
+    """B
+
+    **From SM equation (S1) definitions.**
+
+    Args
+    ----
+    :n, k:      degrees
+    :lambd:     relative radius of cell to the channel
+    :I2, I3:    Integrals from Haberman paper
+
+
+    Return
+    ------
+    :B:         B_alpha(n, k)
+    """
+
     B = (I3[2*k+n+1]/factorial(2*k) +
          I2[2*k+n]*(2*k+2)*(2*k+1)/(factorial(2*k)*(4*k+1)))*lambd**(n+2*k+1)
     B[int(2*k/2)] += np.pi * (4*k+3)*factorial(2*k+2)/(4*(4*k+1))
@@ -60,6 +164,22 @@ def B_alpha(n, k, lambd, I2, I3):
 
 
 def B_beta(n, k, lambd, I2):
+    """B
+
+    **From SM equation (S1) definitions, Exponent of I2 is corrected**
+
+    Args
+    ----
+    :n, k:      degrees
+    :lambd:     relative radius of cell to the channel
+    :I2:        Integral from Haberman paper
+
+
+    Return
+    ------
+    :B:         B_beta(n, k)
+    """
+
     B = -I2[2*k+n+2]/(factorial(2*k)*(4*k+5)) * lambd**(n+2*k+3)
     B[int(2*k/2)] += np.pi * factorial(2*k+2)/4
     try:
@@ -71,6 +191,30 @@ def B_beta(n, k, lambd, I2):
 
 
 def Coeff(N, lambd):
+    """returns a_n, b_n, v_equil
+
+    **Solve system of linear equations equation (S1)**
+
+    .. note::
+        Corrections equation S1:
+            - correct u -> -u
+            - correct 2/5*lambda**2 -> -2/5*lambda**2*u
+            - correct -2/5*lambda**2 -> 2/5*lambda**2*u
+
+    Args
+    ----
+    :N:         max. number of equations taken into account
+    :lambd:     relative radius of cell to the channel
+
+
+    Return
+    ------
+    :a_n:       a_n coefficient of n-th degree
+    :b_n:       b_n coefficient of n-th degree
+    :v_equil:   equilibrium cell velocity
+    """
+
+    # Build arrays with integrals
     I1 = np.zeros(2*N)
     I2 = np.zeros(2*N)
     I3 = np.zeros(2*N)
@@ -83,6 +227,8 @@ def Coeff(N, lambd):
     M = np.zeros((K, N))
     k = 0
     n = np.arange(0, N, 2)
+
+    # Build Matrix of linear system eq. 1 of SM
     for k_i in np.arange(0, K, 2):
         M[k_i, :int(N/2)] = A_alpha(n=n, k=k, lambd=lambd, I1=I1, I2=I2)
         M[k_i, int(N/2):] = B_alpha(n=n, k=k, lambd=lambd, I2=I2, I3=I3)
@@ -90,18 +236,23 @@ def Coeff(N, lambd):
         M[k_i+1, int(N/2):] = B_beta(n=n, k=k, lambd=lambd, I2=I2)
         k += 1
 
+    # b_0 is set to zero. Use this coloumn of matrix M to solve for vec
     vec = np.zeros(N)
-    vec[0] = -1
-    vec[1] = -2/5*lambd**2
-    vec[2] = 2/5*lambd**2
+    vec[0] = -1  # units of u
+    vec[1] = -2/5*lambd**2  # units of u
+    vec[2] = 2/5*lambd**2  # units of u
 
+    # replace b_0 coloumn
     M[:, int(N/2)] = vec
     RHS = np.zeros(N)
-    RHS[0] = -1
+    RHS[0] = -1  # entry of first equation in the system right hand side
 
+    # solve linear system
     coeff = np.linalg.solve(M, RHS)
 
-    v_equil = coeff[int(N/2)]
+    v_equil = coeff[int(N/2)]  # extract u
+
+    # set b_0 equal to zero.
     coeff[int(N/2)] = 0
 
     a_n = coeff[:int(N/2)]
@@ -111,6 +262,25 @@ def Coeff(N, lambd):
 
 
 def Cpts(N, lambd):
+    """returns A_n, B_n, C_n, D_n, v_equil
+
+    **Build Components from Coefficients from SM equations (S2a-d)**
+
+    Args
+    ----
+    :N:         max. number of equations taken into account
+    :lambd:     relative radius of cell to the channel
+
+
+    Return
+    ------
+    :A_n:       A_n coefficient of n-th degree
+    :B_n:       B_n coefficient of n-th degree
+    :C_n:       C_n coefficient of n-th degree
+    :D_n:       D_n coefficient of n-th degree
+    :v_equil:   equilibrium cell velocity
+    """
+
     a_n, b_n, v_equil = Coeff(N=N, lambd=lambd)
 
     A_n = np.zeros(len(a_n))
@@ -142,6 +312,21 @@ def Cpts(N, lambd):
 
 
 def f_n(N, lambd):
+    """returns fn, v_equil
+
+    **f_n coefficients from SM equation (S3a)**
+
+    Args
+    ----
+    :N:         max. number of equations taken into account
+    :lambd:     relative radius of cell to the channel
+
+
+    Return
+    ------
+    :fn:        gn coefficients
+    """
+
     A_n, B_n, C_n, D_n, v_equil = Cpts(N=N, lambd=lambd)
 
     fn = np.zeros(N-1)
@@ -154,6 +339,21 @@ def f_n(N, lambd):
 
 
 def g_n(N, lambd):
+    """returns gn, v_equil
+
+    **g_n coefficients from SM equation (S3b)**
+
+    Args
+    ----
+    :N:         max. number of equations taken into account
+    :lambd:     relative radius of cell to the channel
+
+
+    Return
+    ------
+    :gn:        gn coefficients
+    """
+
     A_n, B_n, C_n, D_n, v_equil = Cpts(N=N, lambd=lambd)
 
     gn = np.zeros(N-1)
@@ -167,6 +367,21 @@ def g_n(N, lambd):
 
 
 def P_n(x, n):
+    """returns P_n
+
+    **Legendre polynomial of n-th degree**
+
+    Args
+    ----
+    :n:     degree
+    :x:     cos(theta)
+
+
+    Return
+    ------
+    :P_n:   Legendre polynomial of n-th degree
+    """
+
     c = np.zeros(n+1)
     c[n] = 1
     P_n = L.legval(x, c, tensor=True)
@@ -175,6 +390,21 @@ def P_n(x, n):
 
 
 def dP_n(x, n):
+    """returns dP_n
+
+    **derivative of Legendre polynomial**
+
+    Args
+    ----
+    :n:     n-th degree
+    :x:     cos(theta)
+
+
+    Return
+    ------
+    :dP_n:  derivative of Legendre polynomial
+    """
+
     c = np.zeros(n+1)
     c[n] = 1
     dc = L.legder(c)
@@ -185,10 +415,40 @@ def dP_n(x, n):
 
 
 def GB(n, x):
-    return (P_n(x, n-2) - P_n(x, n)) / (2*n-1)
+    """returns GB
+
+    **Gegenbauer polynomial for equation 18**
+
+    Args
+    ----
+    :n:     n-th degree
+    :x:     cos(theta)
+
+
+    Return
+    ------
+    :GB:    Gegenbauer polynomial
+    """
+
+    GB = (P_n(x, n-2) - P_n(x, n)) / (2*n-1)
+    return GB
 
 
 def area(x, y):
+    """returns a
+
+    **Measure area a of shape with coordinates (x, y)**
+
+    Args
+    ----
+    :x:         x-coordinates
+    :y:         y-coordinates
+
+
+    Return
+    ------
+    :a:         area
+    """
     a = 0
     x0, y0 = x[0], y[0]
     for i in range(len(x)-1):
@@ -203,6 +463,27 @@ def area(x, y):
 
 
 def alpha_sh(n, gamma, Eh, sig_c, nu, r_0, fn, gn):
+    """returns alpha
+
+    **Expansion coefficients for shell model: equation 16a**
+
+    Args
+    ----
+    :n:         n-th term
+    :gamma:     surface tension
+    :Eh:        stiffness of shell
+    :sig_c:     characteristic stress
+    :nu:        Poisson ratio
+    :r_0:       estimated radius undeformed cell
+    :fn:        fn-coefficients
+    :gn:        gn-coefficients
+
+
+    Return
+    ------
+    :alpha:     n-th coefficient of expansion
+    """
+
     nom_alpha = (n*(n+1)+nu-1)*fn[n] + n*(n+1)*(1+nu)*gn[n]
     denom_alpha = (n*(n+1)-2) * (Eh + gamma*(n*(n+1)+nu-1))
 
@@ -212,6 +493,27 @@ def alpha_sh(n, gamma, Eh, sig_c, nu, r_0, fn, gn):
 
 
 def beta_sh(n, gamma, Eh, sig_c, nu, r_0, fn, gn):
+    """returns beta
+
+    **Expansion coefficients for shell model: equation 16b**
+
+    Args
+    ----
+    :n:         n-th term
+    :gamma:     surface tension
+    :Eh:        stiffness of shell
+    :sig_c:     characteristic stress
+    :nu:        Poisson ratio
+    :r_0:       estimated radius undeformed cell
+    :fn:        fn-coefficients
+    :gn:        gn-coefficients
+
+
+    Return
+    ------
+    :beta:      n-th coefficient of expansion
+    """
+
     nom_beta = (1+nu)*(fn[n]+2*gn[n]) + gamma/(Eh)*(1-nu**2)*(n*(n+1)-2)
     denom_beta = (n*(n+1)-2)*(Eh+gamma*(n*(n+1)+nu-1))
 
@@ -221,7 +523,27 @@ def beta_sh(n, gamma, Eh, sig_c, nu, r_0, fn, gn):
 
 
 def alpha_sp(n, E_0, sig_c, nu, r_0, fn, gn):
-    G = E_0 / (2*(1+nu))
+    """returns alpha
+
+    **Expansion coefficients for sphere model: equation 25a**
+
+    Args
+    ----
+    :n:         n-th term
+    :E_0:       stiffness of sphere
+    :sig_c:     characteristic stress
+    :nu:        Poisson ratio
+    :r_0:       estimated radius undeformed cell
+    :fn:        fn-coefficients
+    :gn:        gn-coefficients
+
+
+    Return
+    ------
+    :alpha:     n-th coefficient of expansion
+    """
+
+    G = E_0 / (2*(1+nu))  # shear stress
 
     nom_alpha = (fn[n]*(2*nu-2*(nu-1)*n**2+nu*n-1) +
                  gn[n]*n*(n+1)*((2*nu-1)*n-nu+2))
@@ -233,6 +555,25 @@ def alpha_sp(n, E_0, sig_c, nu, r_0, fn, gn):
 
 
 def beta_sp(n, E_0, sig_c, nu, r_0, fn, gn):
+    """returns beta
+
+    **Expansion coefficients for sphere model: equation 25b**
+
+    Args
+    ----
+    :n:         n-th term
+    :E_0:       stiffness of sphere
+    :sig_c:     characteristic stress
+    :nu:        Poisson ratio
+    :r_0:       estimated radius undeformed cell
+    :fn:        fn-coefficients
+    :gn:        gn-coefficients
+
+
+    Return
+    ------
+    :beta:      n-th coefficient of expansion
+    """
     G = E_0 / (2*(1+nu))  # shear stress
 
     nom_beta = (fn[n]*(-nu+(2*nu-1)*n+2) +
@@ -245,8 +586,30 @@ def beta_sp(n, E_0, sig_c, nu, r_0, fn, gn):
 
 
 def disp_sh(th, gamma, Eh, sig_c, nu, r_0, fn, gn):
-    u_r = 0
-    u_th = 0
+    """returns u_r, u_th
+
+    **Calculates displacement for shell model: equation 12**
+
+    Args
+    ----
+    :th:        polar angle
+    :gamma:     surface tension
+    :E_0:       stiffness of shell
+    :sig_c:     characteristic stress
+    :nu:        Poisson ratio
+    :r_0:       estimated radius undeformed cell
+    :fn:        fn-coefficients
+    :gn:        gn-coefficients
+
+
+    Return
+    ------
+    :u_r:       radial displacement
+    :u_th:      polar displacement
+    """
+
+    u_r = 0  # radial displacement
+    u_th = 0  # polar displacement
 
     n = np.arange(2, len(fn), 1)
     al = alpha_sh(n, gamma=gamma, Eh=Eh, sig_c=sig_c, nu=nu, r_0=r_0,
@@ -263,6 +626,27 @@ def disp_sh(th, gamma, Eh, sig_c, nu, r_0, fn, gn):
 
 
 def disp_sp(th, E_0, sig_c, nu, r_0, fn, gn):
+    """returns u_r, u_th
+
+    **Calculates displacement for sphere model: equation 23, 24**
+
+    Args
+    ----
+    :th:        polar angle
+    :E_0:       stiffness of sphere
+    :sig_c:     characteristic stress
+    :nu:        Poisson ratio
+    :r_0:       estimated radius undeformed cell
+    :fn:        fn-coefficients
+    :gn:        gn-coefficients
+
+
+    Return
+    ------
+    :u_r:       radial displacement
+    :u_th:      polar displacement
+    """
+
     u_r = 0
     u_th = 0
 
@@ -279,9 +663,34 @@ def disp_sp(th, E_0, sig_c, nu, r_0, fn, gn):
 
 
 def def_sh(th, gamma, Eh, sig_c, nu, r_0, fn, gn):
+    """returns A, d, x_d, z_d
+
+    **Calculates area, deformation and coordinates of deformed shell**
+
+    Args
+    ----
+    :th:        polar angle
+    :gamma:     surface tension
+    :Eh:        stiffness of shell
+    :sig_c:     characteristic stress
+    :nu:        Poisson ratio
+    :r_0:       estimated radius undeformed cell
+    :fn:        fn-coefficients
+    :gn:        gn-coefficients
+
+
+    Return
+    ------
+    :A:         area
+    :d:         deformation
+    :x_d:       x-coordinate
+    :z_d:       z-coordinate
+    """
+
     u_r, u_th = disp_sh(th=th, gamma=gamma, Eh=Eh, sig_c=sig_c, nu=nu,
                         r_0=r_0, fn=fn, gn=gn)
 
+    # transform into polar coordinates. Defined on page 2027
     x_d = (r_0 + u_r) * np.sin(th) + u_th * np.cos(th)
     z_d = (r_0 + u_r) * np.cos(th) - u_th * np.sin(th)
 
@@ -296,9 +705,33 @@ def def_sh(th, gamma, Eh, sig_c, nu, r_0, fn, gn):
 
 
 def def_sp(th, E_0, sig_c, nu, r_0, fn, gn):
+    """returns A, d, x_d, z_d
+
+    **Calculates area, deformation and coordinates of deformed sphere**
+
+    Args
+    ----
+    :th:        polar angle
+    :E_0:       stiffness of sphere
+    :sig_c:     characteristic stress
+    :nu:        Poisson ratio
+    :r_0:       estimated radius undeformed cell
+    :fn:        fn-coefficients
+    :gn:        gn-coefficients
+
+
+    Return
+    ------
+    :A:         area
+    :d:         deformation
+    :x_d:       x-coordinate
+    :z_d:       z-coordinate
+    """
+
     u_r, u_th = disp_sp(th=th, E_0=E_0, sig_c=sig_c, nu=nu,
                         r_0=r_0, fn=fn, gn=gn)
 
+    # transform into polar coordinates. Defined on page 2027
     x_d = (r_0 + u_r) * np.sin(th) + u_th * np.cos(th)
     z_d = (r_0 + u_r) * np.cos(th) - u_th * np.sin(th)
 
@@ -312,7 +745,7 @@ def def_sp(th, E_0, sig_c, nu, r_0, fn, gn):
     return A, d, x_d, z_d
 
 
-def R2(x, z, th=np.pi):
+def R2(x, z, th=np.pi/2):
     """returns x_rot, z_rot
 
     **rotates x, z coordinates by angle th**
