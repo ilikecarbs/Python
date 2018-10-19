@@ -17,7 +17,6 @@ Created on Mon Aug 13 08:59:09 2018
 """
 
 import os
-import utils
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
@@ -28,7 +27,8 @@ from scipy.special import sph_harm
 from scipy.optimize import curve_fit
 import matplotlib.image as mpimg
 
-import ARPES
+import ARPES_header as ARPES
+import ARPES_utils as utils
 
 
 # Set standard fonts

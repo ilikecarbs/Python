@@ -17,8 +17,6 @@ Created on Wed Jun 20 11:30:51 2018
 """
 
 import os
-import ARPES
-import utils
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -26,6 +24,9 @@ from numpy import linalg as la
 import matplotlib.cm as cm
 from scipy.stats import exponnorm
 from scipy.optimize import curve_fit
+
+import ARPES_header as ARPES
+import ARPES_utils as utils
 
 
 # Set standard fonts

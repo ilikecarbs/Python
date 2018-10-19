@@ -24,7 +24,7 @@ from scipy.optimize import curve_fit
 import matplotlib.cm as cm
 from scipy.ndimage import gaussian_filter
 
-import utils
+import ARPES_utils as utils
 
 
 # Set standard fonts

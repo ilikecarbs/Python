@@ -6,9 +6,9 @@ Created on Tue Jun 19 15:14:29 2018
 
 @author: ilikecarbs
 
-%%%%%%%%%%%%%%%%%%%%%
-        main
-%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+        ARPES_main
+%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 **Plotting figures for dissertation**
 
