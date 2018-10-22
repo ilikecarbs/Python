@@ -414,11 +414,11 @@ def P_n(x, n):
 def dP_n(x, n):
     """returns dP_n
 
-    **derivative of Legendre polynomial**
+    **derivative of Legendre polynomial of n-the degree**
 
     Args
     ----
-    :n:     n-th degree
+    :n:     degree
     :x:     cos(theta)
 
 
@@ -459,7 +459,7 @@ def GB(n, x):
 def area(x, y):
     """returns a
 
-    **Measure area a of shape with coordinates (x, y)**
+    **Measure area a of shape with coordinates (x, y) from Green's theorem**
 
     Args
     ----
@@ -918,7 +918,7 @@ def cost_deriv_sh(x_0, z_0, gamma, sig_c, nu, r_0, fn, gn, P):
 
 def optimize_sh(x_0, z_0, gamma_pre, sig_c, nu, r_0, fn, gn,
                 it_max, alpha, P):
-    """returns it, J, Eh
+    """returns it, J, P
 
     **Optimizes the shell model and returns the cost and parameters**
 
@@ -940,7 +940,7 @@ def optimize_sh(x_0, z_0, gamma_pre, sig_c, nu, r_0, fn, gn,
     ------
     :it:        iteratons
     :J:         cost
-    :Eh:        optimized stiffness
+    :P:         optimized parameters
     """
 
     J = np.array([])  # cost
@@ -1095,7 +1095,7 @@ def cost_deriv_sp(x_0, z_0, sig_c, nu, r_0, fn, gn, P):
 
 def optimize_sp(x_0, z_0, sig_c, nu, r_0, fn, gn,
                 it_max, alpha, P):
-    """returns it, J, Eh
+    """returns it, J, P
 
     **Optimizes the sphere model and returns the cost and parameters**
 
@@ -1116,7 +1116,7 @@ def optimize_sp(x_0, z_0, sig_c, nu, r_0, fn, gn,
     ------
     :it:        iteratons
     :J:         cost
-    :E_0:       optimized stiffness of the sphere
+    :P:         optimized parameters
     """
 
     J = np.array([])  # cost
