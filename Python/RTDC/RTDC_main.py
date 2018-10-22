@@ -27,16 +27,29 @@ import RTDC
 # %%
 
 """
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    Generate Coefficients
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+"""
+
+RTDC.Coefficients(res=100, N=40)
+
+# %%
+
+"""
 %%%%%%%%%%%%%%%%
     Figures
 %%%%%%%%%%%%%%%%
 """
 
-RTDC.Cell_Def(Q=1.2e-11, r_0=7.658e-6, save_data=True)
+RTDC.Cell_Def(Q=1.2e-11,
+              r_0=7.658e-6,
+              save_data=True)
 
 # %%
 
-RTDC.Stream_Func(Q=1.2e-11, r_0=9e-6)
+RTDC.Stream_Func(Q=1.2e-11,
+                 r_0=8e-6)
 
 # %%
 
@@ -70,7 +83,7 @@ x_0 = coord_sh[0, :] + 2e-6  # x-data in meters with some distortions in x-pos.
 z_0 = coord_sh[1, :] + 2e-6  # x-data in meters with some distortions in z-pos.
 
 RTDC.Fit_Shell(x_0, z_0,
-               Eh_ini=.1,
+               Eh_ini=1,
                Q=1.2e-11,
                gamma_pre=.1,
                it_max=500,
@@ -117,5 +130,6 @@ RTDC.Fit_Sphere(x_0, z_0,
     Area-vs-Deformation
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 """
-
-# RTDC.Coefficients(res=100, N=40)
+RTDC.Area_vs_Def(Q=1.2e-11,
+                 eh=3.4e-3,
+                 e_0=270)

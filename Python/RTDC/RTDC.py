@@ -279,11 +279,16 @@ def Stream_Func(Q=1.2e-11, r_0=9e-6, print_fig=True):
     x0 = 1*np.cos(th)
     z0 = 1*np.sin(th)
 
-    lambds = np.arange(0, 1, .01)
-    v_equils = np.zeros(len(lambds))
-    for i in range(len(lambds)):
-        A_n, B_n, C_n, D_n, v_equil = utils.Cpts(N, lambds[i])
-        v_equils[i] = v_equil
+    # load data
+    try:
+        os.chdir(data_dir)
+        lambds_v_equil = np.loadtxt('lambds_v_equil.dat')
+    except FileNotFoundError:
+        print('Set valid save directory (data_dir) in RTDC.py')
+
+    lambds = lambds_v_equil[0, :]
+    v_equils = lambds_v_equil[1, :]
+    v_val, v_idx = utils.find(v_equils, v_equil)
 
     """
     %%%%%%%%%%%%%%
@@ -310,7 +315,8 @@ def Stream_Func(Q=1.2e-11, r_0=9e-6, print_fig=True):
                   + str(round(1e6*r_0, 2)) + r'$\,\mu$m')
 
     ax2 = fig.add_axes([.57, .3, .4, .4])
-    ax2.plot(lambds, 1/v_equils)
+    ax2.plot(lambds, 1/v_equils, 'k-')
+    ax2.plot(lambds[v_idx], 1/v_equils[v_idx], 'ro')
     ax2.set_ylabel(r'$v_\mathrm{cell}/u$', fontdict=font)
     ax2.set_xlabel(r'$\lambda$', fontdict=font)
     ax2.set_ylim(.5, 1)
@@ -337,10 +343,13 @@ def Coefficients(res=100, N=40):
 
     Return
     ------
-    :Fn.dat:        fn's of size (N-1, res)
-    :Gn.dat:        gn's of size (N-1, res)
-    :V_equil.dat:   Equilibrium velocities of size (res)
+    :Fn.dat:            fn's of size (N-1, res)
+    :Gn.dat:            gn's of size (N-1, res)
+    :V_equil.dat:       Equilibrium velocities of size (res)
+    :lambs_v_equil.dat  data for lambda vs v_equil plot (2, 200)
     """
+
+    # coefficients for area-vs-def plots
 
     l_0 = 2e-5  # channel side length
     R_0 = 1.094 * l_0 / 2  # equivalent radius
@@ -365,7 +374,21 @@ def Coefficients(res=100, N=40):
         np.savetxt('V_equil.dat', V_equil)
         np.savetxt('r_var.dat', r_var)
     except FileNotFoundError:
-        print('Set valid save directory (save_dir) in RT_DC.py')
+        print('Set valid save directory (data_dir) in RTDC.py')
+
+    # coefficients for lamda vs velocity plot
+    lambds = np.arange(0, 1, .005)
+    lambds_v_equil = np.zeros((2, len(lambds)))
+    for i in range(len(lambds)):
+        A_n, B_n, C_n, D_n, v_equil = utils.Cpts(N, lambds[i])
+        lambds_v_equil[0, i] = lambds[i]
+        lambds_v_equil[1, i] = v_equil
+
+    try:
+        os.chdir(data_dir)
+        np.savetxt('lambds_v_equil.dat', lambds_v_equil)
+    except FileNotFoundError:
+        print('Set valid save directory (data_dir) in RTDC.py')
 
 
 def Fit_Shell(x_0, z_0, Eh_ini=.1, Q=1.2e-11, gamma_pre=.1, it_max=500,
@@ -590,6 +613,143 @@ def Fit_Sphere(x_0, z_0, E_0_ini=1e6, Q=1.2e-11, it_max=500, alpha=5e-3,
     ax2.set_ylim(0, np.max(J))
     ax2.set_xlabel('iterations', fontdict=font)
     ax2.set_ylabel('cost $J$', fontdict=font)
+
+    plt.show()
+
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
+
+
+def Area_vs_Def(Q=1.2e-11, eh=3.4e-3, e_0=270, print_fig=True):
+    """returns plot
+
+    **Area vs Deformation plot for elastic shell and sphere**
+
+    Args
+    ----
+    :Q:         flow rate
+    :eh:        unit of stiffness of shell
+    :e_0:       unit of stiffness of sphere
+    :print_fig: print figure (True / False)
+
+
+    Return
+    ------
+    Plot
+    """
+
+    figname = 'Area_vs_Def_Q0p0'+str(int(Q*1e12))
+
+    # Qs = 1e-11*np.linspace(4, 32, 100)  # range of flow
+
+    l_0 = 2e-5  # channel side length
+    K_2 = 2.096  # constant
+
+    u = K_2 * Q / l_0**2  # Poiseuille flow at inifinity (liquid velocity)
+
+    eh = 3.4e-3  # stiffness unit of shell
+    e_0 = 270  # stiffness unit of sphere
+
+    nu = .5  # compressibility (0.5 ~incompressible)
+    gamma = 0  # surface tension
+    eta = .015  # viscosity
+    th = np.linspace(0, 2*np.pi, 600)  # polar angle
+
+    # load data
+    try:
+        os.chdir(data_dir)
+        V_equil = np.loadtxt('V_equil.dat')
+        Fn = np.loadtxt('Fn.dat')
+        Gn = np.loadtxt('Gn.dat')
+        r_var = np.loadtxt('r_var.dat')
+    except FileNotFoundError:
+        print('Set valid save directory (data_dir) in RTDC.py')
+
+    """
+    %%%%%%%%%%%%%%%%%%%
+       Generate data
+    %%%%%%%%%%%%%%%%%%%
+    """
+
+    # multiplications of stiffness unit
+    K_sp = np.array([1, 2, 3, 4, 5, 6, 8, 10])
+    K_sh = np.array([1, 2, 3, 4, 5, 7, 9, 12])
+
+    # placeholders
+    A_sh = np.zeros((len(K_sh), len(r_var)))
+    Def_sh = np.zeros((len(K_sh), len(r_var)))
+    A_sp = np.zeros((len(K_sp), len(r_var)))
+    Def_sp = np.zeros((len(K_sp), len(r_var)))
+
+    for k in range(len(K_sp)):
+        for i in range(len(r_var)):
+            v_equil = V_equil[i]
+            fn = Fn[:, i]
+            gn = Gn[:, i]
+            v_0 = u / v_equil
+            sig_c = eta * v_0 / r_var[i]
+
+            k_sp = {'th': th, 'E_0': K_sp[k]*e_0, 'sig_c': sig_c,
+                    'nu': nu, 'r_0': r_var[i], 'fn': fn, 'gn': gn}
+
+            k_sh = {'th': th, 'gamma': gamma, 'Eh': K_sh[k]*eh,
+                    'sig_c': sig_c, 'nu': nu, 'r_0': r_var[i],
+                    'fn': fn, 'gn': gn}
+
+            # fill in data
+            A_sp[k, i], Def_sp[k, i], x_d, z_d = utils.def_sp(**k_sp)
+            A_sh[k, i], Def_sh[k, i], x_d, z_d = utils.def_sh(**k_sh)
+
+    """
+    %%%%%%%%%%%%%%
+       Plotting
+    %%%%%%%%%%%%%%
+    """
+
+    # colorscales
+    cols1 = plt.cm.magma_r(np.linspace(.1, 1, len(K_sp)))
+    cols2 = plt.cm.viridis_r(np.linspace(.1, 1, len(K_sh)))
+
+    fig = plt.figure(figname, figsize=(6, 6), clear=True)
+    ax1 = fig.add_subplot(121)
+    ax1.set_position([.12, .55, .6, .4])
+    ax1.tick_params(**kwargs_ticks)
+    ax1.plot(0, 1, 'wo', label=r'$Q=$'+str(Q*1e9)+r'$\,\mu$l/s')
+    ax1.plot(0, 1, 'wo', label=r'$E_0=$'+str(e_0)+r'$\,$Pa')
+    for k in range(len(K_sp)):
+        ax1.plot(A_sp[k]*1e12, Def_sp[k], '-', color=cols1[k], lw=2,
+                 label=str(K_sp[k])+r'$E_0$')
+
+    ax1.legend(bbox_to_anchor=(1.05, 1.0, 0, .0), loc=2, borderaxespad=0.,
+               fontsize=8)
+    ax1.set_yticks(np.arange(0, .05, .01))
+    ax1.set_xticks(np.arange(0, 250, 50))
+    ax1.set_xticklabels([])
+    ax1.set_xlim(0, 200)
+    ax1.set_ylim(0, .03)
+    ax1.set_ylabel(r'Deformation (sphere)', fontdict=font)
+    ax1.grid(True, alpha=.2)
+
+    ax2 = fig.add_subplot(122)
+    ax2.set_position([.12, .1, .6, .4])
+    ax2.tick_params(**kwargs_ticks)
+    ax2.plot(0, 1, 'wo', label=r'$Q=$'+str(Q*1e9)+r'$\,\mu$l/s')
+    ax2.plot(0, 1, 'wo', label=r'$(Eh)_0=$'+str(eh*1e3)+r'$\,$nN/$\mu$m')
+
+    for k in range(len(K_sh)):
+        ax2.plot(A_sh[k]*1e12, Def_sh[k], '-', color=cols2[k], lw=2,
+                 label=str(K_sh[k])+r'$(Eh)_0$')
+    ax2.legend(bbox_to_anchor=(1.05, 1.0, 0, .0), loc=2, borderaxespad=0.,
+               fontsize=8)
+    ax2.set_yticks(np.arange(0, .05, .01))
+    ax2.set_xticks(np.arange(0, 250, 50))
+    ax2.set_xlim(0, 200)
+    ax2.set_ylim(0, .04)
+    ax2.set_xlabel(r'Area ($\mu \mathrm{m}^2$)', fontdict=font)
+    ax2.set_ylabel(r'Deformation (shell)', fontdict=font)
+    ax2.grid(True, alpha=.2)
 
     plt.show()
 

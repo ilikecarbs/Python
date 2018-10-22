@@ -26,6 +26,28 @@ from joblib import Parallel, delayed
 import multiprocessing
 
 
+def find(array, val):
+    """returns array[_val], _val
+
+    **Searches entry in array closest to val.**
+
+    Args
+    ----
+    :array:     entry value in array
+    :_val:      index of entry
+
+    Return
+    ------
+    :array[_val]:   entry value in array
+    :_val:          index of entry
+    """
+
+    array = np.asarray(array)
+    _val = (np.abs(array - val)).argmin()
+
+    return array[_val], _val
+
+
 def I_1(n):
     """returns integral I_1
 
@@ -88,7 +110,7 @@ def I_3(n):
 
 
 def A_alpha(n, k, lambd, I1, I2):
-    """A
+    """returns A
 
     **From SM equation (S1) definitions, Exponent of I1 is corrected**
 
@@ -114,7 +136,7 @@ def A_alpha(n, k, lambd, I1, I2):
 
 
 def A_beta(n, k, lambd, I1):
-    """A
+    """returns A
 
     **From SM equation (S1) definitions, Exponent of I1 is corrected**
 
@@ -137,7 +159,7 @@ def A_beta(n, k, lambd, I1):
 
 
 def B_alpha(n, k, lambd, I2, I3):
-    """B
+    """returns B
 
     **From SM equation (S1) definitions.**
 
@@ -164,7 +186,7 @@ def B_alpha(n, k, lambd, I2, I3):
 
 
 def B_beta(n, k, lambd, I2):
-    """B
+    """returns B
 
     **From SM equation (S1) definitions, Exponent of I2 is corrected**
 
@@ -783,7 +805,7 @@ def R2(x, z, th=np.pi/2):
 def cost_sh(x_0, z_0, gamma, sig_c, nu, r_0, fn, gn, Eh, x_s, z_s):
     """returns J
 
-    **Calculates the cost of the model**
+    **Calculates the cost of the shell model**
 
     Args
     ----
@@ -824,7 +846,7 @@ def cost_sh(x_0, z_0, gamma, sig_c, nu, r_0, fn, gn, Eh, x_s, z_s):
 def d_cost_sh(x_0, z_0, gamma, sig_c, nu, r_0, fn, gn, P, d):
     """returns dJ
 
-    **Calculates the derivative of the cost of the model
+    **Calculates the derivative of the cost of the shell model
     of parameter P[d]**
 
     Args
@@ -863,7 +885,7 @@ def d_cost_sh(x_0, z_0, gamma, sig_c, nu, r_0, fn, gn, P, d):
 def cost_deriv_sh(x_0, z_0, gamma, sig_c, nu, r_0, fn, gn, P):
     """returns dJ
 
-    **Calculates the cost gradients of the model**
+    **Calculates the cost gradients of the shell model**
 
     Args
     ----
@@ -898,7 +920,7 @@ def optimize_sh(x_0, z_0, gamma_pre, sig_c, nu, r_0, fn, gn,
                 it_max, alpha, P):
     """returns it, J, Eh
 
-    **Optimizes the model and returns the cost and parameters**
+    **Optimizes the shell model and returns the cost and parameters**
 
     Args
     ----
@@ -961,7 +983,7 @@ def optimize_sh(x_0, z_0, gamma_pre, sig_c, nu, r_0, fn, gn,
 def cost_sp(x_0, z_0, sig_c, nu, r_0, fn, gn, E_0, x_s, z_s):
     """returns J
 
-    **Calculates the cost of the model**
+    **Calculates the cost of the sphere model**
 
     Args
     ----
@@ -1002,7 +1024,7 @@ def cost_sp(x_0, z_0, sig_c, nu, r_0, fn, gn, E_0, x_s, z_s):
 def d_cost_sp(x_0, z_0, sig_c, nu, r_0, fn, gn, P, d):
     """returns dJ
 
-    **Calculates the derivative of the cost of the model
+    **Calculates the derivative of the cost of the sphere model
     of parameter P[d]**
 
     Args
@@ -1041,7 +1063,7 @@ def d_cost_sp(x_0, z_0, sig_c, nu, r_0, fn, gn, P, d):
 def cost_deriv_sp(x_0, z_0, sig_c, nu, r_0, fn, gn, P):
     """returns dJ
 
-    **Calculates the cost gradients of the model**
+    **Calculates the cost gradients of the sphere model**
 
     Args
     ----
@@ -1075,7 +1097,7 @@ def optimize_sp(x_0, z_0, sig_c, nu, r_0, fn, gn,
                 it_max, alpha, P):
     """returns it, J, Eh
 
-    **Optimizes the model and returns the cost and parameters**
+    **Optimizes the sphere model and returns the cost and parameters**
 
     Args
     ----
