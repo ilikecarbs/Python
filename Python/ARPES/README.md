@@ -12,4 +12,6 @@ ANGLE RESOLVED PHOTOEMISSION SPECTROSCOPY TOOLS
 
 - PhD_chapter_CSRO.py: Figures of Ca1.8Sr0.2RuO4 chapter
 
+- PhD_chapter_Concepts.py: Conceptual figures
+
 - Experiments:    Scripts for plotting figures of experiment
