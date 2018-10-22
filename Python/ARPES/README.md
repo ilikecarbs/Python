@@ -4,9 +4,9 @@ ANGLE RESOLVED PHOTOEMISSION SPECTROSCOPY TOOLS
 
 - ARPES_methods.py: Superclass with all methods for ARPES.py
 
-- main.py:        Main file for plotting figures
+- ARPES_main.py:        Main file for plotting figures
 
-- utils.py:       Helper functions for data transformations
+- ARPES_utils.py:       Helper functions for data transformations
 
 - PhD_chapter_CRO.py: Figures of Ca2RuO4 chapter
 
