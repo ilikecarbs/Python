@@ -23,8 +23,8 @@ import os
 
 
 # Directory paths
-save_dir = '/Users/denyssutter/Documents/Denys/Zivi/Figs/'
-data_dir = '/Users/denyssutter/Documents/Denys/Zivi/data/'
+save_dir = '/Users/denyssutter/Documents/Denys/Zivi_Denys_Sutter/RTDC_Figs/'
+data_dir = '/Users/denyssutter/Documents/Denys/Zivi_Denys_Sutter/RTDC_Data/'
 
 # Set standard fonts
 plt.rcParams['mathtext.fontset'] = 'cm'
