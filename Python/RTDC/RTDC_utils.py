@@ -26,6 +26,28 @@ from joblib import Parallel, delayed
 import multiprocessing
 
 
+def find(array, val):
+    """returns array[_val], _val
+
+    **Searches entry in array closest to val.**
+
+    Args
+    ----
+    :array:     entry value in array
+    :_val:      index of entry
+
+    Return
+    ------
+    :array[_val]:   entry value in array
+    :_val:          index of entry
+    """
+
+    array = np.asarray(array)
+    _val = (np.abs(array - val)).argmin()
+
+    return array[_val], _val
+
+
 def I_1(n):
     """returns integral I_1
 
@@ -88,7 +110,7 @@ def I_3(n):
 
 
 def A_alpha(n, k, lambd, I1, I2):
-    """A
+    """returns A
 
     **From SM equation (S1) definitions, Exponent of I1 is corrected**
 
@@ -114,7 +136,7 @@ def A_alpha(n, k, lambd, I1, I2):
 
 
 def A_beta(n, k, lambd, I1):
-    """A
+    """returns A
 
     **From SM equation (S1) definitions, Exponent of I1 is corrected**
 
@@ -137,7 +159,7 @@ def A_beta(n, k, lambd, I1):
 
 
 def B_alpha(n, k, lambd, I2, I3):
-    """B
+    """returns B
 
     **From SM equation (S1) definitions.**
 
@@ -164,7 +186,7 @@ def B_alpha(n, k, lambd, I2, I3):
 
 
 def B_beta(n, k, lambd, I2):
-    """B
+    """returns B
 
     **From SM equation (S1) definitions, Exponent of I2 is corrected**
 
@@ -392,11 +414,11 @@ def P_n(x, n):
 def dP_n(x, n):
     """returns dP_n
 
-    **derivative of Legendre polynomial**
+    **derivative of Legendre polynomial of n-the degree**
 
     Args
     ----
-    :n:     n-th degree
+    :n:     degree
     :x:     cos(theta)
 
 
@@ -437,7 +459,7 @@ def GB(n, x):
 def area(x, y):
     """returns a
 
-    **Measure area a of shape with coordinates (x, y)**
+    **Measure area a of shape with coordinates (x, y) from Green's theorem**
 
     Args
     ----
@@ -783,7 +805,7 @@ def R2(x, z, th=np.pi/2):
 def cost_sh(x_0, z_0, gamma, sig_c, nu, r_0, fn, gn, Eh, x_s, z_s):
     """returns J
 
-    **Calculates the cost of the model**
+    **Calculates the cost of the shell model**
 
     Args
     ----
@@ -797,7 +819,7 @@ def cost_sh(x_0, z_0, gamma, sig_c, nu, r_0, fn, gn, Eh, x_s, z_s):
     :gn:        gn-coefficients
     :Eh:        stiffness of shell
     :x_s:       center of mass x-coordinate
-    :z_s:       center of maxx z-coordinate
+    :z_s:       center of mass z-coordinate
 
     Return
     ------
@@ -821,10 +843,62 @@ def cost_sh(x_0, z_0, gamma, sig_c, nu, r_0, fn, gn, Eh, x_s, z_s):
     return J
 
 
+def cost_test(x_0, z_0, gamma, sig_c, nu, r_0, fn, gn, Eh, x_s, z_s):
+    """returns J
+
+    **Test: Calculates the cost of the shell model with different costs**
+
+    Args
+    ----
+    :x_0:       x-coordinates from data
+    :z_0:       z-coordinates from data
+    :gamma:     tension of shell
+    :sig_c:     characteristic stress
+    :nu:        Poisson ratio
+    :r_0:       estimated radius undeformed cell
+    :fn:        fn-coefficients
+    :gn:        gn-coefficients
+    :Eh:        stiffness of shell
+    :x_s:       center of mass x-coordinate
+    :z_s:       center of mass z-coordinate
+
+    Return
+    ------
+    :J:         cost
+    """
+
+    r_exp = np.sqrt((x_0-x_s)**2 + (z_0-z_s)**2)
+    th_exp = np.zeros(len(r_exp))
+
+    half_idx = int(len(r_exp)/2)
+    th_exp[:half_idx] = np.arccos((z_0[:half_idx]-z_s) / r_exp[:half_idx])
+    th_exp[half_idx:] = 2*np.pi - np.arccos((z_0[half_idx:]-z_s) /
+                                            r_exp[half_idx:])
+
+    A_0 = area(x_0, z_0)
+    P = 0
+    for i in range(len(x_0)-1):
+        P += np.sqrt((x_0[i+1]-x_0[i])**2 + (z_0[i+1]-z_0[i])**2)
+    c_0 = 2 * np.sqrt(np.pi * A_0) / P
+    d_0 = 1-c_0
+
+    A_sh, d_sh, x_sh, z_sh = def_sh(th_exp, gamma, Eh, sig_c, nu, r_0, fn, gn)
+
+    r_sh = np.sqrt(x_sh**2 + z_sh**2)
+
+    J_r = np.sum(np.abs(r_exp - r_sh)) / len(x_0) * 1e6
+    J_A = np.sqrt(np.sum(np.abs(A_0 - A_sh)) * 1e12)
+    J_d = np.sum(np.abs(d_0 - d_sh)) * 1e6
+
+    J = J_r + J_A + J_d
+
+    return J
+
+
 def d_cost_sh(x_0, z_0, gamma, sig_c, nu, r_0, fn, gn, P, d):
     """returns dJ
 
-    **Calculates the derivative of the cost of the model
+    **Calculates the derivative of the cost of the shell model
     of parameter P[d]**
 
     Args
@@ -863,7 +937,7 @@ def d_cost_sh(x_0, z_0, gamma, sig_c, nu, r_0, fn, gn, P, d):
 def cost_deriv_sh(x_0, z_0, gamma, sig_c, nu, r_0, fn, gn, P):
     """returns dJ
 
-    **Calculates the cost gradients of the model**
+    **Calculates the cost gradients of the shell model**
 
     Args
     ----
@@ -896,9 +970,9 @@ def cost_deriv_sh(x_0, z_0, gamma, sig_c, nu, r_0, fn, gn, P):
 
 def optimize_sh(x_0, z_0, gamma_pre, sig_c, nu, r_0, fn, gn,
                 it_max, alpha, P):
-    """returns it, J, Eh
+    """returns it, J, P
 
-    **Optimizes the model and returns the cost and parameters**
+    **Optimizes the shell model and returns the cost and parameters**
 
     Args
     ----
@@ -918,7 +992,7 @@ def optimize_sh(x_0, z_0, gamma_pre, sig_c, nu, r_0, fn, gn,
     ------
     :it:        iteratons
     :J:         cost
-    :Eh:        optimized stiffness
+    :P:         optimized parameters
     """
 
     J = np.array([])  # cost
@@ -961,7 +1035,7 @@ def optimize_sh(x_0, z_0, gamma_pre, sig_c, nu, r_0, fn, gn,
 def cost_sp(x_0, z_0, sig_c, nu, r_0, fn, gn, E_0, x_s, z_s):
     """returns J
 
-    **Calculates the cost of the model**
+    **Calculates the cost of the sphere model**
 
     Args
     ----
@@ -975,7 +1049,7 @@ def cost_sp(x_0, z_0, sig_c, nu, r_0, fn, gn, E_0, x_s, z_s):
     :gn:        gn-coefficients
     :E_0:       stiffness of sphere
     :x_s:       center of mass x-coordinate
-    :z_s:       center of maxx z-coordinate
+    :z_s:       center of mass z-coordinate
 
     Return
     ------
@@ -1002,7 +1076,7 @@ def cost_sp(x_0, z_0, sig_c, nu, r_0, fn, gn, E_0, x_s, z_s):
 def d_cost_sp(x_0, z_0, sig_c, nu, r_0, fn, gn, P, d):
     """returns dJ
 
-    **Calculates the derivative of the cost of the model
+    **Calculates the derivative of the cost of the sphere model
     of parameter P[d]**
 
     Args
@@ -1041,7 +1115,7 @@ def d_cost_sp(x_0, z_0, sig_c, nu, r_0, fn, gn, P, d):
 def cost_deriv_sp(x_0, z_0, sig_c, nu, r_0, fn, gn, P):
     """returns dJ
 
-    **Calculates the cost gradients of the model**
+    **Calculates the cost gradients of the sphere model**
 
     Args
     ----
@@ -1073,9 +1147,9 @@ def cost_deriv_sp(x_0, z_0, sig_c, nu, r_0, fn, gn, P):
 
 def optimize_sp(x_0, z_0, sig_c, nu, r_0, fn, gn,
                 it_max, alpha, P):
-    """returns it, J, Eh
+    """returns it, J, P
 
-    **Optimizes the model and returns the cost and parameters**
+    **Optimizes the sphere model and returns the cost and parameters**
 
     Args
     ----
@@ -1094,7 +1168,7 @@ def optimize_sp(x_0, z_0, sig_c, nu, r_0, fn, gn,
     ------
     :it:        iteratons
     :J:         cost
-    :E_0:       optimized stiffness of the sphere
+    :P:         optimized parameters
     """
 
     J = np.array([])  # cost
