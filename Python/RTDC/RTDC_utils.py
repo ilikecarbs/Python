@@ -819,7 +819,7 @@ def cost_sh(x_0, z_0, gamma, sig_c, nu, r_0, fn, gn, Eh, x_s, z_s):
     :gn:        gn-coefficients
     :Eh:        stiffness of shell
     :x_s:       center of mass x-coordinate
-    :z_s:       center of maxx z-coordinate
+    :z_s:       center of mass z-coordinate
 
     Return
     ------
@@ -839,6 +839,58 @@ def cost_sh(x_0, z_0, gamma, sig_c, nu, r_0, fn, gn, Eh, x_s, z_s):
     r_sh = np.sqrt(x_sh**2 + z_sh**2)
 
     J = np.sum(np.abs(r_exp - r_sh)) / len(x_0) * 1e6
+
+    return J
+
+
+def cost_test(x_0, z_0, gamma, sig_c, nu, r_0, fn, gn, Eh, x_s, z_s):
+    """returns J
+
+    **Test: Calculates the cost of the shell model with different costs**
+
+    Args
+    ----
+    :x_0:       x-coordinates from data
+    :z_0:       z-coordinates from data
+    :gamma:     tension of shell
+    :sig_c:     characteristic stress
+    :nu:        Poisson ratio
+    :r_0:       estimated radius undeformed cell
+    :fn:        fn-coefficients
+    :gn:        gn-coefficients
+    :Eh:        stiffness of shell
+    :x_s:       center of mass x-coordinate
+    :z_s:       center of mass z-coordinate
+
+    Return
+    ------
+    :J:         cost
+    """
+
+    r_exp = np.sqrt((x_0-x_s)**2 + (z_0-z_s)**2)
+    th_exp = np.zeros(len(r_exp))
+
+    half_idx = int(len(r_exp)/2)
+    th_exp[:half_idx] = np.arccos((z_0[:half_idx]-z_s) / r_exp[:half_idx])
+    th_exp[half_idx:] = 2*np.pi - np.arccos((z_0[half_idx:]-z_s) /
+                                            r_exp[half_idx:])
+
+    A_0 = area(x_0, z_0)
+    P = 0
+    for i in range(len(x_0)-1):
+        P += np.sqrt((x_0[i+1]-x_0[i])**2 + (z_0[i+1]-z_0[i])**2)
+    c_0 = 2 * np.sqrt(np.pi * A_0) / P
+    d_0 = 1-c_0
+
+    A_sh, d_sh, x_sh, z_sh = def_sh(th_exp, gamma, Eh, sig_c, nu, r_0, fn, gn)
+
+    r_sh = np.sqrt(x_sh**2 + z_sh**2)
+
+    J_r = np.sum(np.abs(r_exp - r_sh)) / len(x_0) * 1e6
+    J_A = np.sqrt(np.sum(np.abs(A_0 - A_sh)) * 1e12)
+    J_d = np.sum(np.abs(d_0 - d_sh)) * 1e6
+
+    J = J_r + J_A + J_d
 
     return J
 
@@ -997,7 +1049,7 @@ def cost_sp(x_0, z_0, sig_c, nu, r_0, fn, gn, E_0, x_s, z_s):
     :gn:        gn-coefficients
     :E_0:       stiffness of sphere
     :x_s:       center of mass x-coordinate
-    :z_s:       center of maxx z-coordinate
+    :z_s:       center of mass z-coordinate
 
     Return
     ------

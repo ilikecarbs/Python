@@ -17,6 +17,8 @@ Created on Fri Oct 12 15:37:10 2018
               is given as follows: Measure area A and extract radius r_0 from
               a circle with area A. Perhaps finding a way to fit r_0 would
               be an improvement.
+            - Try implement other fit parameters i.e. as area or deformation.
+
 """
 
 import os
@@ -74,7 +76,8 @@ x_0: Perpendicular to flow axis.
 """
 
 # Directory path
-data_dir = '/Users/denyssutter/Documents/Denys/Zivi/data/'
+data_dir = ('/Users/denyssutter/Documents/' +
+            'Denys/Zivi_Denys_Sutter/RTDC/RTDC_Data')
 
 os.chdir(data_dir)
 coord_sh = np.loadtxt('coord_sh.dat')
@@ -110,6 +113,10 @@ x_0: Perpendicular to flow axis.
     x_0, z_0 = utils.R2(x_old, z_old, th=np.pi/2)
 
 """
+
+# Directory path
+data_dir = ('/Users/denyssutter/Documents/' +
+            'Denys/Zivi_Denys_Sutter/RTDC/RTDC_Data')
 
 os.chdir(data_dir)
 coord_sp = np.loadtxt('coord_sp.dat')
