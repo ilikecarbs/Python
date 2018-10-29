@@ -346,7 +346,7 @@ def f_n(N, lambd):
 
     Return
     ------
-    :fn:        gn coefficients
+    :fn:        fn coefficients
     """
 
     A_n, B_n, C_n, D_n, v_equil = Cpts(N=N, lambd=lambd)
@@ -767,7 +767,7 @@ def def_sp(th, E_0, sig_c, nu, r_0, fn, gn):
     return A, d, x_d, z_d
 
 
-def R2(x, z, th=np.pi/2):
+def R_y(x, z, th=np.pi/2):
     """returns x_rot, z_rot
 
     **rotates x, z coordinates by angle th**
@@ -823,7 +823,7 @@ def cost_sh(x_0, z_0, gamma, sig_c, nu, r_0, fn, gn, Eh, x_s, z_s):
 
     Return
     ------
-    :J:         cost
+    :J:         cost / fitness norm
     """
 
     r_exp = np.sqrt((x_0-x_s)**2 + (z_0-z_s)**2)
@@ -838,7 +838,7 @@ def cost_sh(x_0, z_0, gamma, sig_c, nu, r_0, fn, gn, Eh, x_s, z_s):
 
     r_sh = np.sqrt(x_sh**2 + z_sh**2)
 
-    J = np.sum(np.abs(r_exp - r_sh)) / len(x_0) * 1e6
+    J = np.sum(np.abs(r_exp - r_sh)) / len(x_0) / r_0
 
     return J
 
@@ -1053,7 +1053,7 @@ def cost_sp(x_0, z_0, sig_c, nu, r_0, fn, gn, E_0, x_s, z_s):
 
     Return
     ------
-    :J:         cost
+    :J:         cost, fitness norm
     """
 
     r_exp = np.sqrt((x_0-x_s)**2 + (z_0-z_s)**2)
@@ -1068,7 +1068,7 @@ def cost_sp(x_0, z_0, sig_c, nu, r_0, fn, gn, E_0, x_s, z_s):
 
     r_sp = np.sqrt(x_sp**2 + z_sp**2)
 
-    J = np.sum(np.abs(r_exp - r_sp)) / len(x_0) * 1e6
+    J = np.sum(np.abs(r_exp - r_sp)) / len(x_0) / r_0
 
     return J
 
