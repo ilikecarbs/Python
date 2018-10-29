@@ -496,11 +496,11 @@ def Fit_Shell(x_0, z_0, Eh_ini=.1, Q=1.2e-11, gamma_pre=.1, it_max=500,
              r'$d_\mathrm{fit}=$'+str(np.round(d_sh, 3)),
              fontdict=font)
     ax2 = fig.add_axes([.58, .3, .4, .4])
-    ax2.plot(it, J, 'k-')
+    ax2.plot(it, J*100, 'k-')
     ax2.set_xlim(0, it_max)
-    ax2.set_ylim(0, np.max(J))
+    ax2.set_ylim(0, np.max(J)*100)
     ax2.set_xlabel('iterations', fontdict=font)
-    ax2.set_ylabel(r'$\xi\, (\mu$m)', fontdict=font)
+    ax2.set_ylabel(r'$\xi\, (\%)$', fontdict=font)
 
     plt.show()
 
@@ -610,11 +610,11 @@ def Fit_Sphere(x_0, z_0, E_0_ini=1e6, Q=1.2e-11, it_max=500, alpha=5e-3,
              r'$d_\mathrm{fit}=$'+str(np.round(d_sp, 3)),
              fontdict=font)
     ax2 = fig.add_axes([.58, .3, .4, .4])
-    ax2.plot(it, J, 'k-')
+    ax2.plot(it, J*100, 'k-')
     ax2.set_xlim(0, it_max)
-    ax2.set_ylim(0, np.max(J))
+    ax2.set_ylim(0, np.max(J)*100)
     ax2.set_xlabel('iterations', fontdict=font)
-    ax2.set_ylabel(r'$\xi\, (\mu$m)', fontdict=font)
+    ax2.set_ylabel(r'$\xi\, (\%)$', fontdict=font)
 
     plt.show()
 
