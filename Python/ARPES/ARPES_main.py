@@ -41,6 +41,9 @@ CON.fig13:  Sr2RuO4 model
 CON.fig14:  Fermi liquid scattering scheme
 CON.fig15:  Fermi liquid momentum distribution
 CON.fig16:  Filling control Mott
+CON.fig17:  Bi-layer model
+CON.fig18:  Tri-layer model
+CON.fig19:  Infinity-layer model
 
 ----------  Ca2RuO4 Figures   ----------
 CRO.fig1:   DFT plot: figure 3 of Nature Comm.
@@ -95,17 +98,11 @@ CSRO.fig28: Fermi surface counting SRO
 CSRO.fig29: Fermi surface folded CSRO
 CSRO.fig30: xFig1 2nd version
 CSRO.fig31: xFig3 self energy
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    Which figure do you desire?
-            enter below:
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 """
 
 # %%
 
-CON.fig16()
+CON.fig19()
 
 # %%
 
@@ -113,6 +110,6 @@ CRO.fig19(print_fig=True)
 
 # %%
 # CSRO.fig20(load=False)
-CSRO.fig22(print_fig=True)
+CSRO.fig3(print_fig=True)
 
 # %%

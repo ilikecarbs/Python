@@ -23,7 +23,9 @@ import CRYO
 """
 ----------  CRYO Figures   ----------
 
-FirstCool       Figure for grant (first cooling)
+FirstCool_v1    version 1: Figure for grant (first cooling)
+FirstCool_v2    version 2: Figure for grant (first cooling)
+Stabilization   Temperature stabilization
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     Which figure do you desire?
@@ -34,4 +36,6 @@ FirstCool       Figure for grant (first cooling)
 
 # %%
 
-CRYO.FirstCool()
+#CRYO.FirstCool_v1()
+#CRYO.FirstCool_v2()
+#CRYO.Stabilization()

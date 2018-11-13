@@ -71,7 +71,7 @@ x_0: Perpendicular to flow axis.
 -   Rotate input data such that flow axis is vertical. Use for example:
 
     import RTDC_utils as utils
-    x_0, z_0 = utils.R2(x_old, z_old, th=np.pi/2)
+    x_0, z_0 = utils.R_y(x_old, z_old, th=np.pi/2)
 
 """
 
@@ -110,7 +110,7 @@ x_0: Perpendicular to flow axis.
 -   Rotate input data such that flow axis is vertical. Use for example:
 
     import RTDC_utils as utils
-    x_0, z_0 = utils.R2(x_old, z_old, th=np.pi/2)
+    x_0, z_0 = utils.R_y(x_old, z_old, th=np.pi/2)
 
 """
 

@@ -180,7 +180,9 @@ def fig1(print_fig=True):
 
         # plot data
         ax.contourf(A1.en_norm, A1.kys, A1.int_norm, 300, **kwargs_ex,
-                    vmin=.1*np.max(A1.int_norm), vmax=.7*np.max(A1.int_norm))
+                    vmin=.1*np.max(A1.int_norm), vmax=.7*np.max(A1.int_norm),
+                    zorder=.1)
+        ax.set_rasterization_zorder(.2)
         ax.plot([0, 0], [np.min(A1.kys), np.max(A1.kys)], **kwargs_ef)
         ax.plot([-.005, -.005], [np.min(A1.kys), np.max(A1.kys)],
                 **kwargs_cut)
@@ -234,7 +236,8 @@ def fig1(print_fig=True):
                          np.transpose(np.fliplr(A2.int_norm)), 300,
                          **kwargs_ex,
                          vmin=.1*np.max(A2.int_norm),
-                         vmax=.7*np.max(A2.int_norm))
+                         vmax=.7*np.max(A2.int_norm), zorder=.1)
+        ax.set_rasterization_zorder(.2)
         ax.plot([0, 0], [np.min(A2.kys), np.max(A2.kys)], **kwargs_ef)
         for i in range(6):
             TB_A2[i][TB_A2[i] > 0] = 10
@@ -269,7 +272,9 @@ def fig1(print_fig=True):
 
         # plot data
         ax.contourf(D.kx, D.ky, np.flipud(D.map), 300, **kwargs_ex,
-                    vmax=.9 * np.max(D.map), vmin=.3 * np.max(D.map))
+                    vmax=.9 * np.max(D.map), vmin=.3 * np.max(D.map),
+                    zorder=.1)
+        ax.set_rasterization_zorder(.2)
 
         # decorate axes
         ax.set_xlabel(r'$k_y \,(\pi/b)$', fontdict=font)
@@ -360,7 +365,8 @@ def fig1(print_fig=True):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
 
 
 def fig2(print_fig=True):
@@ -514,7 +520,9 @@ def fig2(print_fig=True):
 
         # plot data
         c0 = ax.contourf(D.kx, D.ky, D.map, 100, **kwargs_ex,
-                         vmin=.6*np.max(D.map), vmax=1.0*np.max(D.map))
+                         vmin=.6*np.max(D.map), vmax=1.0*np.max(D.map),
+                         zorder=.1)
+        ax.set_rasterization_zorder(.2)
         ax.plot([-bnd, bnd], [-bnd, bnd], **kwargs_cut)
         ax.plot([0, 0], [-bnd, bnd], **kwargs_cut)
 
@@ -583,7 +591,8 @@ def fig2(print_fig=True):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
 
 
 def fig3(print_fig=True):
@@ -696,7 +705,9 @@ def fig3(print_fig=True):
             # plot data
             if j == 0:
                 ax.contourf(ks[j], en[j], data[j], 300, **kwargs_ex,
-                            vmin=.05*np.max(data[j]), vmax=.35*np.max(data[j]))
+                            vmin=.05*np.max(data[j]), vmax=.35*np.max(data[j]),
+                            zorder=.1)
+                ax.set_rasterization_zorder(.2)
 #                for bands in range(6):
 #                    TB_D[bands][TB_D[bands] > 0] = 10
 #                    ax.plot(k[j], TB_D[bands], 'wo', ms=.5, alpha=.2)
@@ -710,7 +721,8 @@ def fig3(print_fig=True):
             else:
                 c0 = ax.contourf(ks[j], en[j], data[j], 300, **kwargs_ex,
                                  vmin=.3*np.max(data[1]),
-                                 vmax=.6*np.max(data[1]))
+                                 vmax=.6*np.max(data[1]), zorder=.1)
+                ax.set_rasterization_zorder(.2)
                 mdc = (mdc - b_mdc) / .007
 
                 # decorate axes
@@ -760,7 +772,8 @@ def fig3(print_fig=True):
             ax.set_position([.08+j*.21, .29, .2, .2])
             ax.tick_params(**kwargs_ticks)
             c0 = ax.contourf(spec_k, spec_en, spec_full, 300, **kwargs_th,
-                             vmin=.5, vmax=6)
+                             vmin=.5, vmax=6, zorder=.1)
+            ax.set_rasterization_zorder(.2)
 
             n_0 = .3
             n_w = .2
@@ -906,19 +919,21 @@ def fig3(print_fig=True):
         ax_d.plot_surface(dxz_r[0]*.0, dxz_r[1]*3,
                           dxz_r[2]*3, alpha=.1,
                           facecolors=colormap.to_rgba(dxz.real),
-                          rstride=2, cstride=2)
+                          rstride=2, cstride=2, zorder=.1)
 
         ax_h.plot_surface(dxy_r[0]*3, dxy_r[1]*3,
                           dxy_r[2]*.0, alpha=.1,
                           facecolors=colormap.to_rgba(dxy.real),
-                          rstride=2, cstride=2)
+                          rstride=2, cstride=2, zorder=.1)
 
         X = np.zeros((2, 2))
         z = [0, 3.5]
         y = [-3, 3]
         Y, Z = np.meshgrid(y, z)
-        ax_d.plot_surface(X, Y, Z, alpha=.2, color='C8')
-        ax_h.plot_surface(X, Y, Z, alpha=.2, color='C8')
+        ax_d.plot_surface(X, Y, Z, alpha=.2, color='C8', zorder=.1)
+        ax_h.plot_surface(X, Y, Z, alpha=.2, color='C8', zorder=.1)
+        ax_d.set_rasterization_zorder(.2)
+        ax_h.set_rasterization_zorder(.2)
 
         # angdg = np.linspace(-15, 15, 100)
         # tidg = 0
@@ -936,24 +951,26 @@ def fig3(print_fig=True):
 
         for ax in [ax_d, ax_h]:
             # draw cylinder
-            ax.plot_surface(X_cyl, Y_cyl, Z_cyl, **kwargs_cyl)
-            ax.plot_surface(X_cyl, -Y_cyl, Z_cyl, **kwargs_cyl)
-            ax.plot_surface(X_cir, Y_cir, Z_floor, **kwargs_cyl)
-            ax.plot_surface(X_cir, Y_cir, Z_ceil, **kwargs_cyl)
-            ax.plot(x_cir, y_cir, 'k-', alpha=.1, lw=.5)
-            ax.plot(x_cir, y_cir, -1, 'k--', alpha=.1, lw=.5)
+            ax.plot_surface(X_cyl, Y_cyl, Z_cyl, **kwargs_cyl, zorder=.1)
+            ax.plot_surface(X_cyl, -Y_cyl, Z_cyl, **kwargs_cyl, zorder=.1)
+            ax.plot_surface(X_cir, Y_cir, Z_floor, **kwargs_cyl, zorder=.1)
+            ax.plot_surface(X_cir, Y_cir, Z_ceil, **kwargs_cyl, zorder=.1)
+            ax.plot(x_cir, y_cir, 'k-', alpha=.1, lw=.5, zorder=.1)
+            ax.plot(x_cir, y_cir, -1, 'k--', alpha=.1, lw=.5, zorder=.1)
+            ax.set_rasterization_zorder(.2)
             ax.axis('off')
             ax.view_init(elev=20, azim=50)
 
             ax.quiver(0, 0, 0, kx_i-.1, ky_i-.1, kz_i-.1,
                       arrow_length_ratio=.08,
-                      lw=1, color='r')
+                      lw=1, color='r', zorder=.1)
             ax.quiver(x_hv[-1], y_hv[-1], z_hv[-1], .1, .3, -.2,
-                      arrow_length_ratio=.6, color='c')
-            ax.plot([0, 0], [0, 0], [0, 0], 'o', mec='k', mfc='w', ms=3)
+                      arrow_length_ratio=.6, color='c', zorder=.1)
+            ax.plot([0, 0], [0, 0], [0, 0], 'o', mec='k', mfc='w', ms=3,
+                    zorder=.1)
             ax.plot([kx_i, kx_i], [ky_i, ky_i], [kz_i, kz_i],
-                    'o', mec='k', mfc='k', ms=3)
-            ax.plot(x_hv, y_hv, z_hv, 'c', lw=1)
+                    'o', mec='k', mfc='k', ms=3, zorder=.1)
+            ax.plot(x_hv, y_hv, z_hv, 'c', lw=1, zorder=.1)
             ax.set_xlim([-2, 2])
             ax.set_ylim([-2, 2])
             ax.set_zlim([-1, 4])
@@ -965,9 +982,9 @@ def fig3(print_fig=True):
             ax.text(2.8, 2.2, -0.33, 'SAMPLE', fontdict=font_small)
             ax.text(0, 0, 2.2, 'Mirror plane', fontdict=font_small)
         ax_d.quiver(0, -1.5, 1.5, 0, 1, 1, arrow_length_ratio=.2,
-                    color='b', lw=1)
+                    color='b', lw=1, zorder=.1)
         ax_h.quiver(0, -1.5, 1.5, 1, 0, 0, arrow_length_ratio=.2,
-                    color='b', lw=1)
+                    color='b', lw=1, zorder=.1)
         ax_d.text(.8, 0, 2.1, r'$\bar{\pi}$', fontdict=font_small)
         ax_h.text(1.9, 0, 1.8, r'$\bar{\sigma}$', fontdict=font_small)
         ax_d.text(0, -6, 3.5, r'(d) $d_{xz}$')
@@ -983,7 +1000,8 @@ def fig3(print_fig=True):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+        plt.savefig(save_dir + figname + '.png', dpi=400,
+                    bbox_inches="tight", rasterized=False)
 
 
 def fig4(print_fig=True):
@@ -1157,7 +1175,8 @@ def fig4(print_fig=True):
             # Plot data
             c0 = ax.contourf(k[j], en[j], spec[j], 300, **kwargs_ex,
                              vmin=.01*np.max(spec[0]),
-                             vmax=.28*np.max(spec[0]))
+                             vmax=.28*np.max(spec[0]), zorder=.1)
+            ax.set_rasterization_zorder(.2)
             ax.plot([np.min(k[j]), np.max(k[j])], [0, 0], **kwargs_ef)
 
             if j == 0:
@@ -1438,7 +1457,8 @@ def fig4(print_fig=True):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
 
     dims = np.array([len(en), en[0].shape[0], en[0].shape[1]])
     os.chdir(data_dir)
@@ -1658,7 +1678,8 @@ def fig5(print_fig=False, load=True):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
 
     return Z
 
@@ -1762,7 +1783,9 @@ def fig6(print_fig=True, load=True):
 
         # plot spectra
         c0 = ax.contourf(k[j], en[j], spec[j], 300, **kwargs_ex,
-                         vmin=.0 * np.max(spec[0]), vmax=1 * np.max(spec[0]))
+                         vmin=.0 * np.max(spec[0]), vmax=1 * np.max(spec[0]),
+                         zorder=.1)
+        ax.set_rasterization_zorder(.2)
         ax.plot([-1, 0], [en[j][0, mdc_seq[2]], en[j][0, mdc_seq[2]]],
                 **kwargs_cut)
         ax.plot([-1, 0], [en[j][0, mdc_seq[50]], en[j][0, mdc_seq[50]]],
@@ -2012,7 +2035,8 @@ def fig6(print_fig=True, load=True):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
 
     dims = np.array([len(Re), Re[0].shape[0]])
     os.chdir(data_dir)
@@ -2076,7 +2100,8 @@ def fig7(print_fig=True):
 
         # plot data
         c0 = ax.contourf(D.kxs, D.en_norm - .008, D.int_norm, 300,
-                         **kwargs_ex, vmin=.0, vmax=.03)
+                         **kwargs_ex, vmin=.0, vmax=.03, zorder=.1)
+        ax.set_rasterization_zorder(.2)
         ax.plot([np.min(D.kxs), np.max(D.kxs)], [0, 0], **kwargs_ef)
 
         # decorate axes
@@ -2125,7 +2150,8 @@ def fig7(print_fig=True):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
 
 
 def fig8(print_fig=True):
@@ -2191,7 +2217,8 @@ def fig8(print_fig=True):
     ax.tick_params(**kwargs_ticks)
 
     # plot DFT spectra
-    c0 = ax.contourf(spec_k, spec_en, spec, 300, **kwargs_th)
+    c0 = ax.contourf(spec_k, spec_en, spec, 300, **kwargs_th, zorder=.1)
+    ax.set_rasterization_zorder(.2)
     ax.plot(xx, utils.poly_1(xx, *p_max), 'C9--', linewidth=1)
     ax.plot(max_k, max_en, 'ro', ms=2)
     ax.plot([np.min(spec_k), 0], [0, 0], **kwargs_ef)
@@ -2217,7 +2244,8 @@ def fig8(print_fig=True):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
 
     # save data
     os.chdir(data_dir)
@@ -2344,7 +2372,8 @@ def fig9(print_fig=True, load=True):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
 
     # save data
     os.chdir(data_dir)
@@ -2473,7 +2502,8 @@ def fig10(print_fig=True):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
 
 
 def fig11(print_fig=True):
@@ -2517,11 +2547,12 @@ def fig11(print_fig=True):
     # plot data
     for band in bands:
         ax.contour(X, Y, band, colors='black', ls='-',
-                   levels=0, alpha=.2)
+                   levels=0, alpha=.2, zorder=.1)
     ax.contourf(tb.kx, tb.ky, tb.FS, 300, cmap='PuOr',
-                vmin=-v_bnd, vmax=v_bnd, alpha=.05)
+                vmin=-v_bnd, vmax=v_bnd, alpha=.05, zorder=.1)
     c0 = ax.contourf(tb.kx[250:750], tb.ky[250:750], tb.FS[250:750, 250:750],
-                     300, cmap='PuOr', vmin=-v_bnd, vmax=v_bnd)
+                     300, cmap='PuOr', vmin=-v_bnd, vmax=v_bnd, zorder=.1)
+    ax.set_rasterization_zorder(.2)
     ax.plot([-1, 1], [1, 1], 'k-', lw=2)
     ax.plot([-1, 1], [-1, -1], 'k-', lw=2)
     ax.plot([1, 1], [-1, 1], 'k-', lw=2)
@@ -2550,7 +2581,8 @@ def fig11(print_fig=True):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
 
 
 def fig12(print_fig=True):
@@ -2670,8 +2702,9 @@ def fig13(print_fig=True):
         ax.tick_params(**kwargs_ticks)
 
         # plot data
-        c0 = ax.contourf(k, en, spec, 300,
+        c0 = ax.contourf(k, en, spec, 300, zorder=.1,
                          cmap='PuOr', vmin=-v_bnd, vmax=v_bnd)
+        ax.set_rasterization_zorder(.2)
         ax.plot([k[0], k[-1]], [0, 0], **kwargs_ef)
         for j in range(len(bndstr)):
             ax.plot(k, bndstr[j], 'k-', alpha=.2)
@@ -2704,7 +2737,8 @@ def fig13(print_fig=True):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
 
 
 def fig14(print_fig=True):
@@ -2874,7 +2908,8 @@ def fig14(print_fig=True):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
 
     # save data
     os.chdir(data_dir)
@@ -3014,7 +3049,9 @@ def fig15(print_fig=True):
     ax = fig.add_subplot(121)
     ax.set_position([.1, .3, .4, .4])
     ax.tick_params(**kwargs_ticks)
-    c0 = ax.contourf(kx, ky, DMFT, 300, cmap='PuOr', vmin=-v_d, vmax=v_d)
+    c0 = ax.contourf(kx, ky, DMFT, 300, cmap='PuOr', vmin=-v_d, vmax=v_d,
+                     zorder=.1)
+    ax.set_rasterization_zorder(.2)
 
     # decorate axes
     ax.set_xticks(np.arange(-2, 2, 1))
@@ -3042,7 +3079,8 @@ def fig15(print_fig=True):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
 
 
 def fig16(print_fig=True):
@@ -3101,7 +3139,8 @@ def fig16(print_fig=True):
 
         # plot data
         c0 = ax.contourf(k[i], en, bndstr[i], 200, cmap='PuOr',
-                         vmax=v_bnd, vmin=-v_bnd)
+                         vmax=v_bnd, vmin=-v_bnd, zorder=.1)
+        ax.set_rasterization_zorder(.2)
         ax.plot([k[i][0], k[i][-1]], [0, 0], 'k:')
 
         # decorate axes
@@ -3131,7 +3170,8 @@ def fig16(print_fig=True):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
 
 
 def fig17(print_fig=True):
@@ -3187,7 +3227,8 @@ def fig17(print_fig=True):
 
         # plot data
         c0 = ax.contourf(k[i], en, bndstr[i], 200, cmap='PuOr',
-                         vmax=v_bnd, vmin=-v_bnd)
+                         vmax=v_bnd, vmin=-v_bnd, zorder=.1)
+        ax.set_rasterization_zorder(.2)
         ax.plot([k[i][0], k[i][-1]], [0, 0], 'k:')
 
         if i == 0:
@@ -3218,7 +3259,8 @@ def fig17(print_fig=True):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
 
 
 def fig18(print_fig=True):
@@ -3267,7 +3309,8 @@ def fig18(print_fig=True):
         ax.set_position([.08, .3, .2, .35])
         ax.tick_params(**kwargs_ticks)
         ax.contourf(A1.en_norm, A1.kys, A1.int_norm, 300, **kwargs_ex,
-                    vmin=0, vmax=.8 * np.max(A1.int_norm))
+                    vmin=0, vmax=.8 * np.max(A1.int_norm), zorder=.1)
+        ax.set_rasterization_zorder(.2)
         ax.plot([0, 0], [np.min(A1.kys), np.max(A1.kys)], **kwargs_ef)
         ax.plot([-.005, -.005], [np.min(A1.kys), np.max(A1.kys)],
                 **kwargs_cut)
@@ -3297,8 +3340,9 @@ def fig18(print_fig=True):
         c0 = ax.contourf(-np.transpose(np.fliplr(A2.en_norm))-.002,
                          np.transpose(A2.kys),
                          np.transpose(np.fliplr(A2.int_norm)), 300,
-                         **kwargs_ex,
+                         **kwargs_ex, zorder=.1,
                          vmin=0, vmax=.8 * np.max(A2.int_norm))
+        ax.set_rasterization_zorder(.2)
         ax.plot([0, 0], [np.min(A2.kys), np.max(A2.kys)], **kwargs_ef)
 
         # decorate axes
@@ -3332,7 +3376,8 @@ def fig18(print_fig=True):
         # plot data
         ax.contourf(D.kx, D.ky, np.flipud(D.map), 300, **kwargs_ex,
                     vmax=.9 * np.max(D.map),
-                    vmin=.1 * np.max(D.map))
+                    vmin=.1 * np.max(D.map), zorder=.1)
+        ax.set_rasterization_zorder(.2)
         ax.plot(A1.k[0], A1.k[1], **kwargs_cut)
         ax.plot(A2.k[0], A2.k[1], **kwargs_cut)
 
@@ -3361,7 +3406,8 @@ def fig18(print_fig=True):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
 
 
 def fig19(print_fig=True):
@@ -3433,7 +3479,8 @@ def fig19(print_fig=True):
 
     # plot data
     c0 = ax.contourf(D.kxs, D.en_norm+.002, D.int_norm, 300, **kwargs_ex,
-                     vmin=0, vmax=.7 * np.max(D.int_norm))
+                     vmin=0, vmax=.7 * np.max(D.int_norm), zorder=.1)
+    ax.set_rasterization_zorder(.2)
     ax.plot([np.min(D.kxs), np.max(D.kxs)], [0, 0], **kwargs_ef)
 
     # plot MDC
@@ -3480,7 +3527,8 @@ def fig19(print_fig=True):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
 
 
 def fig20(print_fig=True, load=True):
@@ -3661,8 +3709,8 @@ def fig20(print_fig=True, load=True):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname,
-                    dpi=600, bbox_inches="tight")
+        plt.savefig(save_dir + figname + '.pdf',
+                    dpi=100, bbox_inches="tight", rasterized=True)
 
     return it_max, J, P
 
@@ -3718,7 +3766,8 @@ def fig21(print_fig=True):
 
     # plot data
     ax.contourf(D.kx, D.ky, np.flipud(D.map), 300, **kwargs_ex,
-                vmax=.9 * np.max(D.map), vmin=.3 * np.max(D.map))
+                vmax=.9 * np.max(D.map), vmin=.3 * np.max(D.map), zorder=.1)
+    ax.set_rasterization_zorder(.2)
 
 #    # Tight Binding Model
 #    param = utils.paramCSRO20_opt()  # Load parameters
@@ -3783,8 +3832,8 @@ def fig21(print_fig=True):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.png',
-                    dpi=600, bbox_inches="tight")
+        plt.savefig(save_dir + figname + '.pdf',
+                    dpi=100, bbox_inches="tight", rasterized=True)
 
 
 def fig22(print_fig=True):
@@ -3828,11 +3877,12 @@ def fig22(print_fig=True):
     for band in bands:
         n += 1
         if n < 4:
-            ax.contour(X, Y, band, colors='C0', ls='-',
+            ax.contour(X, Y, band, colors='C0', ls='-', zorder=.1,
                        linewidths=2, levels=0, alpha=1)
         else:
-            ax.contour(X, Y, band, colors='C8', linewidths=.5,
+            ax.contour(X, Y, band, colors='C8', linewidths=.5, zorder=.1,
                        levels=0)
+    ax.set_rasterization_zorder(.2)
     ax.plot([-1, 0], [0, 1], 'k-', lw=2)
     ax.plot([-1, 0], [0, -1], 'k-', lw=2)
     ax.plot([0, 1], [1, 0], 'k-', lw=2)
@@ -3889,8 +3939,9 @@ def fig22(print_fig=True):
     n = 0  # counter
     for band in bands:
         ax2.contour(X, Y, band, ls='-', colors=lblc[n],
-                    linewidths=2, levels=0, alpha=1)
+                    linewidths=2, levels=0, alpha=1, zorder=.1)
         n += 1
+    ax2.set_rasterization_zorder(.2)
     ax2.plot([-2, 0], [0, 2], 'k-', lw=2)
     ax2.plot([-2, 0], [0, -2], 'k-', lw=2)
     ax2.plot([0, 2], [2, 0], 'k-', lw=2)
@@ -4074,8 +4125,8 @@ def fig23(print_fig=True, load=True):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname,
-                    dpi=600, bbox_inches="tight")
+        plt.savefig(save_dir + figname + '.pdf',
+                    dpi=100, bbox_inches="tight", rasterized=True)
 
     # save data
     os.chdir(data_dir)
@@ -4309,7 +4360,8 @@ def fig25(print_fig=True):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
 
 
 def fig26(print_fig=True):
@@ -4409,7 +4461,8 @@ def fig26(print_fig=True):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
 
 
 def fig27(print_fig=True):
@@ -4517,7 +4570,8 @@ def fig27(print_fig=True):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
 
 
 def fig28(print_fig=True):
@@ -4610,7 +4664,8 @@ def fig28(print_fig=True):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
 
 
 def fig29(print_fig=True):
@@ -4783,7 +4838,8 @@ def fig29(print_fig=True):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
 
 
 def fig30(print_fig=True):
@@ -5045,7 +5101,9 @@ def fig30(print_fig=True):
 
         # plot data
         ax.contourf(A1.en_norm, A1.kys, A1.int_norm, 300, **kwargs_ex,
-                    vmin=.1*np.max(A1.int_norm), vmax=.7*np.max(A1.int_norm))
+                    vmin=.1*np.max(A1.int_norm), vmax=.7*np.max(A1.int_norm),
+                    zorder=.1)
+        ax.set_rasterization_zorder(.2)
         ax.plot([0, 0], [np.min(A1.kys), np.max(A1.kys)], **kwargs_ef)
         ax.plot([-.005, -.005], [np.min(A1.kys), np.max(A1.kys)], 'r-.', lw=.5)
 
@@ -5092,8 +5150,9 @@ def fig30(print_fig=True):
         ax.tick_params(**kwargs_ticks)
 
         # plot data
-        ax.contourf(D.kx, D.ky, np.flipud(D.map), 300, **kwargs_ex,
+        ax.contourf(D.kx, D.ky, np.flipud(D.map), 300, **kwargs_ex, zorder=.1,
                     vmax=.9 * np.max(D.map), vmin=.3 * np.max(D.map))
+        ax.set_rasterization_zorder(.2)
         ax.plot(A1.k[0], A1.k[1], 'r-.', lw=.5)
         ax.plot(A2.k[0], A2.k[1], 'r-.', lw=.5)
 
@@ -5146,9 +5205,10 @@ def fig30(print_fig=True):
         c0 = ax.contourf(-np.transpose(np.fliplr(A2.en_norm)),
                          np.transpose(A2.kys),
                          np.transpose(np.fliplr(A2.int_norm)), 300,
-                         **kwargs_ex,
+                         **kwargs_ex, zorder=.1,
                          vmin=.1*np.max(A2.int_norm),
                          vmax=.7*np.max(A2.int_norm))
+        ax.set_rasterization_zorder(.2)
         ax.plot([0, 0], [np.min(A2.kys), np.max(A2.kys)], **kwargs_ef)
 
         # decorate axes
@@ -5181,7 +5241,8 @@ def fig30(print_fig=True):
 
     # Save figure
     if print_fig:
-        fig.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+        fig.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
 
 
 def fig31(print_fig=True):
@@ -5261,4 +5322,5 @@ def fig31(print_fig=True):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.png', dpi=600, bbox_inches="tight")
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
