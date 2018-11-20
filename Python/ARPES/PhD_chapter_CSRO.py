@@ -58,7 +58,7 @@ kwargs_ticks = {'bottom': True,
                 'width': .5,
                 'colors': 'black'}
 kwargs_cut = {'linestyle': '-.',
-              'color': 'turquoise',
+              'color': 'red',
               'lw': .5}
 kwargs_ef = {'linestyle': ':',
              'color': 'k',
@@ -186,9 +186,9 @@ def fig1(print_fig=True):
         ax.plot([0, 0], [np.min(A1.kys), np.max(A1.kys)], **kwargs_ef)
         ax.plot([-.005, -.005], [np.min(A1.kys), np.max(A1.kys)],
                 **kwargs_cut)
-        for i in range(6):
-            TB_A1[i][TB_A1[i] > 0] = 10
-            ax.plot(TB_A1[i], A1.k[1], 'wo', ms=.5, alpha=.2)
+#        for i in range(6):
+#            TB_A1[i][TB_A1[i] > 0] = 10
+#            ax.plot(TB_A1[i], A1.k[1], 'wo', ms=.5, alpha=.2)
 
         # decorate axes
         ax.set_xlim(-.06, .03)
@@ -206,24 +206,24 @@ def fig1(print_fig=True):
         ax.text(.024, -.03, r'$\Gamma$', fontsize=12, color='k')
         ax.text(.024, -1.03, 'Y', fontsize=12, color='k')
 
-        # labels
-        cols = ['m', 'b', 'b', 'b', 'b', 'm', 'C1', 'C1']
-        lbls = [r'$\bar{\beta}$', r'$\bar{\gamma}$', r'$\bar{\gamma}$',
-                r'$\bar{\gamma}$', r'$\bar{\gamma}$',
-                r'$\bar{\beta}$', r'$\bar{\alpha}$', r'$\bar{\alpha}$']
-
-        # coordinate corrections to label positions
-        corr = np.array([.012, .004, .007, .004, .002, .008, .002, .0015])
-        p_mdc[6 + 16] *= 1.5
-
-        # plot MDC fits
-        for i in range(8):
-            plt.plot((utils.lor(A1.k[1], p_mdc[i], p_mdc[i+8], p_mdc[i+16],
-                     p_mdc[-3], p_mdc[-2], p_mdc[-1]) - b_mdc) / 30 + .001,
-                     A1.k[1], lw=.5, color=cols[i])
-            plt.text(p_mdc[i+16]/5+corr[i], p_mdc[i]-.03, lbls[i],
-                     fontsize=10, color=cols[i])
-        plt.plot(f_mdc / 30 + .001, A1.k[1], color='k', lw=.5)
+#        # labels
+#        cols = ['m', 'b', 'b', 'b', 'b', 'm', 'C1', 'C1']
+#        lbls = [r'$\bar{\beta}$', r'$\bar{\gamma}$', r'$\bar{\gamma}$',
+#                r'$\bar{\gamma}$', r'$\bar{\gamma}$',
+#                r'$\bar{\beta}$', r'$\bar{\alpha}$', r'$\bar{\alpha}$']
+#
+#        # coordinate corrections to label positions
+#        corr = np.array([.012, .004, .007, .004, .002, .008, .002, .0015])
+#        p_mdc[6 + 16] *= 1.5
+#
+#        # plot MDC fits
+#        for i in range(8):
+#            plt.plot((utils.lor(A1.k[1], p_mdc[i], p_mdc[i+8], p_mdc[i+16],
+#                     p_mdc[-3], p_mdc[-2], p_mdc[-1]) - b_mdc) / 30 + .001,
+#                     A1.k[1], lw=.5, color=cols[i])
+#            plt.text(p_mdc[i+16]/5+corr[i], p_mdc[i]-.03, lbls[i],
+#                     fontsize=10, color=cols[i])
+#        plt.plot(f_mdc / 30 + .001, A1.k[1], color='k', lw=.5)
 
     def fig1c():
         ax = fig.add_subplot(133)
@@ -239,10 +239,10 @@ def fig1(print_fig=True):
                          vmax=.7*np.max(A2.int_norm), zorder=.1)
         ax.set_rasterization_zorder(.2)
         ax.plot([0, 0], [np.min(A2.kys), np.max(A2.kys)], **kwargs_ef)
-        for i in range(6):
-            TB_A2[i][TB_A2[i] > 0] = 10
-            ax.plot(-TB_A2[i], A2.k[1],
-                    'wo', ms=.5, alpha=.1)
+#        for i in range(6):
+#            TB_A2[i][TB_A2[i] > 0] = 10
+#            ax.plot(-TB_A2[i], A2.k[1],
+#                    'wo', ms=.5, alpha=.1)
 
         # decorate axes
         ax.set_xticks(np.arange(0, .08, .02))
@@ -286,70 +286,70 @@ def fig1(print_fig=True):
         ax.text(.95, -.03, r'X', fontsize=15, color='w')
         ax.text(.95, -1.03, r'S', fontsize=15, color='w')
 
-        # labels
-        lblmap = [r'$\bar{\alpha}$', r'$\bar{\beta}$', r'$\bar{\gamma}$',
-                  r'$\bar{\delta}$', r'$\bar{\epsilon}$']
-
-        # label position
-        lblx = np.array([.15, .4, .22, .66, .8])
-        lbly = np.array([-.18, -.42, -.68, -.71, -.8])
-
-        # label colors
-        lblc = ['C1', 'm', 'b', 'r', 'k']
-
-        # add lables
-        for k in range(4):
-            ax.text(lblx[k], lbly[k], lblmap[k], fontsize=15, color=lblc[k])
+#        # labels
+#        lblmap = [r'$\bar{\alpha}$', r'$\bar{\beta}$', r'$\bar{\gamma}$',
+#                  r'$\bar{\delta}$', r'$\bar{\epsilon}$']
+#
+#        # label position
+#        lblx = np.array([.15, .4, .22, .66, .8])
+#        lbly = np.array([-.18, -.42, -.68, -.71, -.8])
+#
+#        # label colors
+#        lblc = ['C1', 'm', 'b', 'r', 'k']
+#
+#        # add lables
+#        for k in range(4):
+#            ax.text(lblx[k], lbly[k], lblmap[k], fontsize=15, color=lblc[k])
         ax.plot(A1.k[0], A1.k[1], **kwargs_cut)
         ax.plot(A2.k[0], A2.k[1], **kwargs_cut)
 
-        # Tight Binding Model
-        tb = utils.TB(a=np.pi, kbnd=2, kpoints=200)  # Initialize
-        tb.CSRO(param)  # Calculate bandstructure
-
-        plt.figure(figname)
-        bndstr = tb.bndstr  # Load bandstructure
-        coord = tb.coord  # Load coordinates
-
-        # read dictionaries
-        X = coord['X']
-        Y = coord['Y']
-        Axy = bndstr['Axy']
-        Bxz = bndstr['Bxz']
-        Byz = bndstr['Byz']
-        bands = (Axy, Bxz, Byz)
-
-        # loop over bands
-        n = 0  # counter
-        for band in bands:
-            n += 1
-            C = plt.contour(X, Y, band, alpha=0, levels=0)
-
-            # get paths
-            p = C.collections[0].get_paths()
-            p = np.asarray(p)
-
-            al = np.array([25])
-            be = np.array([2, 6, 9, 13, 24])
-            ga = np.arange(16, 24, 1)
-            de = np.concatenate((
-                    np.arange(26, 34, 1),
-                    np.arange(16, 24, 1)))
-
-            if n == 3:
-                for j in al:
-                    v = p[j].vertices
-                    ax.plot(v[:, 0], v[:, 1], ls=':', color='C1', lw=1.5)
-                for j in be:
-                    v = p[j].vertices
-                    ax.plot(v[:, 0], v[:, 1], ls=':', color='m', lw=1.5)
-                for j in de:
-                    v = p[j].vertices
-                    ax.plot(v[:, 0], v[:, 1], ls=':', color='r', lw=1.5)
-            elif n == 2:
-                for j in ga:
-                    v = p[j].vertices
-                    ax.plot(v[:, 0], v[:, 1], ls=':', color='b', lw=1.5)
+#        # Tight Binding Model
+#        tb = utils.TB(a=np.pi, kbnd=2, kpoints=200)  # Initialize
+#        tb.CSRO(param)  # Calculate bandstructure
+#
+#        plt.figure(figname)
+#        bndstr = tb.bndstr  # Load bandstructure
+#        coord = tb.coord  # Load coordinates
+#
+#        # read dictionaries
+#        X = coord['X']
+#        Y = coord['Y']
+#        Axy = bndstr['Axy']
+#        Bxz = bndstr['Bxz']
+#        Byz = bndstr['Byz']
+#        bands = (Axy, Bxz, Byz)
+#
+#        # loop over bands
+#        n = 0  # counter
+#        for band in bands:
+#            n += 1
+#            C = plt.contour(X, Y, band, alpha=0, levels=0)
+#
+#            # get paths
+#            p = C.collections[0].get_paths()
+#            p = np.asarray(p)
+#
+#            al = np.array([25])
+#            be = np.array([2, 6, 9, 13, 24])
+#            ga = np.arange(16, 24, 1)
+#            de = np.concatenate((
+#                    np.arange(26, 34, 1),
+#                    np.arange(16, 24, 1)))
+#
+#            if n == 3:
+#                for j in al:
+#                    v = p[j].vertices
+#                    ax.plot(v[:, 0], v[:, 1], ls=':', color='C1', lw=1.5)
+#                for j in be:
+#                    v = p[j].vertices
+#                    ax.plot(v[:, 0], v[:, 1], ls=':', color='m', lw=1.5)
+#                for j in de:
+#                    v = p[j].vertices
+#                    ax.plot(v[:, 0], v[:, 1], ls=':', color='r', lw=1.5)
+#            elif n == 2:
+#                for j in ga:
+#                    v = p[j].vertices
+#                    ax.plot(v[:, 0], v[:, 1], ls=':', color='b', lw=1.5)
 
         ax.set_xticks([-.5, 0, .5, 1])
         ax.set_yticks([-1.5, -1, -.5, 0, .5])
@@ -478,8 +478,31 @@ def fig2(print_fig=True):
 
     # Figure panels
     def fig2a():
+        ax = fig.add_axes([.1, .35, .25, .4])
+        ax.tick_params(**kwargs_ticks)
+
+        intsum = np.sum(D.int[:, 85:88, :], 1)
+
+        xx = np.linspace(-bnd, bnd, D.pol.size)
+        ef = 19.315 + xx * -.008
+        ef = np.transpose(np.broadcast_to(ef, (D.en.size, D.pol.size)))
+        ax.contourf(D.ens[:, 86, :]-ef, D.kys[:, 86, :]*1.12-.02,
+                    intsum, 300, **kwargs_ex,
+                    vmin=0.02*np.max(intsum), vmax=.32*np.max(intsum),
+                    zorder=.1)
+        ax.set_rasterization_zorder(.2)
+        ax.plot([0, 0], [-bnd, bnd], **kwargs_ef)
+
+        ax.set_yticks(np.arange(-10, 10, .5))
+        ax.set_xlim([-.1, .035])
+        ax.set_ylim(-bnd, bnd)
+        ax.set_xlabel(r'$\omega$ (eV)')
+        ax.set_ylabel(r'$k_y \, (\pi/a)$')
+        ax.text(-.095, .62, r'(a)', color='w', fontsize=12)
+
+    def fig2b():
         ax = fig.add_subplot(141)
-        ax.set_position([.08, .605, .4, .15])
+        ax.set_position([.08+.3, .755, .4, .15])
         ax.plot(D.kx[0, :], mdc_d - b_mdc_d + .01, 'o', ms=1.5, color='C9')
         ax.plot(D.kx[0, :], f_mdc_d + .01, color='k', lw=.5)
         ax.fill(D.kx[0, :], f_mdc_d + .01, alpha=.2, color='C9')
@@ -510,12 +533,12 @@ def fig2(print_fig=True):
         ax.set_ylabel(r'Intensity (a.u.)')
 
         # add text
-        ax.text(-.7, .35, '(a)', fontdict=font)
+        ax.text(-.7, .35, '(b)', fontdict=font)
 
-    def fig2b():
+    def fig2c():
         D.FS_flatten(ang=False)
         ax = fig.add_subplot(143)
-        ax.set_position([.08, .2, .4, .4])
+        ax.set_position([.08+.3, .35, .4, .4])
         ax.tick_params(**kwargs_ticks)
 
         # plot data
@@ -528,16 +551,17 @@ def fig2(print_fig=True):
 
         # decorate axes
         ax.arrow(.55, .55, 0, .13, head_width=0.03,
-                 head_length=0.03, fc='turquoise', ec='turquoise')
+                 head_length=0.03, fc='r', ec='r')
         ax.set_xticks(np.arange(-10, 10, .5))
         ax.set_yticks(np.arange(-10, 10, .5))
+        ax.set_xticklabels([])
         ax.set_yticklabels([])
         ax.set_xlabel(r'$k_x \, (\pi/a)$')
         ax.set_xlim(-bnd, bnd)
         ax.set_ylim(-bnd, bnd)
 
         # add label
-        ax.text(-.7, .62, r'(b)', fontdict=font, color='w')
+        ax.text(-.7, .62, r'(c)', fontdict=font, color='w')
 
         pos = ax.get_position()
         cax = plt.axes([pos.x0 - .02,
@@ -546,9 +570,10 @@ def fig2(print_fig=True):
         cbar.set_ticks([])
         cbar.set_clim(np.min(D.map), np.max(D.map))
 
-    def fig2c():
+    def fig2d():
         ax = fig.add_subplot(144)
-        ax.set_position([.485, .2, .15, .4])
+#        ax.set_position([.485, .35, .15, .4])
+        ax.set_position([.485+.3, .35, .15, .4])
         ax.tick_params(**kwargs_ticks)
         ax.plot(mdc - b_mdc, D.ky[:, 0], 'o', markersize=1.5, color='C9')
         ax.plot(f_mdc + .01, D.ky[:, 0], color='k', lw=.5)
@@ -571,22 +596,44 @@ def fig2(print_fig=True):
 
         # decorate axes
         ax.set_yticks(np.arange(-10, 10, .5))
+        ax.set_yticklabels([])
         ax.set_xticks([])
         ax.set_ylim(ymax=bnd, ymin=-bnd)
         ax.set_xlim(xmax=.42, xmin=0)
         ax.tick_params(labelleft='off', labelright='on')
         ax.yaxis.set_label_position('right')
-        ax.set_ylabel(r'$k_y \, (\pi/b)$')
+#        ax.set_ylabel(r'$k_y \, (\pi/b)$')
         ax.set_xlabel(r'Intensity (a.u.)')
 
         # add text
-        ax.text(.32, .63, r'(c)', fontsize=12)
+        ax.text(.32, .63, r'(d)', fontsize=12)
+
+#    def fig2d():
+#        ax = fig.add_axes([.08, .08, .4, .25])
+#        ax.tick_params(**kwargs_ticks)
+#
+#        intsum = np.sum(D.int[:, 85:88, :], 1)
+#
+#        xx = np.linspace(-bnd, bnd, D.pol.size)
+#        ef = 19.315 + xx * -.008
+#        ef = np.transpose(np.broadcast_to(ef, (D.en.size, D.pol.size)))
+#        ax.contourf(D.kys[:, 86, :]*1.12-.02, D.ens[:, 86, :]-ef,
+#                    intsum, 300, **kwargs_ex,
+#                    vmin=0.02*np.max(intsum), vmax=.32*np.max(intsum),
+#                    zorder=.1)
+#        ax.set_rasterization_zorder(.2)
+#        ax.plot([-bnd, bnd], [0, 0], **kwargs_ef)
+#        ax.set_ylim([-.1, .035])
+#        ax.set_xlim(-bnd, bnd)
+#        ax.set_xlabel(r'$k_x \, (\pi/a)$')
+#        ax.text(-.7, .02, r'(d)', fontsize=12)
 
     # Create figure
     fig = plt.figure(figname, figsize=(6, 6), clear=True)
     fig2a()
     fig2b()
     fig2c()
+    fig2d()
     plt.show()
 
     # Save figure
@@ -1190,7 +1237,6 @@ def fig4(print_fig=True):
                 ax.plot([k[j][_EDC_b[j], 0], k[j][_EDC_b[j], 0]],
                         [.015, .04],
                         ls='-.', color='r', lw=.5)
-
                 # decorate axes
                 ax.set_yticks(np.arange(-.1, .03, .02))
                 ax.set_yticklabels(['-100', '-80', '-60', '-40', '-20',
@@ -1201,6 +1247,21 @@ def fig4(print_fig=True):
                 ax.text(-1.18, .007, r'$\gamma$-band', color='m')
                 ax.text(-.52, .007, r'$\alpha$-band', color='b')
 
+            elif j == 1:
+                os.chdir(data_dir)
+                v_LDA_data = np.loadtxt('Data_CSROfig8_v_LDA.dat')
+                v_LDA = v_LDA_data[0]
+
+                k_F = -.32
+                v_LDA = 2.34
+                xx = np.arange(-.4, .25, .01)  # helper variable for plotting
+                ax.text(-.29, .009, r'$\epsilon_\mathbf{k}^b$',
+                                    color='C4')
+                p0 = -k_F * v_LDA
+                yy = p0 + xx * v_LDA  # For plotting v_LDA
+                ax.plot(xx, yy, 'C4--', lw=1)
+                ax.set_yticks(np.arange(-.1, .05, .02))
+                ax.set_yticklabels([])
             elif j == 3:
                 # Plot cut of EDC's high temp
                 ax.plot([k[j][_EDC_e[j], 0], k[j][_EDC_e[j], 0]],
@@ -1243,6 +1304,7 @@ def fig4(print_fig=True):
             ax.set_xticks(np.arange(-1, .5, 1.))
             ax.set_xticklabels([r'S', r'$\Gamma$'])
             ax.set_xlim(np.min(k[j]), 0.05)
+            print('min=', str(np.min(k[j])))
             ax.set_ylim(-.1, .03)
             ax.text(-1.28, .018, lbls[j], fontsize=10)
 
@@ -1450,9 +1512,9 @@ def fig4(print_fig=True):
 
     fig = plt.figure(figname, figsize=(8, 8), clear=True)
     fig4abcd()
-    (en, EDCn_e, EDCn_b, EDC_e, EDC_b, Bkg_e, Bkg_b, _EDC_e, _EDC_b,
-     eEDCn_e, eEDCn_b, eEDC_e, eEDC_b) = fig4efg()
-    fig4h()
+#    (en, EDCn_e, EDCn_b, EDC_e, EDC_b, Bkg_e, Bkg_b, _EDC_e, _EDC_b,
+#     eEDCn_e, eEDCn_b, eEDC_e, eEDC_b) = fig4efg()
+#    fig4h()
     plt.show()
 
     # Save figure
@@ -1802,7 +1864,7 @@ def fig6(print_fig=True, load=True):
 
             # add text
             ax.text(-.46, .009, r'MDC maxima', color='C8')
-            ax.text(-.26, .009, r'$\epsilon_\mathrm{LDA}(\mathbf{k})$',
+            ax.text(-.26, .009, r'$\epsilon_\mathbf{k}^b$',
                     color='C4')
         else:
             ax.set_yticks(np.arange(-.2, .1, .05))
@@ -1943,6 +2005,7 @@ def fig6(print_fig=True, load=True):
 
         # Fourth row
         k_F = loc[0]  # Position first fit
+        print('kF='+str(k_F))
         p0 = -k_F * v_LDA  # get constant from y=v_LDA*x + p0 (y=0, x=k_F)
         yy = p0 + xx * v_LDA  # For plotting v_LDA
         en_LDA = p0 + loc * v_LDA  # Energies
@@ -1988,7 +2051,7 @@ def fig6(print_fig=True, load=True):
 
         # decorate axes
         if j == 0:
-            ax.set_ylabel(r'$\mathfrak{Re}\Sigma$ (meV)', fontdict=font)
+            ax.set_ylabel(r'$\Re \Sigma$ (meV)', fontdict=font)
             ax.set_yticks(np.arange(0, .15, .05))
             ax.set_yticklabels(['0', '50', '100'])
             ax.text(.02, .03, 'Linear fit', fontsize=12, color=Re_cols[-1])
@@ -2010,10 +2073,10 @@ def fig6(print_fig=True, load=True):
         # decorate axes
         if j == 0:
             ax.arrow(loc[20], -.05, 0, loc_en[20]+.04,
-                     head_width=0.01, head_length=0.01, fc='r', ec='r')
+                     head_width=0.01, head_length=0.01, fc='k', ec='k')
             ax.arrow(loc[20], -.05, 0, loc_en[20]+.005,
-                     head_width=0.01, head_length=0.01, fc='r', ec='r')
-            plt.text(-.28, -.05, r'$\mathfrak{Re}\Sigma(\omega)$', color='r')
+                     head_width=0.01, head_length=0.01, fc='k', ec='k')
+            plt.text(-.28, -.048, r'$\Re \Sigma(\omega)$', color='k')
         if j == 3:
 
             # colorbar
@@ -2553,23 +2616,25 @@ def fig11(print_fig=True):
     c0 = ax.contourf(tb.kx[250:750], tb.ky[250:750], tb.FS[250:750, 250:750],
                      300, cmap='PuOr', vmin=-v_bnd, vmax=v_bnd, zorder=.1)
     ax.set_rasterization_zorder(.2)
-    ax.plot([-1, 1], [1, 1], 'k-', lw=2)
-    ax.plot([-1, 1], [-1, -1], 'k-', lw=2)
-    ax.plot([1, 1], [-1, 1], 'k-', lw=2)
-    ax.plot([-1, -1], [-1, 1], 'k-', lw=2)
+#    ax.plot([-1, 1], [1, 1], 'k-', lw=2)
+#    ax.plot([-1, 1], [-1, -1], 'k-', lw=2)
+#    ax.plot([1, 1], [-1, 1], 'k-', lw=2)
+#    ax.plot([-1, -1], [-1, 1], 'k-', lw=2)
 
     # deocrate axes
     ax.set_xticks(np.arange(-kbnd - 1, kbnd + 1, 1))
     ax.set_yticks(np.arange(-kbnd - 1, kbnd + 1, 1))
-    ax.set_xlim(-kbnd, kbnd)
-    ax.set_ylim(-kbnd, kbnd)
+#    ax.set_xticklabels([])
+#    ax.set_yticklabels([])
+    ax.set_xlim(-1, 1)
+    ax.set_ylim(-1, 1)
     ax.set_xlabel(r'$k_x \, (\pi/a)$', fontdict=font)
     ax.set_ylabel(r'$k_y \, (\pi/b)$', fontdict=font)
 
     # add text
-    ax.text(-.1, -.1, r'$\Gamma$', fontsize=18, color='r')
-    ax.text(.9, .9, 'S', fontsize=18, color='r')
-    ax.text(-.1, .9, 'X', fontsize=18, color='r')
+    ax.text(-.05, -.05, r'$\Gamma$', fontsize=18, color='r')
+    ax.text(.95, .95, 'S', fontsize=18, color='r')
+    ax.text(-.06, .95, 'X', fontsize=18, color='r')
 
     pos = ax.get_position()
     cax = plt.axes([pos.x0+pos.width + 0.01, pos.y0, 0.01, pos.height])
@@ -3055,9 +3120,9 @@ def fig15(print_fig=True):
 
     # decorate axes
     ax.set_xticks(np.arange(-2, 2, 1))
-    ax.set_xticklabels([])
+#    ax.set_xticklabels([])
     ax.set_yticks(np.arange(-2, 2, 1))
-    ax.set_yticklabels([])
+#    ax.set_yticklabels([])
     ax.set_ylim(-1, 1)
     ax.set_xlim(-1, 1)
     ax.set_xlabel(r'$k_x \, (\pi / a)$', fontdict=font)
@@ -3897,13 +3962,14 @@ def fig22(print_fig=True):
     ax.set_yticks(np.arange(-kbnd - .5, kbnd + 1, .5))
     ax.set_xticklabels(['', '-2', '-1', '0', '1', '2'])
     ax.set_yticklabels(['', '-2', '-1', '0', '1', '2'])
-    ax.set_xlim(-kbnd, kbnd)
-    ax.set_ylim(-kbnd, kbnd)
+    ax.set_xlim(-.5, .5)
+    ax.set_ylim(-.5, .5)
     ax.set_xlabel(r'$k_x \, (\pi/a_o)$', fontdict=font)
     ax.set_ylabel(r'$k_y \, (\pi/a_o)$', fontdict=font)
 
     # add text
-    ax.text(-.975, .9, '(a)', fontdict=font)
+#    ax.text(-.975, .9, '(a)', fontdict=font)
+    ax.text(-.47, .43, '(a)', fontdict=font)
 
     # Initialize tight binding model
     kbnd = 2  # boundaries
@@ -3955,12 +4021,13 @@ def fig22(print_fig=True):
     ax2.set_xticks(np.arange(-kbnd - 1, kbnd + 1, 1))
     ax2.set_yticks(np.arange(-kbnd - 1, kbnd + 1, 1))
     ax2.set_yticklabels([])
-    ax2.set_xlim(-kbnd, kbnd)
-    ax2.set_ylim(-kbnd, kbnd)
+    ax2.set_xlim(-1, 1)
+    ax2.set_ylim(-1, 1)
     ax2.set_xlabel(r'$k_x \, (\pi/a_o)$', fontdict=font)
 
     # add text
-    ax2.text(-1.95, 1.8, '(b)', fontdict=font)
+#    ax2.text(-1.95, 1.8, '(b)', fontdict=font)
+    ax2.text(-.94, .86, '(b)', fontdict=font)
 
     plt.show()
 
@@ -4206,35 +4273,35 @@ def fig25(print_fig=True):
     # create figure
     fig = plt.figure(figname, figsize=(10, 10), clear=True)
 
-    ax1 = fig.add_subplot(131)
-    ax1.set_position([.08, .3, .25, .25])
-    ax1.tick_params(direction='in', length=1.5, width=.5, colors='k')
-
-    # plot data
-    spec = 2
-    en = -Loc_en[spec]
-    ax1.errorbar(en, im[spec], eim[spec],
-                 color=[0, .4, .4], lw=.5, capsize=2, fmt='d', ms=2)
-    ax1.errorbar(en, re[spec], ere[spec],
-                 color='goldenrod', lw=.5, capsize=2, fmt='o', ms=2)
-
-    # decorate axes
-    ax1.set_ylabel('Self energy (meV)', fontdict=font)
-    ax1.set_yticks(np.arange(0, .25, .05))
-    ax1.set_yticklabels(['0', '50', '100', '150', '200'])
-    ax1.set_xticks(np.arange(0, .1, .02))
-    ax1.set_xticklabels(['0', '-20', '-40', '-60', '-80', '-100'])
-    ax1.set_xlabel(r'$\omega\,(\mathrm{meV})$', fontdict=font)
-    ax1.set_xlim(0, .1)
-    ax1.set_ylim(-.01, .25)
-    ax1.grid(True, alpha=.2)
-
-    # add text
-    ax1.text(.005, .2, r'$\mathfrak{Re}\Sigma(\omega) \, (1-Z)^{-1}$',
-             fontsize=12, color='goldenrod')
-    ax1.text(.06, .014, r'$\mathfrak{Im}\Sigma(\omega)$',
-             fontsize=12, color=[0, .4, .4])
-    ax1.text(.002, .23, '(a)', fontdict=font)
+#    ax1 = fig.add_subplot(131)
+#    ax1.set_position([.08, .3, .25, .25])
+#    ax1.tick_params(direction='in', length=1.5, width=.5, colors='k')
+#
+#    # plot data
+#    spec = 2
+#    en = -Loc_en[spec]
+#    ax1.errorbar(en, im[spec], eim[spec],
+#                 color=[0, .4, .4], lw=.5, capsize=2, fmt='d', ms=2)
+#    ax1.errorbar(en, re[spec], ere[spec],
+#                 color='goldenrod', lw=.5, capsize=2, fmt='o', ms=2)
+#
+#    # decorate axes
+#    ax1.set_ylabel('Self energy (meV)', fontdict=font)
+#    ax1.set_yticks(np.arange(0, .25, .05))
+#    ax1.set_yticklabels(['0', '50', '100', '150', '200'])
+#    ax1.set_xticks(np.arange(0, .1, .02))
+#    ax1.set_xticklabels(['0', '-20', '-40', '-60', '-80', '-100'])
+#    ax1.set_xlabel(r'$\omega\,(\mathrm{meV})$', fontdict=font)
+#    ax1.set_xlim(0, .1)
+#    ax1.set_ylim(-.01, .25)
+#    ax1.grid(True, alpha=.2)
+#
+#    # add text
+#    ax1.text(.005, .2, r'$\mathfrak{Re}\Sigma(\omega) \, (1-Z)^{-1}$',
+#             fontsize=12, color='goldenrod')
+#    ax1.text(.06, .014, r'$\mathfrak{Im}\Sigma(\omega)$',
+#             fontsize=12, color=[0, .4, .4])
+#    ax1.text(.002, .23, '(a)', fontdict=font)
 
     ax2 = fig.add_subplot(132)
     ax2.set_position([.4, .3, .25, .25])
@@ -4277,7 +4344,7 @@ def fig25(print_fig=True):
              color='slateblue')
     ax2.text(8, .31, r'J. Baier $\mathit{et\, \,al.}$',
              color='cadetblue')
-    ax2.text(1.1, .32, '(b)', fontdict=font)
+    ax2.text(1.1, .32, '(a)', fontdict=font)
     ax2.text(2.5e0, .25, r'$\bar{\beta}$-band', color='m')
     ax2.text(2.5e0, .045, r'$\bar{\delta}$-band', color='r')
     ax2.text(20, .135, 'DMFT')
@@ -4334,7 +4401,7 @@ def fig25(print_fig=True):
                          color=cols[i], alpha=.1)
 #    ax3.legend([r'$d_{xy}$', r'$d_{xz}$', r'$d_{yz}$'],
 #               fontsize=12, frameon=False, loc='center left')
-    ax3.text(-3.8, 1.65, '(c) DMFT', fontdict=font)
+    ax3.text(-3.8, 1.65, '(b) DMFT', fontdict=font)
     ax3.text(-1.7, .12, r'$xy$', color=cols[0], fontsize=12)
     ax3.set_yticks(np.arange(0, 2, .5))
     ax3.set_xticklabels(np.arange(-4, 4, 1), fontdict=font)
@@ -4360,8 +4427,8 @@ def fig25(print_fig=True):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.pdf', dpi=100,
-                    bbox_inches="tight", rasterized=True)
+        plt.savefig(save_dir + figname + '.png', dpi=300,
+                    bbox_inches="tight")
 
 
 def fig26(print_fig=True):

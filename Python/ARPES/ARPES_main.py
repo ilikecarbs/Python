@@ -44,6 +44,7 @@ CON.fig16:  Filling control Mott
 CON.fig17:  Bi-layer model
 CON.fig18:  Tri-layer model
 CON.fig19:  Infinity-layer model
+CON.fig20:  Instrumental resolution
 
 ----------  Ca2RuO4 Figures   ----------
 CRO.fig1:   DFT plot: figure 3 of Nature Comm.
@@ -102,7 +103,7 @@ CSRO.fig31: xFig3 self energy
 
 # %%
 
-CON.fig19()
+CON.fig20()
 
 # %%
 
@@ -110,6 +111,6 @@ CRO.fig19(print_fig=True)
 
 # %%
 # CSRO.fig20(load=False)
-CSRO.fig3(print_fig=True)
+CSRO.fig2(print_fig=True)
 
 # %%

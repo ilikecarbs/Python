@@ -1516,18 +1516,18 @@ def fig13(print_fig=True):
         ax.plot_surface(X + x - 1, Y + y, Z + z,  rstride=4,
                         cstride=4, color='b', lw=0)
 
-    ax.plot([1, 1], [1, 1], [3, -3], 'k-')
-    ax.plot([-1, -1], [1, 1], [3, -3], 'k-')
-    ax.plot([1, 1], [-1, -1], [3, -3], 'k-')
-    ax.plot([-1, -1], [-1, -1], [3, -3], 'k-')
-    ax.plot([-1, 1], [-1, -1], [1, 1], 'k-')
-    ax.plot([-1, 1], [-1, -1], [-1, -1], 'k-')
-    ax.plot([-1, -1], [1, -1], [1, 1], 'k-')
-    ax.plot([-1, -1], [1, -1], [-1, -1], 'k-')
-    ax.plot([1, 1], [1, -1], [1, 1], 'k-')
-    ax.plot([1, 1], [1, -1], [-1, -1], 'k-')
-    ax.plot([-1, 1], [1, 1], [1, 1], 'k-')
-    ax.plot([-1, 1], [1, 1], [-1, -1], 'k-')
+#    ax.plot([1, 1], [1, 1], [3, -3], 'k-')
+#    ax.plot([-1, -1], [1, 1], [3, -3], 'k-')
+#    ax.plot([1, 1], [-1, -1], [3, -3], 'k-')
+#    ax.plot([-1, -1], [-1, -1], [3, -3], 'k-')
+#    ax.plot([-1, 1], [-1, -1], [1, 1], 'k-')
+#    ax.plot([-1, 1], [-1, -1], [-1, -1], 'k-')
+#    ax.plot([-1, -1], [1, -1], [1, 1], 'k-')
+#    ax.plot([-1, -1], [1, -1], [-1, -1], 'k-')
+#    ax.plot([1, 1], [1, -1], [1, 1], 'k-')
+#    ax.plot([1, 1], [1, -1], [-1, -1], 'k-')
+#    ax.plot([-1, 1], [1, 1], [1, 1], 'k-')
+#    ax.plot([-1, 1], [1, 1], [-1, -1], 'k-')
     ax.plot_surface(Xs + 1, Ys + 1, Zs + 1,  rstride=4,
                     cstride=4, color='c', lw=0)
     ax.plot_surface(Xs - 1, Ys - 1, Zs + 1,  rstride=4,
@@ -2114,9 +2114,9 @@ def fig19(print_fig=True):
     octahedron(-1, -1, 1)
     octahedron(-1, -1, -1)
 
-    ax.set_xlim(-1.5, 1.5)
-    ax.set_ylim(-1.5, 1.5)
-    ax.set_zlim(-2.6, 2.6)
+    ax.set_xlim(-1.6, 1.6)
+    ax.set_ylim(-1.6, 1.6)
+    ax.set_zlim(-2.65, 2.65)
     ax.view_init(elev=7, azim=20)
     plt.axis('off')
     plt.show()
@@ -2125,3 +2125,150 @@ def fig19(print_fig=True):
     if print_fig:
         plt.savefig(save_dir + figname + '.png', dpi=200,
                     bbox_inches="tight")
+
+
+def fig20(print_fig=True):
+    """figure 20
+
+    %%%%%%%%%%%%%%%%%%%%%%%
+    Instrumental resolution
+    %%%%%%%%%%%%%%%%%%%%%%%
+    """
+
+    figname = 'CONfig20'
+
+    mat = 'CSRO20'
+    year = '2017'
+    sample = 'S6'
+    # gold = '62091'
+    gold = '62158'
+    D = ARPES.DLS(gold, mat, year, sample)
+
+    D.norm(gold=gold)
+    D.norm_shift()
+
+    # create figure
+    fig = plt.figure(figname, figsize=(8, 8), clear=True)
+    ax1 = fig.add_subplot(221)
+    ax1.set_position([.1, .3, .4, .4])
+    ax1.tick_params(**kwargs_ticks)
+    ax2 = fig.add_subplot(222)
+    ax2.set_position([.57, .3, .4, .4])
+    ax2.tick_params(**kwargs_ticks)
+
+    # plot panel (a)
+    c0 = ax1.contourf(D.ang_shift, D.en_shift, D.int_shift, 100, **kwargs_ex,
+                      zorder=.1)
+    ax1.set_rasterization_zorder(.2)
+    ax1.plot([D.ang[0], D.ang[-1]], [0, 0], **kwargs_ef)
+
+    # decorate panel (a)
+    ax1.set_ylabel(r'$\omega$ (eV)', fontdict=font)
+    ax1.set_xlabel(r'Detector angles', fontdict=font)
+    ax1.text(-15, 0.05, '(a)', fontdict=font)
+
+    # colorbar
+    pos = ax1.get_position()
+    cax = plt.axes([pos.x0, pos.y0+pos.height+.01,
+                    pos.width, .01])
+    cbar = plt.colorbar(c0, cax=cax, ticks=None, orientation='horizontal')
+    cbar.set_ticks([])
+
+    # initial fit parameters
+    Ef_ini = 0
+    T_ini = 6  # measured temperature
+    width = .007
+    slope = -.02
+    mx = 0.011
+
+    # other parameters
+    ch = 300  # channel
+    xx = np.linspace(-0.2, 0.2, 1000)  # used for potting
+    kB = 8.6173303e-5  # Boltzmann constant
+
+    int_sum = np.sum(D.int_shift, 0) / D.ang.size  # average EDCs
+#    ax2.plot(D.en_shift, D.int_shift, 'C0o', ms=2)  # plot all EDCs
+
+    # reduce dataset for fit
+    en = D.en_shift[ch, :]
+    mx_val, mx_idx = utils.find(en, 0.02)
+    mn_val, mn_idx = utils.find(en, -0.06)
+
+    en = en[mn_idx:mx_idx]
+    int_sum = int_sum[mn_idx:mx_idx]
+
+    # plot averaged EDC
+    ax2.plot(en, int_sum, 'bo', ms=5)
+
+    # initial guess FD
+    p_ini_FD = np.array([T_ini*kB, Ef_ini, mx,
+                         np.min(int_sum), slope])
+
+    # boundaries FD
+    eps = 1e-9
+    bnd_bot_FD = np.concatenate((p_ini_FD[:1] - eps,
+                                 p_ini_FD[1:3] - np.inf,
+                                 p_ini_FD[3:4] - eps,
+                                 p_ini_FD[4:] - np.inf))
+    bnd_top_FD = np.concatenate((p_ini_FD[:1] + eps,
+                                 p_ini_FD[1:3] + np.inf,
+                                 p_ini_FD[3:4] + eps,
+                                 p_ini_FD[4:] + np.inf))
+    bnd_FD = (bnd_bot_FD, bnd_top_FD)
+
+    # fit FD
+    p_FD, c_FD = curve_fit(utils.FDsl, en,
+                           int_sum, p_ini_FD, bounds=bnd_FD)
+
+    # initial guess FDG
+    p_ini_FDG = np.array([T_ini*kB, p_FD[1], p_FD[2], width,
+                          np.min(int_sum), 1, 0])
+
+    # boundaries FDG
+    bnd_bot_FDG = np.concatenate((p_ini_FDG[:1] - eps,
+                                 p_ini_FDG[1:4] - np.inf,
+                                 p_ini_FDG[4:] - np.inf))
+    bnd_top_FDG = np.concatenate((p_ini_FDG[:1] + eps,
+                                 p_ini_FDG[1:4] + np.inf,
+                                 p_ini_FDG[4:] + np.inf))
+    bnd_FDG = (bnd_bot_FDG, bnd_top_FDG)
+
+    # fit FDG
+    p_FDG, c_FDG = curve_fit(utils.FDconvGauss, en,
+                             int_sum, p_ini_FDG, bounds=bnd_FDG)
+    FWHM = p_FDG[3]
+    err_FDG = np.sqrt(np.diag(c_FDG))
+    err_FWHM = err_FDG[3] / 2
+    print(err_FWHM)
+    sig = FWHM/(2*np.sqrt(2*np.log(2)))
+
+    # plot data
+    ax2.plot(xx, utils.FDsl(xx, *p_FD), 'C1-')
+    ax2.plot(xx, utils.gauss(xx, p_FDG[1], sig, np.max(int_sum), 0, 0, 0),
+             'k-')
+    ax2.plot(xx, utils.FDconvGauss(xx, *p_FDG), 'r-', lw=2)
+
+#    ax2.text(-.035, .002, 'All EDCs', color='C0')
+    ax2.text(-.035, .002, 'Averaged EDC',
+             color='b', fontsize=12)
+    ax2.text(-.035, .0016, r'$\widetilde{f}(\omega, T)$',
+             color='C1', fontsize=12)
+    ax2.text(-.035, .0012, r'$\mathcal{R}(\omega)$',
+             color='k', fontsize=12)
+    ax2.text(-.035, .0008,
+             r'$\mathcal{R}(\omega) \otimes \widetilde{f}(\omega, T)$',
+             color='r', fontsize=12)
+
+    # decorate axes
+    ax2.text(-.038, 0.00415, '(b)', fontdict=font)
+    ax2.set_xlim(-.04, .02)
+    ax2.set_ylim(0, 1.1*np.max(int_sum))
+    ax2.set_yticks([])
+    ax2.set_xlabel(r'$\omega$ (eV)', fontdict=font)
+    ax2.set_ylabel('Intensity (arb.u.)', fontdict=font)
+    plt.show()
+
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)

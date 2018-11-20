@@ -26,6 +26,7 @@ import matplotlib.cm as cm
 import time
 from joblib import Parallel, delayed
 import multiprocessing
+from scipy import signal
 
 
 def find(array, val):
@@ -1937,6 +1938,49 @@ def FDsl(x, *p):
     FDsl = p[3] + (p[2] + p[4] * x) * (np.exp((x - p[1]) / p[0]) + 1) ** -1
 
     return FDsl
+
+
+def FDconvGauss(x, *p):
+    """returns FDG
+
+    **Fermi Dirac function convoluted with a Gaussian**
+
+    Args
+    ----
+    :x:     energy axis
+    :p0:    T
+    :p1:    EF
+    :p2:    Amplitude subfunctions
+    :p3:    Width
+    :p4:    Constant background
+    :p5:    Amplitude overall
+    :p6:    Slope
+
+    Return
+    ------
+    :FDG:   Fermi Dirac function convoluted with a Gaussian
+    """
+
+    xx = np.linspace(-0.2, 0.2, 1000)
+
+    sig = p[3]/(2*np.sqrt(2*np.log(2)))
+
+    FD = FDsl(xx, p[0], p[1], p[2], 0, 0)
+    G = gauss(xx, p[1], sig, 1/(np.sqrt(2*np.pi)*sig), 0, 0, 0)
+
+    dx = abs(xx[1] - xx[0])
+    Ix = abs(xx[-1] - xx[0])
+    N = Ix / dx
+
+    func = (p[4] + (p[5] + p[6] * xx) *
+            signal.convolve(G, FD, mode='same') / (2 * N))
+    FDG = np.zeros(len(x))
+
+    for i in range(len(x)):
+        en_val, en_idx = find(xx, x[i])
+        FDG[i] = func[en_idx]
+
+    return FDG
 
 
 def poly_n(x, n, *p):

@@ -90,7 +90,7 @@ class Methods:
         bnd = 1
         # Takes initial fit parameters for Fermi function until this value.
         # From there on, the initial parameters are the ones from last fit.
-        ch = 300
+        ch = 50
 
         kB = 8.6173303e-5  # Boltzmann constant
 
@@ -901,6 +901,14 @@ class Methods:
             kx_V0[i, :] = self.k_V0[0, :]
             ky_V0[i, :] = self.k_V0[1, :]
 
+        self.kxs = np.transpose(np.broadcast_to(kx, (self.en.size,
+                                                     self.pol.size,
+                                                     self.ang.size)),
+                                (1, 2, 0))
+        self.kys = np.transpose(np.broadcast_to(ky, (self.en.size,
+                                                     self.pol.size,
+                                                     self.ang.size)),
+                                (1, 2, 0))
         self.kx = kx
         self.ky = ky
         self.kx_V0 = kx_V0
