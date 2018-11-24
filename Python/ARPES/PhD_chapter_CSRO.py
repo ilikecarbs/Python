@@ -23,6 +23,7 @@ import matplotlib.cm as cm
 from scipy.optimize import curve_fit
 from scipy import integrate
 from scipy.special import sph_harm
+from scipy.signal import hilbert, chirp
 
 import ARPES_header as ARPES
 import ARPES_utils as utils
@@ -1512,9 +1513,9 @@ def fig4(print_fig=True):
 
     fig = plt.figure(figname, figsize=(8, 8), clear=True)
     fig4abcd()
-#    (en, EDCn_e, EDCn_b, EDC_e, EDC_b, Bkg_e, Bkg_b, _EDC_e, _EDC_b,
-#     eEDCn_e, eEDCn_b, eEDC_e, eEDC_b) = fig4efg()
-#    fig4h()
+    (en, EDCn_e, EDCn_b, EDC_e, EDC_b, Bkg_e, Bkg_b, _EDC_e, _EDC_b,
+     eEDCn_e, eEDCn_b, eEDC_e, eEDC_b) = fig4efg()
+    fig4h()
     plt.show()
 
     # Save figure
@@ -4230,8 +4231,8 @@ def fig25(print_fig=True):
     ere = np.loadtxt('Data_CSROfig9_ere.dat')
     im = np.loadtxt('Data_CSROfig9_im.dat')
     eim = np.loadtxt('Data_CSROfig9_eim.dat')
-    C_B = np.genfromtxt('Data_C_Braden.csv', delimiter=',')
-    C_M = np.genfromtxt('Data_C_Maeno.csv', delimiter=',')
+#    C_B = np.genfromtxt('Data_C_Braden.csv', delimiter=',')
+#    C_M = np.genfromtxt('Data_C_Maeno.csv', delimiter=',')
 #    R_1 = np.genfromtxt('Data_R_1.csv', delimiter=',')
 #    R_2 = np.genfromtxt('Data_R_2.csv', delimiter=',')
     os.chdir(home_dir)
@@ -4261,8 +4262,8 @@ def fig25(print_fig=True):
              m_LDA * m_e)
 
     # heat capacity in units of Z
-    Z_B = gamma / C_B[:, 1]
-    Z_M = gamma / C_M[:, 1] * 1e3
+#    Z_B = gamma / C_B[:, 1]
+#    Z_M = gamma / C_M[:, 1] * 1e3
 
     print('gamma='+str(gamma / np.mean(Z_e)))
 
@@ -4324,8 +4325,8 @@ def fig25(print_fig=True):
     # ax.plot(39, .175, 'r+')  # Matsubara point
 
     # plot heat capacity data
-    ax2.plot(C_B[:, 0], Z_B, 'o', ms=1, color='cadetblue')
-    ax2.plot(C_M[:, 0], Z_M, 'o', ms=1, color='slateblue')
+#    ax2.plot(C_B[:, 0], Z_B, 'o', ms=1, color='cadetblue')
+#    ax2.plot(C_M[:, 0], Z_M, 'o', ms=1, color='slateblue')
 
     # decorate axes
     ax2.arrow(28, .16, 8.5, .06, head_width=0.0, head_length=0,
@@ -4340,13 +4341,13 @@ def fig25(print_fig=True):
     ax2.set_ylabel(r'$Z$', fontdict=font)
 
     # add text
-    ax2.text(8, .33, r'S. Nakatsuji $\mathit{et\, \,al.}$',
-             color='slateblue')
-    ax2.text(8, .31, r'J. Baier $\mathit{et\, \,al.}$',
-             color='cadetblue')
+#    ax2.text(1.1, .11, r'S. Nakatsuji $\mathit{et\, \,al.}$',
+#             color='slateblue')
+#    ax2.text(1.1, .09, r'J. Baier $\mathit{et\, \,al.}$',
+#             color='cadetblue')
     ax2.text(1.1, .32, '(a)', fontdict=font)
-    ax2.text(2.5e0, .25, r'$\bar{\beta}$-band', color='m')
-    ax2.text(2.5e0, .045, r'$\bar{\delta}$-band', color='r')
+    ax2.text(2.5e0, .25, r'$\alpha$-band', color='m')
+    ax2.text(2.5e0, .045, r'$\gamma$-band', color='r')
     ax2.text(20, .135, 'DMFT')
 
 #    # Inset
@@ -5390,4 +5391,596 @@ def fig31(print_fig=True):
     # Save figure
     if print_fig:
         plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
+
+
+def fig32(print_fig=True):
+    """figure 32
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%
+    Resolution effects on alpha
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%
+    """
+
+    figname = 'CSROfig32'
+    fig = plt.figure(figname, figsize=(6, 6), clear=True)
+
+    ax1 = fig.add_subplot(231)
+    ax1.set_position([.1, .55, .2, .2])
+    ax1.tick_params(**kwargs_ticks)
+
+    ax2 = fig.add_subplot(232)
+    ax2.set_position([.32, .55, .2, .2])
+    ax2.tick_params(**kwargs_ticks)
+
+    ax3 = fig.add_subplot(233)
+    ax3.set_position([.54, .55, .2, .2])
+    ax3.tick_params(**kwargs_ticks)
+
+    ax4 = fig.add_subplot(234)
+    ax4.set_position([.1, .3, .2, .2])
+    ax4.tick_params(**kwargs_ticks)
+
+    ax5 = fig.add_subplot(235)
+    ax5.set_position([.32, .3, .2, .2])
+    ax5.tick_params(**kwargs_ticks)
+
+    ax6 = fig.add_subplot(236)
+    ax6.set_position([.54, .3, .2, .2])
+    ax6.tick_params(**kwargs_ticks)
+
+#    Ax = [ax1, ax2, ax3, ax4]
+    kB = 8.617e-5  # Boltzmann constant
+    Ts = np.array([1.3, 10, 20, 30])
+    v_F = 2.34
+    k_F = -.28
+    n = 5000
+    k = np.linspace(-1, .0, n)
+    lda = (k-k_F) * v_F
+    en = np.linspace(lda[0], lda[-1], n)
+    res = 200
+
+    # EDC values
+    edc_b_val = -.36  # EDC beta band
+    edcw_b_val = .01
+
+    # boundaries of fit
+    top_b = .01
+    bot_b = -.015
+    left_b = -.45
+    right_b = -.15
+
+    val, _edc_b = utils.find(k, edc_b_val)
+    val, _edcw_b = utils.find(k, edc_b_val - edcw_b_val)
+    val, _top_b = utils.find(en, top_b)
+    val, _bot_b = utils.find(en, bot_b)
+    val, _left_b = utils.find(k, left_b)
+    val, _right_b = utils.find(k, right_b)
+    val, k_F_idx = utils.find(k, k_F)
+    val, e_F_idx = utils.find(en, 0)
+
+    G0 = .02  # Impurity scattering
+    eta = 10.6
+    G = G0 + eta * en**2
+
+    int_b = np.zeros(len(Ts))
+
+    ImS0 = G * v_F + (np.pi * kB * 0)**2
+    ReS0 = np.imag(hilbert(ImS0)) / 20
+    ReS0 -= ReS0[e_F_idx]
+
+    FD0 = utils.FDsl(en, kB*0, 0, 1, 0, 0)
+    FDres0 = utils.FDconvGauss(en, kB*0, 0, 1, .008, 0, 1, 0)
+    spec0 = np.zeros((len(k), len(en)))
+
+    for j in range(len(k)):
+        spec0[j, :] = ImS0 / ((en-lda[j]-ReS0)**2 + ImS0**2)
+
+    ax1.contourf(k, en, np.transpose(spec0 * FD0), res, **kwargs_ex,
+                 vmin=0, vmax=20, zorder=.1)
+    ax1.set_rasterization_zorder(.2)
+    ax1.plot(k[:e_F_idx+7], lda[:e_F_idx+7], 'k--', lw=1)
+    ax1.plot([-2, 2], [0, 0], **kwargs_ef)
+    ax1.set_xticks([-1, 0])
+    ax1.set_yticks(np.arange(-.08, .08, .04))
+    ax1.set_yticklabels(['-80', '-40', '0', '40'])
+    ax1.set_ylabel(r'$\omega$ (meV)')
+    ax1.set_xticklabels(['S', r'$\Gamma$'])
+    ax1.set_xlim(-1, .0)
+    ax1.set_ylim(-.1, .03)
+    ax1.text(-.95, .012, '(a)')
+    ax1.text(-.8, .012, r'$f(\omega, 0),\,\Sigma(\omega)$')
+    ax1.text(-.25, -.05, r'$\epsilon_\mathbf{k}^b$')
+
+    ax2.contourf(k, en, np.transpose(spec0 * FDres0), res, **kwargs_ex,
+                 vmin=0, vmax=20, zorder=.1)
+    ax2.set_rasterization_zorder(.2)
+    ax2.plot(k[:e_F_idx+7], lda[:e_F_idx+7], 'k--', lw=1)
+    ax2.plot([-2, 2], [0, 0], **kwargs_ef)
+    ax2.set_xticks([-1, 0])
+    ax2.set_yticks(np.arange(-.08, .08, .04))
+    ax2.set_xticklabels(['S', r'$\Gamma$'])
+    ax2.set_yticklabels([])
+    ax2.set_xlim(-1, .0)
+    ax2.set_ylim(-.1, .03)
+    ax2.text(-.95, .012, '(b)')
+    ax2.text(-.8, .012, r'$\otimes \,\mathcal{R}(\Delta \omega, \Delta k)$')
+
+    ImS = G * v_F + (np.pi * kB * 30)**2
+    ReS = np.imag(hilbert(ImS)) / 20
+    ReS -= ReS[e_F_idx]
+    spec_res = np.zeros((len(k), len(en)))
+    FDres = utils.FDconvGauss(en, kB*30, 0, 1, .008, 0, 1, 0)
+
+    for j in range(len(k)):
+        spec_res[j, :] = ImS / ((en-lda[j]-ReS)**2 + ImS**2)
+
+    ax3.contourf(k, en, np.transpose(spec_res * FDres), res, **kwargs_ex,
+                 vmin=0, vmax=20, zorder=.1)
+    ax3.set_rasterization_zorder(.2)
+    ax3.plot(k[:e_F_idx+7], lda[:e_F_idx+7], 'k--', lw=1)
+    ax3.plot([-2, 2], [0, 0], **kwargs_ef)
+
+    box = {'ls': '--', 'color': 'r', 'lw': .5}
+    ax3.plot([k[_left_b], k[_left_b]],
+             [en[_top_b], en[_bot_b]], **box)
+    ax3.plot([k[_right_b], k[_right_b]],
+             [en[_top_b], en[_bot_b]], **box)
+    ax3.plot([k[_left_b], k[_right_b]],
+             [en[_top_b], en[_top_b]], **box)
+    ax3.plot([k[_left_b], k[_right_b]],
+             [en[_bot_b], en[_bot_b]], **box)
+
+    ax3.set_xticks([-1, 0])
+    ax3.set_yticks(np.arange(-.08, .08, .04))
+    ax3.set_xticklabels(['S', r'$\Gamma$'])
+    ax3.set_yticklabels([])
+    ax3.set_xlim(-1, .0)
+    ax3.set_ylim(-.1, .03)
+    ax3.text(-.95, .012, '(c)')
+    ax3.text(-.8, .012, r'$T \,> 0\,$K')
+
+    # self-energy plot
+#    ax6.plot(en, ImS0-G0*v_F)
+#    dReS0 = -(ReS0[e_F_idx-1] - ReS0[e_F_idx])/(en[1]-en[0])
+#    Z = 1 / (1-dReS0)
+#    ax6.plot(en, ReS0/(1-Z))
+#    ax6.set_xlim(-.1, .0)
+#    ax6.set_ylim(0, .25)
+    cols = ['c', 'C0', 'b', 'k']
+    for i in range(len(Ts)):
+        T = Ts[i]
+        ImS = G * v_F + (np.pi * kB * T)**2
+        ReS = np.imag(hilbert(ImS)) / 20
+        ReS -= ReS[e_F_idx]
+
+        spec = np.zeros((len(k), len(en)))
+        for j in range(len(k)):
+            spec[j, :] = ImS / ((en-lda[j]-ReS)**2 + ImS**2)
+
+        FD = utils.FDconvGauss(en, kB*T, 0, 1, .008, 0, 1, 0)
+        spec *= FD
+
+        # integrates around Ef
+        int_b[i] = np.sum(spec[_left_b:_right_b, _bot_b:_top_b])
+
+        # plot data if necessary
+    #    ax = Ax[i]
+    #    ax.contourf(k, en, np.transpose(spec), 10, **kwargs_ex,
+    #                vmin=0, vmax=20)
+    #    ax.plot(k, lda, 'k--')
+    #
+    #    ax.set_ylim(-.1, .03)
+    #    ax.set_xlim(-1, 0)
+
+    #    int_b[i] = int_b[i] / int_b[0]
+
+        MDC = spec[:, e_F_idx]
+        EDC = spec[k_F_idx]
+
+        ax4.plot(k, MDC, color=cols[i], lw=1)
+        ax5.plot(en, EDC, color=cols[i], lw=1)
+        ax6.plot(T, int_b[i] / int_b[0], 'o', ms=3, color=cols[i])
+
+    ax4.set_xlim(-1, .0)
+    ax4.set_ylim(-.05*np.max(MDC), 1.25*np.max(MDC))
+    ax4.set_yticks([])
+    ax4.set_xticks([-1, 0])
+    ax4.set_xticklabels(['S', r'$\Gamma$'])
+    ax4.set_ylabel('Intensity (arb. u.)')
+    ax4.text(-.95, 15, r'(d) MDC @ $E_\mathrm{F}$')
+
+    ax5.set_xticks(np.arange(-.08, .08, .04))
+    ax5.set_xticklabels(['-80', '-40', '0', '40'])
+    ax5.set_xlabel(r'$\omega$ (meV)')
+    ax5.set_xlim(-.1, .03)
+    ax5.set_ylim(-.05*np.max(EDC), 1.3*np.max(EDC))
+    ax5.set_yticks([])
+    ax5.text(-.095, 22.5, r'(e) EDC @ $k_\mathrm{F}$')
+
+    ax6.tick_params(labelleft='off', labelright='on')
+    ax6.yaxis.set_label_position('right')
+    ax6.set_xticks(np.arange(0, 40, 10))
+    ax6.set_yticks(np.arange(0, 1.1, .1))
+    ax6.set_xlabel(r'$T$ (K)', fontdict=font)
+    ax6.set_xlim(0, 32)
+    ax6.set_ylim(.65, 1.1)
+    ax6.grid(True, alpha=.2)
+    ax6.text(1, 1.04, '(f) Box integrated')
+    plt.show()
+
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
+
+
+def fig33(print_fig=True):
+    """figure 33
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%
+    Resolution effects extended
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%
+    """
+
+    figname = 'CSROfig33'
+    fig = plt.figure(figname, figsize=(6, 6), clear=True)
+
+    kB = 8.617e-5  # Boltzmann constant
+    Ts = np.array([1.3, 10, 20, 30])
+    v_F = 2.34
+    k_F = -.28
+    n = 3000
+    k = np.linspace(-1, .0, n)
+    lda = (k-k_F) * v_F
+    en = np.linspace(lda[0], lda[-1], n)
+    res = 200
+
+    # EDC values
+    edc_b_val = -.36  # EDC beta band
+    edcw_b_val = .01
+
+    # boundaries of fit
+    top_b = .01
+    bot_b = -.015
+    left_b = -.45
+    right_b = -.15
+
+    val, _edc_b = utils.find(k, edc_b_val)
+    val, _edcw_b = utils.find(k, edc_b_val - edcw_b_val)
+    val, _top_b = utils.find(en, top_b)
+    val, _bot_b = utils.find(en, bot_b)
+    val, _left_b = utils.find(k, left_b)
+    val, _right_b = utils.find(k, right_b)
+    val, k_F_idx = utils.find(k, k_F)
+    val, e_F_idx = utils.find(en, 0)
+
+    G0 = .02  # Impurity scattering
+    eta = 10.6
+    G = G0 + eta * en**2
+
+    int_b = np.zeros(len(Ts))
+
+    lbls = ['(a)', '(b)', '(c)', '(d)']
+    cols = ['c', 'C0', 'b', 'k']
+    ax1box = fig.add_subplot(3, 5, 4+1)
+    ax1box.set_position([.1+(4*.165)+.02, .72, .15, .15])
+    ax1box.tick_params(**kwargs_ticks)
+    for i in range(len(Ts)):
+        ax1 = fig.add_subplot(3, 5, i+1)
+        ax1.set_position([.1+(i*.165), .72, .15, .15])
+        ax1.tick_params(**kwargs_ticks)
+
+        T = Ts[i]
+        ImS0 = (eta*en**2) * v_F + (np.pi*kB*T)**2
+        ReS0 = np.imag(hilbert(ImS0)) / 20
+        ReS0 -= ReS0[e_F_idx]
+        FD = utils.FDsl(en, kB*T, 0, 1, 0, 0)
+        spec0 = np.zeros((len(k), len(en)))
+
+        for j in range(len(k)):
+            spec0[j, :] = ImS0 / ((en-lda[j]-ReS0)**2 + ImS0**2)
+
+        int_b[i] = np.sum(spec0[_left_b:_right_b, _bot_b:_top_b])
+        ax1box.plot(T, 1, 'o', ms=3, color=cols[i])
+        spec0[spec0 > 20] = 20
+        ax1.contourf(k, en, np.transpose(spec0 * FD), res, **kwargs_ex,
+                     vmin=0, vmax=20, zorder=.1)
+        ax1.set_rasterization_zorder(.2)
+        ax1.plot(k[:e_F_idx], lda[:e_F_idx], 'k--', lw=1)
+        ax1.plot([-2, 2], [0, 0], **kwargs_ef)
+        ax1.set_xticks([-1, 0])
+        ax1.set_xticklabels([])
+        ax1.set_yticks(np.arange(-.08, .08, .04))
+
+        if i == 0:
+            ax1.set_yticklabels(['-80', '-40', '0', '40'], fontsize=8)
+            ax1.set_ylabel(r'$\omega$ (meV)', fontsize=8)
+            ax1.text(-.25, -.05, r'$\epsilon_\mathbf{k}^b$', fontsize=8)
+            ax1.set_title(r'$T_0=\,$'+str(T)+r'$\,$K', fontsize=8)
+        else:
+            ax1.set_yticklabels([])
+            ax1.set_title(r'$T=\,$'+str(T)+r'$\,$K', fontsize=8)
+
+        ax1.set_xlim(-1, .0)
+        ax1.set_ylim(-.1, .03)
+        ax1.text(-.95, .012, lbls[i], fontsize=8)
+
+        box = {'ls': '--', 'color': 'r', 'lw': .5}
+        ax1.plot([k[_left_b], k[_left_b]],
+                 [en[_top_b], en[_bot_b]], **box)
+        ax1.plot([k[_right_b], k[_right_b]],
+                 [en[_top_b], en[_bot_b]], **box)
+        ax1.plot([k[_left_b], k[_right_b]],
+                 [en[_top_b], en[_top_b]], **box)
+        ax1.plot([k[_left_b], k[_right_b]],
+                 [en[_bot_b], en[_bot_b]], **box)
+
+    ax1box.plot([0, 40], [1, 1], **kwargs_ef)
+    ax1box.tick_params(labelleft='off', labelright='on')
+    ax1box.yaxis.set_label_position('right')
+    ax1box.set_title(r'$\Sigma\,$box$\,(T\,)$ / $\Sigma\,$box$\,(T_0)$',
+                     fontsize=8)
+    ax1box.set_xticks(np.arange(0, 40, 10))
+    ax1box.set_xticklabels([])
+    ax1box.set_yticks(np.arange(.7, 1.1, .1))
+    ax1box.set_yticklabels([0.7, 0.8, 0.9, 1.0], fontsize=8)
+    ax1box.set_xlim(0, 32)
+    ax1box.set_ylim(.65, 1.1)
+    ax1box.grid(True, alpha=.2)
+    ax1box.text(1, 1.04, '(e) no elast. scat.', fontsize=8)
+
+    lbls = ['(f)', '(g)', '(h)', '(i)']
+    cols = ['c', 'C0', 'b', 'k']
+    ax2box = fig.add_subplot(3, 5, 9+1)
+    ax2box.set_position([.1+(4*.165)+.02, .56, .15, .15])
+    ax2box.tick_params(**kwargs_ticks)
+    for i in range(len(Ts)):
+        ax2 = fig.add_subplot(3, 5, i+6)
+        ax2.set_position([.1+(i*.165), .56, .15, .15])
+        ax2.tick_params(**kwargs_ticks)
+
+        T = Ts[i]
+        ImS = G * v_F + (np.pi*kB*T)**2
+        ReS = np.imag(hilbert(ImS)) / 20
+        ReS -= ReS[e_F_idx]
+        FD = utils.FDsl(en, kB*T, 0, 1, 0, 0)
+        spec = np.zeros((len(k), len(en)))
+
+        for j in range(len(k)):
+            spec[j, :] = ImS / ((en-lda[j]-ReS)**2 + ImS**2)
+        spec[spec > 20] = 20
+        int_b[i] = np.sum(spec[_left_b:_right_b, _bot_b:_top_b])
+        ax2box.plot(T, int_b[i] / int_b[0], 'o', ms=3, color=cols[i])
+
+        ax2.contourf(k, en, np.transpose(spec * FD), res, **kwargs_ex,
+                     vmin=0, vmax=20, zorder=.1)
+        ax2.set_rasterization_zorder(.2)
+        ax2.plot(k[:e_F_idx], lda[:e_F_idx], 'k--', lw=1)
+        ax2.plot([-2, 2], [0, 0], **kwargs_ef)
+        ax2.set_xticks([-1, 0])
+        ax2.set_xticklabels([])
+        ax2.set_yticks(np.arange(-.08, .08, .04))
+
+        if i == 0:
+            ax2.set_yticklabels(['-80', '-40', '0', '40'], fontsize=8)
+            ax2.set_ylabel(r'$\omega$ (meV)', fontsize=8)
+        else:
+            ax2.set_yticklabels([])
+
+        ax2.set_xlim(-1, .0)
+        ax2.set_ylim(-.1, .03)
+        ax2.text(-.95, .012, lbls[i], fontsize=8)
+
+        box = {'ls': '--', 'color': 'r', 'lw': .5}
+        ax2.plot([k[_left_b], k[_left_b]],
+                 [en[_top_b], en[_bot_b]], **box)
+        ax2.plot([k[_right_b], k[_right_b]],
+                 [en[_top_b], en[_bot_b]], **box)
+        ax2.plot([k[_left_b], k[_right_b]],
+                 [en[_top_b], en[_top_b]], **box)
+        ax2.plot([k[_left_b], k[_right_b]],
+                 [en[_bot_b], en[_bot_b]], **box)
+
+    ax2box.plot([0, 40], [1, 1], **kwargs_ef)
+    ax2box.tick_params(labelleft='off', labelright='on')
+    ax2box.yaxis.set_label_position('right')
+    ax2box.set_xticks(np.arange(0, 40, 10))
+    ax2box.set_xticklabels([])
+    ax2box.set_yticks(np.arange(.7, 1.1, .1))
+    ax2box.set_yticklabels([0.7, 0.8, 0.9, 1.0], fontsize=8)
+    ax2box.set_xlim(0, 32)
+    ax2box.set_ylim(.65, 1.1)
+    ax2box.grid(True, alpha=.2)
+    ax2box.text(1, 1.04, '(j) $+$ elast. scat.', fontsize=8)
+
+    lbls = ['(k)', '(l)', '(m)', '(n)']
+    cols = ['c', 'C0', 'b', 'k']
+    ax3box = fig.add_subplot(3, 5, 15)
+    ax3box.set_position([.1+(4*.165)+.02, .4, .15, .15])
+    ax3box.tick_params(**kwargs_ticks)
+    for i in range(len(Ts)):
+        ax3 = fig.add_subplot(3, 5, i+11)
+        ax3.set_position([.1+(i*.165), .4, .15, .15])
+        ax3.tick_params(**kwargs_ticks)
+
+        T = Ts[i]
+        ImS = G * v_F + (np.pi*kB*T)**2
+        ReS = np.imag(hilbert(ImS)) / 20
+        ReS -= ReS[e_F_idx]
+        FD = utils.FDconvGauss(en, kB*T, 0, 1, .01, 0, 1, 0)
+        spec = np.zeros((len(k), len(en)))
+
+        for j in range(len(k)):
+            spec[j, :] = ImS / ((en-lda[j]-ReS)**2 + ImS**2)
+        spec[spec > 20] = 20
+        int_b[i] = np.sum(spec[_left_b:_right_b, _bot_b:_top_b])
+        ax3box.plot(T, int_b[i] / int_b[0], 'o', ms=3, color=cols[i])
+
+        ax3.contourf(k, en, np.transpose(spec * FD), res, **kwargs_ex,
+                     vmin=0, vmax=20, zorder=.1)
+        ax3.set_rasterization_zorder(.2)
+        ax3.plot(k[:e_F_idx], lda[:e_F_idx], 'k--', lw=1)
+        ax3.plot([-2, 2], [0, 0], **kwargs_ef)
+        ax3.set_xticks([-1, 0])
+        ax3.set_xticklabels(['S', r'$\Gamma$'], fontsize=8)
+        ax3.set_yticks(np.arange(-.08, .08, .04))
+
+        if i == 0:
+            ax3.set_yticklabels(['-80', '-40', '0', '40'], fontsize=8)
+            ax3.set_ylabel(r'$\omega$ (meV)', fontsize=8)
+        else:
+            ax3.set_yticklabels([])
+
+        ax3.set_xlim(-1, .0)
+        ax3.set_ylim(-.1, .03)
+        ax3.text(-.95, .012, lbls[i], fontsize=8)
+
+        box = {'ls': '--', 'color': 'r', 'lw': .5}
+        ax3.plot([k[_left_b], k[_left_b]],
+                 [en[_top_b], en[_bot_b]], **box)
+        ax3.plot([k[_right_b], k[_right_b]],
+                 [en[_top_b], en[_bot_b]], **box)
+        ax3.plot([k[_left_b], k[_right_b]],
+                 [en[_top_b], en[_top_b]], **box)
+        ax3.plot([k[_left_b], k[_right_b]],
+                 [en[_bot_b], en[_bot_b]], **box)
+
+    ax3box.plot([0, 40], [1, 1], **kwargs_ef)
+    ax3box.tick_params(labelleft='off', labelright='on')
+    ax3box.yaxis.set_label_position('right')
+    ax3box.set_xticks(np.arange(0, 40, 10))
+    ax3box.set_yticks(np.arange(.7, 1.1, .1))
+    ax3box.set_xticklabels([0, 10, 20, 30], fontsize=8)
+    ax3box.set_yticklabels([0.7, 0.8, 0.9, 1.0], fontsize=8)
+    ax3box.set_xlabel(r'$T$ (K)', fontsize=8)
+    ax3box.set_xlim(0, 32)
+    ax3box.set_ylim(.65, 1.1)
+    ax3box.grid(True, alpha=.2)
+    ax3box.text(1, 1.04, '(o) $+$ instr. res.', fontsize=8)
+    plt.show()
+
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname + '.pdf', dpi=180,
+                    bbox_inches="tight", rasterized=True)
+
+
+def fig34(print_fig=True):
+    """figure 34
+
+    %%%%%%%%%%%%%%%%%%%%%%%
+    Resolution effects EDCs
+    %%%%%%%%%%%%%%%%%%%%%%%
+    """
+
+    figname = 'CSROfig34'
+    fig = plt.figure(figname, figsize=(6, 6), clear=True)
+
+    ax1 = fig.add_axes([.1, .4, .3, .3])
+    ax1.tick_params(**kwargs_ticks)
+
+    ax2 = fig.add_axes([.43, .4, .3, .3])
+    ax2.tick_params(**kwargs_ticks)
+
+    kB = 8.617e-5  # Boltzmann constant
+    Ts = np.array([1.3, 10, 20, 30])
+    v_F = 2.34
+    k_F = -.28
+    n = 3000
+    k = np.linspace(-.36, -.25, n)
+    lda = (k-k_F) * v_F
+    en = np.linspace(lda[0], lda[-1], n)
+
+    # EDC values
+    edc_b_val = -.36  # EDC beta band
+    edcw_b_val = .01
+
+    val, k_F_idx = utils.find(k, k_F)
+    val, e_F_idx = utils.find(en, 0)
+
+    G0 = .02  # Impurity scattering
+    eta = 10.6
+    G = G0 + eta * en**2
+
+    cols = ['c', 'C0', 'b', 'k']
+
+    for i in range(len(Ts)):
+        T = Ts[i]
+        ImS = G * v_F + (np.pi*kB*T)**2
+        ReS = np.imag(hilbert(ImS)) / 20
+        ReS -= ReS[e_F_idx]
+        FD = utils.FDconvGauss(en, kB*T, 0, 1, .01, 0, 1, 0)
+        EDC = np.zeros(len(en))
+        EDC = ImS / ((en-lda[k_F_idx]-ReS)**2 + ImS**2)
+        EDC *= FD
+        ax1.plot(en, EDC, '-', color=cols[i])
+
+    ax1.plot([-1, 1], [0, 0], **kwargs_ef)
+    ax1.set_xticks(np.arange(-.1, .04, .02))
+    ax1.set_xticklabels(['-100', '-80', '-60', '-40', '-20', '0', '20'])
+    ax1.set_xlabel(r'$\omega$ (meV)', fontdict=font)
+    ax1.set_xlim(-.1, .03)
+    ax1.set_yticks([])
+    ax1.set_ylabel('Intensity (arb. u.)', fontdict=font)
+    ax1.text(-.095, 22.5, r'(a) EDC @ $k_\mathrm{F}$', fontsize=10)
+    ax1.text(.006, 18, r'$1.3\,$K', color=cols[0])
+    ax1.text(.006, 15, r'$10\,$K', color=cols[1])
+    ax1.text(.006, 12, r'$20\,$K', color=cols[2])
+    ax1.text(.006, 9, r'$30\,$K', color=cols[3])
+
+    # data loading for figure
+    files = [25, 26, 27, 28]
+    gold = 14
+    mat = 'CSRO20'
+    year = 2017
+    sample = 'S1'
+
+    edc_b_val = -.36  # EDC beta band
+    edcw_b_val = .01
+
+    for i in [0, 3]:
+        D = ARPES.Bessy(files[i], mat, year, sample)
+        if i == 0:
+            D.int_amp(1.52)  # renoramlize intensity for this spectrum
+        D.norm(gold=gold)
+        D.bkg()
+        D.restrict(bot=.7, top=.9, left=.33, right=.5)
+
+        # Transform data
+        if i == 0:
+            D.ang2k(D.ang, Ekin=48, lat_unit=True, a=5.5, b=5.5, c=11,
+                    V0=0, thdg=2.4, tidg=0, phidg=45)
+        else:
+            D.ang2k(D.ang, Ekin=48, lat_unit=True, a=5.5, b=5.5, c=11,
+                    V0=0, thdg=2.8, tidg=0, phidg=45)
+        int_norm = D.int_norm
+        en_norm = D.en_norm - .008
+        val, _edc_b = utils.find(D.kxs[:, 0], edc_b_val)
+        val, _edcw_b = utils.find(D.kxs[:, 0], edc_b_val - edcw_b_val)
+        edc_b = (np.sum(int_norm[_edcw_b:_edc_b, :], axis=0) /
+                 (_edc_b - _edcw_b + 1))
+
+        bkg_b = utils.Shirley(edc_b)
+        edc_b -= bkg_b
+        bkg_b = utils.Shirley(edc_b)
+        edc_b = edc_b / np.sum(edc_b)
+        ax2.plot(en_norm[_edc_b], edc_b, 'o', ms=2, color=cols[i])
+        ax2.plot([-1, 1], [0, 0], **kwargs_ef)
+
+    ax2.set_xlim([-.1, .03])
+    ax2.set_ylim([-.0004, .0088])
+    ax2.text(-.095, .0078, r'(b) $\alpha$-EDC @ $k_\mathrm{F}$', fontsize=10)
+    ax2.set_xticks(np.arange(-.1, .04, .02))
+    ax2.set_xticklabels(['-100', '-80', '-60', '-40', '-20', '0', '20'])
+    ax2.set_xlabel(r'$\omega$ (meV)', fontdict=font)
+    ax2.set_xlim(-.1, .03)
+    ax2.set_yticks([])
+    ax2.text(.006, .006, r'$1.3\,$K', color=cols[0])
+    ax2.text(.006, .0032, r'$30\,$K', color=cols[3])
+    plt.show()
+
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname + '.pdf', dpi=200,
                     bbox_inches="tight", rasterized=True)

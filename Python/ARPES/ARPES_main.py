@@ -99,6 +99,7 @@ CSRO.fig28: Fermi surface counting SRO
 CSRO.fig29: Fermi surface folded CSRO
 CSRO.fig30: xFig1 2nd version
 CSRO.fig31: xFig3 self energy
+CSRO.fig32: Resolution effects on alpha
 """
 
 # %%
@@ -111,6 +112,6 @@ CRO.fig19(print_fig=True)
 
 # %%
 # CSRO.fig20(load=False)
-CSRO.fig2(print_fig=True)
+CSRO.fig34(print_fig=True)
 
 # %%
