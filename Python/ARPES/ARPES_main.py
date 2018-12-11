@@ -45,6 +45,7 @@ CON.fig17:  Bi-layer model
 CON.fig18:  Tri-layer model
 CON.fig19:  Infinity-layer model
 CON.fig20:  Instrumental resolution
+CON.fig21:  Instrumental resolution vs T
 
 ----------  Ca2RuO4 Figures   ----------
 CRO.fig1:   DFT plot: figure 3 of Nature Comm.
@@ -66,6 +67,7 @@ CRO.fig16:  Schematic DOS band / Mott
 CRO.fig17:  Schematic DOS uniform gap
 CRO.fig18:  Oxygen bands + DFT
 CRO.fig19:  Schematic DOS Mott-Hubbard
+CRO.fig20:  Combined fig7 & 8
 
 ----------  Ca1.8Sr0.2RuO4 Figures ----------
 CSRO.fig1:  Experimental data FS + cuts
@@ -100,18 +102,21 @@ CSRO.fig29: Fermi surface folded CSRO
 CSRO.fig30: xFig1 2nd version
 CSRO.fig31: xFig3 self energy
 CSRO.fig32: Resolution effects on alpha
+CSRO.fig33: Resolution effects extended
+CSRO.fig34: Resolution effects EDCs
+CSRO.fig35: Heat capacity effects
 """
 
 # %%
 
-CON.fig20()
+CON.fig21()
 
 # %%
 
-CRO.fig19(print_fig=True)
+CRO.fig21(print_fig=True)
 
 # %%
 # CSRO.fig20(load=False)
-CSRO.fig34(print_fig=True)
+CSRO.fig19(print_fig=True)
 
 # %%

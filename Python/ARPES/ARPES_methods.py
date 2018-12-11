@@ -129,6 +129,8 @@ class Methods:
             Res[i] = np.sqrt(T_fit[i] ** 2 - T_ini ** 2) * 4 * kB
             Ef[i] = p_FDsl[1]  # Fit parameter
 
+        self.T = T_fit
+
         # Fit Fermi level fits with a polynomial
         p_ini_poly2 = [Ef[ch], 0, 0, 0]
         p_poly2, c_poly2 = curve_fit(utils.poly_2, self.ang[bnd:-bnd],

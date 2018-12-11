@@ -1631,8 +1631,10 @@ def fig14(print_fig=True):
     ax.text(-.83, .57, r'$\mathbf{k}^\prime - \mathbf{q}$', fontdict=font)
     ax.text(-.43, .31, r'$\mathbf{k}$', fontdict=font)
     ax.text(-1.15, -.65, r'$\mathbf{k} + \mathbf{q}$', fontdict=font)
-    ax.text(.36, .08, r'$\epsilon_\mathbf{k}^q$', fontdict=font)
-    ax.text(1.05, -.42, r'$\epsilon_\mathbf{k}^q$', fontdict=font)
+#    ax.text(.36, .08, r'$\epsilon_\mathbf{k}^q$', fontdict=font)
+#    ax.text(1.05, -.42, r'$\epsilon_\mathbf{k}^q$', fontdict=font)
+    ax.text(.36, .08, r'$\omega$', fontdict=font)
+    ax.text(1.05, -.42, r'$\omega$', fontdict=font)
 
     # axes
     ax.set_ylim(-.9, .9)
@@ -2253,10 +2255,10 @@ def fig20(print_fig=True):
              color='b', fontsize=12)
     ax2.text(-.035, .0016, r'$\widetilde{f}(\omega, T)$',
              color='C1', fontsize=12)
-    ax2.text(-.035, .0012, r'$\mathcal{R}(\omega)$',
+    ax2.text(-.035, .0012, r'$\mathcal{R}(\Delta \omega)$',
              color='k', fontsize=12)
     ax2.text(-.035, .0008,
-             r'$\mathcal{R}(\omega) \otimes \widetilde{f}(\omega, T)$',
+             r'$\mathcal{R}(\Delta \omega) \otimes \widetilde{f}(\omega, T)$',
              color='r', fontsize=12)
 
     # decorate axes
@@ -2266,6 +2268,74 @@ def fig20(print_fig=True):
     ax2.set_yticks([])
     ax2.set_xlabel(r'$\omega$ (eV)', fontdict=font)
     ax2.set_ylabel('Intensity (arb.u.)', fontdict=font)
+    plt.show()
+
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
+
+
+def fig21(print_fig=True):
+    """figure 21
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    Instrumental resolution vs T
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    """
+
+    figname = 'CONfig21'
+
+    mat = 'EuLSCO21'
+    year = '2015'
+    sample = 'Eu21_1'
+    files = np.array([25700, 25703, 25707, 25711, 25714, 25717])
+    T = np.array([6.3, 8, 10.15, 12.1, 14.2, 16.2])
+    T_fit = np.zeros(len(T))
+    T_fit_err = np.zeros(len(T))
+
+    n = 0
+    for file in files:
+        D = ARPES.DLS(file, mat, year, sample)
+        D.gold(50.52)
+        T_fit[n] = np.mean(D.T)
+        T_fit_err[n] = np.std(D.T)
+        n += 1
+
+    kB = 8.617e-5  # Boltzmann constant
+
+    fig = plt.figure(figname, figsize=(6, 6), clear=True)
+    ax1 = fig.add_subplot(131)
+    ax1.set_position([.3, .3, .4, .4])
+    ax1.tick_params(**kwargs_ticks)
+
+    en = 4*T_fit*kB*1e3
+    en_err = 4*T_fit_err*kB*1e3/2
+    print(en_err)
+    ax1.errorbar(T, en, yerr=en_err, lw=.5,
+                 capsize=2, color='k', fmt='o', ms=5)
+    p_ini_poly1 = [0, 0, 0]
+    p_poly1, c_poly1 = curve_fit(utils.poly_1, T, en, p0=p_ini_poly1)
+#    err_fit = np.sqrt(np.diag(c_poly1))
+
+    xx = np.linspace(0, 20, 200)
+    yy = utils.poly_1(xx, *p_poly1)
+
+    ax1.plot(xx, yy, 'r--')
+    ax1.plot([0, 5], [p_poly1[0], p_poly1[0]], **kwargs_ef)
+    ax1.arrow(2, 4, 0, 4.2, head_width=0.4, head_length=0.5, fc='k', ec='k')
+    ax1.arrow(2, 4, 0, -3.4, head_width=0.4, head_length=0.5, fc='k', ec='k')
+    ax1.text(2.4, 5, 'Instrumental resolution')
+    ax1.text(2.4, 3.5, (r'$\Delta \omega = $' +
+                        str(np.round(p_poly1[0], 1)) +
+                        r'$\,$meV'))
+    ax1.set_xticks(np.arange(0, 20, 5))
+    ax1.set_yticks(np.arange(0, 20, 5))
+    ax1.set_xlim(0, 18)
+    ax1.set_ylim(0, 15)
+    ax1.set_xlabel(r'$T_\mathrm{sample}$ (K)')
+    ax1.set_ylabel(r'$4\,k_\mathrm{B}\,T_\mathrm{fit}$ (meV)')
+    ax1.grid(True, alpha=.2)
     plt.show()
 
     # Save figure

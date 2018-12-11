@@ -1523,7 +1523,7 @@ def optimize_TB(Kx, Ky, En, it_max, P):
     beta1 = .9  # parameter Adam optimizer
     beta2 = .999  # parameter Adam optimizer
     epsilon = 1e-8  # preventing from dividing by zero
-    alpha = 5e-5  # external learning rate
+    alpha = 5e-5  # external learning rat
 
     # start optimizing
     start_time = time.time()

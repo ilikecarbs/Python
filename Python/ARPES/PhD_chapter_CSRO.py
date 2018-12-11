@@ -24,6 +24,7 @@ from scipy.optimize import curve_fit
 from scipy import integrate
 from scipy.special import sph_harm
 from scipy.signal import hilbert, chirp
+from scipy.interpolate import interp1d
 
 import ARPES_header as ARPES
 import ARPES_utils as utils
@@ -1211,6 +1212,11 @@ def fig4(print_fig=True):
     int_e = int_e / int_e[0]
     int_b = int_b / int_b[0]
 
+#    v_F = 2.34
+#    k_F = -.36
+#    k_lda = np.linspace(-1, .0, 2)
+#    lda = (k_lda-k_F) * v_F
+
     # Figure panels
     def fig4abcd():
         lbls = [r'(a) $T=1.3\,$K', r'(b) $T=10\,$K', r'(c) $T=20\,$K',
@@ -1232,12 +1238,14 @@ def fig4(print_fig=True):
                 ax.plot([k[j][_EDC_e[j], 0], k[j][_EDC_e[j], 0]],
                         [-1, .005],
                         ls='-.', color='r', lw=.5)
-                ax.plot([k[j][_EDC_b[j], 0], k[j][_EDC_b[j], 0]],
+                ax.plot([-.35, -.35],
                         [-1, .005],
                         ls='-.', color='r', lw=.5)
-                ax.plot([k[j][_EDC_b[j], 0], k[j][_EDC_b[j], 0]],
+                ax.plot([-.35, -.35],
                         [.015, .04],
                         ls='-.', color='r', lw=.5)
+#                ax.plot(k_lda, lda, 'w--')
+#                ax.text(-.4, -.06, r'$\varepsilon_k^b$', color='w')
                 # decorate axes
                 ax.set_yticks(np.arange(-.1, .03, .02))
                 ax.set_yticklabels(['-100', '-80', '-60', '-40', '-20',
@@ -1253,14 +1261,14 @@ def fig4(print_fig=True):
                 v_LDA_data = np.loadtxt('Data_CSROfig8_v_LDA.dat')
                 v_LDA = v_LDA_data[0]
 
-                k_F = -.32
+                k_F = -.35
                 v_LDA = 2.34
                 xx = np.arange(-.4, .25, .01)  # helper variable for plotting
-                ax.text(-.29, .009, r'$\epsilon_\mathbf{k}^b$',
-                                    color='C4')
+                ax.text(-.29, .01, r'$\varepsilon_k^b$',
+                        color='C4', fontsize=12)
                 p0 = -k_F * v_LDA
                 yy = p0 + xx * v_LDA  # For plotting v_LDA
-                ax.plot(xx, yy, 'C4--', lw=1)
+                ax.plot(xx, yy, 'C4--', lw=1.5)
                 ax.set_yticks(np.arange(-.1, .05, .02))
                 ax.set_yticklabels([])
             elif j == 3:
@@ -1268,7 +1276,7 @@ def fig4(print_fig=True):
                 ax.plot([k[j][_EDC_e[j], 0], k[j][_EDC_e[j], 0]],
                         [-1, .015],
                         ls='-.', color='r', lw=.5)
-                ax.plot([k[j][_EDC_b[j], 0], k[j][_EDC_b[j], 0]],
+                ax.plot([-.35, -.35],
                         [en[j][0, 0], en[j][0, -1]],
                         ls='-.', color='r', lw=.5)
 
@@ -1319,9 +1327,9 @@ def fig4(print_fig=True):
 
     def fig4efg():
         # labels and position
-        lbls = [r'(e) $\gamma$-band',
-                r'(f) $\gamma$-band (zoom)',
-                r'(g) $\alpha$-band (zoom)']
+        lbls = [r'(e) $\gamma$-band, @$\,$S',
+                r'(f) $\gamma$-band (zoom), @$\,$S',
+                r'(g) $\alpha$-band (zoom), @$\,k_\mathrm{F}$']
         lbls_x = [-.77, -.093, -.093]
         lbls_y = [2.05, 1.08, 1.08]
 
@@ -3391,7 +3399,7 @@ def fig18(print_fig=True):
         ax.set_ylabel(r'$k_x \,(\pi/a)$', fontdict=font)
 
         # add text
-        ax.text(-.075, .48, r'(a)', fontsize=12, color='C1')
+        ax.text(-.075, .48, r'(a)', fontsize=12, color='c')
         ax.text(-.002, -.03, r'$\Gamma$', fontsize=12, color='r')
         ax.text(-.002, -1.03, r'Y', fontsize=12, color='r')
 
@@ -3550,10 +3558,10 @@ def fig19(print_fig=True):
     ax.plot([np.min(D.kxs), np.max(D.kxs)], [0, 0], **kwargs_ef)
 
     # plot MDC
-    ax.plot(D.k[1], (mdc - b_mdc) / 25 + .005, 'o',
+    ax.plot(D.k[1]*.95, (mdc - b_mdc) / 25 + .005, 'o',
             markersize=1.5, color='C9')
-    ax.fill(D.k[1], (f_mdc) / 25 + .005, alpha=.2, color='C9')
-    ax.plot(D.k[1], (f_mdc) / 25 + .005, color='b', linewidth=.5)
+    ax.fill(D.k[1]*.95, (f_mdc) / 25 + .005, alpha=.2, color='C9')
+    ax.plot(D.k[1]*.95, (f_mdc) / 25 + .005, color='b', linewidth=.5)
 
     # label colors and positions
     cols = ['m', 'm', 'k', 'r', 'r', 'k', 'm', 'C1']
@@ -3563,7 +3571,7 @@ def fig19(print_fig=True):
 
     # plot Lorentzians
     for i in range(7):
-        ax.plot(D.k[1], (utils.lor(D.k[1], p_mdc[i], p_mdc[i + 7],
+        ax.plot(D.k[1]*.95, (utils.lor(D.k[1], p_mdc[i], p_mdc[i + 7],
                 p_mdc[i + 14],
                 p_mdc[-3]*0, p_mdc[-2]*0, p_mdc[-1]*0))/25+.002,
                 lw=lws[i], color=cols[i], alpha=alphas[i])
@@ -3579,8 +3587,8 @@ def fig19(print_fig=True):
     ax.set_xlabel(r'$k_x \,(\pi/a)$', fontdict=font)
 
     # add text
-    ax.text(.87, .027, r'$\bar{\epsilon}$', fontsize=12, color='r')
-    ax.text(1.2, .032, r'$\bar{\epsilon}$', fontsize=12, color='r')
+    ax.text(.87*.95, .029, r'$\gamma$', fontsize=12, color='r')
+    ax.text(1.2*.95, .034, r'$\gamma$', fontsize=12, color='r')
 
     # colorbars
     pos = ax.get_position()
@@ -4106,7 +4114,7 @@ def fig23(print_fig=True, load=True):
                 x[i] = coord[i][0]
                 y[i] = 0
                 en[i] = coord[i][1]
-                m += 2 * 2.4  # regularization
+                m +=  2 * 2.4   # regularization
         elif n >= 16:
             for i in range(len(coord)):
                 x[i] = coord[i][0]
@@ -4174,7 +4182,7 @@ def fig23(print_fig=True, load=True):
     J_n = J / m * 1e3
     fig = plt.figure(figname, clear=True, figsize=(7, 7))
     ax = fig.add_axes([.25, .25, .5, .5])
-    print(J_n[-1])
+    print('J_final='+str(J_n[-1]))
     # plot cost
     ax.plot(it, J_n, 'C8o', ms=2)
     ax.plot([0, np.max(it)], [np.min(J_n), np.min(J_n)], **kwargs_ef)
@@ -4182,12 +4190,12 @@ def fig23(print_fig=True, load=True):
 
     # decorate axes
     ax.set_xlim([np.min(it), np.max(it)])
-    ax.set_xlabel('iterations (t)', fontdict=font)
-    ax.set_ylabel(r'fitness $\xi (t)$ (meV)', fontdict=font)
-    ax.arrow(2080, 9.2, 0, -1.2, head_width=160,
-             head_length=.3, fc='k', ec='k')
-    ax.arrow(5950, 7.5, 0, -1.2, head_width=160,
-             head_length=.3, fc='k', ec='k')
+    ax.set_xlabel('iterations $t$', fontdict=font)
+    ax.set_ylabel(r'fitness $\xi (\theta_t)$ (meV)', fontdict=font)
+#    ax.arrow(2080, 9.2, 0, -1.2, head_width=160,
+#             head_length=.3, fc='k', ec='k')
+#    ax.arrow(5950, 7.5, 0, -1.2, head_width=160,
+#             head_length=.3, fc='k', ec='k')
 
     plt.show()
 
@@ -5983,4 +5991,169 @@ def fig34(print_fig=True):
     # Save figure
     if print_fig:
         plt.savefig(save_dir + figname + '.pdf', dpi=200,
+                    bbox_inches="tight", rasterized=True)
+
+
+def fig35(print_fig=True):
+    """figure 35
+
+    %%%%%%%%%%%%%%%%%%%%%
+    Heat capacity effects
+    %%%%%%%%%%%%%%%%%%%%%
+    """
+
+    figname = 'CSROfig35'
+
+    # load data
+    os.chdir(data_dir)
+    DOS_xy = np.loadtxt('Data_TB_DOS_Axy.dat')
+    DOS_yz = np.loadtxt('Data_TB_DOS_Byz.dat')
+    DOS_xz = np.loadtxt('Data_TB_DOS_Bxz.dat')
+
+    DOS_xy_2 = np.loadtxt('Data_TB_DOS_Bxy.dat')
+    DOS_yz_2 = np.loadtxt('Data_TB_DOS_Ayz.dat')
+    DOS_xz_2 = np.loadtxt('Data_TB_DOS_Axz.dat')
+
+    En_xy = np.loadtxt('Data_TB_DOS_en_Axy.dat')
+    En_yz = np.loadtxt('Data_TB_DOS_en_Byz.dat')
+    En_xz = np.loadtxt('Data_TB_DOS_en_Bxz.dat')
+
+    En_xy_2 = np.loadtxt('Data_TB_DOS_en_Bxy.dat')
+    En_yz_2 = np.loadtxt('Data_TB_DOS_en_Ayz.dat')
+    En_xz_2 = np.loadtxt('Data_TB_DOS_en_Axz.dat')
+
+    C_B = np.genfromtxt('Data_C_Braden.csv', delimiter=',')
+    C_M = np.genfromtxt('Data_C_Maeno.csv', delimiter=',')
+
+#    DMFT_DOS_xy_dn = np.loadtxt('DMFT_DOS_xy_dn.dat')
+#    DMFT_DOS_yz_dn = np.loadtxt('DMFT_DOS_yz_dn.dat')
+#    DMFT_DOS_xz_dn = np.loadtxt('DMFT_DOS_xz_dn.dat')
+#    DMFT_DOS_xy_up = np.loadtxt('DMFT_DOS_xy_up.dat')
+#    DMFT_DOS_yz_up = np.loadtxt('DMFT_DOS_yz_up.dat')
+#    DMFT_DOS_xz_up = np.loadtxt('DMFT_DOS_xz_up.dat')
+    os.chdir(home_dir)
+
+#    top = 4500
+#    bot = 3500
+#    DMFT_xy = DMFT_DOS_xy_dn[bot:top, 1] +\
+#              DMFT_DOS_xy_up[bot:top, 1]
+#    DMFT_yz = DMFT_DOS_yz_dn[bot:top, 1] +\
+#              DMFT_DOS_yz_up[bot:top, 1]
+#    DMFT_xz = DMFT_DOS_xz_dn[bot:top, 1] +\
+#              DMFT_DOS_xz_up[bot:top, 1]
+#    En_DMFT = DMFT_DOS_xy_dn[bot:top, 0]
+
+    DOS = (DOS_xy, DOS_yz, DOS_xz, DOS_xy_2, DOS_yz_2, DOS_xz_2)
+    En = (En_xy, En_yz, En_xz, En_xy_2, En_yz_2, En_xz_2)
+    T = np.arange(.4, 40, .05)
+    kB = 8.6173303e-5
+    C = np.ones(len(T))
+    Cp = np.ones(len(T))
+    U = np.ones(len(T))
+    stp = 20
+    J = 1.60218e-19
+    mols = 6.022140857e23
+    Gamma1 = 0
+    Gamma2 = 0
+    fig_sub = plt.figure('specific heat', clear=True)
+
+    for i in range(len(En)):
+        en = En[i]
+        dos = DOS[i]
+
+        nbins = len(en)
+
+        expnt = np.ones((nbins, len(T)))
+        FD = np.ones((nbins, len(T)))
+        dFD = np.ones((nbins, len(T)))
+        expnt_ext = np.ones((stp * nbins - (stp - 1), len(T)))
+        FD_ext = np.ones((stp * nbins - (stp - 1), len(T)))
+        dFD_ext = np.ones((stp * nbins - (stp - 1), len(T)))
+
+#        dE = en[1] - en[0]
+        En_ext = np.linspace(en[0], en[-1], FD_ext[:, 0].size)
+        DOS_ext = interp1d(en, dos, kind='cubic')
+
+        EF = 0.0026
+
+        for t in range(len(T)):
+            expnt[:, t] = (en - EF) / (kB * T[t])
+            expnt_ext[:, t] = (En_ext - EF) / (kB * T[t])
+            FD[:, t] = 1 / (np.exp(expnt[:, t]) + 1)
+            FD_ext[:, t] = 1 / (np.exp(expnt_ext[:, t]) + 1)
+
+        for e in range(nbins):
+            dFD[e, :-1] = np.diff(FD[e, :]) / (T[2] - T[1])
+            dFD[e, -1] = dFD[e, -2]
+
+        for e in range(dFD_ext[:, 0].size):
+            dFD_ext[e, :-1] = np.diff(FD_ext[e, :]) / (T[2] - T[1])
+            dFD_ext[e, -1] = dFD_ext[e, -2]
+
+        v_max = .6 * np.max(dFD_ext)
+        ax3 = fig_sub.add_subplot(223)
+        ax3.pcolormesh(T, En_ext, dFD_ext, cmap='PuOr',
+                       vmax=v_max, vmin=-v_max)
+        ax3.plot(T, 4 * kB * T, 'r--', lw=1)
+        ax3.plot(T, -4 * kB * T, 'r--', lw=1)
+        ax3.set_ylim(-.01, .01)
+
+        edc_val, edc_idx = utils.find(T, 5)
+        ax4 = fig_sub.add_subplot(224)
+        ax4.plot(dFD_ext[:, edc_idx], En_ext, 'C8o', ms=1)
+        ax4.set_ylim(-.01, .01)
+
+        Cpext = Cp
+        Uext = U
+        Cext = C
+
+        for t in range(len(T)):
+            Cp[t] = np.trapz((en - EF) * dos * dFD[:, t], x=en)
+            U[t] = np.trapz((en - EF) * dos * FD[:, t], x=en)
+            Cpext[t] = np.trapz((En_ext - EF)*DOS_ext(En_ext)*dFD_ext[:, t],
+                                x=En_ext)
+            Uext[t] = np.trapz((En_ext - EF)*DOS_ext(En_ext)*FD_ext[:, t],
+                               x=En_ext)
+
+        C[:-1] = np.diff(U[:]) / (T[2] - T[1])
+        C[-1] = C[-2]
+        Cext[:-1] = np.diff(Uext[:]) / (T[2] - T[1])
+        Cext[-1] = Cext[-2]
+        pre = J*mols * 1000
+
+        gamma2 = pre * Cpext / T
+        gamma1 = pre * C / T
+
+        Gamma1 = Gamma1 + gamma1
+        Gamma2 = Gamma2 + gamma2
+
+        ax1 = fig_sub.add_subplot(221)
+        ax1.plot(En_ext, DOS_ext(En_ext), 'rs', ms=1)
+        ax1.plot(en, dos)
+        ax1.plot([EF+2*kB*T[-1], EF+2*kB*T[-1]], [0, np.max(dos)], 'r--')
+        ax1.plot([EF-2*kB*T[-1], EF-2*kB*T[-1]], [0, np.max(dos)], 'r--')
+        ax1.set_xlim(-.1, .1)
+
+    fig = plt.figure(figname, figsize=(6, 6), clear=True)
+    ax = fig.add_axes([.3, .3, .4, .4])
+#    ax2.plot(T, gamma1 * factor)
+    ax.plot(C_B[:, 0], C_B[:, 1] * 1e3, 'o', ms=1, color='k')
+    ax.plot(C_M[:, 0], C_M[:, 1], 'o', ms=1, color='b')
+    ax.text(4e-1, 130, r'J. Baier $\mathit{et\,\,al.}$', color='k')
+    ax.text(4e-1, 120, r'S. Nakatsuji $\mathit{et\,\,al.}$', color='b')
+    ax.text(4e-1, 110, r'TBA model ($\varepsilon_\mathbf{k} + 2.6\,$meV)',
+            color='r')
+    ax.set_xscale("log", nonposx='clip')
+    ax.set_xlim(3e-1, 20)
+    ax.set_ylim(80, 210)
+    ax.set_xlabel(r'$T$ (K)')
+    ax.set_ylabel(r'$c_p$ (mJ$\,$mol$^{-1}\,$K$^{-2}$)')
+
+    ax.plot(T, Gamma1 * 2.85, 'ro', ms=3)
+#    ax.plot(T, Gamma2 * 2.9, 'ro', ms=3)
+    plt.show()
+
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
                     bbox_inches="tight", rasterized=True)
