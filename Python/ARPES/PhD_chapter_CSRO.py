@@ -130,9 +130,9 @@ def fig1(print_fig=True):
              V0=0, thdg=9.2-3.5, tidg=-15.7, phidg=90)
 
     # TB
-    param = utils.paramCSRO20_opt()  # Load parameters
-    TB_A1 = utils.CSRO_eval(A1.k[0], A1.k[1], param)
-    TB_A2 = utils.CSRO_eval(A2.k[0], A2.k[1], param)
+#    param = utils.paramCSRO20_opt()  # Load parameters
+#    TB_A1 = utils.CSRO_eval(A1.k[0], A1.k[1], param)
+#    TB_A2 = utils.CSRO_eval(A2.k[0], A2.k[1], param)
 
     # MDC
     mdc_ = -.004
@@ -182,7 +182,7 @@ def fig1(print_fig=True):
 
         # plot data
         ax.contourf(A1.en_norm, A1.kys, A1.int_norm, 300, **kwargs_ex,
-                    vmin=.1*np.max(A1.int_norm), vmax=.7*np.max(A1.int_norm),
+                    vmin=.1*np.max(A1.int_norm), vmax=.5*np.max(A1.int_norm),
                     zorder=.1)
         ax.set_rasterization_zorder(.2)
         ax.plot([0, 0], [np.min(A1.kys), np.max(A1.kys)], **kwargs_ef)
@@ -238,7 +238,7 @@ def fig1(print_fig=True):
                          np.transpose(np.fliplr(A2.int_norm)), 300,
                          **kwargs_ex,
                          vmin=.1*np.max(A2.int_norm),
-                         vmax=.7*np.max(A2.int_norm), zorder=.1)
+                         vmax=.5*np.max(A2.int_norm), zorder=.1)
         ax.set_rasterization_zorder(.2)
         ax.plot([0, 0], [np.min(A2.kys), np.max(A2.kys)], **kwargs_ef)
 #        for i in range(6):
@@ -274,7 +274,7 @@ def fig1(print_fig=True):
 
         # plot data
         ax.contourf(D.kx, D.ky, np.flipud(D.map), 300, **kwargs_ex,
-                    vmax=.9 * np.max(D.map), vmin=.3 * np.max(D.map),
+                    vmax=.7 * np.max(D.map), vmin=.3 * np.max(D.map),
                     zorder=.1)
         ax.set_rasterization_zorder(.2)
 
@@ -3386,8 +3386,8 @@ def fig18(print_fig=True):
                     vmin=0, vmax=.8 * np.max(A1.int_norm), zorder=.1)
         ax.set_rasterization_zorder(.2)
         ax.plot([0, 0], [np.min(A1.kys), np.max(A1.kys)], **kwargs_ef)
-        ax.plot([-.005, -.005], [np.min(A1.kys), np.max(A1.kys)],
-                **kwargs_cut)
+#        ax.plot([-.005, -.005], [np.min(A1.kys), np.max(A1.kys)],
+#                **kwargs_cut)
 
         # decorate axes
         ax.set_xticks(np.arange(-.08, .0, .02))
@@ -3399,9 +3399,9 @@ def fig18(print_fig=True):
         ax.set_ylabel(r'$k_x \,(\pi/a)$', fontdict=font)
 
         # add text
-        ax.text(-.075, .48, r'(a)', fontsize=12, color='c')
-        ax.text(-.002, -.03, r'$\Gamma$', fontsize=12, color='r')
-        ax.text(-.002, -1.03, r'Y', fontsize=12, color='r')
+        ax.text(-.075, .48, r'(a)', fontsize=12, color='r')
+        ax.text(-.002, -.03, r'$\Gamma$', fontsize=12, color='k')
+        ax.text(-.002, -1.03, r'Y', fontsize=12, color='k')
 
     def fig18c():
         ax = fig.add_subplot(4, 4, 15)
@@ -3430,8 +3430,8 @@ def fig18(print_fig=True):
 
         # add text
         ax.text(0.0, .48, '(c)', fontdict=font)
-        ax.text(-.002, -.03, 'X', fontsize=12, color='r')
-        ax.text(-.002, -1.03, 'S', fontsize=12, color='r')
+        ax.text(-.002, -.03, 'X', fontsize=12, color='k')
+        ax.text(-.002, -1.03, 'S', fontsize=12, color='k')
 
         # colorbar
         pos = ax.get_position()
@@ -3465,10 +3465,10 @@ def fig18(print_fig=True):
 
         # add text
         ax.text(-1.8, .48, '(b)', fontdict=font)
-        ax.text(-.05, -.03, r'$\Gamma$', fontsize=12, color='r')
-        ax.text(-.05, -1.03, 'Y', fontsize=12, color='r')
-        ax.text(.95, -.03, 'X', fontsize=12, color='r')
-        ax.text(.95, -1.03, 'S', fontsize=12, color='r')
+        ax.text(-.05, -.03, r'$\Gamma$', fontsize=12, color='w')
+        ax.text(-.05, -1.03, 'Y', fontsize=12, color='w')
+        ax.text(.95, -.03, 'X', fontsize=12, color='w')
+        ax.text(.95, -1.03, 'S', fontsize=12, color='w')
 
     # create figure
     fig = plt.figure(figname, figsize=(8, 8), clear=True)
@@ -4114,7 +4114,7 @@ def fig23(print_fig=True, load=True):
                 x[i] = coord[i][0]
                 y[i] = 0
                 en[i] = coord[i][1]
-                m +=  2 * 2.4   # regularization
+                m += 2 * 2.4   # regularization
         elif n >= 16:
             for i in range(len(coord)):
                 x[i] = coord[i][0]
@@ -4411,7 +4411,7 @@ def fig25(print_fig=True):
 #    ax3.legend([r'$d_{xy}$', r'$d_{xz}$', r'$d_{yz}$'],
 #               fontsize=12, frameon=False, loc='center left')
     ax3.text(-3.8, 1.65, '(b) DMFT', fontdict=font)
-    ax3.text(-1.7, .12, r'$xy$', color=cols[0], fontsize=12)
+    ax3.text(-1.7, .12, r'$d_{xy}$', color=cols[0], fontsize=12)
     ax3.set_yticks(np.arange(0, 2, .5))
     ax3.set_xticklabels(np.arange(-4, 4, 1), fontdict=font)
     ax3.plot([0, 0], [0, 2], **kwargs_ef)
@@ -4419,7 +4419,7 @@ def fig25(print_fig=True):
     ax3.set_ylim(0, 1.8)
     ax3.text(0.2, 1.3, 'vHs', fontdict=font)
     ax3.set_xlabel(r'$\omega$ (eV)', fontdict=font)
-    ax3.set_ylabel(r'PDOS (eV$^{-1}$)', fontdict=font)
+    ax3.set_ylabel(r'PDOS (eV$^{-1}\,$Ru$^{-1}$)', fontdict=font)
 
 #    # Inset
     axi = fig.add_axes([.75, .4, .11, .11])
@@ -6074,11 +6074,11 @@ def fig35(print_fig=True):
         En_ext = np.linspace(en[0], en[-1], FD_ext[:, 0].size)
         DOS_ext = interp1d(en, dos, kind='cubic')
 
-        EF = 0.0026
+        EF = 0.0031
 
         for t in range(len(T)):
-            expnt[:, t] = (en - EF) / (kB * T[t])
-            expnt_ext[:, t] = (En_ext - EF) / (kB * T[t])
+            expnt[:, t] = (en - EF)/1.65 / (kB * T[t])
+            expnt_ext[:, t] = (En_ext - EF)/1.65 / (kB * T[t])
             FD[:, t] = 1 / (np.exp(expnt[:, t]) + 1)
             FD_ext[:, t] = 1 / (np.exp(expnt_ext[:, t]) + 1)
 
@@ -6141,15 +6141,15 @@ def fig35(print_fig=True):
     ax.plot(C_M[:, 0], C_M[:, 1], 'o', ms=1, color='b')
     ax.text(4e-1, 130, r'J. Baier $\mathit{et\,\,al.}$', color='k')
     ax.text(4e-1, 120, r'S. Nakatsuji $\mathit{et\,\,al.}$', color='b')
-    ax.text(4e-1, 110, r'TBA model ($\varepsilon_\mathbf{k} + 2.6\,$meV)',
+    ax.text(4e-1, 110, r'TBA model ($\mu + 3\,$meV)',
             color='r')
     ax.set_xscale("log", nonposx='clip')
     ax.set_xlim(3e-1, 20)
     ax.set_ylim(80, 210)
-    ax.set_xlabel(r'$T$ (K)')
-    ax.set_ylabel(r'$c_p$ (mJ$\,$mol$^{-1}\,$K$^{-2}$)')
+    ax.set_xlabel(r'$T$ (K)', fontdict=font)
+    ax.set_ylabel(r'$C_p/T$ (mJ$\,$mol$^{-1}\,$K$^{-2}$)', fontdict=font)
 
-    ax.plot(T, Gamma1 * 2.85, 'ro', ms=3)
+    ax.plot(T, Gamma2, 'ro', ms=3)
 #    ax.plot(T, Gamma2 * 2.9, 'ro', ms=3)
     plt.show()
 

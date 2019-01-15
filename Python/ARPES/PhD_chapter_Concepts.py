@@ -1394,8 +1394,8 @@ def fig11(print_fig=True):
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.pdf', dpi=100,
-                    bbox_inches="tight", rasterized=True)
+        plt.savefig(save_dir + figname + '.png', dpi=300,
+                    bbox_inches="tight")
 
 
 def fig12(print_fig=True):
@@ -2150,12 +2150,12 @@ def fig20(print_fig=True):
     D.norm_shift()
 
     # create figure
-    fig = plt.figure(figname, figsize=(8, 8), clear=True)
+    fig = plt.figure(figname, figsize=(10, 10), clear=True)
     ax1 = fig.add_subplot(221)
-    ax1.set_position([.1, .3, .4, .4])
+    ax1.set_position([.41, .4, .25, .25])
     ax1.tick_params(**kwargs_ticks)
     ax2 = fig.add_subplot(222)
-    ax2.set_position([.57, .3, .4, .4])
+    ax2.set_position([.7, .4, .25, .25])
     ax2.tick_params(**kwargs_ticks)
 
     # plot panel (a)
@@ -2167,7 +2167,7 @@ def fig20(print_fig=True):
     # decorate panel (a)
     ax1.set_ylabel(r'$\omega$ (eV)', fontdict=font)
     ax1.set_xlabel(r'Detector angles', fontdict=font)
-    ax1.text(-15, 0.05, '(a)', fontdict=font)
+    ax1.text(-15, 0.05, '(b)', fontdict=font)
 
     # colorbar
     pos = ax1.get_position()
@@ -2262,17 +2262,69 @@ def fig20(print_fig=True):
              color='r', fontsize=12)
 
     # decorate axes
-    ax2.text(-.038, 0.00415, '(b)', fontdict=font)
+    ax2.text(-.038, 0.00415, '(c)', fontdict=font)
     ax2.set_xlim(-.04, .02)
     ax2.set_ylim(0, 1.1*np.max(int_sum))
     ax2.set_yticks([])
     ax2.set_xlabel(r'$\omega$ (eV)', fontdict=font)
     ax2.set_ylabel('Intensity (arb.u.)', fontdict=font)
+
+    # panel a)
+    mat = 'EuLSCO21'
+    year = '2015'
+    sample = 'Eu21_1'
+    files = np.array([25700, 25703, 25707, 25711, 25714, 25717])
+    T = np.array([6.3, 8, 10.15, 12.1, 14.2, 16.2])
+    T_fit = np.zeros(len(T))
+    T_fit_err = np.zeros(len(T))
+
+    n = 0
+    for file in files:
+        D = ARPES.DLS(file, mat, year, sample)
+        D.gold(50.52)
+        T_fit[n] = np.mean(D.T)
+        T_fit_err[n] = np.std(D.T)
+        n += 1
+
+    kB = 8.617e-5  # Boltzmann constant
+
+    en = 4*T_fit*kB*1e3
+    en_err = 4*T_fit_err*kB*1e3/2
+    print(en_err)
+    ax3 = fig.add_subplot(223)
+    ax3.set_position([.08, .4, .25, .25])
+    ax3.tick_params(**kwargs_ticks)
+    ax3.errorbar(T, en, yerr=en_err, lw=.5,
+                 capsize=2, color='k', fmt='o', ms=5)
+    p_ini_poly1 = [0, 0, 0]
+    p_poly1, c_poly1 = curve_fit(utils.poly_1, T, en, p0=p_ini_poly1)
+#    err_fit = np.sqrt(np.diag(c_poly1))
+
+    xx = np.linspace(0, 20, 200)
+    yy = utils.poly_1(xx, *p_poly1)
+
+    ax3.plot(xx, yy, 'r--')
+    ax3.plot([0, 5], [p_poly1[0], p_poly1[0]], **kwargs_ef)
+    ax3.arrow(2, 4, 0, 4.2, head_width=0.4, head_length=0.5, fc='k', ec='k')
+    ax3.arrow(2, 4, 0, -3.4, head_width=0.4, head_length=0.5, fc='k', ec='k')
+    ax3.text(2.4, 5, 'Instrumental resolution')
+    ax3.text(2.4, 3.5, (r'$\Delta \omega = $' +
+                        str(np.round(p_poly1[0], 1)) +
+                        r'$\,$meV'))
+    ax3.text(.5, 13.9, '(a)', fontdict=font)
+    ax3.set_xticks(np.arange(0, 20, 5))
+    ax3.set_yticks(np.arange(0, 20, 5))
+    ax3.set_xlim(0, 18)
+    ax3.set_ylim(0, 15)
+    ax3.set_xlabel(r'$T_\mathrm{sample}$ (K)')
+    ax3.set_ylabel(r'$4\,k_\mathrm{B}\,T_\mathrm{fit}$ (meV)')
+    ax3.grid(True, alpha=.2)
+
     plt.show()
 
     # Save figure
     if print_fig:
-        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+        fig.savefig(save_dir + figname + '.pdf', dpi=100,
                     bbox_inches="tight", rasterized=True)
 
 
@@ -2336,6 +2388,160 @@ def fig21(print_fig=True):
     ax1.set_xlabel(r'$T_\mathrm{sample}$ (K)')
     ax1.set_ylabel(r'$4\,k_\mathrm{B}\,T_\mathrm{fit}$ (meV)')
     ax1.grid(True, alpha=.2)
+    plt.show()
+
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
+
+
+def fig22(print_fig=True):
+    """figure 22
+
+    %%%%%%%%%%%%
+    Tc over time
+    %%%%%%%%%%%%
+    """
+
+    figname = 'CONfig22'
+
+    os.chdir(data_dir)
+    Tc1 = np.genfromtxt('Tc1.csv', delimiter=',')
+    Tc2 = np.genfromtxt('Tc2.csv', delimiter=',')
+    Tc3 = np.genfromtxt('Tc3.csv', delimiter=',')
+    BCS1 = np.arange(0, 6, 1)
+    BCS2 = np.arange(0, 4, 1)
+    HF1 = np.arange(7, 8, 1)
+    HF2 = np.arange(4, 10, 1)
+    C = np.arange(10, 13, 1)
+    Full = np.arange(13, 16, 1)
+    Fe1 = np.arange(16, 18, 1)
+    Fe2 = np.arange(1, 3, 1)
+    Cu1 = np.arange(19, 21, 1)
+    Cu2 = np.arange(3, 9, 1)
+
+    t1 = Tc1[:, 0]
+    T1 = Tc1[:, 1]
+    t2 = Tc2[:, 0]
+    T2 = Tc2[:, 1]
+    t3 = Tc3[:, 0]
+    T3 = Tc3[:, 1]
+
+    fig = plt.figure(figname, figsize=(8, 8), clear=True)
+
+    ax = fig.add_axes([.2, .2, .6, .6])
+    ax.tick_params(**kwargs_ticks)
+    axi = fig.add_axes([.27, .42, .32, .32])
+    axi.tick_params(**kwargs_ticks)
+
+    x_i = 1975
+    x_f = 2016
+    y_i = 0
+    y_f = 50
+
+    ax.plot([x_i, x_f], [y_i, y_i], 'k--')
+    ax.plot([x_i, x_f], [y_f, y_f], 'k--')
+    ax.plot([x_i, x_i], [y_i, y_f], 'k--')
+    ax.plot([x_f, x_f], [y_i, y_f], 'k--')
+
+#    ax.arrow(1978, 60, -2, 35, head_width=1.5, head_length=6, fc='k', ec='k')
+    ax.annotate("", xytext=(1995, 55), xy=(1974, 105),
+                arrowprops=dict(arrowstyle="->"))
+    ax.plot([1900, 2020], [293.15, 293.15], **kwargs_ef)
+    ax.plot([1900, 2020], [77, 77], **kwargs_ef)
+    ax.plot([1900, 2020], [4, 4], **kwargs_ef)
+    axi.plot([1986, 1986], [6, 29], '--', color='steelblue')
+    axi.plot([1986, 1986], [40, 50], '--', color='steelblue')
+
+    ax.plot(t1[BCS1], T1[BCS1], 'o', color='darkgreen')
+    ax.plot(t2[BCS2], T2[BCS2], 'o', color='darkgreen')
+    ax.plot(t3[0], T3[0], 'o', color='darkgreen')
+    ax.plot(t1[HF1], T1[HF1], '*', color='c')
+    ax.plot(t2[HF2], T2[HF2], '*', color='c')
+    ax.plot(t2[C], T2[C], 'd', color='m')
+    ax.plot(t2[Full], T2[Full], 'd', color='b')
+    ax.plot(t2[Fe1], T2[Fe1], 's', color='C1')
+    ax.plot(t3[Fe2], T3[Fe2], 's', color='C1')
+    ax.plot(t2[Cu1], T2[Cu1], 'o', color='r')
+    ax.plot(t3[Cu2], T3[Cu2], 'o', color='r')
+    ax.plot(2018, 260, 'o', color='darkgreen')
+
+    axi.plot(t2[BCS2], T2[BCS2], 'o', color='darkgreen')
+    axi.plot(t1[HF1], T1[HF1], '*', color='c')
+    axi.plot(t2[HF2], T2[HF2], '*', color='c')
+    axi.plot(t2[C], T2[C], 'd', color='m')
+    axi.plot(t2[Full], T2[Full], 'd', color='b')
+    axi.plot(t2[Fe1], T2[Fe1], 's', color='C1')
+    axi.plot(t3[Fe2], T3[Fe2], 's', color='C1')
+    axi.plot(t2[Cu1], T2[Cu1], 'o', color='r')
+    axi.plot(t3[Cu2], T3[Cu2], 'o', color='r')
+
+    ax.text(1960, 283, r'$0^\circ$C', fontdict=font)
+    ax.text(1960, 80, r'L$\,$N$_2$', fontdict=font)
+    ax.text(1960, 7, r'L$\,^4$He', fontdict=font)
+    axi.text(1983, 35, 'Discovery HTSC 1986', rotation=90, color='steelblue')
+
+    ax.text(1908, 10, r'Hg', fontsize=8)
+    ax.text(1913, 12, r'Pb', fontsize=8)
+    ax.text(1931, 14, r'Nb', fontsize=8)
+    ax.text(1939, 22, r'NbN', fontsize=8)
+    ax.text(1948, 7, r'V$_3$Si', fontsize=8)
+    ax.text(1950, 25, r'Nb$_3$Ge', fontsize=8)
+
+    ax.text(1990, 106, r'YBaCuO', fontsize=8)
+    ax.text(1985, 124, r'BiSrCaCuO', fontsize=8)
+    ax.text(1981, 153, r'TlBaCaCuO', fontsize=8, rotation=45)
+    ax.text(1993, 137, r'HgBaCaCuO', fontsize=8)
+    ax.text(1983, 176, r'HgBaCaCuO @$30\,$GPa', fontsize=8)
+    ax.text(1997, 147, r'HgTlBaCaCuO', fontsize=8)
+
+    ax.text(2005, 70, r'SrFFeAs', fontsize=8)
+    ax.text(2013, 105, r'FeSe', fontsize=8)
+
+    ax.text(2005, 223, r'H$_2$S @$155\,$GPa', fontsize=8, rotation=45)
+    ax.text(2002, 255, r'LaH$_{10}$ @$190\,$GPa', fontsize=8, rotation=45)
+
+    axi.text(1976, 7.5, r'CeCu$_2$Si$_2$', rotation=45, fontsize=8)
+    axi.text(1981, 5, r'UBe$_{13}$', rotation=45, fontsize=8)
+    axi.text(1984.5, 4, r'UPt$_3$', rotation=45, fontsize=8)
+    axi.text(1990, 8, r'UPd$_2$Al$_3$', rotation=45, fontsize=8)
+    axi.text(1997, 5, r'CeCoIn$_5$', rotation=45, fontsize=8)
+    axi.text(1999, 12, r'PuRhGa$_5$', rotation=45, fontsize=8)
+    axi.text(1998.5, 23, r'PuCoGa$_5$', rotation=45, fontsize=8)
+
+    axi.text(2002, .5, r'CNT', rotation=0, fontsize=8)
+    axi.text(2005, 5.5, r'diamond', rotation=0, fontsize=8)
+    axi.text(2007, 12, r'CNT', rotation=0, fontsize=8)
+
+    axi.text(1989, 21, r'K$_3$C$_{60}$', rotation=0, fontsize=8)
+    axi.text(1992.5, 33, r'RbCsC$_{60}$', rotation=0, fontsize=8)
+    axi.text(1991, 43.5, r'Cs$_3$C$_{60}$ @$1.4\,$GPa', rotation=0, fontsize=8)
+
+    axi.text(2007, 2.5, r'LaOFeP', rotation=0, fontsize=8)
+    axi.text(2005, 26.5, r'LaOFFeAs', rotation=0, fontsize=8)
+
+    axi.text(1986, 37.5, r'LaSrCuO', rotation=45, fontsize=8)
+    axi.text(1985, 42.5, r'LaBaCuO', rotation=45, fontsize=8)
+
+    axi.text(1989.5, 29.5, r'BKBO', rotation=0, fontsize=8)
+    axi.text(1991, 25, r'YbPd$_2$B$_2$C', rotation=0, fontsize=8)
+    axi.text(2003.5, 16, r'Li @$33\,$GPa', rotation=0, fontsize=8)
+    axi.text(2002.5, 40.5, r'MgB$_2$', rotation=0, fontsize=8)
+
+    ax.text(1981, 262, 'BCS', color='darkgreen', fontsize=12)
+    ax.text(1981, 250, 'Heavy Fermions', color='c', fontsize=12)
+    ax.text(1981, 238, 'Fullerene', color='b', fontsize=12)
+    ax.text(1981, 226, 'Diamond', color='m', fontsize=12)
+    ax.text(1981, 214, 'Cuprates', color='r', fontsize=12)
+    ax.text(1981, 202, 'Iron-based', color='C1', fontsize=12)
+    ax.set_xticks([1900, 1920, 1940, 1960, 1980, 2000, 2018])
+    ax.set_ylim(0, 300)
+    ax.set_xlim(1900, 2020)
+    ax.set_xlabel('Year', fontdict=font)
+    ax.set_ylabel('$T_c$ (K)', fontdict=font)
+    axi.set_xlim(x_i, x_f)
+    axi.set_ylim(y_i, y_f)
     plt.show()
 
     # Save figure

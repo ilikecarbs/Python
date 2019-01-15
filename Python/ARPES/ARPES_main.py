@@ -46,6 +46,7 @@ CON.fig18:  Tri-layer model
 CON.fig19:  Infinity-layer model
 CON.fig20:  Instrumental resolution
 CON.fig21:  Instrumental resolution vs T
+CON.fig22:  Tc over time
 
 ----------  Ca2RuO4 Figures   ----------
 CRO.fig1:   DFT plot: figure 3 of Nature Comm.
@@ -109,7 +110,7 @@ CSRO.fig35: Heat capacity effects
 
 # %%
 
-CON.fig21()
+CON.fig20()
 
 # %%
 
@@ -117,6 +118,6 @@ CRO.fig21(print_fig=True)
 
 # %%
 # CSRO.fig20(load=False)
-CSRO.fig19(print_fig=True)
+CSRO.fig18(print_fig=True)
 
 # %%

@@ -15,9 +15,9 @@ from scipy.optimize import curve_fit
 
 
 # Directory paths
-save_dir = '/Users/denyssutter/Documents/Startup/Figures/'
-data_dir = '/Users/denyssutter/Documents/Startup/Data/'
-home_dir = '/Users/denyssutter/Documents/Startup/'
+save_dir = '/Users/denyssutter/Documents/CondenZero/Figures/'
+data_dir = '/Users/denyssutter/Documents/CondenZero/Data/'
+home_dir = '/Users/denyssutter/Documents/CondenZero/'
 
 # Set standard fonts
 plt.rcParams['mathtext.fontset'] = 'cm'
@@ -250,3 +250,77 @@ def Stabilization(print_fig=True):
     if print_fig:
         plt.savefig(save_dir + figname + '.pdf', dpi=100,
                     bbox_inches="tight", rasterized=True)
+
+
+def Logo(print_fig=True):
+
+    figname = 'Logo'
+    fig = plt.figure(figname, figsize=(6, 6), clear=True)
+    ax = fig.add_axes([.2, .4, .4, .2])
+
+    kB = 8.6173303e-5
+    T = np.array([0, 4, 8, 12, 18])
+    cols = ['navy', 'steelblue', 'lightblue', 'powderblue', 'lightcyan']
+    x = np.linspace(-.006, .006, 300)
+
+    y = np.zeros((len(T), len(x)))
+
+    for i in range(len(T)):
+        y[i] = utils.FDsl(x, kB*T[i], 0, 1, 0, 0)
+        ax.plot(x, y[i], color=cols[i], lw=5)
+    ax.plot(x, y[0], color='navy', lw=5)
+    # ax.text(-.005, .45, r'Conden$\,\,$Zero', fontsize=25)
+    plt.axis('off')
+    plt.show()
+
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
+
+
+def Logo2(print_fig=True):
+
+    figname = 'Logo2'
+    fig = plt.figure(figname, figsize=(3, 3), clear=True)
+    ax = fig.add_axes([0, 0, 1, 1])
+
+    CZ_orange = np.array([205, 131, 58])/256
+#    CZ_gray = np.array([120, 120, 118])/156
+#    CZ_black = np.array([71, 71, 69])/256
+    CZ = np.array([35, 54, 58])/256
+    kB = 8.6173303e-5
+    T = np.array([0, 8])
+#    cols = ['lightblue', 'steelblue', 'navy']
+    a = .003
+    x = np.linspace(-a, a, 300)
+
+    y = np.zeros((len(T), len(x)))
+
+    circle = plt.Circle((0, a), .0054, color=CZ)
+#    x_c = .0054*np.cos(np.linspace(0, 2*np.pi, 600))
+#    y_c = .0054*np.sin(np.linspace(0, 2*np.pi, 600))+a
+
+    for i in range(len(T)):
+        y[i] = utils.FDsl(x, kB*T[i], 0, 2*a, 0, 0)
+#    ax.plot(x[4:-4], y[1][4:-4], '-', color=CZ_orange, lw=20)
+#    ax.plot(x, y[0], color='w', lw=20)
+    ax.plot(x, y[0], color='w', lw=20)
+    ax.plot(x[4:-4], y[1][4:-4], '-', color=CZ_orange, lw=20)
+    ax.plot(x[:100], y[0][:100], color='w', lw=20)
+    ax.plot(x[-100:], y[0][-100:], color='w', lw=20)
+#    ax.text(-.005, .45, r'Conden$\,\,$Zero', fontsize=25)
+#    ax.plot(x[110:190], y[1][110:190], '-', color=CZ_orange, lw=20)
+    ax.add_artist(circle)
+    ax.set_xlim(-.0055, .0055)
+    ax.set_ylim(-.0025, .0085)
+#    ax.set_rasterization_zorder(2)
+    plt.axis('off')
+    plt.show()
+
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
+        plt.savefig(save_dir + figname + '.png', dpi=1000,
+                    bbox_inches="tight")

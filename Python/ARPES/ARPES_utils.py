@@ -27,6 +27,7 @@ import time
 from joblib import Parallel, delayed
 import multiprocessing
 from scipy import signal
+import pandas as pd
 
 
 def find(array, val):
@@ -120,6 +121,23 @@ def rainbow_light_2():
                                                         colors, N=len(colors))
     return rainbow_light_2
 
+def macaw():
+    filepath = '/Users/denyssutter/Documents/PhD/data/kindlmann.csv'
+    cm_data = pd.read_csv(filepath).values
+    cm_data = cm_data / np.max(cm_data)
+    
+    n = 5
+    for i in range(-n,0):
+        r = 1 - abs(i + 1)/n
+        for j in range(3):
+            cm_data[i][j] = r + (1-r) * cm_data[i][j]
+        print(i,cm_data[i])
+    
+    cm_data = cm_data[::-1]
+    
+    macaw = LinearSegmentedColormap.from_list('macaw', cm_data)
+    
+    return macaw
 
 def orbitals():
     colors = np.zeros((100, 3))
