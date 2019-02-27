@@ -42,7 +42,7 @@ font = {'family': 'serif',
         'size': 12,
         }
 
-kwargs_ex = {'cmap': cm.ocean_r}  # Experimental plots
+kwargs_ex = {'cmap': cm.afmhot_r}  # Experimental plots
 kwargs_th = {'cmap': cm.bone_r}  # Theory plots
 kwargs_ticks = {'bottom': True,
                 'top': True,

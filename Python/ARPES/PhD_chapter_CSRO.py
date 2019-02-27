@@ -49,7 +49,7 @@ font_small = {'family': 'serif',
               'size': 8,
               }
 
-kwargs_ex = {'cmap': cm.ocean_r}  # Experimental plots
+kwargs_ex = {'cmap': cm.afmhot_r}  # Experimental plots
 kwargs_th = {'cmap': cm.bone_r}  # Theory plots
 kwargs_ticks = {'bottom': True,
                 'top': True,
@@ -6720,9 +6720,10 @@ def fig37(print_fig=True):
     ax3.tick_params(direction='in', length=1.5, width=.5, colors='k')
     ax4 = fig.add_axes([.08+.28, .2, .2, .2])
     ax4.tick_params(direction='in', length=1.5, width=.5, colors='k')
-    ax4b = ax4.twiny()
-    ax4b.tick_params(direction='in', length=1.5, width=.5, colors='k')
-
+#    ax4b = ax4.twiny()
+#    ax4b.tick_params(direction='in', length=1.5, width=.5, colors='k')
+    ax4i = fig.add_axes([.44, .28, .1, .1])
+    ax4i.tick_params(direction='in', length=1.5, width=.5, colors='k')   
     #  ax5 = fig.add_subplot(235)
     #  ax5.set_position([.08+.56, .5, .2, .2])
     #  ax5.tick_params(direction='in', length=1.5, width=.5, colors='k')
@@ -6736,7 +6737,9 @@ def fig37(print_fig=True):
     ax1.errorbar(en, re[spec], ere[spec], zorder=.1,
                  color='goldenrod', lw=.5, capsize=2, fmt='o', ms=2)
     ax2.errorbar(en, im[spec], eim[spec]*1.5, zorder=.1,
-                 color=[0, .4, .4], lw=.5, capsize=2, fmt='d', ms=2)
+                 color='goldenrod', lw=.5, capsize=2, fmt='d', ms=2)
+#                 color=[0, .4, .4], lw=.5, capsize=2, fmt='d', ms=2)
+    
 
     # Fit for Re-Sig
 
@@ -6758,7 +6761,7 @@ def fig37(print_fig=True):
                              bounds=re_bounds)
 
     re_f = utils.poly_1(en_wd, *p_re)
-    ax1.plot(en[:70], utils.poly_1(en[:70], *p_re), 'k--', lw=1.5, zorder=.2)
+    ax1.plot(en[:70], utils.poly_1(en[:70], *p_re), 'b--', lw=1.5, zorder=.2)
 
     ndf = len(re_wd)-2
     chi2_re = np.sum((re_wd - re_f)**2/(ere_wd)**2)
@@ -6777,7 +6780,7 @@ def fig37(print_fig=True):
         Chi2_re[n] = np.sum((re_wd - re_f)**2/(ere_wd)**2) / len(en_wd-1)
         n += 1
 
-    ax3.plot(en[3:], Chi2_re, 'ko', ms=1)
+    ax3.plot(en[3:], Chi2_re, 'k-', lw=1.5)
     ax3.plot([en[bnd], en[bnd]], [-10, 100], 'k-.', lw=.5)
 
     #  Fit for Im-Sig
@@ -6798,7 +6801,7 @@ def fig37(print_fig=True):
                              bounds=im_bounds)
 
     im_f = utils.poly_2(en_wd, *p_im)
-    ax2.plot(en, utils.poly_2(en, *p_im)-const, 'k--', lw=1.5, zorder=.2)
+    ax2.plot(en, utils.poly_2(en, *p_im)-const, 'b--', lw=1.5, zorder=.2)
 
     ndf = len(im_wd)-2
     chi2_im = np.sum((im_wd - im_f)**2/(eim_wd)**2)
@@ -6864,7 +6867,7 @@ def fig37(print_fig=True):
         Chi2_alpha[i] = np.sum((im[spec] - im_f)**2/(eim[spec])**2) / len(en-1)
 
     Chi2_alpha = (Chi2_alpha - Chi2_im[40])
-    ax4b.plot(np.linspace(1, 3, N), Chi2_alpha, 'r-', lw=1.5)
+    ax4i.plot(np.linspace(1, 3, N), Chi2_alpha, 'r-', lw=1.5)
     #  ax6.plot(np.linspace(1, 3, N), Chi2_alpha, 'r-')
 
     ax1.set_ylabel(r'$\Re \Sigma (\omega) (1-Z)$ (meV)', fontdict=font)
@@ -6899,16 +6902,19 @@ def fig37(print_fig=True):
                    fontdict=font)
     ax4.set_xlim(0, .1)
     ax4.set_ylim(0, 20)
-    ax4b.set_xlabel(r'$\alpha$', fontsize=12, color='r')
-    ax4b.set_xticks(np.arange(1, 3.5, .5))
-    ax4b.set_xticklabels(np.arange(1, 3.5, .5), color='r')
-    ax4b.set_xlim(1, 3)
-    ax4b.set_ylim(0, 20)
+
+    ax4i.set_ylabel(r'$\chi^2 (\alpha) / n_\mathrm{dof}$', fontdict=font)
+    ax4i.set_xlabel(r'$\alpha$', fontdict=font)
+    ax4i.set_xticks(np.arange(1, 4, 1))
+    ax4i.set_xlim(1, 3)
+    ax4i.set_ylim(0, 20)
     # add text
-    ax1.text(.025, .15, r'$\propto \omega$', color='k', fontsize=12)
-    ax2.text(.005, .07, r'$\propto \omega^{2.16 \pm 0.19}$',
+    ax1.text(.025, .15, r'$\propto \omega$', color='b', fontsize=12)
+    ax2.text(.005, .13, r'$\propto \omega^\alpha,$',
              color='r', fontsize=12)
-    ax2.text(.005, .1, r'$\propto \omega^{2}$', color='k', fontsize=12)
+    ax2.text(.005, .1, r'$\alpha = 2.16 \pm 0.19$',
+             color='r', fontsize=10)
+    ax2.text(.005, .16, r'$\propto \omega^{2}$', color='b', fontsize=12)
     plt.show()
 
     # Save figure
