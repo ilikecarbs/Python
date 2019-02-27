@@ -106,11 +106,13 @@ CSRO.fig32: Resolution effects on alpha
 CSRO.fig33: Resolution effects extended
 CSRO.fig34: Resolution effects EDCs
 CSRO.fig35: Heat capacity effects
+CSRO.fig36: (L): Temperature dependence. New Figure 4 in paper
+CSRO.fig37: SI Figure self-energy
 """
 
 # %%
 
-CON.fig20()
+CON.fig22()
 
 # %%
 
@@ -118,6 +120,7 @@ CRO.fig21(print_fig=True)
 
 # %%
 # CSRO.fig20(load=False)
-CSRO.fig18(print_fig=True)
+CSRO.fig37(print_fig=True)
+
 
 # %%

@@ -2026,6 +2026,26 @@ def poly_n(x, n, *p):
     return poly_n
 
 
+def power(x, *p):
+    """returns power
+
+    **power function**
+
+    Args
+    ----
+    :x:       x
+    :p[0]:    prefactor
+    :p[1]:    power coefficient
+
+    Return
+    ------
+    :power:  power function
+    """
+
+    power_f = p[0] * x ** p[1]
+    return power_f
+
+
 def lor_n(x, n, *p):
     """returns lor_n
 
