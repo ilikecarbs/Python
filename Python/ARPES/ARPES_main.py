@@ -20,6 +20,7 @@ Created on Tue Jun 19 15:14:29 2018
 import PhD_chapter_Concepts as CON
 import PhD_chapter_CRO as CRO
 import PhD_chapter_CSRO as CSRO
+import PhD_defense as DEF
 
 
 # %%
@@ -108,19 +109,22 @@ CSRO.fig34: Resolution effects EDCs
 CSRO.fig35: Heat capacity effects
 CSRO.fig36: (L): Temperature dependence. New Figure 4 in paper
 CSRO.fig37: SI Figure self-energy
+
+DEF.fig1:
 """
 
 # %%
 
-CON.fig22()
+CON.fig3()
 
 # %%
 
 CRO.fig5(print_fig=False)
 
 # %%
-# CSRO.fig20(load=False)
-CSRO.fig37(print_fig=True)
 
+CSRO.fig1(print_fig=True)
 
 # %%
+
+DEF.fig1(print_fig=True)

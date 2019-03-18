@@ -26,6 +26,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from scipy.special import sph_harm
 from scipy.optimize import curve_fit
 import matplotlib.image as mpimg
+from scipy.signal import savgol_filter
 
 import ARPES_header as ARPES
 import ARPES_utils as utils
@@ -368,16 +369,53 @@ def fig3(print_fig=True):
     def G(k, w, t1, t2, a, mu, gamma, A, W):
         return 1 / (w - Ximod(t1, t2, a, mu, k) - sig(gamma, A, W, w))
 
+    ek = 1.2 * Ximod(t1, t2, a, mu, k)
     [K, E] = np.meshgrid(k, w)
 
     model = (-1 / np.pi * np.imag(G(K, E, t1, t2, a, mu, gamma, A, W)) *
              utils.FDsl(E, *[T*kB, 0, 1, 0, 0]))
+
+    max_pts = np.ones((w.size))
+
+    # extract eigenenergies in the DFT plot
+    for i in range(w.size):
+        max_pts[i] = model[i, :].argmax()
+    ini = 93  # range where to search for
+    fin = 580  # 580
+    max_pts = max_pts[ini:fin]
+    max_k = np.abs(k[max_pts.astype(int)])
+    max_en = w[ini:fin]
+
+    w_ek = np.zeros(fin-ini)
+    for i in range(fin-ini):
+        dummy, k_idx = utils.find(k, max_k[i])
+        w_ek[i] = ek[k_idx]
 
     # build MDC / EDC
     mdc_val, mdc_idx = utils.find(w, -.1)
     mdc = model[mdc_idx]
     edc_val, edc_idx = utils.find(k, .4)
     edc = model[:, edc_idx]
+
+    # initial guess
+    p_mdc_i = np.array([-.3, .3,
+                        .05, .05,
+                        .3, .3,
+                        .1, 0, 0])
+
+    # fit boundaries
+    bounds_bot = np.concatenate((p_mdc_i[0:-3] - np.inf,
+                                 p_mdc_i[-3:] - np.inf))
+    bounds_top = np.concatenate((p_mdc_i[0:-3] + np.inf,
+                                 p_mdc_i[-3:] + np.inf))
+    p_mdc_bounds = (bounds_bot, bounds_top)
+
+    # fit MDC
+    p_mdc, cov_mdc = curve_fit(
+            utils.lor_2, k, mdc, p_mdc_i, bounds=p_mdc_bounds)
+
+    # fit and background
+    f_mdc = utils.lor_2(k, *p_mdc)
 
     # coherent / incoheren weight EDC
     p_edc_coh = np.array([-.05, 2e-2, 6.6e-1, 0, 0, 0])
@@ -389,18 +427,26 @@ def fig3(print_fig=True):
     f_inc[0] = 0
     f_inc[-1] = 0
 
-    # plot data
     c0 = ax1.pcolormesh(k, w, model, cmap=cm.bone_r, zorder=.1)
     ax1.set_rasterization_zorder(.2)
+    ax1.plot(k, ek, 'C4--')
+    ax1.plot(max_k, max_en, 'k-', lw=1)
     ax1.plot([k[0], k[-1]], [0, 0], **kwargs_ef)
-    ax1.plot([k[0], k[-1]], [mdc_val, mdc_val], ls='-.', color='C8', lw=.5)
-    ax1.plot([edc_val, edc_val], [w[0], w[-1]], ls='-.', color='C8', lw=.5)
+    ax1.plot([k[0], k[-1]], [mdc_val, mdc_val], ls='-.', color='r', lw=.5)
+    ax1.plot([edc_val, edc_val], [w[0], w[-1]], ls='-.', color='r', lw=.5)
 
     ax2 = fig.add_subplot(2, 2, 2)
     ax2.set_position([.1, .29, .3, .2])
     ax2.tick_params(**kwargs_ticks)
     ax2.plot(k, mdc, 'ko-', lw=1, ms=1)
+    ax2.plot(k, f_mdc, 'C8--')
+    # ax2.plot([p_mdc[1]-p_mdc[2], p_mdc[1] + p_mdc[2]],
+    #          [np.max(mdc)/2, np.max(mdc)/2])
 
+    ax2.arrow(-.02, np.max(mdc)/2, .2, 0, head_width=0.3,
+              head_length=0.1, fc='C0', ec='C0')
+    ax2.arrow(.4+.33, np.max(mdc)/2, -.2, 0, head_width=0.3,
+              head_length=0.1, fc='C0', ec='C0')
     ax3 = fig.add_subplot(2, 2, 3)
     ax3.set_position([.41, .5, .2, .4])
     ax3.tick_params(**kwargs_ticks)
@@ -410,11 +456,22 @@ def fig3(print_fig=True):
     ax3.fill(f_inc, w, alpha=.5, color='C0', zorder=.1)
     ax3.set_rasterization_zorder(.2)
 
+    ax4 = fig.add_subplot(2, 2, 4)
+    ax4.set_position([.7, .5, .25, .25])
+    ax4.tick_params(**kwargs_ticks)
+    ReS = savgol_filter(max_en - w_ek, 51, 3)
+    ax4.plot(-w[ini:fin]*1e3, -np.imag(sig(gamma, A, W, w))[ini:fin]*1e3/1.2,
+             'C0', lw=2)
+    ax4.plot(np.abs(max_en)*1e3, ReS*1e3, 'g', lw=2)
+#    ax4.plot(np.abs(max_en)*1e3, utils.poly_2(np.abs(max_en),
+#                                              .02, 0, 1.5)*1e3, 'C0-', lw=2)
+    ax4.set_rasterization_zorder(.2)
+
     # decorate axes
     ax1.set_xticklabels([])
     ax1.set_xlim(-1, 1)
     ax1.set_ylim(-.5, .05)
-    ax1.set_ylabel(r'$\omega$', fontdict=font)
+    ax1.set_ylabel(r'$\omega$ (eV)', fontdict=font)
     ax2.set_yticks([])
     ax2.set_xlim(-1, 1)
     ax2.set_ylim(0, 1.1 * np.max(mdc))
@@ -425,16 +482,31 @@ def fig3(print_fig=True):
     ax3.set_xlim(0, 1.1 * np.max(edc))
     ax3.set_ylim(-.5, .05)
     ax3.set_xlabel('EDC intensity', fontdict=font)
+    ax4.set_ylabel('Arb. units', fontdict=font)
+    ax4.set_yticks([])
+    ax4.set_xlabel(r'$\omega$ (meV)', fontdict=font)
+    ax4.set_xticks(np.arange(0, 300, 100))
+    ax4.set_xticklabels(['0', '-100', '-200'])
+    ax4.set_ylim(0, 85)
+    ax4.set_xlim(0, 268)
 
     # add text
     ax1.text(-.95, .02, r'(a)', fontdict=font)
+    ax1.text(-.85, -.09, 'MDC', color='r', fontsize=12)
+    ax1.text(.27, -.4, 'EDC', rotation=90, color='r', fontsize=12)
+    ax1.text(.05, -.3, r'$\epsilon_\mathbf{k}^b$', color='C4', fontsize=12)
+    ax1.text(.05, -.2, r'$\epsilon_\mathbf{k}^\mathrm{exp}$', color='k',
+             fontsize=12)
     ax2.text(-.95, 5.5, r'(b)', fontdict=font)
+    ax2.text(.5, 3.2, r'$2\,\Gamma$', color='C0', fontsize=12)
     ax3.text(.5, .02, r'(c)', fontdict=font)
-
     ax3.text(4, -.11, r'$\mathcal{A}_\mathrm{coh}\,(k, \omega)$',
              fontsize=12, color='b')
     ax3.text(2, -.2, r'$\mathcal{A}_\mathrm{inc}\,(k, \omega)$',
              fontsize=12, color='C0')
+    ax4.text(200, 56, r'$2\,\Gamma (\omega)$', color='C0', fontsize=12)
+    ax4.text(200, 30, r'$\Re \Sigma (\omega)$', color='g', fontsize=12)
+    ax4.text(5, 78, '(d)', fontdict=font)
 
     # colorbar
     pos = ax3.get_position()
@@ -442,7 +514,7 @@ def fig3(print_fig=True):
                     pos.y0, 0.01, pos.height])
     cbar = plt.colorbar(c0, cax=cax, ticks=None)
     cbar.set_ticks([])
-#    cbar.set_clim(np.min(D.map), np.max(D.map))
+
     plt.show()
 
     # Save figure

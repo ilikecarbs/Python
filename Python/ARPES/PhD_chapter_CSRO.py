@@ -49,7 +49,7 @@ font_small = {'family': 'serif',
               'size': 8,
               }
 
-kwargs_ex = {'cmap': cm.afmhot_r}  # Experimental plots
+kwargs_ex = {'cmap': cm.ocean_r}  # Experimental plots
 kwargs_th = {'cmap': cm.bone_r}  # Theory plots
 kwargs_ticks = {'bottom': True,
                 'top': True,
@@ -2285,7 +2285,7 @@ def fig8(print_fig=True):
     # create figure
     fig = plt.figure(figname, figsize=(8, 8), clear=True)
     ax = fig.add_subplot(131)
-    ax.set_position([.2, .24, .5, .3])
+    ax.set_position([.2, .24, .3, .3])
     ax.tick_params(**kwargs_ticks)
 
     # plot DFT spectra
@@ -2297,7 +2297,8 @@ def fig8(print_fig=True):
 
     # deocrate axes
     ax.set_yticks(np.arange(-1, 1, .1))
-    ax.set_ylim(-.3, .1)
+    ax.set_xlim(-.5, 0)
+    ax.set_ylim(-.3, .05)
     ax.set_ylabel(r'$\omega$ (eV)', fontdict=font)
     ax.set_xlabel(r'$k_{\Gamma - \mathrm{S}}\, (\mathrm{\AA}^{-1})$',
                   fontdict=font)
@@ -6450,7 +6451,7 @@ def fig36(print_fig=True):
                 r'(f) $\gamma$-band (zoom), @$\,$S',
                 r'(g) $\alpha$-band (zoom), @$\,k_\mathrm{F}$']
         lbls_x = [-.77, -.09, -.09]
-        lbls_y = [2.05, .36, .36]
+        lbls_y = [1.63, .36, .36]
 
         # Visualize EDCs and Background
         fig1 = plt.figure('EDC', figsize=(8, 8), clear=True)
@@ -6532,11 +6533,11 @@ def fig36(print_fig=True):
                                          bounds=bounds)
 
                 # plot spectral function
-                f_edc = utils.Full_spectral_func(xx, *p_edc)
-
-                # plot coherent and incoherent weight
-                f_mod = utils.gauss_mod(xx, *p_edc[-6:])
-                f_fl = utils.FL_spectral_func(xx, *p_edc[0:6])
+#                f_edc = utils.Full_spectral_func(xx, *p_edc)
+#
+#                # plot coherent and incoherent weight
+#                f_mod = utils.gauss_mod(xx, *p_edc[-6:])
+#                f_fl = utils.FL_spectral_func(xx, *p_edc[0:6])
 
         # Create figure
         plt.figure(figname)
@@ -6568,7 +6569,7 @@ def fig36(print_fig=True):
                 ax.set_xlabel(r'$\omega$ (eV)')
                 ax.set_ylabel('Intensity (a.u.)')
                 ax.set_xlim(-.8, .1)
-                ax.set_ylim(0, 2.3)
+                ax.set_ylim(0, 1.8)
             else:
                 # decorate axis
                 ax.set_xticks(np.arange(-.08, .06, .04))
@@ -6614,7 +6615,7 @@ def fig36(print_fig=True):
                     capsize=2, color='m', fmt='o', ms=5)
         ax.errorbar(T, int_b, yerr=eint_b, lw=.5,
                     capsize=2, color='b', fmt='d', ms=5)
-        ax.plot([1.3, 32], [1, .64], 'm--', lw=.5)
+        ax.plot([1.3, 32], [1, .68], 'm--', lw=.5)
         ax.plot([1.3, 32], [.99, .99], 'b--', lw=.5)
 
         # decorate axes
@@ -6711,19 +6712,17 @@ def fig37(print_fig=True):
     # create figure
     fig = plt.figure(figname, figsize=(10, 10), clear=True)
 
-    ax1 = fig.add_axes([.08, .48, .2, .2])
-    ax1.tick_params(direction='in', length=1.5, width=.5, colors='k')
-    ax2 = fig.add_axes([.08+.28, .48, .2, .2])
+#    ax1 = fig.add_axes([.08, .48, .16, .16])
+#    ax1.tick_params(direction='in', length=1.5, width=.5, colors='k')
+    ax2 = fig.add_axes([.08, .48, .2, .2])
     ax2.tick_params(direction='in', length=1.5, width=.5, colors='k')
 
-    ax3 = fig.add_axes([.08, .2, .2, .2])
+    ax3 = fig.add_axes([.08+.27, .48, .2, .2])
     ax3.tick_params(direction='in', length=1.5, width=.5, colors='k')
-    ax4 = fig.add_axes([.08+.28, .2, .2, .2])
+    ax4 = fig.add_axes([.08+.54, .48, .2, .2])
     ax4.tick_params(direction='in', length=1.5, width=.5, colors='k')
-#    ax4b = ax4.twiny()
-#    ax4b.tick_params(direction='in', length=1.5, width=.5, colors='k')
-    ax4i = fig.add_axes([.44, .28, .1, .1])
-    ax4i.tick_params(direction='in', length=1.5, width=.5, colors='k')   
+    #    ax4b = ax4.twiny()
+    #    ax4b.tick_params(direction='in', length=1.5, width=.5, colors='k')
     #  ax5 = fig.add_subplot(235)
     #  ax5.set_position([.08+.56, .5, .2, .2])
     #  ax5.tick_params(direction='in', length=1.5, width=.5, colors='k')
@@ -6734,55 +6733,54 @@ def fig37(print_fig=True):
     # plot data
     spec = 2
     en = -Loc_en[spec]
-    ax1.errorbar(en, re[spec], ere[spec], zorder=.1,
-                 color='goldenrod', lw=.5, capsize=2, fmt='o', ms=2)
+#    ax1.errorbar(en, re[spec], ere[spec], zorder=.1,
+#                 color='goldenrod', lw=.5, capsize=2, fmt='o', ms=2)
     ax2.errorbar(en, im[spec], eim[spec]*1.5, zorder=.1,
                  color='goldenrod', lw=.5, capsize=2, fmt='d', ms=2)
-#                 color=[0, .4, .4], lw=.5, capsize=2, fmt='d', ms=2)
-    
+    #                 color=[0, .4, .4], lw=.5, capsize=2, fmt='d', ms=2)
 
     # Fit for Re-Sig
 
     eps = 1e-9
-    re_bot = np.array([0-eps, -np.inf])
-    re_top = np.array([0+eps, +np.inf])
-    p_re_i = np.array([0, 1])
-    re_bounds = (re_bot, re_top)  # boundaries
-
-    bnd = 27
-
-    en_wd = en[:bnd]
-    re_wd = re[spec][:bnd]
-    ere_wd = ere[spec][:bnd]
-
-    ax1.plot([en_wd[-1], en_wd[-1]], [-1, 1], 'k-.', lw=.5)
-
-    p_re, cov_re = curve_fit(utils.poly_1, en_wd, re_wd, p0=p_re_i,
-                             bounds=re_bounds)
-
-    re_f = utils.poly_1(en_wd, *p_re)
-    ax1.plot(en[:70], utils.poly_1(en[:70], *p_re), 'b--', lw=1.5, zorder=.2)
-
-    ndf = len(re_wd)-2
-    chi2_re = np.sum((re_wd - re_f)**2/(ere_wd)**2)
-    print('chi2 = ' + str(np.round(chi2_re, 3)) + ' for ndf = ' + str(ndf))
-
-    # Loop over Re-Sig fit
-    Chi2_re = np.zeros(len(en)-3)
-    n = 0
-    for i in np.arange(3, len(en), 1):
-        en_wd = en[:i]
-        re_wd = re[spec][:i]
-        ere_wd = ere[spec][:i]
-        p_re, cov_re = curve_fit(utils.poly_1, en_wd, re_wd, p0=p_re_i,
-                                 bounds=re_bounds)
-        re_f = utils.poly_1(en_wd, *p_re)
-        Chi2_re[n] = np.sum((re_wd - re_f)**2/(ere_wd)**2) / len(en_wd-1)
-        n += 1
-
-    ax3.plot(en[3:], Chi2_re, 'k-', lw=1.5)
-    ax3.plot([en[bnd], en[bnd]], [-10, 100], 'k-.', lw=.5)
-
+#    re_bot = np.array([0-eps, -np.inf])
+#    re_top = np.array([0+eps, +np.inf])
+#    p_re_i = np.array([0, 1])
+#    re_bounds = (re_bot, re_top)  # boundaries
+#
+#    bnd = 27
+#
+#    en_wd = en[:bnd]
+#    re_wd = re[spec][:bnd]
+#    ere_wd = ere[spec][:bnd]
+#
+#    ax1.plot([en_wd[-1], en_wd[-1]], [-1, 1], 'k-.', lw=.5)
+#
+#    p_re, cov_re = curve_fit(utils.poly_1, en_wd, re_wd, p0=p_re_i,
+#                             bounds=re_bounds)
+#
+#    re_f = utils.poly_1(en_wd, *p_re)
+#    ax1.plot(en[:70], utils.poly_1(en[:70], *p_re), 'k--', lw=1.5, zorder=.2)
+#
+#    ndf = len(re_wd)-2
+#    chi2_re = np.sum((re_wd - re_f)**2/(ere_wd)**2)
+#    print('chi2 = ' + str(np.round(chi2_re, 3)) + ' for ndf = ' + str(ndf))
+#
+#    # Loop over Re-Sig fit
+#    Chi2_re = np.zeros(len(en)-3)
+#    n = 0
+#    for i in np.arange(3, len(en), 1):
+#        en_wd = en[:i]
+#        re_wd = re[spec][:i]
+#        ere_wd = ere[spec][:i]
+#        p_re, cov_re = curve_fit(utils.poly_1, en_wd, re_wd, p0=p_re_i,
+#                                 bounds=re_bounds)
+#        re_f = utils.poly_1(en_wd, *p_re)
+#        Chi2_re[n] = np.sum((re_wd - re_f)**2/(ere_wd)**2) / len(en_wd-1)
+#        n += 1
+#
+#    ax3.plot(en[3:], Chi2_re, 'k-', lw=1.5)
+#    ax3.plot([en[bnd], en[bnd]], [-10, 100], 'k-.', lw=.5)
+#
     #  Fit for Im-Sig
     lin = -.02
     const = -.003
@@ -6820,7 +6818,7 @@ def fig37(print_fig=True):
         Chi2_im[n] = np.sum((im_wd - im_f)**2/(eim_wd*1.5)**2) / len(en_wd-1)
         n += 1
 
-    ax4.plot(en[3:], Chi2_im, 'ko', ms=1)
+    ax3.plot(en[3:], Chi2_im, 'b-', ms=1)
 
     #  Fit for exponent
     amp = 4.3
@@ -6867,18 +6865,18 @@ def fig37(print_fig=True):
         Chi2_alpha[i] = np.sum((im[spec] - im_f)**2/(eim[spec])**2) / len(en-1)
 
     Chi2_alpha = (Chi2_alpha - Chi2_im[40])
-    ax4i.plot(np.linspace(1, 3, N), Chi2_alpha, 'r-', lw=1.5)
+    ax4.plot(np.linspace(1, 3, N), Chi2_alpha, 'r-', lw=1.5)
     #  ax6.plot(np.linspace(1, 3, N), Chi2_alpha, 'r-')
-
-    ax1.set_ylabel(r'$\Re \Sigma (\omega) (1-Z)$ (meV)', fontdict=font)
-    ax1.set_yticks(np.arange(0, .3, .05))
-    ax1.set_yticklabels(['0', '50', '100', '150', '200', '250'])
-    ax1.set_xticks(np.arange(0, .12, .02))
-    ax1.set_xticklabels(['0', '-20', '-40', '-60', '-80', '-100'])
-    ax1.set_xlabel(r'$\omega\,(\mathrm{meV})$', fontdict=font)
-    ax1.set_xlim(0, .1)
-    ax1.set_ylim(-.01, .25)
-    ax1.grid(True, alpha=.2)
+#
+#    ax1.set_ylabel(r'$\Re \Sigma (\omega) (1-Z)$ (meV)', fontdict=font)
+#    ax1.set_yticks(np.arange(0, .3, .05))
+#    ax1.set_yticklabels(['0', '50', '100', '150', '200', '250'])
+#    ax1.set_xticks(np.arange(0, .12, .02))
+#    ax1.set_xticklabels(['0', '-20', '-40', '-60', '-80', '-100'])
+#    ax1.set_xlabel(r'$\omega\,(\mathrm{meV})$', fontdict=font)
+#    ax1.set_xlim(0, .1)
+#    ax1.set_ylim(-.01, .25)
+#    ax1.grid(True, alpha=.2)
     ax2.set_ylabel(r'$\Im \Sigma (\omega)$ (meV)', fontdict=font)
     ax2.set_yticks(np.arange(0, .3, .05))
     ax2.set_yticklabels(['0', '50', '100', '150', '200', '250'])
@@ -6888,33 +6886,32 @@ def fig37(print_fig=True):
     ax2.set_xlim(0, .1)
     ax2.set_ylim(-.01, .25)
     ax2.grid(True, alpha=.2)
-    ax3.set_ylabel(r'$\chi^2 (\Re \Sigma) / n_\mathrm{dof}$', fontdict=font)
+    ax3.set_ylabel(r'$\chi^2 (\Im\Sigma(\omega))$',
+                   fontdict=font)
     ax3.set_xticks(np.arange(0, .12, .02))
     ax3.set_xticklabels(['0', '-20', '-40', '-60', '-80', '-100'])
     ax3.set_xlabel(r'$\omega_\mathrm{fit-cutoff}\,(\mathrm{meV})$',
                    fontdict=font)
     ax3.set_xlim(0, .1)
-    ax3.set_ylim(0, 20)
-    ax4.set_ylabel(r'$\chi^2 (\Im \Sigma) / n_\mathrm{dof}$', fontdict=font)
-    ax4.set_xticks(np.arange(0, .12, .02))
-    ax4.set_xticklabels(['0', '-20', '-40', '-60', '-80', '-100'])
-    ax4.set_xlabel(r'$\omega_\mathrm{fit-cutoff}\,(\mathrm{meV})$',
-                   fontdict=font)
-    ax4.set_xlim(0, .1)
-    ax4.set_ylim(0, 20)
+    ax3.set_ylim(0, 5)
 
-    ax4i.set_ylabel(r'$\chi^2 (\alpha) / n_\mathrm{dof}$', fontdict=font)
-    ax4i.set_xlabel(r'$\alpha$', fontdict=font)
-    ax4i.set_xticks(np.arange(1, 4, 1))
-    ax4i.set_xlim(1, 3)
-    ax4i.set_ylim(0, 20)
+    ax4.set_ylabel(r'$\chi^2 (\alpha)$', fontdict=font)
+    ax4.set_xlabel(r'$\alpha$', fontdict=font)
+    ax4.set_xticks(np.arange(1, 4, 1))
+    ax4.set_xlim(1, 3)
+    ax4.set_ylim(0, 14)
     # add text
-    ax1.text(.025, .15, r'$\propto \omega$', color='b', fontsize=12)
+    ax2.text(.003, .23, '(a)', color='k', fontsize=12)
     ax2.text(.005, .13, r'$\propto \omega^\alpha,$',
              color='r', fontsize=12)
     ax2.text(.005, .1, r'$\alpha = 2.16 \pm 0.19$',
              color='r', fontsize=10)
     ax2.text(.005, .16, r'$\propto \omega^{2}$', color='b', fontsize=12)
+    ax3.text(.003, 4.6, '(b)', color='k', fontsize=12)
+#    ax3.text(.062, 3, r'$\Re \Sigma(\omega)$',
+#             color='k', fontsize=12)
+#    ax3.text(.06, 1, r'$\Im \Sigma(\omega)$', color='b', fontsize=12)
+    ax4.text(1.04, 13, '(c)', color='k', fontsize=12)
     plt.show()
 
     # Save figure
