@@ -26,6 +26,8 @@ import matplotlib.cm as cm
 import time
 from joblib import Parallel, delayed
 import multiprocessing
+from scipy import signal
+import pandas as pd
 
 
 def find(array, val):
@@ -119,6 +121,23 @@ def rainbow_light_2():
                                                         colors, N=len(colors))
     return rainbow_light_2
 
+def macaw():
+    filepath = '/Users/denyssutter/Documents/PhD/data/kindlmann.csv'
+    cm_data = pd.read_csv(filepath).values
+    cm_data = cm_data / np.max(cm_data)
+    
+    n = 5
+    for i in range(-n,0):
+        r = 1 - abs(i + 1)/n
+        for j in range(3):
+            cm_data[i][j] = r + (1-r) * cm_data[i][j]
+        print(i,cm_data[i])
+    
+    cm_data = cm_data[::-1]
+    
+    macaw = LinearSegmentedColormap.from_list('macaw', cm_data)
+    
+    return macaw
 
 def orbitals():
     colors = np.zeros((100, 3))
@@ -1522,7 +1541,7 @@ def optimize_TB(Kx, Ky, En, it_max, P):
     beta1 = .9  # parameter Adam optimizer
     beta2 = .999  # parameter Adam optimizer
     epsilon = 1e-8  # preventing from dividing by zero
-    alpha = 5e-5  # external learning rate
+    alpha = 5e-5  # external learning rat
 
     # start optimizing
     start_time = time.time()
@@ -1939,6 +1958,49 @@ def FDsl(x, *p):
     return FDsl
 
 
+def FDconvGauss(x, *p):
+    """returns FDG
+
+    **Fermi Dirac function convoluted with a Gaussian**
+
+    Args
+    ----
+    :x:     energy axis
+    :p0:    T
+    :p1:    EF
+    :p2:    Amplitude subfunctions
+    :p3:    Width
+    :p4:    Constant background
+    :p5:    Amplitude overall
+    :p6:    Slope
+
+    Return
+    ------
+    :FDG:   Fermi Dirac function convoluted with a Gaussian
+    """
+
+    xx = np.linspace(-0.2, 0.2, 1000)
+
+    sig = p[3]/(2*np.sqrt(2*np.log(2)))
+
+    FD = FDsl(xx, p[0], p[1], p[2], 0, 0)
+    G = gauss(xx, p[1], sig, 1/(np.sqrt(2*np.pi)*sig), 0, 0, 0)
+
+    dx = abs(xx[1] - xx[0])
+    Ix = abs(xx[-1] - xx[0])
+    N = Ix / dx
+
+    func = (p[4] + (p[5] + p[6] * xx) *
+            signal.convolve(G, FD, mode='same') / (2 * N))
+    FDG = np.zeros(len(x))
+
+    for i in range(len(x)):
+        en_val, en_idx = find(xx, x[i])
+        FDG[i] = func[en_idx]
+
+    return FDG
+
+
 def poly_n(x, n, *p):
     """returns poly_n
 
@@ -1962,6 +2024,26 @@ def poly_n(x, n, *p):
         poly_n += p[i] * x ** i
 
     return poly_n
+
+
+def power(x, *p):
+    """returns power
+
+    **power function**
+
+    Args
+    ----
+    :x:       x
+    :p[0]:    prefactor
+    :p[1]:    power coefficient
+
+    Return
+    ------
+    :power:  power function
+    """
+
+    power_f = p[0] * x ** p[1]
+    return power_f
 
 
 def lor_n(x, n, *p):

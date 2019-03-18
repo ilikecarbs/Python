@@ -220,8 +220,8 @@ class SIS(Methods):
         a_i, da = data_meta.attrs['Axis1.Scale']  # initial angle, angle step
 
         # Build up data
-        en = np.arange(e_i, e_i + d1 * de, de)
-        ang = np.arange(a_i, a_i + d2 * da, da)
+        en = np.arange(e_i, e_i + (d1) * de -de/2, de)
+        ang = np.arange(a_i, a_i + (d2) * da, da)
         hv = np.array(f['Other Instruments/hv'])
         pol = np.array(f['Other Instruments/Tilt'])
         # Cases of scan modes#

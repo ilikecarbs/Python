@@ -42,7 +42,7 @@ font = {'family': 'serif',
         'size': 12,
         }
 
-kwargs_ex = {'cmap': cm.ocean_r}  # Experimental plots
+kwargs_ex = {'cmap': cm.afmhot_r}  # Experimental plots
 kwargs_th = {'cmap': cm.bone_r}  # Theory plots
 kwargs_ticks = {'bottom': True,
                 'top': True,
@@ -1991,3 +1991,481 @@ def fig19(print_fig=True):
     if print_fig:
         plt.savefig(save_dir + figname + '.png', dpi=400,
                     bbox_inches="tight")
+
+
+def fig20(print_fig=True):
+    """figure 20
+
+    %%%%%%%%%%%%%%%%%
+    Combined fig7 & 8
+    %%%%%%%%%%%%%%%%%
+    """
+
+    figname = 'CROfig20'
+
+    file = 'CRO_SIS_0048'
+    mat = 'Ca2RuO4'
+    year = '2015'
+    sample = 'data'
+    D = ARPES.SIS(file, mat, year, sample)
+    D.ang2k(D.ang, Ekin=65-4.5, lat_unit=True, a=5.5, b=5.5, c=11,
+            V0=0, thdg=-4, tidg=0, phidg=45)
+
+    # Data at particular photon energies
+    int1 = D.int[11, :, :]
+    # Flux of beamline decreases, normalized to high energy tail
+    int2 = D.int[16, :, :] * 3.9
+
+    edc_ = 1
+    mdc_ = -2.2
+    mdcw_ = .1
+    edc_val, edc_idx = utils.find(D.k[0], edc_)
+    mdc_val, mdc_idx = utils.find(D.en, mdc_)
+    mdcw_val, mdcw_idx = utils.find(D.en, mdc_ - mdcw_)
+    edc1 = int1[edc_idx, :]
+    edc2 = int2[edc_idx, :]
+    mdc = np.sum(int1[:, mdcw_idx:mdc_idx], axis=1)
+    mdc = mdc / np.max(mdc)
+
+    plt.figure('MDC', figsize=(4, 4), clear=True)
+
+    # Fit MDC
+    delta = 1e-5
+    p_mdc_i = [-.3, .35, .1, .1, 1, 1, .66, 0.02, -.0]
+    p_mdc_bounds = ([-.3, .2, 0, 0, 0, 0,
+                     p_mdc_i[-3]-delta, p_mdc_i[-2]-delta, p_mdc_i[-1]-delta],
+                    [-.2, .5, .12, .12, np.inf, np.inf,
+                     p_mdc_i[-3]+delta, p_mdc_i[-2]+delta, p_mdc_i[-1]+delta])
+    p_mdc, c_mdc = curve_fit(
+            utils.gauss_2, D.k[0], mdc, p_mdc_i, bounds=p_mdc_bounds)
+    b_mdc = utils.poly_2(D.k[0], *p_mdc[-3:])
+    f_mdc = utils.gauss_2(D.k[0], *p_mdc)
+
+    plt.plot(D.k[0], mdc, 'o')
+    plt.plot(D.k[0], f_mdc)
+    plt.plot(D.k[0], b_mdc, 'k--')
+
+    # Figure panels
+    def fig20a():
+        ax = fig.add_subplot(231)
+        ax.set_position([.1, .6, .2, .3])
+        ax.tick_params(**kwargs_ticks)
+
+        # Plot data
+        ax.contourf(D.k[0], D.en, np.transpose(int1), 300, **kwargs_ex,
+                    vmin=0, vmax=1.4e4, zorder=.1)
+        ax.set_rasterization_zorder(.2)
+        ax.plot([D.k[0][0], D.k[0][-1]], [0, 0], **kwargs_ef)
+
+        # Plot distribution cuts
+        ax.plot([D.k[0][0], D.k[0][-1]],
+                [mdc_-mdcw_/2, mdc_-mdcw_/2], **kwargs_cut)
+        ax.plot([edc_, edc_], [-2.5, .5], **kwargs_cut)
+
+        # Plot MDC
+        ax.plot(D.k[0], (mdc - b_mdc) * 1.1, 'o', ms=1, c='C9')
+        ax.fill(D.k[0], (f_mdc - b_mdc) * 1., alpha=.2, c='C9')
+
+        # decorate axes
+        ax.set_ylabel(r'$\omega$ (eV)', fontdict=font)
+        ax.set_xticks([-1, 0, 1])
+        ax.set_xticklabels(['S', r'$\Gamma$', 'S'])
+        ax.set_yticks(np.arange(-2.5, 1, .5))
+        # ax.set_xlim(-1, 1.66)
+        ax.set_ylim(-2.5, .5)
+
+        # add text
+        ax.text(-1.02, 0.33, r'(a) $63\,$eV', fontdict=font)
+        ax.text(.22, .1, r'$\mathcal{C}$', fontsize=15)
+
+    def fig20b():
+        ax = fig.add_subplot(232)
+        ax.set_position([.31, .6, .2, .3])
+        ax.tick_params(**kwargs_ticks)
+
+        # Plot data
+        c0 = ax.contourf(D.k[0], D.en+.07, np.transpose(int2), 300,
+                         **kwargs_ex, vmin=0, vmax=1.4e4, zorder=.1)
+        ax.set_rasterization_zorder(.2)
+
+        # Plot distribution cuts
+        ax.plot([D.k[0][0], D.k[0][-1]], [0, 0], **kwargs_ef)
+        ax.plot([edc_, edc_], [-2.5, .5], **kwargs_cut)
+
+        # decorate axes
+        ax.set_xticks([-1, 0, 1])
+        ax.set_xticklabels(['S', r'$\Gamma$', 'S'])
+        ax.set_yticks(np.arange(-2.5, 1, .5))
+        ax.set_yticklabels([])
+        # ax.set_xlim(-1, 1.66)
+        ax.set_ylim(-2.5, .5)
+
+        # add text
+        ax.text(-1.02, 0.33, r'(b) $78\,$eV', fontdict=font)
+
+        # colorbar
+        pos = ax.get_position()
+        cax = plt.axes([pos.x0+pos.width+0.01,
+                        pos.y0, 0.01, pos.height])
+        cbar = plt.colorbar(c0, cax=cax, ticks=None)
+        cbar.set_ticks([])
+        cbar.set_clim(np.min(D.int), np.max(D.int))
+
+    def fig20c():
+        ax = plt.subplot(233)
+        ax.set_position([.55, .6, .2, .3])
+        ax.tick_params(**kwargs_ticks)
+
+        # Plot EDC's
+        xx = np.linspace(1, -5, 200)
+        ax.plot(edc1, D.en, 'o', ms=3, c=(0, 0, .8))
+        ax.plot(edc2, D.en, 'd', ms=3, c='C0')
+        ax.fill(7.4e3 * exponnorm.pdf(-xx, K=2, loc=.63, scale=.2), xx,
+                alpha=.2, fc=(0, 0, .8), zorder=.1)
+        ax.fill(1.3e4 * exponnorm.pdf(-xx, K=2, loc=1.34, scale=.28), xx,
+                alpha=.2, fc='C0', zorder=.1)
+
+        # Plot Mott gap estimate
+        ax.fill_between([0, 1.5e4], 0, -.2, color='C3', alpha=0.2, zorder=.1)
+        ax.plot([0, 1.5e4], [0, 0], **kwargs_ef)
+        ax.plot([0, 1.5e4], [-.2, -.2], 'k:', linewidth=.2)
+        ax.set_rasterization_zorder(.2)
+
+        # decorate axes
+        ax.set_xticks([])
+        ax.set_yticks(np.arange(-2.5, 1, .5))
+        ax.set_yticklabels([])
+        # ax.legend((r'63$\,$eV', r'78$\,$eV'),
+        # frameon=False, loc='lower right')
+        ax.plot(8.2e3, -.35, 'o', ms=3, c=(0, 0, .8))
+        ax.plot(8.2e3, -.5, 'd', ms=3, c='C0')
+        ax.text(8.7e3, -.4, r'63$\,$eV', color=(0, 0, .8))
+        ax.text(8.7e3, -.55, r'78$\,$eV', color='C0')
+        ax.set_xlabel('Intensity (a.u)', fontdict=font)
+        ax.set_xlim(0, 1.2e4)
+        ax.set_ylim(-2.5, 0.5)
+
+        # Add text
+        ax.text(1e3, -0.15, r'$\Delta$', fontsize=12)
+        ax.text(5e2, 0.33, r'(c)', fontdict=font)
+        ax.text(6e3, -.9, r'$\mathcal{A}$', fontsize=15)
+        ax.text(6e3, -1.75, r'$\mathcal{B}$', fontsize=15)
+
+        axi = fig.add_axes([0.69, .545+.3, .05, .05])
+        axi.plot(D.k[0], D.k[1], 'r-')
+        axi.plot([-1, 1], [-1, -1], 'k-')
+        axi.plot([-1, 1], [1, 1], 'k-')
+        axi.plot([-1, -1], [1, -1], 'k-')
+        axi.plot([1, 1], [-1, 1], 'k-')
+        axi.set_xlim(-2, 2)
+        axi.set_ylim(-2, 2)
+        # axi.text(-.3, -.3, r'$\Gamma$', fontsize=10)
+        # axi.text(-1.8, -1.6, 'S', fontsize=10)
+        # axi.text(1.1, .9, 'S', fontsize=10)
+        axi.axis('off')
+
+    file1 = '47991'
+    file2 = '47992'
+    mat = 'Ca2RuO4'
+    year = '2016'
+    sample = 'T10'
+    gold = '48000'
+
+    # load data
+    D1 = ARPES.DLS(file1, mat, year, sample)
+    D2 = ARPES.DLS(file2, mat, year, sample)
+    D1.norm(gold=gold)
+    D2.norm(gold=gold)
+    D1.restrict(bot=.6, top=1, left=0, right=1)
+    D2.restrict(bot=.6, top=1, left=0, right=1)
+    D1.flatten()
+    D2.flatten()
+    D1.ang2k(D1.ang, Ekin=60-4.5, lat_unit=True, a=5.4, b=5.4, c=11,
+             V0=0, thdg=3.5, tidg=12, phidg=-45)
+    D2.ang2k(D2.ang, Ekin=60-4.5, lat_unit=True, a=5.4, b=5.4, c=11,
+             V0=0, thdg=3.5, tidg=12, phidg=-45)
+
+    edc_val = 1.35
+    edc_val, edc_ind = utils.find(np.flipud(D1.k[0]), edc_val)
+    edc3 = D1.int_norm[edc_ind, :]
+    edc4 = D2.int_norm[edc_ind, :]
+
+    # Figure panels
+    def fig20d():
+        ax = fig.add_subplot(234)
+        ax.set_position([.1, .25, .2, .3])
+        ax.tick_params(**kwargs_ticks)
+
+        # Plot data
+        ax.contourf(D1.kxs, D1.en_norm+.1, 1.2*np.flipud(D1.int_norm), 300,
+                    **kwargs_ex, vmin=0, vmax=.008, zorder=.1)
+        ax.set_rasterization_zorder(.2)
+
+        # Plot distribution cuts
+        ax.plot([np.min(D1.kxs), np.max(D1.kxs)], [0, 0], **kwargs_ef)
+        ax.plot([edc_val, edc_val], [-2.5, .5], **kwargs_cut)
+        ax.arrow(-1, -1, 0, -.3, head_width=0.2, head_length=0.2,
+                 fc='g', ec='k')
+
+        # decorate axes
+        ax.set_ylabel(r'$\omega$ (eV)', fontdict=font)
+        ax.set_xticks([0, 1, 2])
+        ax.set_xticklabels([r'$\Gamma$', 'S', r'$\Gamma$'])
+        ax.set_yticks(np.arange(-2.5, 1, .5))
+        # ax.set_xlim(0, 1)
+        ax.set_ylim(-2.5, .5)
+
+        # add text
+        ax.text(-.55, 0.33, r'(d) $\bar{\sigma}$-pol.', fontdict=font)
+
+    def fig20e():
+        ax = plt.subplot(235)
+        ax.set_position([.31, .25, .2, .3])
+        ax.tick_params(**kwargs_ticks)
+
+        # Plot data
+        c0 = ax.contourf(D2.kxs, D2.en_norm+.1, np.flipud(D2.int_norm), 300,
+                         **kwargs_ex, vmin=0, vmax=.008, zorder=.1)
+        ax.plot([np.min(D2.kxs), np.max(D2.kxs)], [0, 0], **kwargs_ef)
+        ax.set_rasterization_zorder(.2)
+
+        # Plot EDC
+        ax.plot([edc_val, edc_val], [-2.5, .5], **kwargs_cut)
+
+        # decorate axes
+        ax.set_xticks([0, 1, 2])
+        ax.set_xticklabels([r'$\Gamma$', 'S', r'$\Gamma$'])
+        ax.set_yticks(np.arange(-2.5, 1, .5), ())
+        ax.set_yticklabels([])
+        # ax.set_xlim(0, 1)
+        ax.set_ylim(-2.5, .5)
+
+        # add text
+        ax.text(-.55, 0.33, r'(e) $\bar{\pi}$-pol.', fontdict=font)
+
+        # colorbar
+        pos = ax.get_position()
+        cax = plt.axes([pos.x0+pos.width+0.01,
+                        pos.y0, 0.01, pos.height])
+        cbar = plt.colorbar(c0, cax=cax, ticks=None)
+        cbar.set_ticks([])
+        cbar.set_clim(np.min(D2.int_norm), np.max(D2.int_norm))
+
+    def fig20f():
+        ax = fig.add_subplot(236)
+        ax.set_position([.55, .25, .2, .3])
+        ax.tick_params(**kwargs_ticks)
+
+        xx = np.linspace(1, -5, 200)
+        ax.plot(edc3, D1.en_norm[edc_ind, :]+.1, 'o', ms=3, color=(0, 0, .8))
+        ax.plot(edc4 * .8, D2.en_norm[edc_ind, :]+.1, 'd', ms=3, color='C0')
+        ax.fill(5.5e-3 * exponnorm.pdf(-xx, K=2, loc=.6, scale=.2), xx,
+                alpha=.2, fc=(0, 0, .8), zorder=.1)
+        ax.fill(5.5e-3 * exponnorm.pdf(-xx, K=2, loc=1.45, scale=.25), xx,
+                alpha=.2, fc='C0', zorder=.1)
+
+        # Plot Mott gap estimate
+        ax.fill_between([0, 1e-2], 0, -.2, color='C3', alpha=0.2, zorder=.1)
+        ax.set_rasterization_zorder(.2)
+        ax.plot([np.min(D1.kxs), np.max(D1.kxs)], [0, 0], **kwargs_ef)
+        ax.plot([0, 1e-2], [-.2, -.2], 'k:', linewidth=.2)
+
+        # decorate axes
+        ax.set_xticks([])
+        ax.set_yticks(np.arange(-2.5, 1, .5))
+        ax.set_yticklabels([])
+        # ax.legend((r'$\sigma$-pol.', r'$\pi$-pol.'), frameon=False)
+        ax.set_xlabel('Intensity (a.u)', fontdict=font)
+        ax.set_xlim(0, .007)
+        ax.set_ylim(-2.5, .5)
+
+        # Add text
+        ax.plot(4.5e-3, -.3, 'o', ms=3, c=(0, 0, .8))
+        ax.plot(4.5e-3, -.45, 'd', ms=3, c='C0')
+        ax.text(5e-3, -.35, r'$\bar{\sigma}$-pol.', color=(0, 0, .8))
+        ax.text(5e-3, -.5, r'$\bar{\pi}$-pol.', color='C0')
+        ax.text(7e-4, -0.15, r'$\Delta$', fontsize=12)
+        ax.text(5e-4, 0.33, r'(f)', fontdict=font)
+        ax.text(3.3e-3, -.9, r'$\mathcal{A}$', fontsize=15)
+        ax.text(3.3e-3, -1.75, r'$\mathcal{B}$', fontsize=15)
+
+        axi = fig.add_axes([0.69, .548-.05, .05, .05])
+        axi.plot(D1.k[0], D1.k[1], 'r-')
+        axi.plot([-1, 1], [-1, -1], 'k-')
+        axi.plot([-1, 1], [1, 1], 'k-')
+        axi.plot([-1, -1], [1, -1], 'k-')
+        axi.plot([1, 1], [-1, 1], 'k-')
+        axi.set_xlim(-2., 2.)
+        axi.set_ylim(-1.5, 2.5)
+        axi.axis('off')
+
+    fig = plt.figure(figname, figsize=(10, 10), clear=True)
+    fig20a()
+    fig20b()
+    fig20c()
+    fig20d()
+    fig20e()
+    fig20f()
+    plt.show()
+
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)
+
+
+def fig21(print_fig=True):
+    """figure 21
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    Polarization dependence Ca2RuO4: figure 2 of Nature Comm.
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    """
+
+    figname = 'CROfig8'
+
+    file1 = '47989'
+    file2 = '47990'
+    mat = 'Ca2RuO4'
+    year = '2016'
+    sample = 'T10'
+    gold = '48000'
+
+    # load data
+    D1 = ARPES.DLS(file1, mat, year, sample)
+    D2 = ARPES.DLS(file2, mat, year, sample)
+    D1.norm(gold=gold)
+    D2.norm(gold=gold)
+    D1.restrict(bot=.6, top=1, left=0, right=1)
+    D2.restrict(bot=.6, top=1, left=0, right=1)
+    D1.flatten()
+    D2.flatten()
+    D1.ang2k(D1.ang, Ekin=60-4.5, lat_unit=True, a=5.4, b=5.4, c=11,
+             V0=0, thdg=3.5, tidg=0, phidg=-45)
+    D2.ang2k(D2.ang, Ekin=60-4.5, lat_unit=True, a=5.4, b=5.4, c=11,
+             V0=0, thdg=3.5, tidg=0, phidg=-45)
+
+    edc_ = 1.35
+    edc_val, edc_idx = utils.find(np.flipud(D1.k[0]), edc_)
+    edc1 = D1.int_norm[edc_idx, :]
+    edc2 = D2.int_norm[edc_idx, :]
+
+    # Figure panels
+    def fig21a():
+        ax = fig.add_subplot(131)
+        ax.set_position([.1, .3, .2, .3])
+        ax.tick_params(**kwargs_ticks)
+
+        # Plot data
+        ax.contourf(D1.kxs, D1.en_norm+.1, 1.2*np.flipud(D1.int_norm), 300,
+                    **kwargs_ex, vmin=0, vmax=.008, zorder=.1)
+        ax.set_rasterization_zorder(.2)
+
+        # Plot distribution cuts
+        ax.plot([np.min(D1.kxs), np.max(D1.kxs)], [0, 0], **kwargs_ef)
+        ax.plot([edc_val, edc_val], [-2.5, .5], **kwargs_cut)
+        ax.arrow(-1, -1, 0, -.3, head_width=0.2, head_length=0.2,
+                 fc='g', ec='k')
+
+        # decorate axes
+        ax.set_ylabel(r'$\omega$ (eV)', fontdict=font)
+#        ax.set_xticks([0, 1, 2])
+        ax.set_xticklabels([r'$\Gamma$', 'S', r'$\Gamma$'])
+        ax.set_yticks(np.arange(-2.5, 1, .5))
+        # ax.set_xlim(0, 1)
+        ax.set_ylim(-2.5, .5)
+
+        # add text
+        ax.text(-.55, 0.33, r'(a) $\bar{\sigma}$-pol.', fontdict=font)
+
+    def fig21b():
+        ax = plt.subplot(132)
+        ax.set_position([.31, .3, .2, .3])
+        ax.tick_params(**kwargs_ticks)
+
+        # Plot data
+        c0 = ax.contourf(D2.kxs, D2.en_norm+.1, np.flipud(D2.int_norm), 300,
+                         **kwargs_ex, vmin=0, vmax=.008, zorder=.1)
+        ax.plot([np.min(D2.kxs), np.max(D2.kxs)], [0, 0], **kwargs_ef)
+        ax.set_rasterization_zorder(.2)
+
+        # Plot EDC
+        ax.plot([edc_, edc_], [-2.5, .5], **kwargs_cut)
+
+        # decorate axes
+#        ax.set_xticks([0, 1, 2])
+        ax.set_xticklabels([r'$\Gamma$', 'S', r'$\Gamma$'])
+        ax.set_yticks(np.arange(-2.5, 1, .5), ())
+        ax.set_yticklabels([])
+        # ax.set_xlim(0, 1)
+        ax.set_ylim(-2.5, .5)
+
+        # add text
+        ax.text(-.55, 0.33, r'(b) $\bar{\pi}$-pol.', fontdict=font)
+
+        # colorbar
+        pos = ax.get_position()
+        cax = plt.axes([pos.x0+pos.width+0.01,
+                        pos.y0, 0.01, pos.height])
+        cbar = plt.colorbar(c0, cax=cax, ticks=None)
+        cbar.set_ticks([])
+        cbar.set_clim(np.min(D2.int_norm), np.max(D2.int_norm))
+
+    def fig21c():
+        ax = fig.add_subplot(1, 3, 3)
+        ax.set_position([.55, .3, .2, .3])
+        ax.tick_params(**kwargs_ticks)
+
+        xx = np.linspace(1, -5, 200)
+        ax.plot(edc1, D1.en_norm[edc_idx, :]+.1, 'o', ms=3, color=(0, 0, .8))
+        ax.plot(edc2 * .8, D2.en_norm[edc_idx, :]+.1, 'd', ms=3, color='C0')
+        ax.fill(5.5e-3 * exponnorm.pdf(-xx, K=2, loc=.6, scale=.2), xx,
+                alpha=.2, fc=(0, 0, .8), zorder=.1)
+        ax.fill(5.5e-3 * exponnorm.pdf(-xx, K=2, loc=1.45, scale=.25), xx,
+                alpha=.2, fc='C0', zorder=.1)
+
+        # Plot Mott gap estimate
+        ax.fill_between([0, 1e-2], 0, -.2, color='C3', alpha=0.2, zorder=.1)
+        ax.set_rasterization_zorder(.2)
+        ax.plot([np.min(D1.kxs), np.max(D1.kxs)], [0, 0], **kwargs_ef)
+        ax.plot([0, 1e-2], [-.2, -.2], 'k:', linewidth=.2)
+
+        # decorate axes
+        ax.set_xticks([])
+        ax.set_yticks(np.arange(-2.5, 1, .5))
+        ax.set_yticklabels([])
+        # ax.legend((r'$\sigma$-pol.', r'$\pi$-pol.'), frameon=False)
+        ax.set_xlabel('Intensity (a.u)', fontdict=font)
+        ax.set_xlim(0, .007)
+        ax.set_ylim(-2.5, .5)
+
+        # Add text
+        ax.plot(4.5e-3, -.3, 'o', ms=3, c=(0, 0, .8))
+        ax.plot(4.5e-3, -.45, 'd', ms=3, c='C0')
+        ax.text(5e-3, -.35, r'$\bar{\sigma}$-pol.', color=(0, 0, .8))
+        ax.text(5e-3, -.5, r'$\bar{\pi}$-pol.', color='C0')
+        ax.text(7e-4, -0.15, r'$\Delta$', fontsize=12)
+        ax.text(5e-4, 0.33, r'(c)', fontdict=font)
+        ax.text(3.3e-3, -.9, r'$\mathcal{A}$', fontsize=15)
+        ax.text(3.3e-3, -1.75, r'$\mathcal{B}$', fontsize=15)
+
+        axi = fig.add_axes([0.69, .548, .05, .05])
+        axi.plot(D1.k[0], D1.k[1], 'r-')
+        axi.plot([-1, 1], [-1, -1], 'k-')
+        axi.plot([-1, 1], [1, 1], 'k-')
+        axi.plot([-1, -1], [1, -1], 'k-')
+        axi.plot([1, 1], [-1, 1], 'k-')
+        axi.set_xlim(-2., 2.)
+        axi.set_ylim(-1.5, 2.5)
+        axi.axis('off')
+
+    fig = plt.figure(figname, figsize=(10, 10), clear=True)
+    fig21a()
+    fig21b()
+    fig21c()
+    plt.show()
+
+    # Save figure
+    if print_fig:
+        plt.savefig(save_dir + figname + '.pdf', dpi=100,
+                    bbox_inches="tight", rasterized=True)

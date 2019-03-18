@@ -90,7 +90,7 @@ class Methods:
         bnd = 1
         # Takes initial fit parameters for Fermi function until this value.
         # From there on, the initial parameters are the ones from last fit.
-        ch = 300
+        ch = 50
 
         kB = 8.6173303e-5  # Boltzmann constant
 
@@ -128,6 +128,8 @@ class Methods:
             T_fit[i] = p_FDsl[0] / kB
             Res[i] = np.sqrt(T_fit[i] ** 2 - T_ini ** 2) * 4 * kB
             Ef[i] = p_FDsl[1]  # Fit parameter
+
+        self.T = T_fit
 
         # Fit Fermi level fits with a polynomial
         p_ini_poly2 = [Ef[ch], 0, 0, 0]
@@ -901,6 +903,14 @@ class Methods:
             kx_V0[i, :] = self.k_V0[0, :]
             ky_V0[i, :] = self.k_V0[1, :]
 
+        self.kxs = np.transpose(np.broadcast_to(kx, (self.en.size,
+                                                     self.pol.size,
+                                                     self.ang.size)),
+                                (1, 2, 0))
+        self.kys = np.transpose(np.broadcast_to(ky, (self.en.size,
+                                                     self.pol.size,
+                                                     self.ang.size)),
+                                (1, 2, 0))
         self.kx = kx
         self.ky = ky
         self.kx_V0 = kx_V0

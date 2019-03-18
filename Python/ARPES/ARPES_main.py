@@ -20,6 +20,7 @@ Created on Tue Jun 19 15:14:29 2018
 import PhD_chapter_Concepts as CON
 import PhD_chapter_CRO as CRO
 import PhD_chapter_CSRO as CSRO
+import PhD_defense as DEF
 
 
 # %%
@@ -41,6 +42,12 @@ CON.fig13:  Sr2RuO4 model
 CON.fig14:  Fermi liquid scattering scheme
 CON.fig15:  Fermi liquid momentum distribution
 CON.fig16:  Filling control Mott
+CON.fig17:  Bi-layer model
+CON.fig18:  Tri-layer model
+CON.fig19:  Infinity-layer model
+CON.fig20:  Instrumental resolution
+CON.fig21:  Instrumental resolution vs T
+CON.fig22:  Tc over time
 
 ----------  Ca2RuO4 Figures   ----------
 CRO.fig1:   DFT plot: figure 3 of Nature Comm.
@@ -62,6 +69,7 @@ CRO.fig16:  Schematic DOS band / Mott
 CRO.fig17:  Schematic DOS uniform gap
 CRO.fig18:  Oxygen bands + DFT
 CRO.fig19:  Schematic DOS Mott-Hubbard
+CRO.fig20:  Combined fig7 & 8
 
 ----------  Ca1.8Sr0.2RuO4 Figures ----------
 CSRO.fig1:  Experimental data FS + cuts
@@ -95,24 +103,28 @@ CSRO.fig28: Fermi surface counting SRO
 CSRO.fig29: Fermi surface folded CSRO
 CSRO.fig30: xFig1 2nd version
 CSRO.fig31: xFig3 self energy
+CSRO.fig32: Resolution effects on alpha
+CSRO.fig33: Resolution effects extended
+CSRO.fig34: Resolution effects EDCs
+CSRO.fig35: Heat capacity effects
+CSRO.fig36: (L): Temperature dependence. New Figure 4 in paper
+CSRO.fig37: SI Figure self-energy
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    Which figure do you desire?
-            enter below:
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+DEF.fig1:
 """
 
 # %%
 
-CON.fig16()
+CON.fig3()
 
 # %%
 
-CRO.fig19(print_fig=True)
+CRO.fig5(print_fig=False)
 
 # %%
-# CSRO.fig20(load=False)
-CSRO.fig22(print_fig=True)
+
+CSRO.fig1(print_fig=True)
 
 # %%
+
+DEF.fig1(print_fig=True)
