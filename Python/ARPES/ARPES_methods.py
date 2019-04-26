@@ -149,7 +149,7 @@ class Methods:
         os.chdir(self.folder)
         np.savetxt(''.join(['Ef_', str(self.file), '.dat']), Ef_fit)
         np.savetxt(''.join(['norm_', str(self.file), '.dat']), norm)
-        os.chdir('/Users/denyssutter/Documents/library/Python')
+        os.chdir('/Users/denyssutter/Documents/3_library/Python')
 
         # Plot data
         ax2 = fig.add_subplot(312)
@@ -200,7 +200,7 @@ class Methods:
             os.chdir(self.folder)
             Ef = np.loadtxt(''.join(['Ef_', str(gold), '.dat']))
             norm = np.loadtxt(''.join(['norm_', str(gold), '.dat']))
-            os.chdir('/Users/denyssutter/Documents/library/Python')
+            os.chdir('/Users/denyssutter/Documents/3_library/Python')
 
             # Placeholders
             en_norm = np.ones(self.ens.shape)
@@ -220,7 +220,7 @@ class Methods:
                     eint_norm[:, i, :] = np.divide(self.eint[:, i, :], norm[i])
 
         except OSError:
-            os.chdir('/Users/denyssutter/Documents/library/Python')
+            os.chdir('/Users/denyssutter/Documents/3_library/Python')
             print('- No gold files: {}'.format(self.gold), '\n')
 
         self.gold = gold
@@ -253,7 +253,7 @@ class Methods:
         try:
             os.chdir(self.folder)
             Ef = np.loadtxt(''.join(['Ef_', str(gold), '.dat']))
-            os.chdir('/Users/denyssutter/Documents/library/Python')
+            os.chdir('/Users/denyssutter/Documents/3_library/Python')
 
             # Placeholder
             en_shift = np.ones(self.ens.shape)
@@ -267,7 +267,7 @@ class Methods:
                     en_shift[:, i, :] = self.en - Ef[i]
 
         except OSError:
-            os.chdir('/Users/denyssutter/Documents/library/Python')
+            os.chdir('/Users/denyssutter/Documents/3_library/Python')
             print('- No gold files: {}'.format(self.gold), '\n')
 
         self.gold = gold

@@ -95,7 +95,7 @@ def Shirley(EDC):
 
 
 def rainbow_light():
-    filepath = '/Users/denyssutter/Documents/PhD/data/rainbow_light.dat'
+    filepath = '/Users/denyssutter/Documents/2_physics/PhD/data/rainbow_light.dat'
     data = np.loadtxt(filepath)
     colors = np.array([(i[0], i[1], i[2]) for i in data])
 
@@ -109,7 +109,7 @@ def rainbow_light():
 
 
 def rainbow_light_2():
-    filepath = '/Users/denyssutter/Documents/PhD/data/rainbow_light_2.dat'
+    filepath = '/Users/denyssutter/Documents/2_physics/PhD/data/rainbow_light.dat'
     data = np.loadtxt(filepath)
     colors = np.array([(i[0], i[1], i[2]) for i in data])
 
@@ -122,7 +122,7 @@ def rainbow_light_2():
     return rainbow_light_2
 
 def macaw():
-    filepath = '/Users/denyssutter/Documents/PhD/data/kindlmann.csv'
+    filepath = '/Users/denyssutter/Documents/2_physics/PhD/data/kindlmann.csv'
     cm_data = pd.read_csv(filepath).values
     cm_data = cm_data / np.max(cm_data)
     

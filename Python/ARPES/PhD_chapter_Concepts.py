@@ -63,9 +63,9 @@ kwargs_ef = {'linestyle': ':',
              'lw': 1}
 
 # Directory paths
-save_dir = '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/'
-data_dir = '/Users/denyssutter/Documents/PhD/data/'
-home_dir = '/Users/denyssutter/Documents/library/Python/ARPES'
+save_dir = '/Users/denyssutter/Documents/2_physics/PhD/PhD_Denys/Figs/'
+data_dir = '/Users/denyssutter/Documents/2_physics/PhD/data/'
+home_dir = '/Users/denyssutter/Documents/3_library/Python/ARPES'
 
 
 def fig1(print_fig=True):

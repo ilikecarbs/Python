@@ -66,8 +66,8 @@ class DLS(Methods):
 
     def __init__(self, file, mat, year, sample):
         # Define directories
-        folder = ''.join(['/Users/denyssutter/Documents/Denys/', str(mat),
-                          '/Diamond', str(year), '/', str(sample), '/'])
+        folder = ''.join(['/Users/denyssutter/Documents/2_physics/DATA/',
+                          str(mat), '/Diamond', str(year), '/', str(sample), '/'])
         filename = ''.join(['i05-', str(file), '.nxs'])
         path = folder + filename
         print('\n ~ Initializing Diamond Light Source data file: \n {}'
@@ -130,8 +130,8 @@ class ALS(Methods):
 
     def __init__(self, file, mat, year, sample):
         # Define directories
-        folder = ''.join(['/Users/denyssutter/Documents/Denys/', str(mat),
-                          '/ALS', str(year), '/', str(sample), '/'])
+        folder = ''.join(['/Users/denyssutter/Documents/2_physics/DATA/',
+                          str(mat), '/ALS', str(year), '/', str(sample), '/'])
         filename = ''.join([str(year), file, '.fits'])
         path = folder + filename
         print('\n ~ Initializing Advanced Light Source data file: \n {}'
@@ -199,8 +199,8 @@ class SIS(Methods):
 
     def __init__(self, file, mat, year, sample):
         # Define directories
-        folder = ''.join(['/Users/denyssutter/Documents/Denys/', str(mat),
-                          '/SIS', str(year), '/', str(sample), '/'])
+        folder = ''.join(['/Users/denyssutter/Documents/2_physics/DATA/',
+                          str(mat), '/SIS', str(year), '/', str(sample), '/'])
         filename = ''.join([str(file), '.h5'])
         path = folder + filename
         print('\n ~ Initializing SIS data file: \n {}'.format(path),
@@ -280,8 +280,8 @@ class Bessy(Methods):
 
     def __init__(self, file, mat, year, sample):
         # Define directories
-        folder = ''.join(['/Users/denyssutter/Documents/Denys/', str(mat),
-                          '/Bessy', str(year), '/', str(sample), '/'])
+        folder = ''.join(['/Users/denyssutter/Documents/2_physics/DATA/',
+                          str(mat), '/Bessy', str(year), '/', str(sample), '/'])
         path_ang = ''.join(['Ca_', str(file), 'ang', '.dat'])
         path_pol = ''.join(['Ca_', str(file), 'pol', '.dat'])
         path_en = ''.join(['Ca_', str(file), 'en', '.dat'])
@@ -348,8 +348,8 @@ class CASS(Methods):
 
     def __init__(self, file, mat, year, mode):
         # Define directories
-        folder = ''.join(['/Users/denyssutter/Documents/Denys/', str(mat),
-                          '/CASS', str(year), '/'])
+        folder = ''.join(['/Users/denyssutter/Documents/2_physics/DATA/',
+                          str(mat), '/CASS', str(year), '/'])
 
         # txt file
         if mode == 'cut_txt':
