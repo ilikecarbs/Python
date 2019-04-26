@@ -67,9 +67,9 @@ kwargs_ef = {'linestyle': ':',
              'lw': 1}
 
 # Directory paths
-save_dir = '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/'
-data_dir = '/Users/denyssutter/Documents/PhD/data/'
-home_dir = '/Users/denyssutter/Documents/library/Python/ARPES'
+save_dir = '/Users/denyssutter/Documents/2_physics/PhD/PhD_Denys/Figs/'
+data_dir = '/Users/denyssutter/Documents/2_physics/PhD/data/'
+home_dir = '/Users/denyssutter/Documents/3_library/Python/ARPES'
 
 
 def fig1(print_fig=True):
@@ -5401,9 +5401,9 @@ def fig31(print_fig=True):
     ax1.grid(True, alpha=.2)
 
     # add text
-    ax1.text(.005, .18, r'$\Re\Sigma (\omega) \, (1-Z)^{-1}$',
+    ax1.text(.003, .18, r'$\mathrm{Re}\Sigma (\omega) \, (1-Z)^{-1}$',
              fontsize=12, color='goldenrod')
-    ax1.text(.05, .014, r'$\Im\Sigma (\omega)$',
+    ax1.text(.05, .014, r'$\mathrm{Im}\Sigma (\omega)$',
              fontsize=12, color=[0, .4, .4])
 #    ax1.text(.084, .06, r'$\omega_\mathrm{FL}$', fontdict=font)
     ax1.text(.022, .06, r'$\propto \omega$', color='b', fontsize=12)

@@ -60,9 +60,9 @@ kwargs_ef = {'linestyle': ':',
              'lw': 1}
 
 # Directory paths
-save_dir = '/Users/denyssutter/Documents/PhD/PhD_Denys/Figs/'
-data_dir = '/Users/denyssutter/Documents/PhD/data/'
-home_dir = '/Users/denyssutter/Documents/library/Python/ARPES'
+save_dir = '/Users/denyssutter/Documents/2_physics/PhD/PhD_Denys/Figs/'
+data_dir = '/Users/denyssutter/Documents/2_physics/PhD/data/'
+home_dir = '/Users/denyssutter/Documents/3_library/Python/ARPES'
 
 
 def CRO_theory_plot(k_pts, data_en, data, v_max, figname):
@@ -1249,7 +1249,7 @@ def fig10(print_fig=True):
         ax.legend((r'$d_{xy}$', r'$d_{\gamma z}$'), frameon=False)
 
         # add text
-        ax.text(10, 1.15, r'(a)', fontdict=font)
+#        ax.text(10, 1.15, r'(a)', fontdict=font)
 
     def fig10b():
         ax = fig.add_subplot(122)
@@ -1272,7 +1272,7 @@ def fig10(print_fig=True):
         ax.set_ylim(-3, 1.5)
 
         # add text
-        ax.text(10, 1.15, r'(b)', fontdict=font)
+#        ax.text(10, 1.15, r'(b)', fontdict=font)
 
         # colorbar
         pos = ax.get_position()

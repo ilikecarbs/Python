@@ -119,12 +119,13 @@ CON.fig3()
 
 # %%
 
-CRO.fig5(print_fig=False)
+CRO.fig10(print_fig=True)
 
 # %%
 
-CSRO.fig1(print_fig=True)
+CSRO.fig31(print_fig=True)
 
 # %%
 
-DEF.fig1(print_fig=True)
+DEF.fig13(print_fig=True)
+
